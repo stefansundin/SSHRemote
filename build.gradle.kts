@@ -3,4 +3,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
+
+    // https://github.com/google/ksp/releases
+    id("com.google.devtools.ksp") version "2.2.21-2.0.4" apply false
 }
