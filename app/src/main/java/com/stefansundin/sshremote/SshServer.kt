@@ -28,5 +28,6 @@ data class SshServer(
     val name: String,
     val host: String,
     val port: Int,
-    val user: String
+    val user: String,
+    val encryptedPassword: String?,
 )

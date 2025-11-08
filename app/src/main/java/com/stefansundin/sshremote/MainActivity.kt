@@ -71,8 +71,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import android.util.Base64
+import android.util.Log
+import androidx.compose.material3.IconToggleButton
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 
 class MainActivity : ComponentActivity() {
+    private val cryptoManager = CryptoManager()
 
     private val sshServerViewModel: SshServerViewModel by viewModels {
         SshServerViewModelFactory((application as SshRemoteApplication).repository)
@@ -88,29 +96,36 @@ class MainActivity : ComponentActivity() {
                 ) {
                     var serverToEdit by remember { mutableStateOf<SshServer?>(null) }
                     var showAddEditScreen by remember { mutableStateOf(false) }
+                    val navigateBackToList = {
+                        serverToEdit = null
+                        showAddEditScreen = false
+                    }
+                    val editServer = { server: SshServer? ->
+                        serverToEdit = server
+                        showAddEditScreen = true
+                    }
 
                     if (showAddEditScreen) {
                         AddEditSshServerScreen(
                             server = serverToEdit,
                             onServerSaved = { server ->
                                 sshServerViewModel.upsert(server)
-                                showAddEditScreen = false
+                                navigateBackToList()
                             },
                             onNavigateUp = {
-                                showAddEditScreen = false
-                            }
+                                navigateBackToList()
+                            },
+                            cryptoManager,
                         )
                     } else {
                         val servers by sshServerViewModel.allServers.collectAsState()
                         SshServerScreen(
                             servers = servers,
                             onAddServerClicked = {
-                                serverToEdit = null
-                                showAddEditScreen = true
+                                editServer(null)
                             },
                             onEditServerClicked = { server ->
-                                serverToEdit = server
-                                showAddEditScreen = true
+                                editServer(server)
                             },
                             onDeleteServerClicked = { server ->
                                 sshServerViewModel.delete(server)
@@ -295,14 +310,31 @@ fun validatePort(port: String): Boolean {
 fun AddEditSshServerScreen(
     server: SshServer?,
     onServerSaved: (SshServer) -> Unit,
-    onNavigateUp: () -> Unit
+    onNavigateUp: () -> Unit,
+    cryptoManager: CryptoManager?, // null allowed for preview
 ) {
     var name by remember { mutableStateOf(server?.name ?: "") }
     var host by remember { mutableStateOf(server?.host ?: "") }
     var port by remember { mutableStateOf(server?.port?.toString() ?: "22") }
     var user by remember { mutableStateOf(server?.user ?: "") }
+    var password by remember {
+        val decryptedPassword = server?.encryptedPassword?.let {
+            if (cryptoManager != null && it.contains(":")) {
+                try {
+                    val (iv, data) = it.split(":").map { str -> Base64.decode(str, Base64.DEFAULT) }
+                    cryptoManager.decrypt(EncryptedPayload(iv, data))
+                } catch (e: Exception) {
+                    Log.e("AddEditSshServerScreen", "Error decrypting password", e)
+                    ""
+                }
+            } else ""
+        } ?: ""
+        mutableStateOf(decryptedPassword)
+    }
 
+    var passwordVisible by remember { mutableStateOf(false) }
     var hasBeenSubmitted by remember { mutableStateOf(false) }
+    val onSubmit = { hasBeenSubmitted = true }
 
     val isNameValid by remember(name) { derivedStateOf { validateName(name) } }
     val isHostValid by remember(host) { derivedStateOf { validateHost(host) } }
@@ -323,14 +355,24 @@ fun AddEditSshServerScreen(
                 actions = {
                     Button(
                         onClick = {
-                            hasBeenSubmitted = true
+                            onSubmit()
                             if (isFormValid) {
+                                val encryptedPassword = if (cryptoManager != null && password.isNotEmpty()) {
+                                    val encryptedPayload = cryptoManager.encrypt(password)
+                                    Base64.encodeToString(encryptedPayload.iv, Base64.DEFAULT) +
+                                            ":" + Base64.encodeToString(
+                                        encryptedPayload.encryptedBytes,
+                                        Base64.DEFAULT
+                                    )
+                                } else ""
+
                                 val serverToSave = SshServer(
                                     id = server?.id ?: 0,
                                     name = name,
                                     host = host,
                                     port = port.toInt(),
-                                    user = user
+                                    user = user,
+                                    encryptedPassword = encryptedPassword,
                                 )
                                 onServerSaved(serverToSave)
                             }
@@ -409,6 +451,24 @@ fun AddEditSshServerScreen(
                 isError = hasBeenSubmitted && !isUserValid,
                 singleLine = true
             )
+
+            // PASSWORD FIELD
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    val description = if (passwordVisible) "Hide password" else "Show password"
+                    IconToggleButton(checked = passwordVisible, onCheckedChange = { passwordVisible = it }) {
+                        Icon(imageVector = image, contentDescription = description)
+                    }
+                }
+            )
         }
     }
 }
@@ -418,8 +478,8 @@ fun AddEditSshServerScreen(
 fun SshServerScreenPreview() {
     SSHRemoteTheme {
         val sampleServers = listOf(
-            SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi"),
-            SshServer(2, "Example Server", "example.com", 2222, "admin")
+            SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null),
+            SshServer(2, "Example Server", "example.com", 2222, "admin", null)
         )
         SshServerScreen(
             servers = sampleServers,
@@ -434,7 +494,7 @@ fun SshServerScreenPreview() {
 @Composable
 fun AddSshServerScreenPreview() {
     SSHRemoteTheme {
-        AddEditSshServerScreen(server = null, onServerSaved = {}, onNavigateUp = {})
+        AddEditSshServerScreen(server = null, onServerSaved = {}, onNavigateUp = {}, cryptoManager = null)
     }
 }
 
@@ -442,7 +502,7 @@ fun AddSshServerScreenPreview() {
 @Composable
 fun EditSshServerScreenPreview() {
     SSHRemoteTheme {
-        val sampleServer = SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi")
-        AddEditSshServerScreen(server = sampleServer, onServerSaved = {}, onNavigateUp = {})
+        val sampleServer = SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null)
+        AddEditSshServerScreen(server = sampleServer, onServerSaved = {}, onNavigateUp = {}, cryptoManager = null)
     }
 }

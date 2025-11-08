@@ -70,6 +70,7 @@ dependencies {
     // --- Room Database ---
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.security.crypto)
     ksp(libs.androidx.room.compiler)
 
     // --- Testing Dependencies ---
