@@ -19,8 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package com.stefansundin.sshremote
 
 import android.os.Bundle
+import android.util.Base64
 import android.util.Patterns
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -35,20 +35,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -66,71 +72,90 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import android.util.Base64
-import android.util.Log
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+
+enum class Screen {
+    LIST,
+    EDIT,
+    TERMINAL,
+}
 
 class MainActivity : ComponentActivity() {
     private val cryptoManager = CryptoManager()
+    private val sshRepository = SshRepository()
 
     private val sshServerViewModel: SshServerViewModel by viewModels {
-        SshServerViewModelFactory((application as SshRemoteApplication).repository)
+        SshServerViewModelFactory(
+            (application as SshRemoteApplication).repository,
+            sshRepository,
+            cryptoManager,
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             SSHRemoteTheme {
+                var selectedServer by remember { mutableStateOf<SshServer?>(null) }
+                var currentScreen by remember { mutableStateOf(Screen.LIST) }
+
+                val navigateBackToList = {
+                    selectedServer = null
+                    currentScreen = Screen.LIST
+                }
+                val connectToServer = { server: SshServer ->
+                    selectedServer = server
+                    currentScreen = Screen.TERMINAL
+                    sshServerViewModel.connectToServer(server)
+                }
+                val editServer = { server: SshServer? ->
+                    selectedServer = server
+                    currentScreen = Screen.EDIT
+                }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var serverToEdit by remember { mutableStateOf<SshServer?>(null) }
-                    var showAddEditScreen by remember { mutableStateOf(false) }
-                    val navigateBackToList = {
-                        serverToEdit = null
-                        showAddEditScreen = false
-                    }
-                    val editServer = { server: SshServer? ->
-                        serverToEdit = server
-                        showAddEditScreen = true
-                    }
-
-                    if (showAddEditScreen) {
-                        AddEditSshServerScreen(
-                            server = serverToEdit,
-                            onServerSaved = { server ->
-                                sshServerViewModel.upsert(server)
-                                navigateBackToList()
-                            },
-                            onNavigateUp = {
-                                navigateBackToList()
-                            },
-                            cryptoManager,
-                        )
-                    } else {
-                        val servers by sshServerViewModel.allServers.collectAsState()
-                        SshServerScreen(
-                            servers = servers,
-                            onAddServerClicked = {
-                                editServer(null)
-                            },
-                            onEditServerClicked = { server ->
-                                editServer(server)
-                            },
-                            onDeleteServerClicked = { server ->
-                                sshServerViewModel.delete(server)
-                            }
-                        )
+                    when (currentScreen) {
+                        Screen.LIST -> {
+                            val servers by sshServerViewModel.allServers.collectAsState()
+                            SshServerScreen(
+                                servers = servers,
+                                onConnectClicked = { server: SshServer -> connectToServer(server) },
+                                onAddServerClicked = { editServer(null) },
+                                onEditServerClicked = { server -> editServer(server) },
+                                onDeleteServerClicked = { server -> sshServerViewModel.delete(server) },
+                            )
+                        }
+                        Screen.EDIT -> {
+                            AddEditSshServerScreen(
+                                server = selectedServer,
+                                onServerSaved = { server ->
+                                    sshServerViewModel.upsert(server)
+                                    navigateBackToList()
+                                },
+                                onNavigateUp = { navigateBackToList() },
+                                cryptoManager = cryptoManager
+                            )
+                        }
+                        Screen.TERMINAL -> {
+                            val uiState by sshServerViewModel.uiState.collectAsState()
+                            SshTerminalScreen(
+                                uiState = uiState,
+                                onRunUptime = { sshServerViewModel.runUptimeCommand() },
+                                onDisconnect = {
+                                    sshServerViewModel.disconnect()
+                                    navigateBackToList()
+                                },
+                                onClearCommandOutput = { sshServerViewModel.clearCommandOutput() }
+                            )
+                        }
                     }
                 }
             }
@@ -142,6 +167,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SshServerScreen(
     servers: List<SshServer>,
+    onConnectClicked: (SshServer) -> Unit,
     onAddServerClicked: () -> Unit,
     onEditServerClicked: (SshServer) -> Unit,
     onDeleteServerClicked: (SshServer) -> Unit,
@@ -172,6 +198,7 @@ fun SshServerScreen(
             items(items = servers, key = { server -> server.id }) { server ->
                 SshServerItem(
                     server = server,
+                    onConnect = { onConnectClicked(server) },
                     onEdit = { onEditServerClicked(server) },
                     onDelete = { onDeleteServerClicked(server) }
                 )
@@ -183,24 +210,23 @@ fun SshServerScreen(
 @Composable
 fun SshServerItem(
     server: SshServer,
+    onConnect: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isContextMenuVisible by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
     Card(
         modifier = modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth()
-            .clickable {
-                Toast.makeText(context, "TODO: Connect to ${server.name}", Toast.LENGTH_SHORT)
-                    .show()
-            }
+            .clickable(onClick = onConnect)
     ) {
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min).padding(start = 16.dp),
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
+                .padding(start = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
@@ -318,17 +344,11 @@ fun AddEditSshServerScreen(
     var port by remember { mutableStateOf(server?.port?.toString() ?: "22") }
     var user by remember { mutableStateOf(server?.user ?: "") }
     var password by remember {
-        val decryptedPassword = server?.encryptedPassword?.let {
-            if (cryptoManager != null && it.contains(":")) {
-                try {
-                    val (iv, data) = it.split(":").map { str -> Base64.decode(str, Base64.DEFAULT) }
-                    cryptoManager.decrypt(EncryptedPayload(iv, data))
-                } catch (e: Exception) {
-                    Log.e("AddEditSshServerScreen", "Error decrypting password", e)
-                    ""
-                }
-            } else ""
-        } ?: ""
+        val decryptedPassword = if (cryptoManager != null && server?.encryptedPassword != null) {
+            decryptString(server.encryptedPassword, cryptoManager)
+        } else {
+            ""
+        }
         mutableStateOf(decryptedPassword)
     }
 
@@ -358,13 +378,8 @@ fun AddEditSshServerScreen(
                             onSubmit()
                             if (isFormValid) {
                                 val encryptedPassword = if (cryptoManager != null && password.isNotEmpty()) {
-                                    val encryptedPayload = cryptoManager.encrypt(password)
-                                    Base64.encodeToString(encryptedPayload.iv, Base64.DEFAULT) +
-                                            ":" + Base64.encodeToString(
-                                        encryptedPayload.encryptedBytes,
-                                        Base64.DEFAULT
-                                    )
-                                } else ""
+                                    encryptString(password, cryptoManager)
+                                } else null
 
                                 val serverToSave = SshServer(
                                     id = server?.id ?: 0,
@@ -483,6 +498,7 @@ fun SshServerScreenPreview() {
         )
         SshServerScreen(
             servers = sampleServers,
+            onConnectClicked = {},
             onAddServerClicked = {},
             onEditServerClicked = {},
             onDeleteServerClicked = {}
@@ -504,5 +520,58 @@ fun EditSshServerScreenPreview() {
     SSHRemoteTheme {
         val sampleServer = SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null)
         AddEditSshServerScreen(server = sampleServer, onServerSaved = {}, onNavigateUp = {}, cryptoManager = null)
+    }
+}
+
+@Composable
+fun SshTerminalScreen(
+    uiState: SshTerminalUiState,
+    onRunUptime: () -> Unit,
+    onDisconnect: () -> Unit,
+    onClearCommandOutput: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = uiState.connectionStatus,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Button(
+            onClick = onRunUptime,
+            enabled = uiState.connectionStatus.startsWith("Connected") && !uiState.isLoading
+        ) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Run 'uptime'")
+            }
+        }
+
+        Button(onClick = onDisconnect) {
+            Text("Disconnect")
+        }
+    }
+
+    if (uiState.commandOutput != null) {
+        AlertDialog(
+            onDismissRequest = { onClearCommandOutput() },
+            title = { Text("Command Output") },
+            text = { Text(uiState.commandOutput) },
+            confirmButton = {
+                Button(onClick = { onClearCommandOutput() }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }

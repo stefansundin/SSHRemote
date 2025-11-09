@@ -18,15 +18,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package com.stefansundin.sshremote
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SshServerViewModel(private val repository: SshServerRepository) : ViewModel() {
+class SshServerViewModel(
+    private val repository: SshServerRepository,
+    private val sshRepository: SshRepository,
+    private val cryptoManager: CryptoManager,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(SshTerminalUiState())
+    val uiState = _uiState.asStateFlow()
 
     val allServers: StateFlow<List<SshServer>> = repository.getAllServers()
         .stateIn(
@@ -42,14 +53,77 @@ class SshServerViewModel(private val repository: SshServerRepository) : ViewMode
     fun delete(server: SshServer) = viewModelScope.launch {
         repository.delete(server)
     }
+
+    fun connectToServer(server: SshServer) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(connectionStatus = "Connecting...") }
+            try {
+                val password = if (server.encryptedPassword != null) {
+                    decryptString(server.encryptedPassword, cryptoManager)
+                } else null
+
+                val connectionDetails = SshServerConnectionDetails(
+                    host = server.host,
+                    port = server.port,
+                    user = server.user,
+                    password = password,
+                )
+
+                sshRepository.connect(connectionDetails)
+                _uiState.update { it.copy(connectionStatus = "Connected to ${server.name}") }
+            } catch (e: Exception) {
+                Log.e("SshServerViewModel", "Error connecting to server", e)
+                _uiState.update { it.copy(connectionStatus = "Error: ${e.message}") }
+            }
+        }
+    }
+
+    fun runUptimeCommand() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(commandOutput = null, isLoading = true) }
+            try {
+                when (val result = sshRepository.executeCommand("uptime")) {
+                    is Result.Success -> {
+                        _uiState.update { it.copy(commandOutput = result.output, isLoading = false) }
+                    }
+                    is Result.Error -> {
+                        _uiState.update { it.copy(commandOutput = result.message, isLoading = false) }
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(commandOutput = "Error executing command: ${e.message}", isLoading = false) }
+            }
+        }
+    }
+
+    fun disconnect() {
+        viewModelScope.launch {
+            sshRepository.disconnect()
+            _uiState.update { it.copy(connectionStatus = "Disconnected") }
+        }
+    }
+
+    fun clearCommandOutput() {
+        _uiState.update { it.copy(commandOutput = null) }
+    }
 }
 
-class SshServerViewModelFactory(private val repository: SshServerRepository) :
-    ViewModelProvider.Factory {
+// Data class to hold the UI state for the terminal screen
+data class SshTerminalUiState(
+    val connectionStatus: String = "Idle",
+    val commandOutput: String? = null,
+    val isLoading: Boolean = false
+)
+
+class SshServerViewModelFactory(
+    private val repository: SshServerRepository,
+    private val sshRepository: SshRepository,
+    private val cryptoManager: CryptoManager
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SshServerViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SshServerViewModel(repository) as T
+            return SshServerViewModel(repository, sshRepository, cryptoManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

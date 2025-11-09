@@ -11,6 +11,8 @@ materialIconsExtendedAndroid = "1.7.8"
 room = "2.8.3"
 lifecycle = "2.9.4"
 securityCrypto = "1.1.0"
+jsch = "2.27.5"
+bcprovJdk18on = "1.79"
 
 [libraries]
 androidx-compose-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
@@ -34,6 +36,8 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+jsch = { group = "com.github.mwiede", name = "jsch", version.ref = "jsch" }
+bcprov-jdk18on = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bcprovJdk18on" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

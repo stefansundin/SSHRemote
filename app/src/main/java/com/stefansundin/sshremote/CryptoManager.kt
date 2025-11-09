@@ -20,6 +20,7 @@ package com.stefansundin.sshremote
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.util.Base64
 import java.nio.charset.Charset
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -105,4 +106,35 @@ data class EncryptedPayload(val iv: ByteArray, val encryptedBytes: ByteArray) {
         result = 31 * result + encryptedBytes.contentHashCode()
         return result
     }
+}
+
+/**
+ * A reusable helper function to encrypt a string.
+ * It returns a string in the "iv_base64:data_base64" format.
+ *
+ * @param string The string to encrypt.
+ * @param cryptoManager The CryptoManager instance to use for encryption.
+ * @return The encrypted string.
+ * @throws Exception if encryption fails.
+ */
+fun encryptString(string: String, cryptoManager: CryptoManager): String {
+    val encryptedPayload = cryptoManager.encrypt(string)
+    return Base64.encodeToString(encryptedPayload.iv, Base64.DEFAULT) +
+            ":" + Base64.encodeToString(encryptedPayload.encryptedBytes, Base64.DEFAULT)
+}
+
+/**
+ * A reusable helper function to decrypt a data string.
+ * It handles parsing the "iv:data" format and returns the decrypted data.
+ *
+ * @param encryptedString The data string in "iv_base64:data_base64" format.
+ * @param cryptoManager The CryptoManager instance to use for decryption.
+ * @return The decrypted string.
+ * @throws Exception if parsing or decryption fails.
+ */
+fun decryptString(encryptedString: String, cryptoManager: CryptoManager): String {
+    val (iv, data) = encryptedString.split(":").map { str ->
+        Base64.decode(str, Base64.DEFAULT)
+    }
+    return cryptoManager.decrypt(EncryptedPayload(iv, data))
 }

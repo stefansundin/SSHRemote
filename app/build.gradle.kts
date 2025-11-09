@@ -73,6 +73,10 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     ksp(libs.androidx.room.compiler)
 
+    // --- SSH ---
+    implementation(libs.jsch)
+    implementation(libs.bcprov.jdk18on) // BouncyCastle is required for some SSH features on older Java versions
+
     // --- Testing Dependencies ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
