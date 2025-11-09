@@ -5,5 +5,5 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
 
     // https://github.com/google/ksp/releases
-    id("com.google.devtools.ksp") version "2.2.21-2.0.4" apply false
+    id("com.google.devtools.ksp") version "2.3.2" apply false
 }

@@ -12,7 +12,7 @@ room = "2.8.3"
 lifecycle = "2.9.4"
 securityCrypto = "1.1.0"
 jsch = "2.27.5"
-bcprovJdk18on = "1.79"
+bcprovJdk18on = "1.82"
 
 [libraries]
 androidx-compose-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
