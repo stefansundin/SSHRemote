@@ -58,7 +58,7 @@ dependencies {
     // This correctly manages versions for all the Compose libraries below.
     implementation(platform(libs.androidx.compose.bom))
 
-    // --- Compose UI Libraries (duplicates removed) ---
+    // --- Compose UI Libraries ---
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -78,7 +78,10 @@ dependencies {
 
     // --- SSH ---
     implementation(libs.jsch)
-    implementation(libs.bcprov.jdk18on) // BouncyCastle is required for some SSH features on older Java versions
+    implementation(libs.bouncycastle.bcprov.jdk18on) // BouncyCastle is required for some SSH features on older Java versions
+    // Used for ED25519 key generation:
+    implementation(libs.bouncycastle.bcpkix.jdk18on)
+    implementation(libs.eddsa)
 
     // --- Testing Dependencies ---
     testImplementation(libs.junit)

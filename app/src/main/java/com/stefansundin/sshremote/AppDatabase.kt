@@ -22,13 +22,18 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room.TypeConverters
+import com.stefansundin.sshremote.data.Converters
+import com.stefansundin.sshremote.data.SshKey
+import com.stefansundin.sshremote.data.SshKeyDao
+import com.stefansundin.sshremote.data.SshKeyIdsConverter
 
-@Database(entities = [SshServer::class], version = 2, exportSchema = false)
+@Database(entities = [SshServer::class, SshKey::class], version = 3, exportSchema = false)
+@TypeConverters(Converters::class, SshKeyIdsConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun sshServerDao(): SshServerDao
+    abstract fun sshKeyDao(): SshKeyDao
 
     companion object {
         // The @Volatile annotation ensures that writes to this field are immediately
@@ -36,20 +41,13 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE ssh_servers ADD COLUMN password TEXT")
-            }
-        }
-
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "ssh_remote_database"
+                    "ssh_remote_database",
                 )
-                    .addMigrations(MIGRATION_1_2)
                     .build()
                 INSTANCE = instance
                 instance

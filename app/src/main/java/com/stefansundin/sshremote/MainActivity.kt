@@ -19,9 +19,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package com.stefansundin.sshremote
 
 import android.os.Bundle
+import android.util.Log
 import android.util.Patterns
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -54,6 +57,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -68,6 +73,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -76,20 +82,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jcraft.jsch.JSch
+import com.jcraft.jsch.KeyPair
+import com.stefansundin.sshremote.data.SshKey
+import com.stefansundin.sshremote.data.SshKeyViewModel
+import com.stefansundin.sshremote.data.SshKeyViewModelFactory
+import com.stefansundin.sshremote.ui.screens.AddSshKeyScreen
+import com.stefansundin.sshremote.ui.screens.PublicKeyDialog
+import com.stefansundin.sshremote.ui.screens.SshKeysScreen
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import java.io.ByteArrayOutputStream
 
 enum class Screen {
     LIST,
     EDIT,
     TERMINAL,
     SETTINGS,
+    SSH_KEYS,
+    ADD_SSH_KEY,
 }
 
 enum class Theme {
@@ -103,15 +122,26 @@ class MainActivity : ComponentActivity() {
     private val sshRepository = SshRepository()
 
     private val sshServerViewModel: SshServerViewModel by viewModels {
+        val app = (application as SshRemoteApplication)
         SshServerViewModelFactory(
-            (application as SshRemoteApplication).repository,
+            app.sshServerRepository,
+            app.sshKeyRepository,
             sshRepository,
             cryptoManager,
         )
     }
 
     private val settingsViewModel: SettingsViewModel by viewModels {
-        SettingsViewModelFactory((application as SshRemoteApplication).settingsRepository)
+        val app = (application as SshRemoteApplication)
+        SettingsViewModelFactory(app.settingsRepository)
+    }
+
+    private val sshKeyViewModel: SshKeyViewModel by viewModels {
+        val app = (application as SshRemoteApplication)
+        SshKeyViewModelFactory(
+            app.sshKeyRepository,
+            cryptoManager,
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -145,6 +175,31 @@ class MainActivity : ComponentActivity() {
                 val showSettings = {
                     currentScreen = Screen.SETTINGS
                 }
+                val showSshKeys = {
+                    currentScreen = Screen.SSH_KEYS
+                }
+                val addSshKey = {
+                    currentScreen = Screen.ADD_SSH_KEY
+                }
+
+                var showPublicKeyDialog by remember { mutableStateOf(false) }
+                var publicKeyToShow by remember { mutableStateOf("") }
+
+                val context = LocalContext.current
+
+                LaunchedEffect(Unit) {
+                    sshKeyViewModel.newPublicKeyFlow.collect { publicKey ->
+                        publicKeyToShow = publicKey
+                        showPublicKeyDialog = true
+                    }
+                }
+
+                if (showPublicKeyDialog) {
+                    PublicKeyDialog(
+                        publicKey = publicKeyToShow,
+                        onDismiss = { showPublicKeyDialog = false },
+                    )
+                }
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -163,8 +218,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         Screen.EDIT -> {
+                            val sshKeys by sshKeyViewModel.sshKeys.collectAsState()
                             AddEditSshServerScreen(
                                 server = selectedServer,
+                                sshKeys = sshKeys,
                                 onServerSaved = { server ->
                                     sshServerViewModel.upsert(server)
                                     navigateBackToList()
@@ -188,7 +245,85 @@ class MainActivity : ComponentActivity() {
                         Screen.SETTINGS -> {
                             SettingsScreen(
                                 settingsViewModel = settingsViewModel,
+                                onNavigateToSshKeys = { showSshKeys() },
                                 onNavigateUp = { navigateBackToList() },
+                            )
+                        }
+                        Screen.SSH_KEYS -> {
+                            val fileSaverLauncher =
+                                rememberLauncherForActivityResult(
+                                    contract = ActivityResultContracts.CreateDocument("attachment/plain"),
+                                    onResult = { uri ->
+                                        if (uri != null) {
+                                            val keyToExport = sshKeyViewModel.keyToExport.value
+                                            if (keyToExport != null) {
+                                                val privateKey =
+                                                    cryptoManager.decrypt(keyToExport.encryptedPrivateKey)
+                                                val keypair = KeyPair.load(JSch(), privateKey, null)
+                                                val outputStream = ByteArrayOutputStream()
+                                                val comment =
+                                                    keypair.publicKeyComment.ifEmpty { keyToExport.name }
+                                                keypair.writePublicKey(outputStream, comment)
+                                                val publicKey =
+                                                    outputStream.toString(Charsets.UTF_8.name())
+                                                keypair.dispose()
+
+                                                context.contentResolver.openOutputStream(uri)
+                                                    ?.use { output ->
+                                                        output.write(publicKey.toByteArray())
+                                                    }
+                                            }
+                                        }
+                                    },
+                                )
+
+                            SshKeysScreen(
+                                sshKeyViewModel = sshKeyViewModel,
+                                cryptoManager = cryptoManager,
+                                onNavigateToAddSshKey = { addSshKey() },
+                                onNavigateUp = { showSettings() },
+                                onShowPublicKey = { key ->
+                                    val privateKey = cryptoManager.decrypt(key.encryptedPrivateKey)
+                                    val keypair = KeyPair.load(JSch(), privateKey, null)
+                                    val outputStream = ByteArrayOutputStream()
+                                    keypair.writePublicKey(
+                                        outputStream,
+                                        keypair.publicKeyComment.ifEmpty { key.name },
+                                    )
+                                    val publicKey = outputStream.toString(Charsets.UTF_8.name())
+                                    keypair.dispose()
+                                    publicKeyToShow = publicKey
+                                    showPublicKeyDialog = true
+                                },
+                                onExportPublicKey = { key ->
+                                    sshKeyViewModel.keyToExport.value = key
+
+                                    val privateKey = cryptoManager.decrypt(key.encryptedPrivateKey)
+                                    val keypair = KeyPair.load(JSch(), privateKey, null)
+                                    val keyTypeName = if (keypair.keyTypeString == "ssh-ed25519") { "ed25519" } else "rsa"
+                                    keypair.dispose()
+
+                                    val suggestedFilename = "id_$keyTypeName.pub"
+                                    fileSaverLauncher.launch(suggestedFilename)
+                                },
+                                onDeleteKey = { key -> sshKeyViewModel.delete(key) },
+                            )
+                        }
+                        Screen.ADD_SSH_KEY -> {
+                            AddSshKeyScreen(
+                                onKeySaved = { name, privateKey ->
+                                    sshKeyViewModel.insert(name, privateKey)
+                                    currentScreen = Screen.SSH_KEYS
+                                },
+                                onKeyGenerated = { name, type, comment ->
+                                    Log.d(
+                                        "AddSshKeyScreen",
+                                        "Key generated: $name, $type, $comment",
+                                    )
+                                    sshKeyViewModel.generateAndInsert(name, type, comment)
+                                    currentScreen = Screen.SSH_KEYS
+                                },
+                                onNavigateUp = { currentScreen = Screen.SSH_KEYS },
                             )
                         }
                     }
@@ -229,23 +364,37 @@ fun SshServerScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddServerClicked) {
-                Icon(Icons.Filled.Add, contentDescription = "Add SSH Server")
+                Icon(Icons.Filled.Add, contentDescription = "Add SSH Host")
             }
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-        ) {
-            items(items = servers, key = { server -> server.id }) { server ->
-                SshServerItem(
-                    server = server,
-                    onConnect = { onConnectClicked(server) },
-                    onEdit = { onEditServerClicked(server) },
-                    onDelete = { onDeleteServerClicked(server) },
+        if (servers.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "No SSH hosts added.\n\nPress the + button to add a new host.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(16.dp)
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+            ) {
+                items(items = servers, key = { server -> server.id }) { server ->
+                    SshServerItem(
+                        server = server,
+                        onConnect = { onConnectClicked(server) },
+                        onEdit = { onEditServerClicked(server) },
+                        onDelete = { onDeleteServerClicked(server) },
+                    )
+                }
             }
         }
     }
@@ -379,6 +528,7 @@ fun validatePort(port: String): Boolean {
 @Composable
 fun AddEditSshServerScreen(
     server: SshServer?,
+    sshKeys: List<SshKey>,
     onServerSaved: (SshServer) -> Unit,
     onNavigateUp: () -> Unit,
     cryptoManager: CryptoManager?, // null allowed for preview
@@ -395,6 +545,8 @@ fun AddEditSshServerScreen(
         }
         mutableStateOf(decryptedPassword)
     }
+    var selectedSshKeyIds by remember { mutableStateOf(server?.sshKeyIds) }
+    var sshKeyDropdownExpanded by remember { mutableStateOf(false) }
 
     var passwordVisible by remember { mutableStateOf(false) }
     var hasBeenSubmitted by remember { mutableStateOf(false) }
@@ -438,6 +590,7 @@ fun AddEditSshServerScreen(
                                     port = port.toInt(),
                                     user = user,
                                     encryptedPassword = encryptedPassword,
+                                    sshKeyIds = selectedSshKeyIds,
                                 )
                                 onServerSaved(serverToSave)
                             }
@@ -552,6 +705,56 @@ fun AddEditSshServerScreen(
                     }
                 },
             )
+
+            // SSH KEY SELECTION DROPDOWN
+            ExposedDropdownMenuBox(
+                expanded = sshKeyDropdownExpanded,
+                onExpandedChange = { sshKeyDropdownExpanded = !sshKeyDropdownExpanded },
+            ) {
+                OutlinedTextField(
+                    readOnly = true,
+                    value = if (selectedSshKeyIds == null) { "Use any key" }
+                        else if (selectedSshKeyIds!!.isEmpty()) { "Do not use keys" }
+                        else sshKeys.filter { selectedSshKeyIds!!.contains(it.id) }.joinToString(", ") { it.name },
+                    onValueChange = { },
+                    label = { Text("SSH Key") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sshKeyDropdownExpanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
+                )
+                ExposedDropdownMenu(
+                    expanded = sshKeyDropdownExpanded,
+                    onDismissRequest = { sshKeyDropdownExpanded = false },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Use any key") },
+                        onClick = {
+                            selectedSshKeyIds = null
+                            sshKeyDropdownExpanded = false
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Do not use keys") },
+                        onClick = {
+                            selectedSshKeyIds = listOf()
+                            sshKeyDropdownExpanded = false
+                        },
+                    )
+                    sshKeys.forEach { key ->
+                        DropdownMenuItem(
+                            text = { Text(key.name) },
+                            onClick = {
+                                // Later this might support multiple key assignments
+                                selectedSshKeyIds = listOf(key.id)
+                                sshKeyDropdownExpanded = false
+                            },
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -579,7 +782,7 @@ fun SshServerScreenPreview() {
 @Composable
 fun AddSshServerScreenPreview() {
     SSHRemoteTheme {
-        AddEditSshServerScreen(server = null, onServerSaved = {}, onNavigateUp = {}, cryptoManager = null)
+        AddEditSshServerScreen(server = null, onServerSaved = {}, onNavigateUp = {}, sshKeys = emptyList(), cryptoManager = null)
     }
 }
 
@@ -588,7 +791,7 @@ fun AddSshServerScreenPreview() {
 fun EditSshServerScreenPreview() {
     SSHRemoteTheme {
         val sampleServer = SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null)
-        AddEditSshServerScreen(server = sampleServer, onServerSaved = {}, onNavigateUp = {}, cryptoManager = null)
+        AddEditSshServerScreen(server = sampleServer, onServerSaved = {}, onNavigateUp = {}, sshKeys = emptyList(), cryptoManager = null)
     }
 }
 
@@ -650,6 +853,7 @@ fun SshTerminalScreen(
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     onNavigateUp: () -> Unit,
+    onNavigateToSshKeys: () -> Unit,
 ) {
     val savedTheme by settingsViewModel.theme.collectAsState()
     var previewTheme by remember { mutableStateOf(savedTheme) }
@@ -674,7 +878,7 @@ fun SettingsScreen(
                 onDismiss = {
                     previewTheme = savedTheme
                     showThemeDialog = false
-                }
+                },
             )
         }
 
@@ -683,12 +887,14 @@ fun SettingsScreen(
                 TopAppBar(
                     title = { Text("Settings") },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            if (previewTheme != savedTheme) {
-                                settingsViewModel.setTheme(savedTheme)
-                            }
-                            onNavigateUp()
-                        }) {
+                        IconButton(
+                            onClick = {
+                                if (previewTheme != savedTheme) {
+                                    settingsViewModel.setTheme(savedTheme)
+                                }
+                                onNavigateUp()
+                            },
+                        ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
@@ -713,16 +919,38 @@ fun SettingsScreen(
                             showThemeDialog = true
                         }
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp)
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
                 ) {
                     Text(
                         "Theme",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                     Text(
                         savedTheme.name.lowercase().replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Security", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .clickable { onNavigateToSshKeys() }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "SSH Keys",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "Manage SSH keys for authentication",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -753,16 +981,16 @@ private fun ThemeSettingDialog(
                                 role = Role.RadioButton,
                             )
                             .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(
                             selected = (theme == currentTheme),
-                            onClick = null
+                            onClick = null,
                         )
                         Text(
                             text = theme.name.lowercase().replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
                 }
@@ -777,6 +1005,6 @@ private fun ThemeSettingDialog(
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
+        },
     )
 }

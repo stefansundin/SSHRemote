@@ -16,14 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote
+package com.stefansundin.sshremote.data
 
-import android.app.Application
-import com.stefansundin.sshremote.data.SshKeyRepository
+import kotlinx.coroutines.flow.Flow
 
-class SshRemoteApplication : Application() {
-    private val database by lazy { AppDatabase.getInstance(this) }
-    val sshServerRepository by lazy { SshServerRepository(database.sshServerDao()) }
-    val sshKeyRepository by lazy { SshKeyRepository(database.sshKeyDao()) }
-    val settingsRepository by lazy { SettingsRepository(this) }
+class SshKeyRepository(private val sshKeyDao: SshKeyDao) {
+
+    fun getAllKeys(): Flow<List<SshKey>> {
+        return sshKeyDao.getAllKeys()
+    }
+
+    fun getKeyById(id: Int): Flow<SshKey?> = sshKeyDao.getKeyById(id)
+
+    suspend fun insert(sshKey: SshKey) {
+        sshKeyDao.insert(sshKey)
+    }
+
+    suspend fun delete(sshKey: SshKey) {
+        sshKeyDao.delete(sshKey)
+    }
 }

@@ -16,14 +16,33 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote
+package com.stefansundin.sshremote.data
 
-import android.app.Application
-import com.stefansundin.sshremote.data.SshKeyRepository
+import androidx.room.TypeConverter
+import java.util.Date
 
-class SshRemoteApplication : Application() {
-    private val database by lazy { AppDatabase.getInstance(this) }
-    val sshServerRepository by lazy { SshServerRepository(database.sshServerDao()) }
-    val sshKeyRepository by lazy { SshKeyRepository(database.sshKeyDao()) }
-    val settingsRepository by lazy { SettingsRepository(this) }
+class Converters {
+    @TypeConverter
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
+    }
+
+    @TypeConverter
+    fun dateToTimestamp(date: Date?): Long? {
+        return date?.time
+    }
+}
+
+object SshKeyIdsConverter {
+    @TypeConverter
+    @JvmStatic
+    fun fromString(value: String?): List<Int>? {
+        return value?.split(',')?.mapNotNull { it.toIntOrNull() }
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun fromIntList(list: List<Int>?): String? {
+        return list?.joinToString(",")
+    }
 }

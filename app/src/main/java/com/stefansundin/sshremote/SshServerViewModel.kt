@@ -22,16 +22,22 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stefansundin.sshremote.data.SshKeyRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SshServerViewModel(
     private val repository: SshServerRepository,
+    private val sshKeyRepository: SshKeyRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
 ) : ViewModel() {
@@ -58,6 +64,14 @@ class SshServerViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(connectionStatus = "Connecting...") }
             try {
+                val sshKeys = server.sshKeyIds?.map { id ->
+                    async { sshKeyRepository.getKeyById(id).filterNotNull().first() }
+                }?.awaitAll() ?: sshKeyRepository.getAllKeys().first()
+
+                val privateKeys = sshKeys.map { key ->
+                    cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8)
+                }
+
                 val password = if (server.encryptedPassword != null) {
                     decryptString(server.encryptedPassword, cryptoManager)
                 } else null
@@ -67,6 +81,7 @@ class SshServerViewModel(
                     port = server.port,
                     user = server.user,
                     password = password,
+                    privateKeys = privateKeys,
                 )
 
                 sshRepository.connect(connectionDetails)
@@ -117,13 +132,14 @@ data class SshTerminalUiState(
 
 class SshServerViewModelFactory(
     private val repository: SshServerRepository,
+    private val sshKeyRepository: SshKeyRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SshServerViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SshServerViewModel(repository, sshRepository, cryptoManager) as T
+            return SshServerViewModel(repository, sshKeyRepository, sshRepository, cryptoManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

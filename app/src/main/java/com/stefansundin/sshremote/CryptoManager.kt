@@ -76,11 +76,31 @@ class CryptoManager {
         return String(decryptedBytes, Charset.defaultCharset())
     }
 
+    fun encrypt(data: ByteArray): ByteArray {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        val secretKey = getSecretKey()
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+        val iv = cipher.iv
+        val ciphertext = cipher.doFinal(data)
+        return iv + ciphertext
+    }
+
+    fun decrypt(encryptedDataWithIv: ByteArray): ByteArray {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        val secretKey = getSecretKey()
+        val iv = encryptedDataWithIv.copyOfRange(0, IV_LENGTH_BYTES)
+        val ciphertext = encryptedDataWithIv.copyOfRange(IV_LENGTH_BYTES, encryptedDataWithIv.size)
+        val spec = GCMParameterSpec(128, iv)
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, spec)
+        return cipher.doFinal(ciphertext)
+    }
+
     companion object {
         private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
+        private const val IV_LENGTH_BYTES = 12
     }
 }
 

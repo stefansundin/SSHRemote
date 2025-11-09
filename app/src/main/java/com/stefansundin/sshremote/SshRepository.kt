@@ -54,6 +54,11 @@ class SshRepository {
             JSch.setLogger(JschLogger())
 
             val jsch = JSch()
+
+            details.privateKeys?.forEachIndexed { index, key ->
+                jsch.addIdentity("privateKey-$index", key.toByteArray(), null, null)
+            }
+
             session = jsch.getSession(details.user, details.host, details.port)
             details.password?.let { session?.setPassword(it) }
 

@@ -24,10 +24,11 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "ssh_servers")
 data class SshServer(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0, // Set default to 0 for auto-generation
+    val id: Int = 0,
     val name: String,
     val host: String,
     val port: Int,
     val user: String,
     val encryptedPassword: String?,
+    val sshKeyIds: List<Int>? = null
 )

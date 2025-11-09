@@ -16,14 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote
+package com.stefansundin.sshremote.data
 
-import android.app.Application
-import com.stefansundin.sshremote.data.SshKeyRepository
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.Date
 
-class SshRemoteApplication : Application() {
-    private val database by lazy { AppDatabase.getInstance(this) }
-    val sshServerRepository by lazy { SshServerRepository(database.sshServerDao()) }
-    val sshKeyRepository by lazy { SshKeyRepository(database.sshKeyDao()) }
-    val settingsRepository by lazy { SettingsRepository(this) }
-}
+@Entity(tableName = "ssh_keys")
+data class SshKey(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val createdAt: Date = Date(),
+    val name: String,
+    val encryptedPrivateKey: ByteArray,
+)
