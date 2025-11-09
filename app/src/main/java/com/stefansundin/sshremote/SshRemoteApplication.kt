@@ -23,4 +23,5 @@ import android.app.Application
 class SshRemoteApplication : Application() {
     private val database by lazy { AppDatabase.getInstance(this) }
     val repository by lazy { SshServerRepository(database.sshServerDao()) }
+    val settingsRepository by lazy { SettingsRepository(this) }
 }

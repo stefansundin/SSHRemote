@@ -24,6 +24,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +38,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -56,6 +60,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -71,6 +76,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -83,6 +89,13 @@ enum class Screen {
     LIST,
     EDIT,
     TERMINAL,
+    SETTINGS,
+}
+
+enum class Theme {
+    SYSTEM,
+    LIGHT,
+    DARK
 }
 
 class MainActivity : ComponentActivity() {
@@ -97,10 +110,22 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    private val settingsViewModel: SettingsViewModel by viewModels {
+        SettingsViewModelFactory((application as SshRemoteApplication).settingsRepository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            SSHRemoteTheme {
+            val theme by settingsViewModel.theme.collectAsState()
+            val useDarkTheme = when (theme) {
+                Theme.SYSTEM -> isSystemInDarkTheme()
+                Theme.LIGHT -> false
+                Theme.DARK -> true
+            }
+
+            SSHRemoteTheme(darkTheme = useDarkTheme) {
                 var selectedServer by remember { mutableStateOf<SshServer?>(null) }
                 var currentScreen by remember { mutableStateOf(Screen.LIST) }
 
@@ -117,10 +142,13 @@ class MainActivity : ComponentActivity() {
                     selectedServer = server
                     currentScreen = Screen.EDIT
                 }
+                val showSettings = {
+                    currentScreen = Screen.SETTINGS
+                }
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     when (currentScreen) {
                         Screen.LIST -> {
@@ -131,6 +159,7 @@ class MainActivity : ComponentActivity() {
                                 onAddServerClicked = { editServer(null) },
                                 onEditServerClicked = { server -> editServer(server) },
                                 onDeleteServerClicked = { server -> sshServerViewModel.delete(server) },
+                                onSettingsClicked = { showSettings() },
                             )
                         }
                         Screen.EDIT -> {
@@ -141,7 +170,7 @@ class MainActivity : ComponentActivity() {
                                     navigateBackToList()
                                 },
                                 onNavigateUp = { navigateBackToList() },
-                                cryptoManager = cryptoManager
+                                cryptoManager = cryptoManager,
                             )
                         }
                         Screen.TERMINAL -> {
@@ -153,7 +182,13 @@ class MainActivity : ComponentActivity() {
                                     sshServerViewModel.disconnect()
                                     navigateBackToList()
                                 },
-                                onClearCommandOutput = { sshServerViewModel.clearCommandOutput() }
+                                onClearCommandOutput = { sshServerViewModel.clearCommandOutput() },
+                            )
+                        }
+                        Screen.SETTINGS -> {
+                            SettingsScreen(
+                                settingsViewModel = settingsViewModel,
+                                onNavigateUp = { navigateBackToList() },
                             )
                         }
                     }
@@ -171,7 +206,8 @@ fun SshServerScreen(
     onAddServerClicked: () -> Unit,
     onEditServerClicked: (SshServer) -> Unit,
     onDeleteServerClicked: (SshServer) -> Unit,
-    modifier: Modifier = Modifier
+    onSettingsClicked: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         topBar = {
@@ -180,27 +216,35 @@ fun SshServerScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
-                )
+                ),
+                actions = {
+                    IconButton(onClick = onSettingsClicked) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                        )
+                    }
+                },
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddServerClicked) {
                 Icon(Icons.Filled.Add, contentDescription = "Add SSH Server")
             }
-        }
+        },
     ) { innerPadding ->
         LazyColumn(
             modifier = modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
         ) {
             items(items = servers, key = { server -> server.id }) { server ->
                 SshServerItem(
                     server = server,
                     onConnect = { onConnectClicked(server) },
                     onEdit = { onEditServerClicked(server) },
-                    onDelete = { onDeleteServerClicked(server) }
+                    onDelete = { onDeleteServerClicked(server) },
                 )
             }
         }
@@ -213,7 +257,7 @@ fun SshServerItem(
     onConnect: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var isContextMenuVisible by remember { mutableStateOf(false) }
 
@@ -221,23 +265,23 @@ fun SshServerItem(
         modifier = modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth()
-            .clickable(onClick = onConnect)
+            .clickable(onClick = onConnect),
     ) {
         Row(
             modifier = Modifier
                 .height(IntrinsicSize.Min)
                 .padding(start = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 12.dp),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Text(
                     text = server.name,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
@@ -246,7 +290,7 @@ fun SshServerItem(
                 Text(
                     text = "${server.user}@${server.host}${portString}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -254,27 +298,27 @@ fun SshServerItem(
                 IconButton(onClick = { isContextMenuVisible = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options"
+                        contentDescription = "More options",
                     )
                 }
 
                 DropdownMenu(
                     expanded = isContextMenuVisible,
-                    onDismissRequest = { isContextMenuVisible = false }
+                    onDismissRequest = { isContextMenuVisible = false },
                 ) {
                     DropdownMenuItem(
                         text = { Text("Edit") },
                         onClick = {
                             onEdit()
                             isContextMenuVisible = false
-                        }
+                        },
                     )
                     DropdownMenuItem(
                         text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                         onClick = {
                             onDelete()
                             isContextMenuVisible = false
-                        }
+                        },
                     )
                 }
             }
@@ -370,16 +414,22 @@ fun AddEditSshServerScreen(
             TopAppBar(
                 title = { Text(if (server == null) "Add Host" else "Edit Host") },
                 navigationIcon = {
-                    TextButton(onClick = onNavigateUp) { Text("Cancel") }
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Cancel",
+                        )
+                    }
                 },
                 actions = {
                     Button(
                         onClick = {
                             onSubmit()
                             if (isFormValid) {
-                                val encryptedPassword = if (cryptoManager != null && password.isNotEmpty()) {
-                                    encryptString(password, cryptoManager)
-                                } else null
+                                val encryptedPassword =
+                                    if (cryptoManager != null && password.isNotEmpty()) {
+                                        encryptString(password, cryptoManager)
+                                    } else null
 
                                 val serverToSave = SshServer(
                                     id = server?.id ?: 0,
@@ -395,16 +445,16 @@ fun AddEditSshServerScreen(
                     ) {
                         Text("Save")
                     }
-                }
+                },
             )
-        }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(16.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // NAME FIELD
             OutlinedTextField(
@@ -423,7 +473,7 @@ fun AddEditSshServerScreen(
                 minLines = 1,
                 maxLines = 2,
                 keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Next,
                 ),
             )
 
@@ -439,7 +489,7 @@ fun AddEditSshServerScreen(
                 isError = hasBeenSubmitted && !isHostValid,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Next,
                 ),
             )
 
@@ -458,7 +508,7 @@ fun AddEditSshServerScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Next,
                 ),
             )
 
@@ -474,7 +524,7 @@ fun AddEditSshServerScreen(
                 isError = hasBeenSubmitted && !isUserValid,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Next,
                 ),
             )
 
@@ -488,15 +538,19 @@ fun AddEditSshServerScreen(
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Done,
                 ),
                 trailingIcon = {
-                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    val image =
+                        if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                     val description = if (passwordVisible) "Hide password" else "Show password"
-                    IconToggleButton(checked = passwordVisible, onCheckedChange = { passwordVisible = it }) {
+                    IconToggleButton(
+                        checked = passwordVisible,
+                        onCheckedChange = { passwordVisible = it },
+                    ) {
                         Icon(imageVector = image, contentDescription = description)
                     }
-                }
+                },
             )
         }
     }
@@ -508,14 +562,15 @@ fun SshServerScreenPreview() {
     SSHRemoteTheme {
         val sampleServers = listOf(
             SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null),
-            SshServer(2, "Example Server", "example.com", 2222, "admin", null)
+            SshServer(2, "Example Server", "example.com", 2222, "admin", null),
         )
         SshServerScreen(
             servers = sampleServers,
             onConnectClicked = {},
             onAddServerClicked = {},
             onEditServerClicked = {},
-            onDeleteServerClicked = {}
+            onDeleteServerClicked = {},
+            onSettingsClicked = {},
         )
     }
 }
@@ -543,28 +598,28 @@ fun SshTerminalScreen(
     onRunUptime: () -> Unit,
     onDisconnect: () -> Unit,
     onClearCommandOutput: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
             text = uiState.connectionStatus,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
         )
 
         Button(
             onClick = onRunUptime,
-            enabled = uiState.connectionStatus.startsWith("Connected") && !uiState.isLoading
+            enabled = uiState.connectionStatus.startsWith("Connected") && !uiState.isLoading,
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             } else {
                 Text("Run 'uptime'")
@@ -585,7 +640,143 @@ fun SshTerminalScreen(
                 Button(onClick = { onClearCommandOutput() }) {
                     Text("OK")
                 }
-            }
+            },
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+    settingsViewModel: SettingsViewModel,
+    onNavigateUp: () -> Unit,
+) {
+    val savedTheme by settingsViewModel.theme.collectAsState()
+    var previewTheme by remember { mutableStateOf(savedTheme) }
+    var showThemeDialog by remember { mutableStateOf(false) }
+    val useDarkTheme = when (previewTheme) {
+        Theme.SYSTEM -> isSystemInDarkTheme()
+        Theme.LIGHT -> false
+        Theme.DARK -> true
+    }
+
+    SSHRemoteTheme(darkTheme = useDarkTheme) {
+        if (showThemeDialog) {
+            ThemeSettingDialog(
+                currentTheme = previewTheme,
+                onThemeSelected = { newTheme ->
+                    previewTheme = newTheme
+                },
+                onConfirm = {
+                    settingsViewModel.setTheme(previewTheme)
+                    showThemeDialog = false
+                },
+                onDismiss = {
+                    previewTheme = savedTheme
+                    showThemeDialog = false
+                }
+            )
+        }
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Settings") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            if (previewTheme != savedTheme) {
+                                settingsViewModel.setTheme(savedTheme)
+                            }
+                            onNavigateUp()
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(16.dp),
+            ) {
+                Text("Appearance", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .clickable {
+                            previewTheme = savedTheme
+                            showThemeDialog = true
+                        }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp)
+                ) {
+                    Text(
+                        "Theme",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        savedTheme.name.lowercase().replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeSettingDialog(
+    currentTheme: Theme,
+    onThemeSelected: (Theme) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose theme") },
+        text = {
+            Column {
+                Theme.entries.forEach { theme ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .selectable(
+                                selected = (theme == currentTheme),
+                                onClick = { onThemeSelected(theme) }, // Instantly report theme selection for preview
+                                role = Role.RadioButton,
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (theme == currentTheme),
+                            onClick = null
+                        )
+                        Text(
+                            text = theme.name.lowercase().replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
