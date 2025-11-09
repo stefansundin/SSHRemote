@@ -72,6 +72,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -419,10 +420,12 @@ fun AddEditSshServerScreen(
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = hasBeenSubmitted && !isNameValid,
-                // Allow multiple lines for the name field
                 singleLine = false,
                 minLines = 1,
-                maxLines = 2
+                maxLines = 2,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
             )
 
             // HOST FIELD
@@ -435,7 +438,10 @@ fun AddEditSshServerScreen(
                 label = { Text("Host") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = hasBeenSubmitted && !isHostValid,
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
             )
 
             // PORT FIELD
@@ -448,10 +454,13 @@ fun AddEditSshServerScreen(
                     }
                 },
                 label = { Text("Port") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 isError = hasBeenSubmitted && !isPortValid,
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
             )
 
             // USER FIELD
@@ -464,7 +473,10 @@ fun AddEditSshServerScreen(
                 label = { Text("User") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = hasBeenSubmitted && !isUserValid,
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
             )
 
             // PASSWORD FIELD
@@ -475,7 +487,10 @@ fun AddEditSshServerScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 trailingIcon = {
                     val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                     val description = if (passwordVisible) "Hide password" else "Show password"
