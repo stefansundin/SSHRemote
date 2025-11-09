@@ -9,6 +9,7 @@ plugins {
 
 android {
     namespace = "com.stefansundin.sshremote"
+
     compileSdk {
         version = release(36)
     }
@@ -19,6 +20,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        base.archivesName = "ssh-remote-$versionName"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
