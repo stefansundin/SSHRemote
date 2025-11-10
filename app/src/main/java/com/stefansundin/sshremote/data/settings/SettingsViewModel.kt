@@ -41,6 +41,20 @@ open class SettingsViewModel(private val repository: SettingsRepository) : ViewM
             repository.setTheme(theme)
         }
     }
+
+    open val strictHostKeyChecking: StateFlow<Boolean> = repository.strictHostKeyChecking
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = true,
+        )
+
+    fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
+        viewModelScope.launch {
+            repository.setStrictHostKeyChecking(strictHostKeyChecking)
+        }
+    }
+
 }
 
 class SettingsViewModelFactory(private val repository: SettingsRepository) :

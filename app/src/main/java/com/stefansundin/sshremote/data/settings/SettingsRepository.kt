@@ -21,6 +21,7 @@ package com.stefansundin.sshremote.data.settings
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -36,6 +37,7 @@ class SettingsRepository(context: Context) {
 
     private object PreferencesKeys {
         val THEME = stringPreferencesKey("theme")
+        val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
     }
 
     val theme: Flow<Theme> = dataStore.data
@@ -53,4 +55,16 @@ class SettingsRepository(context: Context) {
             preferences[PreferencesKeys.THEME] = theme.name
         }
     }
+
+    val strictHostKeyChecking: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.STRICT_HOST_KEY_CHECKING] ?: true
+        }
+
+    suspend fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.STRICT_HOST_KEY_CHECKING] = strictHostKeyChecking
+        }
+    }
+
 }

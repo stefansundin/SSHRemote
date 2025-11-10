@@ -53,7 +53,7 @@ class SshServerViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = emptyList(),
         )
 
     fun upsert(server: SshServer) = viewModelScope.launch {
@@ -86,9 +86,15 @@ class SshServerViewModel(
                     user = server.user,
                     password = password,
                     privateKeys = privateKeys,
+                    knownHosts = server.knownHosts,
                 )
 
-                sshRepository.connect(connectionDetails)
+                val newKnownHosts = sshRepository.connect(connectionDetails)
+                if (newKnownHosts != connectionDetails.knownHosts) {
+                    val updatedServer = server.copy(knownHosts = newKnownHosts)
+                    repository.upsert(updatedServer)
+                }
+
                 _uiState.update { it.copy(connectionStatus = "Connected to ${server.name}") }
             } catch (e: Exception) {
                 Log.e("SshServerViewModel", "Error connecting to server", e)
@@ -103,14 +109,30 @@ class SshServerViewModel(
             try {
                 when (val result = sshRepository.executeCommand("uptime")) {
                     is Result.Success -> {
-                        _uiState.update { it.copy(commandOutput = result.output, isLoading = false) }
+                        _uiState.update {
+                            it.copy(
+                                commandOutput = result.output,
+                                isLoading = false,
+                            )
+                        }
                     }
+
                     is Result.Error -> {
-                        _uiState.update { it.copy(commandOutput = result.message, isLoading = false) }
+                        _uiState.update {
+                            it.copy(
+                                commandOutput = result.message,
+                                isLoading = false,
+                            )
+                        }
                     }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(commandOutput = "Error executing command: ${e.message}", isLoading = false) }
+                _uiState.update {
+                    it.copy(
+                        commandOutput = "Error executing command: ${e.message}",
+                        isLoading = false,
+                    )
+                }
             }
         }
     }
@@ -131,19 +153,24 @@ class SshServerViewModel(
 data class SshTerminalUiState(
     val connectionStatus: String = "Idle",
     val commandOutput: String? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 class SshServerViewModelFactory(
     private val repository: SshServerRepository,
     private val sshKeyRepository: SshKeyRepository,
     private val sshRepository: SshRepository,
-    private val cryptoManager: CryptoManager
+    private val cryptoManager: CryptoManager,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SshServerViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SshServerViewModel(repository, sshKeyRepository, sshRepository, cryptoManager) as T
+            return SshServerViewModel(
+                repository,
+                sshKeyRepository,
+                sshRepository,
+                cryptoManager,
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

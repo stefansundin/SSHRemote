@@ -25,9 +25,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.sshkey.SshKeyEvent
 import com.stefansundin.sshremote.data.sshkey.SshKeyViewModel
@@ -73,7 +78,11 @@ enum class Theme {
 
 class MainActivity : ComponentActivity() {
     private val cryptoManager = CryptoManager()
-    private val sshRepository = SshRepository()
+
+    private val sshRepository: SshRepository by lazy {
+        val app = (application as SshRemoteApplication)
+        SshRepository(app.settingsRepository)
+    }
 
     private val sshServerViewModel: SshServerViewModel by viewModels {
         val app = (application as SshRemoteApplication)
@@ -134,6 +143,95 @@ class MainActivity : ComponentActivity() {
                         fileToExport = null
                     },
                 )
+
+                val hostKeyVerification by sshRepository.hostKeyVerification.collectAsState()
+                hostKeyVerification?.let { verification ->
+                    AlertDialog(
+                        onDismissRequest = { sshRepository.onHostKeyVerificationComplete(false) },
+                        title = { Text("Host Key Verification") },
+                        text = { Text(verification.message) },
+                        confirmButton = {
+                            TextButton(onClick = { sshRepository.onHostKeyVerificationComplete(true) }) {
+                                Text("Accept")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { sshRepository.onHostKeyVerificationComplete(false) }) {
+                                Text("Reject")
+                            }
+                        },
+                    )
+                }
+
+                val message by sshRepository.message.collectAsState()
+                message?.let { message ->
+                    AlertDialog(
+                        onDismissRequest = { sshRepository.onMessageDismissed() },
+                        title = { Text("Message") },
+                        text = { Text(message.message) },
+                        confirmButton = {
+                            TextButton(onClick = { sshRepository.onMessageDismissed() }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+
+                val passwordPrompt by sshRepository.passwordPrompt.collectAsState()
+                passwordPrompt?.let { prompt ->
+                    var password by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { sshRepository.onPasswordPromptComplete(null) },
+                        title = { Text(prompt.message) },
+                        text = {
+                            TextField(
+                                value = password,
+                                onValueChange = { password = it },
+                                label = { Text("Password") },
+                                visualTransformation = PasswordVisualTransformation(),
+                                singleLine = true
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { sshRepository.onPasswordPromptComplete(password) }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { sshRepository.onPasswordPromptComplete(null) }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
+
+                val passphrasePrompt by sshRepository.passphrasePrompt.collectAsState()
+                passphrasePrompt?.let { prompt ->
+                    var passphrase by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { sshRepository.onPassphrasePromptComplete(null) },
+                        title = { Text(prompt.message) },
+                        text = {
+                            TextField(
+                                value = passphrase,
+                                onValueChange = { passphrase = it },
+                                label = { Text("Passphrase") },
+                                visualTransformation = PasswordVisualTransformation(),
+                                singleLine = true
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { sshRepository.onPassphrasePromptComplete(passphrase) }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { sshRepository.onPassphrasePromptComplete(null) }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
 
                 LaunchedEffect(Unit) {
                     sshKeyViewModel.eventFlow.collectLatest { event ->

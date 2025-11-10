@@ -21,6 +21,7 @@ package com.stefansundin.sshremote.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -137,10 +139,23 @@ fun SshKeyItem(
     val privateKey = cryptoManager.decrypt(sshKey.encryptedPrivateKey)
     val keypair = KeyPair.load(JSch(), privateKey, null)
     val keyInfo = "${keypair.keyTypeString} - ${sshKey.createdAt}"
+    val isEncrypted = keypair.isEncrypted
     keypair.dispose()
 
     ListItem(
-        headlineContent = { Text(sshKey.name) },
+        headlineContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(sshKey.name)
+                if (isEncrypted) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Passphrase protected",
+                        modifier = Modifier.padding(start = 8.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
         supportingContent = {
             Text(keyInfo)
         },

@@ -30,5 +30,6 @@ data class SshServer(
     val port: Int,
     val user: String,
     val encryptedPassword: String?,
-    val sshKeyIds: List<Int>? = null
+    val sshKeyIds: List<Int>? = null,
+    val knownHosts: List<String> = emptyList(),
 )

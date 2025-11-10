@@ -46,3 +46,14 @@ object SshKeyIdsConverter {
         return list?.joinToString(",")
     }
 }
+
+class ListConverter {
+    @TypeConverter
+    fun fromList(list: List<String>?): String? {
+        return list?.joinToString("\n")
+    }
+    @TypeConverter
+    fun toList(data: String?): List<String>? {
+        return data?.split("\n")?.filter { it.isNotEmpty() }
+    }
+}

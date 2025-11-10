@@ -27,5 +27,6 @@ data class SshServerConnectionDetails(
     val port: Int,
     val user: String,
     val password: String?,
-    val privateKeys: List<String>?
+    val privateKeys: List<String>?,
+    val knownHosts: List<String>,
 )

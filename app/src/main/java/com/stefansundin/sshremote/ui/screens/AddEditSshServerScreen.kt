@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -86,6 +88,7 @@ fun AddEditSshServerScreen(
     }
     var selectedSshKeyIds by remember { mutableStateOf(server?.sshKeyIds) }
     var sshKeyDropdownExpanded by remember { mutableStateOf(false) }
+    var knownHosts by remember { mutableStateOf(server?.knownHosts ?: emptyList()) }
 
     var passwordVisible by remember { mutableStateOf(false) }
     var hasBeenSubmitted by remember { mutableStateOf(false) }
@@ -130,6 +133,7 @@ fun AddEditSshServerScreen(
                                     user = user,
                                     encryptedPassword = encryptedPassword,
                                     sshKeyIds = selectedSshKeyIds,
+                                    knownHosts = knownHosts,
                                 )
                                 onServerSaved(serverToSave)
                             }
@@ -225,6 +229,9 @@ fun AddEditSshServerScreen(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
+                supportingText = {
+                    Text("Optional, will be prompted for if not provided")
+                },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -294,6 +301,27 @@ fun AddEditSshServerScreen(
                                 sshKeyDropdownExpanded = false
                             },
                         )
+                    }
+                }
+            }
+
+            // KNOWN HOSTS MANAGEMENT
+            if (server != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    val keyCount = knownHosts.size
+                    Text(
+                        text = "Saved host keys: $keyCount",
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                    Button(
+                        enabled = keyCount > 0,
+                        onClick = { knownHosts = emptyList() },
+                    ) {
+                        Text("Clear")
                     }
                 }
             }

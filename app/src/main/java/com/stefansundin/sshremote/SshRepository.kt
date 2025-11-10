@@ -21,8 +21,14 @@ package com.stefansundin.sshremote
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
+import com.jcraft.jsch.UserInfo
+import com.stefansundin.sshremote.data.settings.SettingsRepository
 import com.stefansundin.sshremote.data.sshserver.SshServerConnectionDetails
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.util.Properties
@@ -32,12 +38,44 @@ sealed class Result {
     data class Error(val message: String) : Result()
 }
 
+data class HostKeyVerification(
+    val message: String,
+    val response: CompletableDeferred<Boolean>
+)
+
+data class PasswordPrompt(
+    val message: String,
+    val response: CompletableDeferred<String?>
+)
+
+data class PassphrasePrompt(
+    val message: String,
+    val response: CompletableDeferred<String?>
+)
+
+data class Message(
+    val message: String,
+    val response: CompletableDeferred<Unit>
+)
+
 /**
  * A repository for handling SSH connection and command execution.
  */
-class SshRepository {
+class SshRepository(private val settingsRepository: SettingsRepository) {
 
     private var session: Session? = null
+
+    private val _hostKeyVerification = MutableStateFlow<HostKeyVerification?>(null)
+    val hostKeyVerification = _hostKeyVerification.asStateFlow()
+
+    private val _message = MutableStateFlow<Message?>(null)
+    val message = _message.asStateFlow()
+
+    private val _passwordPrompt = MutableStateFlow<PasswordPrompt?>(null)
+    val passwordPrompt = _passwordPrompt.asStateFlow()
+
+    private val _passphrasePrompt = MutableStateFlow<PassphrasePrompt?>(null)
+    val passphrasePrompt = _passphrasePrompt.asStateFlow()
 
     /**
      * Connects to an SSH server. This is a suspending function and must be called
@@ -46,8 +84,8 @@ class SshRepository {
      * @param details The server details from the database.
      * @throws Exception if connection fails.
      */
-    suspend fun connect(details: SshServerConnectionDetails) {
-        withContext(Dispatchers.IO) {
+    suspend fun connect(details: SshServerConnectionDetails): List<String> {
+        return withContext(Dispatchers.IO) {
             if (session?.isConnected == true) {
                 session?.disconnect()
             }
@@ -56,20 +94,102 @@ class SshRepository {
 
             val jsch = JSch()
 
+            val useStrictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
+            if (useStrictHostKeyChecking) {
+                details.knownHosts.joinToString("\n").let { jsch.setKnownHosts(it.byteInputStream()) }
+            }
+
             details.privateKeys?.forEachIndexed { index, key ->
                 jsch.addIdentity("privateKey-$index", key.toByteArray(), null, null)
             }
 
             session = jsch.getSession(details.user, details.host, details.port)
+
+            session?.userInfo = object : UserInfo {
+                var passwordPromptMessage: String? = null
+                var passphrasePromptMessage: String? = null
+                var userCancelledAuth = false
+
+                override fun promptYesNo(message: String): Boolean {
+                    val deferred = CompletableDeferred<Boolean>()
+                    _hostKeyVerification.value = HostKeyVerification(message, deferred)
+                    val result = kotlinx.coroutines.runBlocking { deferred.await() }
+                    _hostKeyVerification.value = null
+                    return result
+                }
+
+                override fun showMessage(message: String) {
+                    val deferred = CompletableDeferred<Unit>()
+                    _message.value = Message(message, deferred)
+                    kotlinx.coroutines.runBlocking { deferred.await() }
+                    _message.value = null
+                }
+
+                override fun promptPassword(message: String): Boolean {
+                    if (userCancelledAuth) return false
+                    passwordPromptMessage = message
+                    return true
+                }
+
+                override fun getPassword(): String? {
+                    val deferred = CompletableDeferred<String?>()
+                    _passwordPrompt.value = PasswordPrompt(passwordPromptMessage ?: "Enter password", deferred)
+                    val result = kotlinx.coroutines.runBlocking { deferred.await() }
+                    _passwordPrompt.value = null
+                    if (result == null) {
+                        userCancelledAuth = true
+                    }
+                    return result
+                }
+
+                override fun getPassphrase(): String? {
+                    val deferred = CompletableDeferred<String?>()
+                    _passphrasePrompt.value = PassphrasePrompt(passphrasePromptMessage ?: "Enter passphrase for private key", deferred)
+                    val result = kotlinx.coroutines.runBlocking { deferred.await() }
+                    _passphrasePrompt.value = null
+                    if (result == null) {
+                        userCancelledAuth = true
+                    }
+                    return result
+                }
+
+                override fun promptPassphrase(message: String): Boolean {
+                    if (userCancelledAuth) return false
+                    passphrasePromptMessage = message
+                    return true
+                }
+            }
+
             details.password?.let { session?.setPassword(it) }
 
-            // TODO: manage known_hosts
             val config = Properties()
-            config["StrictHostKeyChecking"] = "no"
+            val strictHostKeyChecking = if (useStrictHostKeyChecking) "ask" else "no"
+            config["StrictHostKeyChecking"] = strictHostKeyChecking
             session?.setConfig(config)
 
             session?.connect(30000) // 30-second timeout
+
+            val hostKeyRepository = jsch.hostKeyRepository
+            val newKnownHosts = hostKeyRepository.hostKey.joinToString("\n") { "${it.host} ${it.type} ${it.key}" }
+
+            return@withContext newKnownHosts.split("\n").filter { it.isNotEmpty() }
         }
+    }
+
+    fun onHostKeyVerificationComplete(result: Boolean) {
+        _hostKeyVerification.value?.response?.complete(result)
+    }
+
+    fun onMessageDismissed() {
+        _message.value?.response?.complete(Unit)
+    }
+
+    fun onPasswordPromptComplete(password: String?) {
+        _passwordPrompt.value?.response?.complete(password)
+    }
+
+    fun onPassphrasePromptComplete(passphrase: String?) {
+        _passphrasePrompt.value?.response?.complete(passphrase)
     }
 
     /**
