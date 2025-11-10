@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.Theme
 
@@ -55,7 +56,7 @@ fun ThemeSettingDialog(
                             .height(56.dp)
                             .selectable(
                                 selected = (theme == currentTheme),
-                                onClick = { onThemeSelected(theme) }, // Instantly report theme selection for preview
+                                onClick = { onThemeSelected(theme) },
                                 role = Role.RadioButton,
                             )
                             .padding(horizontal = 16.dp),
@@ -84,5 +85,16 @@ fun ThemeSettingDialog(
                 Text("Cancel")
             }
         },
+    )
+}
+
+@Preview
+@Composable
+private fun ThemeSettingDialogPreview() {
+    ThemeSettingDialog(
+        currentTheme = Theme.SYSTEM,
+        onThemeSelected = {},
+        onConfirm = {},
+        onDismiss = {},
     )
 }

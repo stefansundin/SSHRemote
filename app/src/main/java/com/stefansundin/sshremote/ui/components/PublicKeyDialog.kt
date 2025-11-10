@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,5 +64,14 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
                 Text("Close")
             }
         },
+    )
+}
+
+@Preview
+@Composable
+private fun PublicKeyDialogPreview() {
+    PublicKeyDialog(
+        publicKey = "ssh-ed25519 AAAA... Comment",
+        onDismiss = {},
     )
 }

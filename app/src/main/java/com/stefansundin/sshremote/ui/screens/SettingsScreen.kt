@@ -41,11 +41,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.data.settings.SettingsRepository
+import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.ui.components.ThemeSettingDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,5 +159,38 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+}
+
+class MockSettingsViewModel(theme: Theme, settingsRepository: SettingsRepository) :
+    SettingsViewModel(settingsRepository) {
+    private val _theme = MutableStateFlow(theme)
+    override val theme = _theme.asStateFlow()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+    val mockViewModel =
+        MockSettingsViewModel(Theme.SYSTEM, SettingsRepository(LocalContext.current))
+    SSHRemoteTheme {
+        SettingsScreen(
+            settingsViewModel = mockViewModel,
+            onNavigateUp = {},
+            onNavigateToSshKeys = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenDarkPreview() {
+    val mockViewModel = MockSettingsViewModel(Theme.DARK, SettingsRepository(LocalContext.current))
+    SSHRemoteTheme(darkTheme = true) {
+        SettingsScreen(
+            settingsViewModel = mockViewModel,
+            onNavigateUp = {},
+            onNavigateToSshKeys = {},
+        )
     }
 }

@@ -60,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
@@ -202,75 +203,6 @@ fun AddSshKeyScreen(
     }
 }
 
-fun getClipEntryText(clipData: ClipData): String? {
-    val itemCount = clipData.itemCount
-    var textFull = ""
-    for (i in 0..<itemCount) {
-        val item = clipData.getItemAt(i)
-        val text = item?.text
-        if (text != null)
-            textFull += text
-    }
-    return textFull.ifEmpty { null }
-}
-
-@Composable
-fun ManualEntryTab(
-    privateKey: String,
-    onPrivateKeyChange: (String) -> Unit,
-    onNameSuggestion: (String) -> Unit,
-    isError: Boolean,
-) {
-    val clipboard = LocalClipboard.current
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(privateKey) {
-        withContext(Dispatchers.IO) {
-            try {
-                val keypair = KeyPair.load(JSch(), privateKey.toByteArray(), null)
-                val comment = keypair.publicKeyComment
-                if (comment.isNotBlank()) {
-                    onNameSuggestion(comment)
-                }
-                keypair.dispose()
-            } catch (e: Exception) {
-                Log.e("AddSshKeyScreen", "Error parsing key", e)
-            }
-        }
-    }
-
-
-    OutlinedTextField(
-        value = privateKey,
-        onValueChange = onPrivateKeyChange,
-        label = { Text("Private Key") },
-        placeholder = { Text("-----BEGIN OPENSSH PRIVATE KEY-----") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
-        isError = isError,
-        supportingText = { if (isError) Text("Invalid key format") },
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    TextButton(
-        onClick = {
-            coroutineScope.launch {
-                val clipEntry = clipboard.getClipEntry() ?: return@launch
-                val clipboardText = getClipEntryText(clipEntry.clipData) ?: return@launch
-                onPrivateKeyChange(clipboardText)
-            }
-        },
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Icon(
-            imageVector = Icons.Default.ContentPaste,
-            contentDescription = "Paste from clipboard",
-            modifier = Modifier.padding(end = 8.dp),
-        )
-        Text("Paste from clipboard")
-    }
-}
-
 @Composable
 fun ImportFileTab(
     keyType: Int?,
@@ -357,5 +289,121 @@ fun GenerateKeyTab(keyType: Int?, onKeyTypeSelected: (Int) -> Unit) {
                 Text(text = name, modifier = Modifier.padding(start = 8.dp))
             }
         }
+    }
+}
+
+fun getClipEntryText(clipData: ClipData): String? {
+    val itemCount = clipData.itemCount
+    var textFull = ""
+    for (i in 0..<itemCount) {
+        val item = clipData.getItemAt(i)
+        val text = item?.text
+        if (text != null)
+            textFull += text
+    }
+    return textFull.ifEmpty { null }
+}
+
+@Composable
+fun ManualEntryTab(
+    privateKey: String,
+    onPrivateKeyChange: (String) -> Unit,
+    onNameSuggestion: (String) -> Unit,
+    isError: Boolean,
+) {
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(privateKey) {
+        withContext(Dispatchers.IO) {
+            try {
+                val keypair = KeyPair.load(JSch(), privateKey.toByteArray(), null)
+                val comment = keypair.publicKeyComment
+                if (comment.isNotBlank()) {
+                    onNameSuggestion(comment)
+                }
+                keypair.dispose()
+            } catch (e: Exception) {
+                Log.e("AddSshKeyScreen", "Error parsing key", e)
+            }
+        }
+    }
+
+    OutlinedTextField(
+        value = privateKey,
+        onValueChange = onPrivateKeyChange,
+        label = { Text("Private Key") },
+        placeholder = { Text("-----BEGIN OPENSSH PRIVATE KEY-----") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        isError = isError,
+        supportingText = { if (isError) Text("Invalid key format") },
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    TextButton(
+        onClick = {
+            coroutineScope.launch {
+                val clipEntry = clipboard.getClipEntry() ?: return@launch
+                val clipboardText = getClipEntryText(clipEntry.clipData) ?: return@launch
+                onPrivateKeyChange(clipboardText)
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Icon(
+            imageVector = Icons.Default.ContentPaste,
+            contentDescription = "Paste from clipboard",
+            modifier = Modifier.padding(end = 8.dp),
+        )
+        Text("Paste from clipboard")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddSshKeyScreenPreview_ImportTab() {
+    AddSshKeyScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _ -> }, onNavigateUp = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GenerateKeyTabPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        GenerateKeyTab(keyType = KeyPair.ED25519, onKeyTypeSelected = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ManualEntryTabPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        ManualEntryTab(
+            privateKey = "",
+            onPrivateKeyChange = {},
+            onNameSuggestion = {},
+            isError = false,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ManualEntryTabWithErrorPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        ManualEntryTab(
+            privateKey = "invalid key data",
+            onPrivateKeyChange = {},
+            onNameSuggestion = {},
+            isError = true,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ImportFileTabPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        ImportFileTab(keyType = null, onKeyContentRead = {}, onNameSuggestion = {})
     }
 }

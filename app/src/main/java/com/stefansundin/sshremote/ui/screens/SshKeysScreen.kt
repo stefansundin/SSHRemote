@@ -65,7 +65,7 @@ fun SshKeysScreen(
     onNavigateUp: () -> Unit,
     onShowPublicKey: (SshKey) -> Unit,
     onExportPublicKey: (SshKey) -> Unit,
-    onDeleteKey: (SshKey) -> Unit
+    onDeleteKey: (SshKey) -> Unit,
 ) {
     val sshKeys by sshKeyViewModel.sshKeys.collectAsState()
 
@@ -77,26 +77,28 @@ fun SshKeysScreen(
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = "Navigate back",
                         )
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToAddSshKey) {
                 Icon(Icons.Default.Add, contentDescription = "Add SSH Key")
             }
-        }
+        },
     ) { innerPadding ->
-        Box(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+        ) {
             if (sshKeys.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text("No SSH keys added yet.", style = MaterialTheme.typography.bodyLarge)
                     Text(
@@ -128,7 +130,7 @@ fun SshKeyItem(
     cryptoManager: CryptoManager,
     onShowPublicKey: () -> Unit,
     onExportPublicKey: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     var isContextMenuVisible by remember { mutableStateOf(false) }
 
@@ -149,31 +151,31 @@ fun SshKeyItem(
                 }
                 DropdownMenu(
                     expanded = isContextMenuVisible,
-                    onDismissRequest = { isContextMenuVisible = false }
+                    onDismissRequest = { isContextMenuVisible = false },
                 ) {
                     DropdownMenuItem(
                         text = { Text("View public key") },
                         onClick = {
                             onShowPublicKey()
                             isContextMenuVisible = false
-                        }
+                        },
                     )
                     DropdownMenuItem(
                         text = { Text("Export public key") },
                         onClick = {
                             onExportPublicKey()
                             isContextMenuVisible = false
-                        }
+                        },
                     )
                     DropdownMenuItem(
                         text = { Text("Delete", color = Color.Red) },
                         onClick = {
                             onDelete()
                             isContextMenuVisible = false
-                        }
+                        },
                     )
                 }
             }
-        }
+        },
     )
 }

@@ -27,9 +27,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
+open class SettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
 
-    val theme: StateFlow<Theme> = repository.theme
+    open val theme: StateFlow<Theme> = repository.theme
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
