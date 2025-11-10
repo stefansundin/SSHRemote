@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SshKeyDao {
-    @Query("SELECT * FROM ssh_keys ORDER BY name ASC")
+    @Query("SELECT * FROM ssh_keys ORDER BY id DESC")
     fun getAllKeys(): Flow<List<SshKey>>
 
     @Query("SELECT * FROM ssh_keys WHERE id = :id")

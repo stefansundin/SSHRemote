@@ -36,6 +36,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -89,17 +90,20 @@ fun SshKeysScreen(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()) {
             if (sshKeys.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Text("No SSH keys added yet.", style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        text = "No SSH keys added.\n\nPress the + button to add a new key.",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
+                        "Tap the + button to add one.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp),
                     )
                 }
             } else {
@@ -110,7 +114,7 @@ fun SshKeysScreen(
                             cryptoManager = cryptoManager,
                             onShowPublicKey = { onShowPublicKey(sshKey) },
                             onExportPublicKey = { onExportPublicKey(sshKey) },
-                            onDelete = { onDeleteKey(sshKey) }
+                            onDelete = { onDeleteKey(sshKey) },
                         )
                     }
                 }

@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package com.stefansundin.sshremote
 
 import android.os.Bundle
-import android.util.Log
 import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -67,7 +66,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -79,6 +79,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,19 +89,18 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jcraft.jsch.JSch
-import com.jcraft.jsch.KeyPair
 import com.stefansundin.sshremote.data.SshKey
+import com.stefansundin.sshremote.data.SshKeyEvent
 import com.stefansundin.sshremote.data.SshKeyViewModel
 import com.stefansundin.sshremote.data.SshKeyViewModelFactory
 import com.stefansundin.sshremote.ui.screens.AddSshKeyScreen
 import com.stefansundin.sshremote.ui.screens.PublicKeyDialog
 import com.stefansundin.sshremote.ui.screens.SshKeysScreen
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import java.io.ByteArrayOutputStream
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 enum class Screen {
     LIST,
@@ -184,13 +184,43 @@ class MainActivity : ComponentActivity() {
 
                 var showPublicKeyDialog by remember { mutableStateOf(false) }
                 var publicKeyToShow by remember { mutableStateOf("") }
+                var fileToExport by remember { mutableStateOf<Pair<String, String>?>(null) }
 
+                val snackbarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
                 val context = LocalContext.current
 
+                val fileSaverLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.CreateDocument("attachment/plain"),
+                    onResult = { uri ->
+                        uri?.let {
+                            fileToExport?.let { (_, content) ->
+                                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                                    outputStream.write(content.toByteArray())
+                                }
+                            }
+                        }
+                        fileToExport = null
+                    },
+                )
+
                 LaunchedEffect(Unit) {
-                    sshKeyViewModel.newPublicKeyFlow.collect { publicKey ->
-                        publicKeyToShow = publicKey
-                        showPublicKeyDialog = true
+                    sshKeyViewModel.eventFlow.collectLatest { event ->
+                        when (event) {
+                            is SshKeyEvent.ShowPublicKey -> {
+                                publicKeyToShow = event.publicKey
+                                showPublicKeyDialog = true
+                            }
+
+                            is SshKeyEvent.ExportPublicKey -> {
+                                fileToExport = event.filename to event.content
+                                fileSaverLauncher.launch(event.filename)
+                            }
+
+                            is SshKeyEvent.Error -> {
+                                scope.launch { snackbarHostState.showSnackbar(event.message) }
+                            }
+                        }
                     }
                 }
 
@@ -201,10 +231,9 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
+                Scaffold(
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                ) { paddingValues ->
                     when (currentScreen) {
                         Screen.LIST -> {
                             val servers by sshServerViewModel.allServers.collectAsState()
@@ -213,10 +242,15 @@ class MainActivity : ComponentActivity() {
                                 onConnectClicked = { server: SshServer -> connectToServer(server) },
                                 onAddServerClicked = { editServer(null) },
                                 onEditServerClicked = { server -> editServer(server) },
-                                onDeleteServerClicked = { server -> sshServerViewModel.delete(server) },
+                                onDeleteServerClicked = { server ->
+                                    sshServerViewModel.delete(
+                                        server,
+                                    )
+                                },
                                 onSettingsClicked = { showSettings() },
                             )
                         }
+
                         Screen.EDIT -> {
                             val sshKeys by sshKeyViewModel.sshKeys.collectAsState()
                             AddEditSshServerScreen(
@@ -230,6 +264,7 @@ class MainActivity : ComponentActivity() {
                                 cryptoManager = cryptoManager,
                             )
                         }
+
                         Screen.TERMINAL -> {
                             val uiState by sshServerViewModel.uiState.collectAsState()
                             SshTerminalScreen(
@@ -242,6 +277,7 @@ class MainActivity : ComponentActivity() {
                                 onClearCommandOutput = { sshServerViewModel.clearCommandOutput() },
                             )
                         }
+
                         Screen.SETTINGS -> {
                             SettingsScreen(
                                 settingsViewModel = settingsViewModel,
@@ -249,66 +285,19 @@ class MainActivity : ComponentActivity() {
                                 onNavigateUp = { navigateBackToList() },
                             )
                         }
+
                         Screen.SSH_KEYS -> {
-                            val fileSaverLauncher =
-                                rememberLauncherForActivityResult(
-                                    contract = ActivityResultContracts.CreateDocument("attachment/plain"),
-                                    onResult = { uri ->
-                                        if (uri != null) {
-                                            val keyToExport = sshKeyViewModel.keyToExport.value
-                                            if (keyToExport != null) {
-                                                val privateKey =
-                                                    cryptoManager.decrypt(keyToExport.encryptedPrivateKey)
-                                                val keypair = KeyPair.load(JSch(), privateKey, null)
-                                                val outputStream = ByteArrayOutputStream()
-                                                val comment =
-                                                    keypair.publicKeyComment.ifEmpty { keyToExport.name }
-                                                keypair.writePublicKey(outputStream, comment)
-                                                val publicKey =
-                                                    outputStream.toString(Charsets.UTF_8.name())
-                                                keypair.dispose()
-
-                                                context.contentResolver.openOutputStream(uri)
-                                                    ?.use { output ->
-                                                        output.write(publicKey.toByteArray())
-                                                    }
-                                            }
-                                        }
-                                    },
-                                )
-
                             SshKeysScreen(
-                                sshKeyViewModel = sshKeyViewModel,
                                 cryptoManager = cryptoManager,
+                                sshKeyViewModel = sshKeyViewModel,
                                 onNavigateToAddSshKey = { addSshKey() },
                                 onNavigateUp = { showSettings() },
-                                onShowPublicKey = { key ->
-                                    val privateKey = cryptoManager.decrypt(key.encryptedPrivateKey)
-                                    val keypair = KeyPair.load(JSch(), privateKey, null)
-                                    val outputStream = ByteArrayOutputStream()
-                                    keypair.writePublicKey(
-                                        outputStream,
-                                        keypair.publicKeyComment.ifEmpty { key.name },
-                                    )
-                                    val publicKey = outputStream.toString(Charsets.UTF_8.name())
-                                    keypair.dispose()
-                                    publicKeyToShow = publicKey
-                                    showPublicKeyDialog = true
-                                },
-                                onExportPublicKey = { key ->
-                                    sshKeyViewModel.keyToExport.value = key
-
-                                    val privateKey = cryptoManager.decrypt(key.encryptedPrivateKey)
-                                    val keypair = KeyPair.load(JSch(), privateKey, null)
-                                    val keyTypeName = if (keypair.keyTypeString == "ssh-ed25519") { "ed25519" } else "rsa"
-                                    keypair.dispose()
-
-                                    val suggestedFilename = "id_$keyTypeName.pub"
-                                    fileSaverLauncher.launch(suggestedFilename)
-                                },
+                                onShowPublicKey = { key -> sshKeyViewModel.showPublicKeyFor(key) },
+                                onExportPublicKey = { key -> sshKeyViewModel.exportPublicKeyFor(key) },
                                 onDeleteKey = { key -> sshKeyViewModel.delete(key) },
                             )
                         }
+
                         Screen.ADD_SSH_KEY -> {
                             AddSshKeyScreen(
                                 onKeySaved = { name, privateKey ->
@@ -316,10 +305,6 @@ class MainActivity : ComponentActivity() {
                                     currentScreen = Screen.SSH_KEYS
                                 },
                                 onKeyGenerated = { name, type, comment ->
-                                    Log.d(
-                                        "AddSshKeyScreen",
-                                        "Key generated: $name, $type, $comment",
-                                    )
                                     sshKeyViewModel.generateAndInsert(name, type, comment)
                                     currentScreen = Screen.SSH_KEYS
                                 },
@@ -345,6 +330,7 @@ fun SshServerScreen(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Hosts") },
@@ -370,22 +356,24 @@ fun SshServerScreen(
     ) { innerPadding ->
         if (servers.isEmpty()) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                Text("No SSH hosts added yet.", style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    text = "No SSH hosts added.\n\nPress the + button to add a new host.",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
+                    "Tap the + button to add one.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp),
                 )
             }
         } else {
             LazyColumn(
-                modifier = modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                contentPadding = innerPadding,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
             ) {
                 items(items = servers, key = { server -> server.id }) { server ->
                     SshServerItem(
@@ -713,9 +701,12 @@ fun AddEditSshServerScreen(
             ) {
                 OutlinedTextField(
                     readOnly = true,
-                    value = if (selectedSshKeyIds == null) { "Use any key" }
-                        else if (selectedSshKeyIds!!.isEmpty()) { "Do not use keys" }
-                        else sshKeys.filter { selectedSshKeyIds!!.contains(it.id) }.joinToString(", ") { it.name },
+                    value = if (selectedSshKeyIds == null) {
+                        "Use any key"
+                    } else if (selectedSshKeyIds!!.isEmpty()) {
+                        "Do not use keys"
+                    } else sshKeys.filter { selectedSshKeyIds!!.contains(it.id) }
+                        .joinToString(", ") { it.name },
                     onValueChange = { },
                     label = { Text("SSH Key") },
                     trailingIcon = {
@@ -782,7 +773,13 @@ fun SshServerScreenPreview() {
 @Composable
 fun AddSshServerScreenPreview() {
     SSHRemoteTheme {
-        AddEditSshServerScreen(server = null, onServerSaved = {}, onNavigateUp = {}, sshKeys = emptyList(), cryptoManager = null)
+        AddEditSshServerScreen(
+            server = null,
+            onServerSaved = {},
+            onNavigateUp = {},
+            sshKeys = emptyList(),
+            cryptoManager = null,
+        )
     }
 }
 
@@ -791,7 +788,13 @@ fun AddSshServerScreenPreview() {
 fun EditSshServerScreenPreview() {
     SSHRemoteTheme {
         val sampleServer = SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null)
-        AddEditSshServerScreen(server = sampleServer, onServerSaved = {}, onNavigateUp = {}, sshKeys = emptyList(), cryptoManager = null)
+        AddEditSshServerScreen(
+            server = sampleServer,
+            onServerSaved = {},
+            onNavigateUp = {},
+            sshKeys = emptyList(),
+            cryptoManager = null,
+        )
     }
 }
 

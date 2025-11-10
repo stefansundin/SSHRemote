@@ -24,12 +24,11 @@ import com.stefansundin.sshremote.CryptoManager
 
 class SshKeyViewModelFactory(
     private val sshKeyRepository: SshKeyRepository,
-    private val cryptoManager: CryptoManager // Add CryptoManager
+    private val cryptoManager: CryptoManager,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SshKeyViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            // Pass it to the ViewModel
             return SshKeyViewModel(sshKeyRepository, cryptoManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

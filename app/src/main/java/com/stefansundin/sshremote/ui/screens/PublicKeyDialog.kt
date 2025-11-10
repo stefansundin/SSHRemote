@@ -49,10 +49,12 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
             )
         },
         confirmButton = {
-            TextButton(onClick = {
-                val clipData = ClipData.newPlainText("Public SSH key", publicKey)
-                scope.launch{clipboard.setClipEntry(clipData.toClipEntry())}
-            }) {
+            TextButton(
+                onClick = {
+                    val clipData = ClipData.newPlainText("Public SSH key", publicKey)
+                    scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
+                },
+            ) {
                 Text("Copy")
             }
         },

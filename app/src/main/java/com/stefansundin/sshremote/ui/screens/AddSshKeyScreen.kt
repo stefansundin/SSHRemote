@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import android.content.ClipData
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -40,10 +41,10 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -69,17 +70,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private fun isKeyValid(privateKey: String): Boolean {
-    if (privateKey.isBlank()) return false
-    return try {
-        val jsch = JSch()
-        val keyPair = KeyPair.load(jsch, privateKey.toByteArray(), null)
-        keyPair.dispose()
-        true
-    } catch (e: Exception) {
-        false
-    }
-}
+val keyTypes = mapOf(KeyPair.ED25519 to "ED25519", KeyPair.RSA to "RSA")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,10 +84,24 @@ fun AddSshKeyScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("Import File", "Generate", "Enter Manually")
     var isKeyContentValid by remember { mutableStateOf(false) }
+    var selectedKeyType by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(privateKey, selectedTabIndex) {
         isKeyContentValid = if (selectedTabIndex == 0 || selectedTabIndex == 2) {
-            isKeyValid(privateKey)
+            if (privateKey.isBlank()) false
+            else {
+                try {
+                    val jsch = JSch()
+                    val keyPair = KeyPair.load(jsch, privateKey.toByteArray(), null)
+                    if (keyTypes.containsKey(keyPair.keyType)) {
+                        selectedKeyType = keyPair.keyType
+                    }
+                    keyPair.dispose()
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
         } else {
             true
         }
@@ -105,8 +110,6 @@ fun AddSshKeyScreen(
     val isFormValid = (selectedTabIndex == 0 && isKeyContentValid) ||
             (selectedTabIndex == 1) ||
             (selectedTabIndex == 2 && isKeyContentValid)
-
-    var selectedKeyType by remember { mutableIntStateOf(KeyPair.ED25519) }
 
     Scaffold(
         topBar = {
@@ -130,13 +133,17 @@ fun AddSshKeyScreen(
                             "Key ${
                                 SimpleDateFormat(
                                     "yyyy-MM-dd HH:mm",
-                                    Locale.getDefault()
+                                    Locale.getDefault(),
                                 ).format(Date())
                             }"
                         }
                         when (selectedTabIndex) {
                             0, 2 -> onKeySaved(finalName, privateKey)
-                            1 -> onKeyGenerated(finalName, selectedKeyType, finalName)
+                            1 -> onKeyGenerated(
+                                finalName,
+                                selectedKeyType ?: KeyPair.ED25519,
+                                finalName,
+                            )
                         }
                     },
                 ) {
@@ -160,7 +167,7 @@ fun AddSshKeyScreen(
                 singleLine = true,
             )
 
-            TabRow(selectedTabIndex = selectedTabIndex) {
+            PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                 tabTitles.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
@@ -173,17 +180,21 @@ fun AddSshKeyScreen(
             Column(modifier = Modifier.padding(16.dp)) {
                 when (selectedTabIndex) {
                     0 -> ImportFileTab(
+                        keyType = selectedKeyType,
                         onKeyContentRead = { content -> privateKey = content },
-                        onNameSuggestion = { suggestedName -> name = suggestedName }
+                        onNameSuggestion = { suggestedName -> name = suggestedName },
                     )
+
                     1 -> GenerateKeyTab(
-                        selectedKeyType = selectedKeyType,
-                        onKeyTypeSelected = { selectedKeyType = it }
+                        keyType = selectedKeyType,
+                        onKeyTypeSelected = { selectedKeyType = it },
                     )
+
                     2 -> ManualEntryTab(
                         privateKey = privateKey,
                         onPrivateKeyChange = { privateKey = it },
-                        isError = privateKey.isNotBlank() && !isKeyContentValid
+                        onNameSuggestion = { suggestedName -> name = suggestedName },
+                        isError = privateKey.isNotBlank() && !isKeyContentValid,
                     )
                 }
             }
@@ -192,36 +203,53 @@ fun AddSshKeyScreen(
 }
 
 fun getClipEntryText(clipData: ClipData): String? {
-        val itemCount = clipData.itemCount
-        var textFull = ""
-        for (i in 0 ..< itemCount) {
-            val item = clipData.getItemAt(i)
-            val text = item?.text
-            if (text != null)
-                textFull += text
-        }
-        return textFull.ifEmpty { null }
+    val itemCount = clipData.itemCount
+    var textFull = ""
+    for (i in 0..<itemCount) {
+        val item = clipData.getItemAt(i)
+        val text = item?.text
+        if (text != null)
+            textFull += text
+    }
+    return textFull.ifEmpty { null }
 }
 
 @Composable
 fun ManualEntryTab(
     privateKey: String,
     onPrivateKeyChange: (String) -> Unit,
-    isError: Boolean
+    onNameSuggestion: (String) -> Unit,
+    isError: Boolean,
 ) {
     val clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(privateKey) {
+        withContext(Dispatchers.IO) {
+            try {
+                val keypair = KeyPair.load(JSch(), privateKey.toByteArray(), null)
+                val comment = keypair.publicKeyComment
+                if (comment.isNotBlank()) {
+                    onNameSuggestion(comment)
+                }
+                keypair.dispose()
+            } catch (e: Exception) {
+                Log.e("AddSshKeyScreen", "Error parsing key", e)
+            }
+        }
+    }
+
 
     OutlinedTextField(
         value = privateKey,
         onValueChange = onPrivateKeyChange,
         label = { Text("Private Key") },
-        placeholder = { Text("Begins with -----BEGIN...-----") },
+        placeholder = { Text("-----BEGIN OPENSSH PRIVATE KEY-----") },
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp),
         isError = isError,
-        supportingText = { if (isError) Text("Invalid key format") }
+        supportingText = { if (isError) Text("Invalid key format") },
     )
     Spacer(modifier = Modifier.height(8.dp))
     TextButton(
@@ -232,12 +260,12 @@ fun ManualEntryTab(
                 onPrivateKeyChange(clipboardText)
             }
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Icon(
             imageVector = Icons.Default.ContentPaste,
             contentDescription = "Paste from clipboard",
-            modifier = Modifier.padding(end = 8.dp)
+            modifier = Modifier.padding(end = 8.dp),
         )
         Text("Paste from clipboard")
     }
@@ -245,11 +273,13 @@ fun ManualEntryTab(
 
 @Composable
 fun ImportFileTab(
+    keyType: Int?,
     onKeyContentRead: (String) -> Unit,
-    onNameSuggestion: (String) -> Unit
+    onNameSuggestion: (String) -> Unit,
 ) {
     val context = LocalContext.current
     var keyContentForParsing by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(keyContentForParsing) {
         keyContentForParsing?.let { content ->
@@ -257,14 +287,16 @@ fun ImportFileTab(
                 try {
                     val keypair = KeyPair.load(JSch(), content.toByteArray(), null)
                     val comment = keypair.publicKeyComment
-                    if (comment != null && comment.isNotBlank()) {
+                    if (comment.isNotBlank()) {
                         withContext(Dispatchers.Main) {
                             onNameSuggestion(comment)
                         }
                     }
                     keypair.dispose()
+                    error = null
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    error = e.message
+                    Log.e("AddSshKeyScreen", "Error parsing key", e)
                 }
             }
         }
@@ -280,7 +312,7 @@ fun ImportFileTab(
                     keyContentForParsing = keyContent
                 }
             }
-        }
+        },
     )
 
     Column(
@@ -292,29 +324,35 @@ fun ImportFileTab(
         Button(onClick = { filePickerLauncher.launch("*/*") }) {
             Text("Select File")
         }
+        if (error != null) {
+            Text("Error: $error")
+        } else if (keyType != null) {
+            Text("Key Type: ${keyTypes[keyType]}")
+        }
     }
 }
 
 @Composable
-fun GenerateKeyTab(selectedKeyType: Int, onKeyTypeSelected: (Int) -> Unit) {
-    val keyTypes = listOf("ED25519" to KeyPair.ED25519, "RSA" to KeyPair.RSA)
+fun GenerateKeyTab(keyType: Int?, onKeyTypeSelected: (Int) -> Unit) {
+    val keyTypeOptions = listOf("ED25519" to KeyPair.ED25519, "RSA" to KeyPair.RSA)
+    val selectedKeyType = keyType ?: KeyPair.ED25519
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text("Select the type of key to generate:")
-        keyTypes.forEach { (name, type) ->
+        keyTypeOptions.forEach { (name, type) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onKeyTypeSelected(type) }
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 4.dp),
             ) {
                 RadioButton(
                     selected = (selectedKeyType == type),
-                    onClick = { onKeyTypeSelected(type) }
+                    onClick = { onKeyTypeSelected(type) },
                 )
                 Text(text = name, modifier = Modifier.padding(start = 8.dp))
             }
