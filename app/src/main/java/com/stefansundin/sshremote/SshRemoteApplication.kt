@@ -19,7 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package com.stefansundin.sshremote
 
 import android.app.Application
-import com.stefansundin.sshremote.data.SshKeyRepository
+import com.stefansundin.sshremote.data.AppDatabase
+import com.stefansundin.sshremote.data.sshkey.SshKeyRepository
+import com.stefansundin.sshremote.data.settings.SettingsRepository
+import com.stefansundin.sshremote.data.sshserver.SshServerRepository
 
 class SshRemoteApplication : Application() {
     private val database by lazy { AppDatabase.getInstance(this) }

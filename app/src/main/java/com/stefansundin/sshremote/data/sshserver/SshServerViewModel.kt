@@ -16,13 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote
+package com.stefansundin.sshremote.data.sshserver
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stefansundin.sshremote.data.SshKeyRepository
+import com.stefansundin.sshremote.Result
+import com.stefansundin.sshremote.SshRepository
+import com.stefansundin.sshremote.data.CryptoManager
+import com.stefansundin.sshremote.data.sshkey.SshKeyRepository
+import com.stefansundin.sshremote.data.decryptString
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow

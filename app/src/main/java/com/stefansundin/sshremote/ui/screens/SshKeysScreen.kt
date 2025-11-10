@@ -49,13 +49,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
-import com.stefansundin.sshremote.CryptoManager
-import com.stefansundin.sshremote.data.SshKey
-import com.stefansundin.sshremote.data.SshKeyViewModel
+import com.stefansundin.sshremote.data.CryptoManager
+import com.stefansundin.sshremote.data.sshkey.SshKey
+import com.stefansundin.sshremote.data.sshkey.SshKeyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

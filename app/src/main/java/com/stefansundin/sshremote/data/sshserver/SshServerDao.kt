@@ -16,19 +16,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote
+package com.stefansundin.sshremote.data.sshserver
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
-@Entity(tableName = "ssh_servers")
-data class SshServer(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val name: String,
-    val host: String,
-    val port: Int,
-    val user: String,
-    val encryptedPassword: String?,
-    val sshKeyIds: List<Int>? = null
-)
+@Dao
+interface SshServerDao {
+
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    suspend fun upsert(server: SshServer)
+
+    @Delete
+    suspend fun delete(server: SshServer)
+
+    @Query("SELECT * FROM ssh_servers ORDER BY name ASC")
+    fun getAllServers(): Flow<List<SshServer>>
+
+    @Query("SELECT * FROM ssh_servers WHERE id = :id")
+    fun getServerById(id: Int): Flow<SshServer?>
+}

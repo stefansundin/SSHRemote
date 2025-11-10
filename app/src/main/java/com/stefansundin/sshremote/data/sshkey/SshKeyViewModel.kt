@@ -16,14 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote.data
+package com.stefansundin.sshremote.data.sshkey
 
 import android.util.Base64
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
-import com.stefansundin.sshremote.CryptoManager
+import com.stefansundin.sshremote.data.CryptoManager
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel

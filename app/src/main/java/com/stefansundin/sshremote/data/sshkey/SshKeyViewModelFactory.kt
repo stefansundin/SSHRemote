@@ -16,11 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote.data
+package com.stefansundin.sshremote.data.sshkey
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stefansundin.sshremote.CryptoManager
+import com.stefansundin.sshremote.data.CryptoManager
 
 class SshKeyViewModelFactory(
     private val sshKeyRepository: SshKeyRepository,

@@ -16,16 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote
+package com.stefansundin.sshremote.data.sshserver
 
-/**
- * A simple data holder for the information needed to establish an SSH connection.
- * This is separate from the Room @Entity to keep the database model clean, and has decrypted data.
- */
-data class SshServerConnectionDetails(
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "ssh_servers")
+data class SshServer(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val name: String,
     val host: String,
     val port: Int,
     val user: String,
-    val password: String?,
-    val privateKeys: List<String>?
+    val encryptedPassword: String?,
+    val sshKeyIds: List<Int>? = null
 )

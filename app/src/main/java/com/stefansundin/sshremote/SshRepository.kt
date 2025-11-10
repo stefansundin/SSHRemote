@@ -21,6 +21,7 @@ package com.stefansundin.sshremote
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
+import com.stefansundin.sshremote.data.sshserver.SshServerConnectionDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream

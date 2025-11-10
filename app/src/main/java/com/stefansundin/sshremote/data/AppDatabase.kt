@@ -16,17 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.stefansundin.sshremote
+package com.stefansundin.sshremote.data
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.stefansundin.sshremote.data.Converters
-import com.stefansundin.sshremote.data.SshKey
-import com.stefansundin.sshremote.data.SshKeyDao
-import com.stefansundin.sshremote.data.SshKeyIdsConverter
+import com.stefansundin.sshremote.data.sshkey.SshKey
+import com.stefansundin.sshremote.data.sshkey.SshKeyDao
+import com.stefansundin.sshremote.data.sshserver.SshServer
+import com.stefansundin.sshremote.data.sshserver.SshServerDao
 
 @Database(entities = [SshServer::class, SshKey::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class, SshKeyIdsConverter::class)
