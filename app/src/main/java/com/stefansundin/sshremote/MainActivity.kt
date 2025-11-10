@@ -159,29 +159,6 @@ class MainActivity : ComponentActivity() {
                 var selectedServer by remember { mutableStateOf<SshServer?>(null) }
                 var currentScreen by remember { mutableStateOf(Screen.LIST) }
 
-                val navigateBackToList = {
-                    selectedServer = null
-                    currentScreen = Screen.LIST
-                }
-                val connectToServer = { server: SshServer ->
-                    selectedServer = server
-                    currentScreen = Screen.TERMINAL
-                    sshServerViewModel.connectToServer(server)
-                }
-                val editServer = { server: SshServer? ->
-                    selectedServer = server
-                    currentScreen = Screen.EDIT
-                }
-                val showSettings = {
-                    currentScreen = Screen.SETTINGS
-                }
-                val showSshKeys = {
-                    currentScreen = Screen.SSH_KEYS
-                }
-                val addSshKey = {
-                    currentScreen = Screen.ADD_SSH_KEY
-                }
-
                 var showPublicKeyDialog by remember { mutableStateOf(false) }
                 var publicKeyToShow by remember { mutableStateOf("") }
                 var fileToExport by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -239,15 +216,27 @@ class MainActivity : ComponentActivity() {
                             val servers by sshServerViewModel.allServers.collectAsState()
                             SshServerScreen(
                                 servers = servers,
-                                onConnectClicked = { server: SshServer -> connectToServer(server) },
-                                onAddServerClicked = { editServer(null) },
-                                onEditServerClicked = { server -> editServer(server) },
+                                onConnectClicked = { server: SshServer ->
+                                    selectedServer = server
+                                    currentScreen = Screen.TERMINAL
+                                    sshServerViewModel.connectToServer(server)
+                                },
+                                onAddServerClicked = {
+                                    selectedServer = null
+                                    currentScreen = Screen.EDIT
+                                },
+                                onEditServerClicked = { server ->
+                                    selectedServer = server
+                                    currentScreen = Screen.EDIT
+                                },
                                 onDeleteServerClicked = { server ->
                                     sshServerViewModel.delete(
                                         server,
                                     )
                                 },
-                                onSettingsClicked = { showSettings() },
+                                onSettingsClicked = {
+                                    currentScreen = Screen.SETTINGS
+                                },
                             )
                         }
 
@@ -258,9 +247,13 @@ class MainActivity : ComponentActivity() {
                                 sshKeys = sshKeys,
                                 onServerSaved = { server ->
                                     sshServerViewModel.upsert(server)
-                                    navigateBackToList()
+                                    selectedServer = null
+                                    currentScreen = Screen.LIST
                                 },
-                                onNavigateUp = { navigateBackToList() },
+                                onNavigateUp = {
+                                    selectedServer = null
+                                    currentScreen = Screen.LIST
+                                },
                                 cryptoManager = cryptoManager,
                             )
                         }
@@ -272,7 +265,8 @@ class MainActivity : ComponentActivity() {
                                 onRunUptime = { sshServerViewModel.runUptimeCommand() },
                                 onDisconnect = {
                                     sshServerViewModel.disconnect()
-                                    navigateBackToList()
+                                    selectedServer = null
+                                    currentScreen = Screen.LIST
                                 },
                                 onClearCommandOutput = { sshServerViewModel.clearCommandOutput() },
                             )
@@ -281,8 +275,11 @@ class MainActivity : ComponentActivity() {
                         Screen.SETTINGS -> {
                             SettingsScreen(
                                 settingsViewModel = settingsViewModel,
-                                onNavigateToSshKeys = { showSshKeys() },
-                                onNavigateUp = { navigateBackToList() },
+                                onNavigateToSshKeys = { currentScreen = Screen.SSH_KEYS },
+                                onNavigateUp = {
+                                    selectedServer = null
+                                    currentScreen = Screen.LIST
+                                },
                             )
                         }
 
@@ -290,8 +287,10 @@ class MainActivity : ComponentActivity() {
                             SshKeysScreen(
                                 cryptoManager = cryptoManager,
                                 sshKeyViewModel = sshKeyViewModel,
-                                onNavigateToAddSshKey = { addSshKey() },
-                                onNavigateUp = { showSettings() },
+                                onNavigateToAddSshKey = { currentScreen = Screen.ADD_SSH_KEY },
+                                onNavigateUp = {
+                                    currentScreen = Screen.SETTINGS
+                                },
                                 onShowPublicKey = { key -> sshKeyViewModel.showPublicKeyFor(key) },
                                 onExportPublicKey = { key -> sshKeyViewModel.exportPublicKeyFor(key) },
                                 onDeleteKey = { key -> sshKeyViewModel.delete(key) },
