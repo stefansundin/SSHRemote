@@ -22,6 +22,7 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.stefansundin.sshremote.data.sshserver.Command
+import java.time.Instant
 import java.util.Date
 
 class Converters {
@@ -35,6 +36,16 @@ class Converters {
     @TypeConverter
     fun dateToTimestamp(date: Date?): Long? {
         return date?.time
+    }
+
+    @TypeConverter
+    fun fromInstant(value: Long?): Instant? {
+        return value?.let { Instant.ofEpochMilli(it) }
+    }
+
+    @TypeConverter
+    fun instantToTimestamp(instant: Instant?): Long? {
+        return instant?.toEpochMilli()
     }
 
     @TypeConverter

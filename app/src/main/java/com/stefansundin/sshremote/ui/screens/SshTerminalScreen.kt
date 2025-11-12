@@ -64,6 +64,7 @@ fun SshTerminalScreen(
     onDisconnect: () -> Unit,
     onClearCommandOutput: () -> Unit,
     onEditCommands: () -> Unit,
+    onAdHocCommandClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -103,6 +104,13 @@ fun SshTerminalScreen(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
                     ) {
+                        DropdownMenuItem(
+                            text = { Text("Ad-hoc command") },
+                            onClick = {
+                                showMenu = false
+                                onAdHocCommandClicked()
+                            },
+                        )
                         DropdownMenuItem(
                             text = { Text("Edit commands") },
                             onClick = {
@@ -182,6 +190,6 @@ fun ConnectionStatusIndicator(connectionStatus: ConnectionStatus, modifier: Modi
     Box(
         modifier = modifier
             .size(12.dp)
-            .background(color, shape = CircleShape)
+            .background(color, shape = CircleShape),
     )
 }

@@ -209,7 +209,7 @@ class SshKeyViewModel(
         keypair.writePublicKey(outputStream, comment)
         val publicKeyString = outputStream.toString(Charsets.UTF_8.name())
         keypair.dispose()
-        publicKeyString
+        publicKeyString.trim()
     }
 }
 

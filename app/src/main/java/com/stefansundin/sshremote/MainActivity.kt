@@ -42,18 +42,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.stefansundin.sshremote.data.CryptoManager
+import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
+import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
+import com.stefansundin.sshremote.data.settings.SettingsViewModel
+import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
 import com.stefansundin.sshremote.data.sshkey.SshKeyEvent
 import com.stefansundin.sshremote.data.sshkey.SshKeyViewModel
 import com.stefansundin.sshremote.data.sshkey.SshKeyViewModelFactory
-import com.stefansundin.sshremote.data.settings.SettingsViewModel
-import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
+import com.stefansundin.sshremote.data.sshserver.Command
 import com.stefansundin.sshremote.data.sshserver.SshServer
 import com.stefansundin.sshremote.data.sshserver.SshServerViewModel
 import com.stefansundin.sshremote.data.sshserver.SshServerViewModelFactory
+import com.stefansundin.sshremote.ui.components.PublicKeyDialog
+import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
 import com.stefansundin.sshremote.ui.screens.AddEditSshServerScreen
 import com.stefansundin.sshremote.ui.screens.AddSshKeyScreen
 import com.stefansundin.sshremote.ui.screens.EditCommandsScreen
-import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.screens.SettingsScreen
 import com.stefansundin.sshremote.ui.screens.SshKeysScreen
 import com.stefansundin.sshremote.ui.screens.SshServerScreen
@@ -70,6 +74,7 @@ enum class Screen {
     SSH_KEYS,
     ADD_SSH_KEY,
     EDIT_COMMANDS,
+    AD_HOC_COMMAND,
 }
 
 enum class Theme {
@@ -107,6 +112,11 @@ class MainActivity : ComponentActivity() {
             app.sshKeyRepository,
             cryptoManager,
         )
+    }
+
+    private val adHocCommandViewModel: AdHocCommandViewModel by viewModels {
+        val app = (application as SshRemoteApplication)
+        AdHocCommandViewModelFactory(app.adHocCommandRepository)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -175,7 +185,7 @@ class MainActivity : ComponentActivity() {
                             TextButton(onClick = { sshRepository.onMessageDismissed() }) {
                                 Text("OK")
                             }
-                        }
+                        },
                     )
                 }
 
@@ -191,7 +201,7 @@ class MainActivity : ComponentActivity() {
                                 onValueChange = { password = it },
                                 label = { Text("Password") },
                                 visualTransformation = PasswordVisualTransformation(),
-                                singleLine = true
+                                singleLine = true,
                             )
                         },
                         confirmButton = {
@@ -203,7 +213,7 @@ class MainActivity : ComponentActivity() {
                             TextButton(onClick = { sshRepository.onPasswordPromptComplete(null) }) {
                                 Text("Cancel")
                             }
-                        }
+                        },
                     )
                 }
 
@@ -219,7 +229,7 @@ class MainActivity : ComponentActivity() {
                                 onValueChange = { passphrase = it },
                                 label = { Text("Passphrase") },
                                 visualTransformation = PasswordVisualTransformation(),
-                                singleLine = true
+                                singleLine = true,
                             )
                         },
                         confirmButton = {
@@ -231,7 +241,7 @@ class MainActivity : ComponentActivity() {
                             TextButton(onClick = { sshRepository.onPassphrasePromptComplete(null) }) {
                                 Text("Cancel")
                             }
-                        }
+                        },
                     )
                 }
 
@@ -324,6 +334,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onClearCommandOutput = { sshServerViewModel.clearCommandOutput() },
                                 onEditCommands = { currentScreen = Screen.EDIT_COMMANDS },
+                                onAdHocCommandClicked = { currentScreen = Screen.AD_HOC_COMMAND },
                             )
                         }
 
@@ -377,6 +388,21 @@ class MainActivity : ComponentActivity() {
                                     currentScreen = Screen.SSH_KEYS
                                 },
                                 onNavigateUp = { currentScreen = Screen.SSH_KEYS },
+                            )
+                        }
+
+                        Screen.AD_HOC_COMMAND -> {
+                            val adHocCommands by adHocCommandViewModel.adHocCommands.collectAsState()
+                            AdHocCommandScreen(
+                                commands = adHocCommands,
+                                onExecuteCommand = { command ->
+                                    adHocCommandViewModel.addAdHocCommand(command)
+                                    sshServerViewModel.runCommand(Command(command, command, true))
+                                    currentScreen = Screen.TERMINAL
+                                },
+                                onDeleteCommand = { adHocCommandViewModel.deleteAdHocCommand(it) },
+                                onClearHistory = { adHocCommandViewModel.clearAdHocCommands() },
+                                onNavigateUp = { currentScreen = Screen.TERMINAL },
                             )
                         }
                     }

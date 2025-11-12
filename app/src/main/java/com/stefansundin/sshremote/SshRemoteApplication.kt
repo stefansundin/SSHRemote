@@ -20,13 +20,15 @@ package com.stefansundin.sshremote
 
 import android.app.Application
 import com.stefansundin.sshremote.data.AppDatabase
-import com.stefansundin.sshremote.data.sshkey.SshKeyRepository
+import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.settings.SettingsRepository
+import com.stefansundin.sshremote.data.sshkey.SshKeyRepository
 import com.stefansundin.sshremote.data.sshserver.SshServerRepository
 
 class SshRemoteApplication : Application() {
     private val database by lazy { AppDatabase.getInstance(this) }
     val sshServerRepository by lazy { SshServerRepository(database.sshServerDao()) }
     val sshKeyRepository by lazy { SshKeyRepository(database.sshKeyDao()) }
+    val adHocCommandRepository by lazy { AdHocCommandRepository(database.adHocCommandDao()) }
     val settingsRepository by lazy { SettingsRepository(this) }
 }

@@ -23,17 +23,24 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
+import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandDao
 import com.stefansundin.sshremote.data.sshkey.SshKey
 import com.stefansundin.sshremote.data.sshkey.SshKeyDao
 import com.stefansundin.sshremote.data.sshserver.SshServer
 import com.stefansundin.sshremote.data.sshserver.SshServerDao
 
-@Database(entities = [SshServer::class, SshKey::class], version = 1, exportSchema = false)
+@Database(
+    entities = [SshServer::class, SshKey::class, AdHocCommand::class],
+    version = 2,
+    exportSchema = false,
+)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun sshServerDao(): SshServerDao
     abstract fun sshKeyDao(): SshKeyDao
+    abstract fun adHocCommandDao(): AdHocCommandDao
 
     companion object {
         // The @Volatile annotation ensures that writes to this field are immediately
@@ -48,6 +55,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "ssh_remote_database",
                 )
+                    .fallbackToDestructiveMigration(true)
                     .build()
                 INSTANCE = instance
                 instance
