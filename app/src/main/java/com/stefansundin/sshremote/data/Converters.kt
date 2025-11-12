@@ -19,9 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package com.stefansundin.sshremote.data
 
 import androidx.room.TypeConverter
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.stefansundin.sshremote.data.sshserver.Command
 import java.util.Date
 
 class Converters {
+    private val gson = Gson()
+
     @TypeConverter
     fun fromTimestamp(value: Long?): Date? {
         return value?.let { Date(it) }
@@ -31,29 +36,46 @@ class Converters {
     fun dateToTimestamp(date: Date?): Long? {
         return date?.time
     }
-}
 
-object SshKeyIdsConverter {
     @TypeConverter
-    @JvmStatic
-    fun fromString(value: String?): List<Int>? {
-        return value?.split(',')?.mapNotNull { it.toIntOrNull() }
+    fun fromCommandsList(value: List<Command>?): String? {
+        return gson.toJson(value)
     }
 
     @TypeConverter
-    @JvmStatic
-    fun fromIntList(list: List<Int>?): String? {
-        return list?.joinToString(",")
+    fun toCommandsList(value: String?): List<Command>? {
+        if (value == null) {
+            return null
+        }
+        val listType = object : TypeToken<List<Command>>() {}.type
+        return gson.fromJson(value, listType)
     }
-}
 
-class ListConverter {
     @TypeConverter
-    fun fromList(list: List<String>?): String? {
-        return list?.joinToString("\n")
+    fun fromIntList(value: List<Int>?): String? {
+        return gson.toJson(value)
     }
+
     @TypeConverter
-    fun toList(data: String?): List<String>? {
-        return data?.split("\n")?.filter { it.isNotEmpty() }
+    fun toIntList(value: String?): List<Int>? {
+        if (value == null) {
+            return null
+        }
+        val listType = object : TypeToken<List<Int>>() {}.type
+        return gson.fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun fromStringList(value: List<String>?): String? {
+        return gson.toJson(value)
+    }
+
+    @TypeConverter
+    fun toStringList(value: String?): List<String>? {
+        if (value == null) {
+            return null
+        }
+        val listType = object : TypeToken<List<String>>() {}.type
+        return gson.fromJson(value, listType)
     }
 }

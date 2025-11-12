@@ -18,28 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package com.stefansundin.sshremote.data.sshserver
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
-
-@Dao
-interface SshServerDao {
-
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-    suspend fun upsert(server: SshServer)
-
-    @Delete
-    suspend fun delete(server: SshServer)
-
-    @Query("SELECT * FROM ssh_servers ORDER BY name ASC")
-    fun getAllServers(): Flow<List<SshServer>>
-
-    @Query("SELECT * FROM ssh_servers WHERE id = :id")
-    fun getServerById(id: Int): Flow<SshServer?>
-
-    @Query("SELECT * FROM ssh_servers WHERE id = :id")
-    suspend fun getServerByIdOnce(id: Int): SshServer?
-}
+data class Command(
+    val name: String,
+    val command: String,
+    val showOutput: Boolean = false,
+)

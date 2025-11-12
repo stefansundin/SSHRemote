@@ -25,14 +25,16 @@ import androidx.lifecycle.viewModelScope
 import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.SshRepository
 import com.stefansundin.sshremote.data.CryptoManager
-import com.stefansundin.sshremote.data.sshkey.SshKeyRepository
 import com.stefansundin.sshremote.data.decryptString
+import com.stefansundin.sshremote.data.sshkey.SshKeyRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -49,6 +51,9 @@ class SshServerViewModel(
     private val _uiState = MutableStateFlow(SshTerminalUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var currentServer: SshServer? = null
+    private var serverStateJob: Job? = null
+
     val allServers: StateFlow<List<SshServer>> = repository.getAllServers()
         .stateIn(
             scope = viewModelScope,
@@ -64,9 +69,31 @@ class SshServerViewModel(
         repository.delete(server)
     }
 
+    fun setActiveServer(server: SshServer) {
+        currentServer = server
+        serverStateJob?.cancel()
+        serverStateJob = viewModelScope.launch {
+            repository.getServerById(server.id).filterNotNull().collectLatest { updatedServer ->
+                currentServer = updatedServer
+                _uiState.update {
+                    it.copy(
+                        serverName = updatedServer.name,
+                        commands = updatedServer.commands,
+                    )
+                }
+            }
+        }
+    }
+
     fun connectToServer(server: SshServer) {
+        setActiveServer(server)
         viewModelScope.launch {
-            _uiState.update { it.copy(connectionStatus = "Connecting...") }
+            _uiState.update {
+                it.copy(
+                    serverName = server.name,
+                    connectionStatus = ConnectionStatus.CONNECTING,
+                )
+            }
             try {
                 val sshKeys = server.sshKeyIds?.map { id ->
                     async { sshKeyRepository.getKeyById(id).filterNotNull().first() }
@@ -94,45 +121,34 @@ class SshServerViewModel(
                     val updatedServer = server.copy(knownHosts = newKnownHosts)
                     repository.upsert(updatedServer)
                 }
+                _uiState.update { it.copy(connectionStatus = ConnectionStatus.CONNECTED) }
 
-                _uiState.update { it.copy(connectionStatus = "Connected to ${server.name}") }
             } catch (e: Exception) {
                 Log.e("SshServerViewModel", "Error connecting to server", e)
-                _uiState.update { it.copy(connectionStatus = "Error: ${e.message}") }
+                _uiState.update { it.copy(connectionStatus = ConnectionStatus.DISCONNECTED) }
             }
         }
     }
 
-    fun runUptimeCommand() {
+    fun runCommand(command: Command) {
         viewModelScope.launch {
-            _uiState.update { it.copy(commandOutput = null, isLoading = true) }
-            try {
-                when (val result = sshRepository.executeCommand("uptime")) {
-                    is Result.Success -> {
-                        _uiState.update {
-                            it.copy(
-                                commandOutput = result.output,
-                                isLoading = false,
-                            )
-                        }
-                    }
+            _uiState.update { it.copy(isLoading = true, commandOutput = null) }
 
-                    is Result.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                commandOutput = result.message,
-                                isLoading = false,
-                            )
-                        }
-                    }
+            val result = sshRepository.executeCommand(command.command)
+            val output = try {
+                when (result) {
+                    is Result.Success -> result.output
+                    is Result.Error -> result.message
                 }
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        commandOutput = "Error executing command: ${e.message}",
-                        isLoading = false,
-                    )
-                }
+                "Error executing command: ${e.message}"
+            }
+
+            _uiState.update {
+                it.copy(
+                    commandOutput = if (result is Result.Error || command.showOutput) output else null,
+                    isLoading = false,
+                )
             }
         }
     }
@@ -140,7 +156,7 @@ class SshServerViewModel(
     fun disconnect() {
         viewModelScope.launch {
             sshRepository.disconnect()
-            _uiState.update { it.copy(connectionStatus = "Disconnected") }
+            _uiState.update { it.copy(connectionStatus = ConnectionStatus.DISCONNECTED) }
         }
     }
 
@@ -149,11 +165,19 @@ class SshServerViewModel(
     }
 }
 
+enum class ConnectionStatus {
+    CONNECTED,
+    CONNECTING,
+    DISCONNECTED
+}
+
 // Data class to hold the UI state for the terminal screen
 data class SshTerminalUiState(
-    val connectionStatus: String = "Idle",
+    val serverName: String? = null,
     val commandOutput: String? = null,
     val isLoading: Boolean = false,
+    val commands: List<Command> = emptyList(),
+    val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
 )
 
 class SshServerViewModelFactory(

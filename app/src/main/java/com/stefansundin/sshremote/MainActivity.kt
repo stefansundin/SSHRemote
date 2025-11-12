@@ -52,6 +52,7 @@ import com.stefansundin.sshremote.data.sshserver.SshServerViewModel
 import com.stefansundin.sshremote.data.sshserver.SshServerViewModelFactory
 import com.stefansundin.sshremote.ui.screens.AddEditSshServerScreen
 import com.stefansundin.sshremote.ui.screens.AddSshKeyScreen
+import com.stefansundin.sshremote.ui.screens.EditCommandsScreen
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.screens.SettingsScreen
 import com.stefansundin.sshremote.ui.screens.SshKeysScreen
@@ -68,6 +69,7 @@ enum class Screen {
     SETTINGS,
     SSH_KEYS,
     ADD_SSH_KEY,
+    EDIT_COMMANDS,
 }
 
 enum class Theme {
@@ -314,13 +316,28 @@ class MainActivity : ComponentActivity() {
                             val uiState by sshServerViewModel.uiState.collectAsState()
                             SshTerminalScreen(
                                 uiState = uiState,
-                                onRunUptime = { sshServerViewModel.runUptimeCommand() },
+                                onRunCommand = { sshServerViewModel.runCommand(it) },
                                 onDisconnect = {
                                     sshServerViewModel.disconnect()
                                     selectedServer = null
                                     currentScreen = Screen.LIST
                                 },
                                 onClearCommandOutput = { sshServerViewModel.clearCommandOutput() },
+                                onEditCommands = { currentScreen = Screen.EDIT_COMMANDS },
+                            )
+                        }
+
+                        Screen.EDIT_COMMANDS -> {
+                            val uiState by sshServerViewModel.uiState.collectAsState()
+                            EditCommandsScreen(
+                                commands = uiState.commands,
+                                onSave = {
+                                    selectedServer?.let { server ->
+                                        sshServerViewModel.upsert(server.copy(commands = it))
+                                    }
+                                    currentScreen = Screen.TERMINAL
+                                },
+                                onNavigateBack = { currentScreen = Screen.TERMINAL },
                             )
                         }
 

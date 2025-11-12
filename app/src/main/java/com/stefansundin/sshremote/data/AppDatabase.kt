@@ -28,8 +28,8 @@ import com.stefansundin.sshremote.data.sshkey.SshKeyDao
 import com.stefansundin.sshremote.data.sshserver.SshServer
 import com.stefansundin.sshremote.data.sshserver.SshServerDao
 
-@Database(entities = [SshServer::class, SshKey::class], version = 3, exportSchema = false)
-@TypeConverters(Converters::class, SshKeyIdsConverter::class, ListConverter::class)
+@Database(entities = [SshServer::class, SshKey::class], version = 1, exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun sshServerDao(): SshServerDao

@@ -83,6 +83,9 @@ dependencies {
     implementation(libs.bouncycastle.bcpkix.jdk18on)
     implementation(libs.eddsa)
 
+    // --- JSON Serialization ---
+    implementation(libs.gson)
+
     // --- Testing Dependencies ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

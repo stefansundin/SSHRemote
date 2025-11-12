@@ -37,6 +37,11 @@ class SshServerRepository(private val sshServerDao: SshServerDao) {
     fun getServerById(id: Int): Flow<SshServer?> = sshServerDao.getServerById(id)
 
     /**
+     * Retrieves a single SSH server by its ID, once.
+     */
+    suspend fun getServerByIdOnce(id: Int): SshServer? = sshServerDao.getServerByIdOnce(id)
+
+    /**
      * Inserts or updates an SSH server in the database.
      */
     suspend fun upsert(server: SshServer) {

@@ -128,6 +128,7 @@ class SshKeyViewModel(
     }
 
     private fun generateEd25519KeyPair(comment: String): Pair<String, String> {
+        // JSch can't export ED25519 keys. https://github.com/mwiede/jsch/issues/118
         // Generate the key pair using the pre-registered security provider
         val generator = KeyPairGenerator.getInstance("EdDSA")
         val keyPair = generator.generateKeyPair()

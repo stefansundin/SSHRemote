@@ -32,4 +32,5 @@ data class SshServer(
     val encryptedPassword: String?,
     val sshKeyIds: List<Int>? = null,
     val knownHosts: List<String> = emptyList(),
+    val commands: List<Command> = listOf(Command("Uptime", "uptime", true)),
 )
