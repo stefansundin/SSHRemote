@@ -21,10 +21,11 @@ package com.stefansundin.sshremote.data.adhoccommand
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.Instant
+import java.time.OffsetDateTime
 
 @Entity(tableName = "ad_hoc_commands")
 data class AdHocCommand(
     @PrimaryKey
     val command: String,
-    val lastUsed: Instant = Instant.now(),
+    val lastUsed: OffsetDateTime = OffsetDateTime.now(),
 )

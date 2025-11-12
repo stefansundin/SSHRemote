@@ -33,7 +33,7 @@ class AdHocCommandViewModel(private val adHocCommandRepository: AdHocCommandRepo
 
     fun addAdHocCommand(command: String) {
         viewModelScope.launch {
-            adHocCommandRepository.insert(AdHocCommand(command = command, lastUsed = Instant.now()))
+            adHocCommandRepository.insert(AdHocCommand(command = command))
         }
     }
 

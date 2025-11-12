@@ -22,30 +22,19 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.stefansundin.sshremote.data.sshserver.Command
-import java.time.Instant
-import java.util.Date
+import java.time.OffsetDateTime
 
 class Converters {
     private val gson = Gson()
 
     @TypeConverter
-    fun fromTimestamp(value: Long?): Date? {
-        return value?.let { Date(it) }
+    fun fromOffsetDateTime(value: String?): OffsetDateTime? {
+        return value?.let { OffsetDateTime.parse(it) }
     }
 
     @TypeConverter
-    fun dateToTimestamp(date: Date?): Long? {
-        return date?.time
-    }
-
-    @TypeConverter
-    fun fromInstant(value: Long?): Instant? {
-        return value?.let { Instant.ofEpochMilli(it) }
-    }
-
-    @TypeConverter
-    fun instantToTimestamp(instant: Instant?): Long? {
-        return instant?.toEpochMilli()
+    fun offsetDateTimeToString(offsetDateTime: OffsetDateTime?): String? {
+        return offsetDateTime?.toString()
     }
 
     @TypeConverter

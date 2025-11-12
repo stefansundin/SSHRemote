@@ -20,13 +20,14 @@ package com.stefansundin.sshremote.data.sshkey
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.OffsetDateTime
 import java.util.Date
 
 @Entity(tableName = "ssh_keys")
 data class SshKey(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val createdAt: Date = Date(),
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),
     val name: String,
     val encryptedPrivateKey: ByteArray,
 )
