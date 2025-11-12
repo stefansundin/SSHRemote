@@ -18,6 +18,10 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +33,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,8 +41,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,12 +56,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.data.settings.SettingsEvent
 import com.stefansundin.sshremote.data.settings.SettingsRepository
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
+import com.stefansundin.sshremote.data.sshserver.SshServer
+import com.stefansundin.sshremote.data.sshserver.SshServerDao
+import com.stefansundin.sshremote.data.sshserver.SshServerRepository
 import com.stefansundin.sshremote.ui.components.ThemeSettingDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,15 +79,82 @@ fun SettingsScreen(
     onNavigateUp: () -> Unit,
     onNavigateToSshKeys: () -> Unit,
 ) {
+    val context = LocalContext.current
     val savedTheme by settingsViewModel.theme.collectAsState()
     var previewTheme by remember { mutableStateOf(savedTheme) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    var importUri by remember { mutableStateOf<Uri?>(null) }
     val useDarkTheme = when (previewTheme) {
         Theme.SYSTEM -> isSystemInDarkTheme()
         Theme.LIGHT -> false
         Theme.DARK -> true
     }
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+        onResult = { uri ->
+            uri?.let {
+                settingsViewModel.exportSettings(context, uri)
+            }
+        }
+    )
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri ->
+            uri?.let { importUri = it }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        settingsViewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is SettingsEvent.ImportSuccess -> {
+                    val message = "Successfully imported ${event.count} servers."
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                is SettingsEvent.ImportError -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    importUri?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { importUri = null },
+            title = { Text("Import settings") },
+            text = { Text("Do you want to merge with existing servers or overwrite them? Overwriting will delete all current servers before importing.") },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(
+                        onClick = {
+                            settingsViewModel.importSettings(context, uri, false)
+                            importUri = null
+                        }
+                    ) {
+                        Text("Overwrite")
+                    }
+                    TextButton(
+                        onClick = {
+                            settingsViewModel.importSettings(context, uri, true)
+                            importUri = null
+                        }
+                    ) {
+                        Text("Merge")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { importUri = null }
+                ) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
 
     SSHRemoteTheme(darkTheme = useDarkTheme) {
         if (showThemeDialog) {
@@ -181,40 +264,55 @@ fun SettingsScreen(
                         },
                     )
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Data", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .clickable {
+                            val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
+                            val filename = "ssh-remote-settings-${dateFormat.format(Date())}.json"
+                            exportLauncher.launch(filename)
+                        }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "Export settings",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "Export settings to a file.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        "SSH keys and passwords are not exported.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .clickable { importLauncher.launch(arrayOf("application/json")) }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "Import settings",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "Import settings from a file.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
-    }
-}
-
-class MockSettingsViewModel(theme: Theme, settingsRepository: SettingsRepository) :
-    SettingsViewModel(settingsRepository) {
-    private val _theme = MutableStateFlow(theme)
-    override val theme = _theme.asStateFlow()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    val mockViewModel =
-        MockSettingsViewModel(Theme.SYSTEM, SettingsRepository(LocalContext.current))
-    SSHRemoteTheme {
-        SettingsScreen(
-            settingsViewModel = mockViewModel,
-            onNavigateUp = {},
-            onNavigateToSshKeys = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenDarkPreview() {
-    val mockViewModel = MockSettingsViewModel(Theme.DARK, SettingsRepository(LocalContext.current))
-    SSHRemoteTheme(darkTheme = true) {
-        SettingsScreen(
-            settingsViewModel = mockViewModel,
-            onNavigateUp = {},
-            onNavigateToSshKeys = {},
-        )
     }
 }

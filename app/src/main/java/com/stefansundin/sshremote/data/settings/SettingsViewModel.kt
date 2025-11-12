@@ -18,18 +18,31 @@
 
 package com.stefansundin.sshremote.data.settings
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
+import com.stefansundin.sshremote.data.sshserver.SshServerRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-open class SettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
+class SettingsViewModel(
+    private val settingsRepository: SettingsRepository,
+    private val sshServerRepository: SshServerRepository,
+    private val adHocCommandRepository: AdHocCommandRepository,
+) : ViewModel() {
 
-    open val theme: StateFlow<Theme> = repository.theme
+    private val _eventFlow = MutableSharedFlow<SettingsEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
+    val theme: StateFlow<Theme> = settingsRepository.theme
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -38,11 +51,11 @@ open class SettingsViewModel(private val repository: SettingsRepository) : ViewM
 
     fun setTheme(theme: Theme) {
         viewModelScope.launch {
-            repository.setTheme(theme)
+            settingsRepository.setTheme(theme)
         }
     }
 
-    open val strictHostKeyChecking: StateFlow<Boolean> = repository.strictHostKeyChecking
+    val strictHostKeyChecking: StateFlow<Boolean> = settingsRepository.strictHostKeyChecking
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -51,18 +64,45 @@ open class SettingsViewModel(private val repository: SettingsRepository) : ViewM
 
     fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
         viewModelScope.launch {
-            repository.setStrictHostKeyChecking(strictHostKeyChecking)
+            settingsRepository.setStrictHostKeyChecking(strictHostKeyChecking)
         }
     }
 
+    fun exportSettings(context: Context, uri: Uri) {
+        viewModelScope.launch {
+            SettingsExporter(context, settingsRepository, sshServerRepository, adHocCommandRepository).export(uri)
+        }
+    }
+
+    fun importSettings(context: Context, uri: Uri, merge: Boolean) {
+        viewModelScope.launch {
+            try {
+                val count =
+                    SettingsImporter(context, settingsRepository, sshServerRepository, adHocCommandRepository)
+                        .import(uri, merge)
+                _eventFlow.emit(SettingsEvent.ImportSuccess(count))
+            } catch (e: ImportException) {
+                _eventFlow.emit(SettingsEvent.ImportError(e.message ?: "Unknown error"))
+            }
+        }
+    }
 }
 
-class SettingsViewModelFactory(private val repository: SettingsRepository) :
+sealed class SettingsEvent {
+    data class ImportSuccess(val count: Int) : SettingsEvent()
+    data class ImportError(val message: String) : SettingsEvent()
+}
+
+class SettingsViewModelFactory(
+    private val settingsRepository: SettingsRepository,
+    private val sshServerRepository: SshServerRepository,
+    private val adHocCommandRepository: AdHocCommandRepository,
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(repository) as T
+            return SettingsViewModel(settingsRepository, sshServerRepository, adHocCommandRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

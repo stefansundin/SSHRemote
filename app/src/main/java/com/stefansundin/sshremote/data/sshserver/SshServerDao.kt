@@ -28,11 +28,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SshServerDao {
 
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(server: SshServer)
 
     @Delete
     suspend fun delete(server: SshServer)
+
+    @Query("DELETE FROM ssh_servers")
+    suspend fun deleteAll()
 
     @Query("SELECT * FROM ssh_servers ORDER BY name ASC")
     fun getAllServers(): Flow<List<SshServer>>

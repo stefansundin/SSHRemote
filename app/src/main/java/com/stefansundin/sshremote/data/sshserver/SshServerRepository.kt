@@ -54,4 +54,11 @@ class SshServerRepository(private val sshServerDao: SshServerDao) {
     suspend fun delete(server: SshServer) {
         sshServerDao.delete(server)
     }
+
+    /**
+     * Deletes all SSH servers from the database.
+     */
+    suspend fun deleteAll() {
+        sshServerDao.deleteAll()
+    }
 }

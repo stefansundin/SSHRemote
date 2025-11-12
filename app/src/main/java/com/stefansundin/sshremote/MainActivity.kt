@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
 
     private val settingsViewModel: SettingsViewModel by viewModels {
         val app = (application as SshRemoteApplication)
-        SettingsViewModelFactory(app.settingsRepository)
+        SettingsViewModelFactory(app.settingsRepository, app.sshServerRepository, app.adHocCommandRepository)
     }
 
     private val sshKeyViewModel: SshKeyViewModel by viewModels {

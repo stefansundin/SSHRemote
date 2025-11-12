@@ -215,8 +215,7 @@ class SshKeyViewModel(
 
 sealed class SshKeyEvent {
     data class ShowPublicKey(val publicKey: String) : SshKeyEvent()
-    data class ExportPublicKey(val filename: String, val content: String) :
-        SshKeyEvent() // New event
+    data class ExportPublicKey(val filename: String, val content: String) : SshKeyEvent()
 
     data class Error(val message: String) : SshKeyEvent()
 }
