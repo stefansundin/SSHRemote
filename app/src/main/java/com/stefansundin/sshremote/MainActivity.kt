@@ -346,6 +346,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onEditCommands = { currentScreen = Screen.EDIT_COMMANDS },
                                 onAdHocCommandClicked = { currentScreen = Screen.AD_HOC_COMMAND },
+                                onClearError = { sshServerViewModel.clearError() },
                             )
                         }
 

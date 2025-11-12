@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -40,6 +41,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,9 +64,23 @@ fun SshTerminalScreen(
     onDisconnect: () -> Unit,
     onEditCommands: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
+    onClearError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
+
+    if (uiState.error != null) {
+        AlertDialog(
+            onDismissRequest = onClearError,
+            title = { Text("Connection Error") },
+            text = { Text(uiState.error) },
+            confirmButton = {
+                TextButton(onClick = onClearError) {
+                    Text("OK")
+                }
+            },
+        )
+    }
 
     Scaffold(
         topBar = {

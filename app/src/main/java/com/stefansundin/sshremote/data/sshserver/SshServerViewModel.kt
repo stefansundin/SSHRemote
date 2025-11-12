@@ -125,7 +125,12 @@ class SshServerViewModel(
 
             } catch (e: Exception) {
                 Log.e("SshServerViewModel", "Error connecting to server", e)
-                _uiState.update { it.copy(connectionStatus = ConnectionStatus.DISCONNECTED) }
+                _uiState.update {
+                    it.copy(
+                        connectionStatus = ConnectionStatus.DISCONNECTED,
+                        error = e.message,
+                    )
+                }
             }
         }
     }
@@ -156,12 +161,21 @@ class SshServerViewModel(
     fun disconnect() {
         viewModelScope.launch {
             sshRepository.disconnect()
-            _uiState.update { it.copy(connectionStatus = ConnectionStatus.DISCONNECTED) }
+            _uiState.update {
+                it.copy(
+                    connectionStatus = ConnectionStatus.DISCONNECTED,
+                    error = null,
+                )
+            }
         }
     }
 
     fun clearCommandOutput() {
         _uiState.update { it.copy(commandOutput = null) }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 }
 
@@ -178,6 +192,7 @@ data class SshTerminalUiState(
     val isLoading: Boolean = false,
     val commands: List<Command> = emptyList(),
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
+    val error: String? = null,
 )
 
 class SshServerViewModelFactory(
