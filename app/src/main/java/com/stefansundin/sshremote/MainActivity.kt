@@ -302,6 +302,10 @@ class MainActivity : ComponentActivity() {
                                     selectedServer = server
                                     currentScreen = Screen.EDIT
                                 },
+                                onCloneServerClicked = { server ->
+                                    selectedServer = server.copy(id = 0, name = "Copy of ${server.name}")
+                                    currentScreen = Screen.EDIT
+                                },
                                 onDeleteServerClicked = { server ->
                                     sshServerViewModel.delete(
                                         server,

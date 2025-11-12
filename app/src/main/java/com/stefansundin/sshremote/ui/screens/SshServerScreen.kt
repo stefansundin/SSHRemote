@@ -66,6 +66,7 @@ fun SshServerScreen(
     onConnectClicked: (SshServer) -> Unit,
     onAddServerClicked: () -> Unit,
     onEditServerClicked: (SshServer) -> Unit,
+    onCloneServerClicked: (SshServer) -> Unit,
     onDeleteServerClicked: (SshServer) -> Unit,
     onSettingsClicked: () -> Unit,
     modifier: Modifier = Modifier,
@@ -114,13 +115,14 @@ fun SshServerScreen(
             LazyColumn(
                 contentPadding = innerPadding,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(16.dp),
             ) {
                 items(items = servers, key = { server -> server.id }) { server ->
                     SshServerItem(
                         server = server,
                         onConnect = { onConnectClicked(server) },
                         onEdit = { onEditServerClicked(server) },
+                        onClone = { onCloneServerClicked(server) },
                         onDelete = { onDeleteServerClicked(server) },
                     )
                 }
@@ -135,6 +137,7 @@ fun SshServerItem(
     server: SshServer,
     onConnect: () -> Unit,
     onEdit: () -> Unit,
+    onClone: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -193,6 +196,13 @@ fun SshServerItem(
                         },
                     )
                     DropdownMenuItem(
+                        text = { Text("Clone") },
+                        onClick = {
+                            onClone()
+                            isContextMenuVisible = false
+                        },
+                    )
+                    DropdownMenuItem(
                         text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                         onClick = {
                             onDelete()
@@ -218,6 +228,7 @@ fun SshServerScreenPreview() {
             onConnectClicked = {},
             onAddServerClicked = {},
             onEditServerClicked = {},
+            onCloneServerClicked = {},
             onDeleteServerClicked = {},
             onSettingsClicked = {},
         )
