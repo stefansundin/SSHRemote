@@ -52,6 +52,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -63,7 +65,7 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 @Composable
 fun AdHocCommandScreen(
     commands: List<AdHocCommand>,
-    onExecuteCommand: (String) -> Unit,
+    onExecuteCommand: (command: String, popUpToPrevious: Boolean) -> Unit,
     onDeleteCommand: (AdHocCommand) -> Unit,
     onClearHistory: () -> Unit,
     onNavigateUp: () -> Unit,
@@ -71,6 +73,9 @@ fun AdHocCommandScreen(
     var commandText by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
     var showContextMenuFor by remember { mutableStateOf<AdHocCommand?>(null) }
+
+    val executeAndStay: () -> Unit = { onExecuteCommand(commandText, false) }
+    val executeAndGoBack: () -> Unit = { onExecuteCommand(commandText, true) }
 
     Scaffold(
         topBar = {
@@ -114,7 +119,7 @@ fun AdHocCommandScreen(
                                 .combinedClickable(
                                     onClick = {
                                         if (commandText == command.command) {
-                                            onExecuteCommand(command.command)
+                                            executeAndStay()
                                         } else {
                                             commandText = command.command
                                         }
@@ -153,18 +158,27 @@ fun AdHocCommandScreen(
                         .weight(1f)
                         .onPreviewKeyEvent {
                             if (it.type == KeyEventType.KeyDown && it.key == Key.Enter) {
-                                onExecuteCommand(commandText)
+                                if (it.isShiftPressed || it.isCtrlPressed) {
+                                    executeAndGoBack()
+                                } else {
+                                    executeAndStay()
+                                }
                                 true
                             } else {
                                 false
                             }
                         },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                    keyboardActions = KeyboardActions(onSend = { onExecuteCommand(commandText) }),
+                    keyboardActions = KeyboardActions(onSend = { executeAndStay() }),
                 )
-                IconButton(onClick = { onExecuteCommand(commandText) }) {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Execute")
-                }
+                Icon(
+                    Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Execute",
+                    modifier = Modifier.combinedClickable(
+                        onClick = executeAndStay,
+                        onLongClick = executeAndGoBack
+                    )
+                )
             }
         }
     }

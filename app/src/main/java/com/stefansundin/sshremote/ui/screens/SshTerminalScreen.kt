@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -43,7 +42,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,19 +60,11 @@ fun SshTerminalScreen(
     uiState: SshTerminalUiState,
     onRunCommand: (Command) -> Unit,
     onDisconnect: () -> Unit,
-    onClearCommandOutput: () -> Unit,
     onEditCommands: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    var showOutputDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(uiState.commandOutput) {
-        if (uiState.commandOutput != null) {
-            showOutputDialog = true
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -163,19 +153,6 @@ fun SshTerminalScreen(
                     }
                 }
             }
-        }
-
-        if (showOutputDialog) {
-            AlertDialog(
-                onDismissRequest = { onClearCommandOutput(); showOutputDialog = false },
-                title = { Text("Command Output") },
-                text = { Text(uiState.commandOutput ?: "") },
-                confirmButton = {
-                    Button(onClick = { onClearCommandOutput(); showOutputDialog = false }) {
-                        Text("OK")
-                    }
-                },
-            )
         }
     }
 }

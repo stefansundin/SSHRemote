@@ -53,6 +53,7 @@ import com.stefansundin.sshremote.data.sshserver.Command
 import com.stefansundin.sshremote.data.sshserver.SshServer
 import com.stefansundin.sshremote.data.sshserver.SshServerViewModel
 import com.stefansundin.sshremote.data.sshserver.SshServerViewModelFactory
+import com.stefansundin.sshremote.ui.components.CommandOutputDialog
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
 import com.stefansundin.sshremote.ui.screens.AddEditSshServerScreen
@@ -245,6 +246,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                val uiState by sshServerViewModel.uiState.collectAsState()
+                uiState.commandOutput?.let { output ->
+                    CommandOutputDialog(
+                        output = output,
+                        onDismiss = { sshServerViewModel.clearCommandOutput() },
+                    )
+                }
+
                 LaunchedEffect(Unit) {
                     sshKeyViewModel.eventFlow.collectLatest { event ->
                         when (event) {
@@ -323,7 +332,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         Screen.TERMINAL -> {
-                            val uiState by sshServerViewModel.uiState.collectAsState()
                             SshTerminalScreen(
                                 uiState = uiState,
                                 onRunCommand = { sshServerViewModel.runCommand(it) },
@@ -332,14 +340,12 @@ class MainActivity : ComponentActivity() {
                                     selectedServer = null
                                     currentScreen = Screen.LIST
                                 },
-                                onClearCommandOutput = { sshServerViewModel.clearCommandOutput() },
                                 onEditCommands = { currentScreen = Screen.EDIT_COMMANDS },
                                 onAdHocCommandClicked = { currentScreen = Screen.AD_HOC_COMMAND },
                             )
                         }
 
                         Screen.EDIT_COMMANDS -> {
-                            val uiState by sshServerViewModel.uiState.collectAsState()
                             EditCommandsScreen(
                                 commands = uiState.commands,
                                 onSave = {
@@ -395,10 +401,12 @@ class MainActivity : ComponentActivity() {
                             val adHocCommands by adHocCommandViewModel.adHocCommands.collectAsState()
                             AdHocCommandScreen(
                                 commands = adHocCommands,
-                                onExecuteCommand = { command ->
+                                onExecuteCommand = { command, popUpToPrevious ->
                                     adHocCommandViewModel.addAdHocCommand(command)
                                     sshServerViewModel.runCommand(Command(command, command, true))
-                                    currentScreen = Screen.TERMINAL
+                                    if (popUpToPrevious) {
+                                        currentScreen = Screen.TERMINAL
+                                    }
                                 },
                                 onDeleteCommand = { adHocCommandViewModel.deleteAdHocCommand(it) },
                                 onClearHistory = { adHocCommandViewModel.clearAdHocCommands() },
