@@ -22,6 +22,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -34,6 +35,9 @@ interface SshKeyDao {
 
     @Insert
     suspend fun insert(sshKey: SshKey)
+
+    @Update
+    suspend fun update(sshKey: SshKey)
 
     @Delete
     suspend fun delete(sshKey: SshKey)

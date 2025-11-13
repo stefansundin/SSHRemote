@@ -21,6 +21,7 @@ package com.stefansundin.sshremote.ui.screens
 import android.content.ClipData
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -87,6 +89,56 @@ fun AddSshKeyScreen(
     var isKeyContentValid by remember { mutableStateOf(false) }
     var selectedKeyType by remember { mutableStateOf<Int?>(null) }
 
+    var showSaveDialog by remember { mutableStateOf(false) }
+
+    val hasUnsavedChanges = privateKey.isNotBlank()
+
+    fun handleSave() {
+        val finalName = name.ifBlank {
+            "Key ${
+                SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm",
+                    Locale.getDefault(),
+                ).format(Date())
+            }"
+        }
+        when (selectedTabIndex) {
+            0, 2 -> onKeySaved(finalName, privateKey)
+            1 -> onKeyGenerated(
+                finalName,
+                selectedKeyType ?: KeyPair.ED25519,
+                finalName,
+            )
+        }
+    }
+
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text("Unsaved changes") },
+            text = { Text("Do you want to save the key before leaving?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        handleSave()
+                        onNavigateUp()
+                    },
+                ) {
+                    Text("Save and leave")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onNavigateUp) {
+                    Text("Discard and leave")
+                }
+            },
+        )
+    }
+
+    BackHandler(enabled = hasUnsavedChanges) {
+        showSaveDialog = true
+    }
+
     LaunchedEffect(privateKey, selectedTabIndex) {
         isKeyContentValid = if (selectedTabIndex == 0 || selectedTabIndex == 2) {
             if (privateKey.isBlank()) false
@@ -117,7 +169,15 @@ fun AddSshKeyScreen(
             TopAppBar(
                 title = { Text("Add SSH Key") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
+                    IconButton(
+                        onClick = {
+                            if (hasUnsavedChanges) {
+                                showSaveDialog = true
+                            } else {
+                                onNavigateUp()
+                            }
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -130,22 +190,7 @@ fun AddSshKeyScreen(
             if (isFormValid) {
                 FloatingActionButton(
                     onClick = {
-                        val finalName = name.ifBlank {
-                            "Key ${
-                                SimpleDateFormat(
-                                    "yyyy-MM-dd HH:mm",
-                                    Locale.getDefault(),
-                                ).format(Date())
-                            }"
-                        }
-                        when (selectedTabIndex) {
-                            0, 2 -> onKeySaved(finalName, privateKey)
-                            1 -> onKeyGenerated(
-                                finalName,
-                                selectedKeyType ?: KeyPair.ED25519,
-                                finalName,
-                            )
-                        }
+                        handleSave()
                     },
                 ) {
                     Icon(

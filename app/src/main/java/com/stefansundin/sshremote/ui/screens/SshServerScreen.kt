@@ -44,6 +44,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -51,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +62,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.sshserver.SshServer
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,11 +73,16 @@ fun SshServerScreen(
     onEditServerClicked: (SshServer) -> Unit,
     onCloneServerClicked: (SshServer) -> Unit,
     onDeleteServerClicked: (SshServer) -> Unit,
+    onUndoDeleteClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Hosts") },
@@ -123,7 +133,19 @@ fun SshServerScreen(
                         onConnect = { onConnectClicked(server) },
                         onEdit = { onEditServerClicked(server) },
                         onClone = { onCloneServerClicked(server) },
-                        onDelete = { onDeleteServerClicked(server) },
+                        onDelete = {
+                            onDeleteServerClicked(server)
+                            scope.launch {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                val result = snackbarHostState.showSnackbar(
+                                    message = "Host deleted",
+                                    actionLabel = "Undo",
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    onUndoDeleteClicked()
+                                }
+                            }
+                        },
                     )
                 }
             }
@@ -221,7 +243,7 @@ fun SshServerScreenPreview() {
     SSHRemoteTheme {
         val sampleServers = listOf(
             SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null),
-            SshServer(2, "Example Server", "example.com", 2222, "admin", null),
+            SshServer(2, "Example Host", "example.com", 2222, "admin", null),
         )
         SshServerScreen(
             servers = sampleServers,
@@ -230,6 +252,7 @@ fun SshServerScreenPreview() {
             onEditServerClicked = {},
             onCloneServerClicked = {},
             onDeleteServerClicked = {},
+            onUndoDeleteClicked = {},
             onSettingsClicked = {},
         )
     }

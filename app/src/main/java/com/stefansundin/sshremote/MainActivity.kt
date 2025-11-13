@@ -263,7 +263,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             is SshKeyEvent.ExportPublicKey -> {
-                                fileToExport = event.filename to event.content
+                                fileToExport = event.filename to "${event.content}\n"
                                 fileSaverLauncher.launch(event.filename)
                             }
 
@@ -306,11 +306,8 @@ class MainActivity : ComponentActivity() {
                                     selectedServer = server.copy(id = 0, name = "Copy of ${server.name}")
                                     currentScreen = Screen.EDIT
                                 },
-                                onDeleteServerClicked = { server ->
-                                    sshServerViewModel.delete(
-                                        server,
-                                    )
-                                },
+                                onDeleteServerClicked = { server -> sshServerViewModel.delete(server) },
+                                onUndoDeleteClicked = { sshServerViewModel.undoDelete() },
                                 onSettingsClicked = {
                                     currentScreen = Screen.SETTINGS
                                 },
@@ -385,6 +382,8 @@ class MainActivity : ComponentActivity() {
                                 onShowPublicKey = { key -> sshKeyViewModel.showPublicKeyFor(key) },
                                 onExportPublicKey = { key -> sshKeyViewModel.exportPublicKeyFor(key) },
                                 onDeleteKey = { key -> sshKeyViewModel.delete(key) },
+                                onRenameKey = { key, newName -> sshKeyViewModel.rename(key, newName) },
+                                onUndoDeleteKey = { sshKeyViewModel.undoDelete() },
                             )
                         }
 

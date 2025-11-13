@@ -32,6 +32,10 @@ class SshKeyRepository(private val sshKeyDao: SshKeyDao) {
         sshKeyDao.insert(sshKey)
     }
 
+    suspend fun update(sshKey: SshKey) {
+        sshKeyDao.update(sshKey)
+    }
+
     suspend fun delete(sshKey: SshKey) {
         sshKeyDao.delete(sshKey)
     }

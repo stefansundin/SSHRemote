@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,6 +43,7 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -56,14 +59,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.CryptoManager
-import com.stefansundin.sshremote.data.sshserver.SshServer
 import com.stefansundin.sshremote.Validations
-import com.stefansundin.sshremote.data.sshkey.SshKey
+import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.decryptString
 import com.stefansundin.sshremote.data.encryptString
+import com.stefansundin.sshremote.data.sshkey.SshKey
+import com.stefansundin.sshremote.data.sshserver.SshServer
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import kotlin.collections.forEach
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,21 +76,23 @@ fun AddEditSshServerScreen(
     onNavigateUp: () -> Unit,
     cryptoManager: CryptoManager?, // null allowed for preview
 ) {
-    var name by remember { mutableStateOf(server?.name ?: "") }
-    var host by remember { mutableStateOf(server?.host ?: "") }
-    var port by remember { mutableStateOf(server?.port?.toString() ?: "22") }
-    var user by remember { mutableStateOf(server?.user ?: "") }
-    var password by remember {
-        val decryptedPassword = if (cryptoManager != null && server?.encryptedPassword != null) {
+    var name by remember(server) { mutableStateOf(server?.name ?: "") }
+    var host by remember(server) { mutableStateOf(server?.host ?: "") }
+    var port by remember(server) { mutableStateOf(server?.port?.toString() ?: "22") }
+    var user by remember(server) { mutableStateOf(server?.user ?: "") }
+    val initialPassword = remember(server, cryptoManager) {
+        if (cryptoManager != null && server?.encryptedPassword != null) {
             decryptString(server.encryptedPassword, cryptoManager)
         } else {
             ""
         }
-        mutableStateOf(decryptedPassword)
     }
-    var selectedSshKeyIds by remember { mutableStateOf(server?.sshKeyIds) }
+    var password by remember(initialPassword) { mutableStateOf(initialPassword) }
+    var selectedSshKeyIds by remember(server, sshKeys) {
+        mutableStateOf(server?.sshKeyIds?.filter { id -> sshKeys.any { it.id == id } })
+    }
     var sshKeyDropdownExpanded by remember { mutableStateOf(false) }
-    var knownHosts by remember { mutableStateOf(server?.knownHosts ?: emptyList()) }
+    var knownHosts by remember(server) { mutableStateOf(server?.knownHosts ?: emptyList()) }
 
     var passwordVisible by remember { mutableStateOf(false) }
     var hasBeenSubmitted by remember { mutableStateOf(false) }
@@ -103,12 +107,93 @@ fun AddEditSshServerScreen(
         derivedStateOf { isNameValid && isHostValid && isUserValid && isPortValid }
     }
 
+    val hasUnsavedChanges = (name != (server?.name ?: "")) ||
+            (host != (server?.host ?: "")) ||
+            (port != (server?.port?.toString() ?: "22")) ||
+            (user != (server?.user ?: "")) ||
+            (password != initialPassword) ||
+            (selectedSshKeyIds != server?.sshKeyIds) ||
+            (knownHosts != (server?.knownHosts ?: emptyList<String>()))
+
+    var showSaveDialog by remember { mutableStateOf(false) }
+
+    fun handleSave() {
+        onSubmit()
+        if (isFormValid) {
+            val encryptedPassword =
+                if (cryptoManager != null && password.isNotEmpty()) {
+                    encryptString(password, cryptoManager)
+                } else null
+
+            val serverToSave = SshServer(
+                id = server?.id ?: 0,
+                name = name,
+                host = host,
+                port = port.toInt(),
+                user = user,
+                encryptedPassword = encryptedPassword,
+                sshKeyIds = selectedSshKeyIds,
+                knownHosts = knownHosts,
+            )
+            onServerSaved(serverToSave)
+        }
+    }
+
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text("Unsaved changes") },
+            text = { Text("Do you want to save the server before leaving?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        handleSave()
+                        if (isFormValid) {
+                            onNavigateUp()
+                        } else {
+                            showSaveDialog = false
+                        }
+                    },
+                ) {
+                    if (isFormValid) {
+                        Text("Save and leave")
+                    } else {
+                        Text("Stay")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onNavigateUp) {
+                    Text("Discard and leave")
+                }
+            },
+        )
+    }
+
+    BackHandler(enabled = hasUnsavedChanges) {
+        showSaveDialog = true
+    }
+
+    val title = when {
+        server == null -> "Add Host"
+        server.id == 0 -> "Clone Host"
+        else -> "Edit Host"
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (server == null) "Add Host" else "Edit Host") },
+                title = { Text(title) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
+                    IconButton(
+                        onClick = {
+                            if (hasUnsavedChanges) {
+                                showSaveDialog = true
+                            } else {
+                                onNavigateUp()
+                            }
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Cancel",
@@ -118,25 +203,7 @@ fun AddEditSshServerScreen(
                 actions = {
                     Button(
                         onClick = {
-                            onSubmit()
-                            if (isFormValid) {
-                                val encryptedPassword =
-                                    if (cryptoManager != null && password.isNotEmpty()) {
-                                        encryptString(password, cryptoManager)
-                                    } else null
-
-                                val serverToSave = SshServer(
-                                    id = server?.id ?: 0,
-                                    name = name,
-                                    host = host,
-                                    port = port.toInt(),
-                                    user = user,
-                                    encryptedPassword = encryptedPassword,
-                                    sshKeyIds = selectedSshKeyIds,
-                                    knownHosts = knownHosts,
-                                )
-                                onServerSaved(serverToSave)
-                            }
+                            handleSave()
                         },
                     ) {
                         Text("Save")
@@ -348,6 +415,21 @@ fun AddSshServerScreenPreview() {
 fun EditSshServerScreenPreview() {
     SSHRemoteTheme {
         val sampleServer = SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
+        AddEditSshServerScreen(
+            server = sampleServer,
+            onServerSaved = {},
+            onNavigateUp = {},
+            sshKeys = emptyList(),
+            cryptoManager = null,
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Clone Host Preview")
+@Composable
+fun CloneSshServerScreenPreview() {
+    SSHRemoteTheme {
+        val sampleServer = SshServer(0, "Copy of Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
         AddEditSshServerScreen(
             server = sampleServer,
             onServerSaved = {},

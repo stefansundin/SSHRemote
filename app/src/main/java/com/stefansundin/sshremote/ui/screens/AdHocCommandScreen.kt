@@ -39,6 +39,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -96,7 +97,7 @@ fun AdHocCommandScreen(
                             onDismissRequest = { showMenu = false },
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Clear history") },
+                                text = { Text("Clear history", color = MaterialTheme.colorScheme.error) },
                                 onClick = {
                                     onClearHistory()
                                     showMenu = false
@@ -135,7 +136,7 @@ fun AdHocCommandScreen(
                             onDismissRequest = { showContextMenuFor = null },
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Delete") },
+                                text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                                 onClick = {
                                     onDeleteCommand(command)
                                     showContextMenuFor = null
@@ -176,8 +177,8 @@ fun AdHocCommandScreen(
                     contentDescription = "Execute",
                     modifier = Modifier.combinedClickable(
                         onClick = executeAndStay,
-                        onLongClick = executeAndGoBack
-                    )
+                        onLongClick = executeAndGoBack,
+                    ),
                 )
             }
         }

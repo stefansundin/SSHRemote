@@ -54,6 +54,8 @@ class SshServerViewModel(
     private var currentServer: SshServer? = null
     private var serverStateJob: Job? = null
 
+    private var lastDeletedServer: SshServer? = null
+
     val allServers: StateFlow<List<SshServer>> = repository.getAllServers()
         .stateIn(
             scope = viewModelScope,
@@ -66,7 +68,12 @@ class SshServerViewModel(
     }
 
     fun delete(server: SshServer) = viewModelScope.launch {
+        lastDeletedServer = server
         repository.delete(server)
+    }
+
+    fun undoDelete() = viewModelScope.launch {
+        lastDeletedServer?.let { repository.upsert(it) }
     }
 
     fun setActiveServer(server: SshServer) {
@@ -96,8 +103,8 @@ class SshServerViewModel(
             }
             try {
                 val sshKeys = server.sshKeyIds?.map { id ->
-                    async { sshKeyRepository.getKeyById(id).filterNotNull().first() }
-                }?.awaitAll() ?: sshKeyRepository.getAllKeys().first()
+                    async { sshKeyRepository.getKeyById(id).first() }
+                }?.awaitAll()?.filterNotNull() ?: sshKeyRepository.getAllKeys().first()
 
                 val privateKeys = sshKeys.map { key ->
                     cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8)

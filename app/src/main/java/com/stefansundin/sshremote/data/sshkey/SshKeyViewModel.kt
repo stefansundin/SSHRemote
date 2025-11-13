@@ -40,6 +40,7 @@ import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 import java.security.KeyPairGenerator
 import java.security.Security
+import kotlin.concurrent.atomics.update
 
 class SshKeyViewModel(
     private val sshKeyRepository: SshKeyRepository,
@@ -49,6 +50,8 @@ class SshKeyViewModel(
 
     private val _eventChannel = Channel<SshKeyEvent>()
     val eventFlow = _eventChannel.receiveAsFlow()
+
+    private var lastDeletedKey: SshKey? = null
 
     val sshKeys: StateFlow<List<SshKey>> = sshKeyRepository.getAllKeys()
         .stateIn(
@@ -166,13 +169,30 @@ class SshKeyViewModel(
         return Pair(privateKeyPem, publicKeyString)
     }
 
+    fun rename(sshKey: SshKey, newName: String) {
+        viewModelScope.launch {
+            try {
+                sshKeyRepository.update(sshKey.copy(name = newName))
+            } catch (e: Exception) {
+                _eventChannel.send(SshKeyEvent.Error("Failed to rename key: ${e.message}"))
+            }
+        }
+    }
+
     fun delete(sshKey: SshKey) {
         viewModelScope.launch {
             try {
+                lastDeletedKey = sshKey
                 sshKeyRepository.delete(sshKey)
             } catch (_: Exception) {
                 _eventChannel.send(SshKeyEvent.Error("Failed to delete the key."))
             }
+        }
+    }
+
+    fun undoDelete() {
+        viewModelScope.launch {
+            lastDeletedKey?.let { sshKeyRepository.insert(it) }
         }
     }
 
@@ -205,7 +225,7 @@ class SshKeyViewModel(
         val privateKey = cryptoManager.decrypt(sshKey.encryptedPrivateKey)
         val keypair = KeyPair.load(JSch(), privateKey, null)
         val outputStream = ByteArrayOutputStream()
-        val comment = keypair.publicKeyComment.ifEmpty { sshKey.name }
+        val comment = sshKey.name.ifEmpty { keypair.publicKeyComment }
         keypair.writePublicKey(outputStream, comment)
         val publicKeyString = outputStream.toString(Charsets.UTF_8.name())
         keypair.dispose()

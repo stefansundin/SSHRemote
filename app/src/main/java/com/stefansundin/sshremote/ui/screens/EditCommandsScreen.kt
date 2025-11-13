@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,19 +37,26 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.sshserver.Command
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,13 +68,54 @@ fun EditCommandsScreen(
     var editingCommands by remember { mutableStateOf(commands) }
     var showDialog by remember { mutableStateOf(false) }
     var editingCommand by remember { mutableStateOf<Command?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val hasUnsavedChanges = editingCommands != commands
+    var showUnsavedDialog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = hasUnsavedChanges) {
+        showUnsavedDialog = true
+    }
+
+    if (showUnsavedDialog) {
+        AlertDialog(
+            onDismissRequest = { showUnsavedDialog = false },
+            title = { Text("Unsaved changes") },
+            text = { Text("Do you want to save your changes before leaving?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onSave(editingCommands)
+                        onNavigateBack()
+                    },
+                ) {
+                    Text("Save and leave")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onNavigateBack) {
+                    Text("Discard and leave")
+                }
+            },
+        )
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Edit Commands") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(
+                        onClick = {
+                            if (hasUnsavedChanges) {
+                                showUnsavedDialog = true
+                            } else {
+                                onNavigateBack()
+                            }
+                        },
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -74,26 +123,54 @@ fun EditCommandsScreen(
                     IconButton(onClick = { showDialog = true }) {
                         Icon(Icons.Default.Add, contentDescription = "Add command")
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.padding(padding).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(editingCommands) { command ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(text = "${command.name}: ${command.command}", modifier = Modifier.weight(1f))
-                    IconButton(onClick = { editingCommand = command; showDialog = true }) {
+                    IconButton(
+                        onClick = {
+                            editingCommand = command
+                            showDialog = true
+                        },
+                    ) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit command")
                     }
-                    IconButton(onClick = { editingCommands = editingCommands.filter { it != command } }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete command")
+                    IconButton(
+                        onClick = {
+                            val deletedCommandIndex = editingCommands.indexOf(command)
+                            editingCommands = editingCommands.filter { it != command }
+                            snackbarHostState.currentSnackbarData?.dismiss()
+                            scope.launch {
+                                val result = snackbarHostState.showSnackbar(
+                                    message = "Command deleted",
+                                    actionLabel = "Undo",
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    val currentCommands = editingCommands.toMutableList()
+                                    currentCommands.add(deletedCommandIndex, command)
+                                    editingCommands = currentCommands
+                                }
+                            }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete command",
+                            tint = MaterialTheme.colorScheme.error,
+                        )
                     }
                 }
             }
@@ -108,7 +185,10 @@ fun EditCommandsScreen(
     if (showDialog) {
         CommandDialog(
             command = editingCommand,
-            onDismiss = { showDialog = false; editingCommand = null },
+            onDismiss = {
+                showDialog = false
+                editingCommand = null
+            },
             onSave = { command ->
                 editingCommands = if (editingCommand != null) {
                     editingCommands.map { if (it == editingCommand) command else it }
@@ -117,7 +197,7 @@ fun EditCommandsScreen(
                 }
                 showDialog = false
                 editingCommand = null
-            }
+            },
         )
     }
 }
@@ -126,7 +206,7 @@ fun EditCommandsScreen(
 fun CommandDialog(
     command: Command?,
     onDismiss: () -> Unit,
-    onSave: (Command) -> Unit
+    onSave: (Command) -> Unit,
 ) {
     var name by remember { mutableStateOf(command?.name ?: "") }
     var commandText by remember { mutableStateOf(command?.command ?: "") }
@@ -148,7 +228,7 @@ fun CommandDialog(
         confirmButton = {
             Button(
                 onClick = { onSave(Command(name, commandText, showOutput)) },
-                enabled = name.isNotBlank() && commandText.isNotBlank()
+                enabled = name.isNotBlank() && commandText.isNotBlank(),
             ) {
                 Text("Save")
             }
@@ -157,6 +237,6 @@ fun CommandDialog(
             Button(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
+        },
     )
 }
