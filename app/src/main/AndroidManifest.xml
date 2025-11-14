@@ -35,7 +35,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.SSHRemote">
+            android:theme="@style/Theme.SSHRemote"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
