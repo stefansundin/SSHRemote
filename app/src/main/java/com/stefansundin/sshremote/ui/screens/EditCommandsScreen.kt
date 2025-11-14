@@ -216,7 +216,7 @@ fun CommandDialog(
         title = { Text(if (command == null) "Add Command" else "Edit Command") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
+                TextField(value = name, onValueChange = { name = it }, label = { Text("Name (optional)") })
                 TextField(value = commandText, onValueChange = { commandText = it }, label = { Text("Command") })
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = showOutput, onCheckedChange = { showOutput = it })
@@ -226,8 +226,8 @@ fun CommandDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onSave(Command(name, commandText, showOutput)) },
-                enabled = name.isNotBlank() && commandText.isNotBlank(),
+                onClick = { onSave(Command(name.ifBlank { commandText }, commandText, showOutput)) },
+                enabled = commandText.isNotBlank(),
             ) {
                 Text("Save")
             }
