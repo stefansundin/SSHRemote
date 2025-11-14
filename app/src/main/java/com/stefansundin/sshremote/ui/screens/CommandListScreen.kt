@@ -52,14 +52,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.sshserver.Command
-import com.stefansundin.sshremote.data.sshserver.ConnectionStatus
-import com.stefansundin.sshremote.data.sshserver.SshTerminalUiState
+import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.ConnectionStatus
+import com.stefansundin.sshremote.data.host.RemoteUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SshTerminalScreen(
-    uiState: SshTerminalUiState,
+fun CommandListScreen(
+    uiState: RemoteUiState,
     onRunCommand: (Command) -> Unit,
     onDisconnect: () -> Unit,
     onEditCommands: () -> Unit,
@@ -85,7 +85,7 @@ fun SshTerminalScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(uiState.serverName ?: "SSH Terminal") },
+                title = { Text(uiState.hostName ?: "Remote") },
                 navigationIcon = {
                     IconButton(onClick = onDisconnect) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")

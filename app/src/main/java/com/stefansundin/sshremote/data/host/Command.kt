@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshserver
+package com.stefansundin.sshremote.data.host
 
 data class Command(
     val name: String,

@@ -19,14 +19,14 @@
 package com.stefansundin.sshremote.data.settings
 
 import com.stefansundin.sshremote.Theme
-import com.stefansundin.sshremote.data.sshserver.Command
+import com.stefansundin.sshremote.data.host.Command
 
-data class ExportedSshServer(
+data class ExportedHost(
     val name: String,
-    val host: String,
+    val hostname: String,
     val port: Int,
     val user: String,
-    val allowSshKeys: Boolean,
+    val allowIdentities: Boolean,
     val knownHosts: List<String>,
     val commands: List<Command>,
 )
@@ -39,6 +39,6 @@ data class ExportedAdHocCommand(
 data class ExportedSettings(
     val theme: Theme?,
     val strictHostKeyChecking: Boolean?,
-    val sshServers: List<ExportedSshServer>?,
+    val hosts: List<ExportedHost>?,
     val adHocCommands: List<ExportedAdHocCommand>?,
 )

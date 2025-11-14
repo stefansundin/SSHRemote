@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshserver
+package com.stefansundin.sshremote.data.identity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.stefansundin.sshremote.data.CryptoManager
 
-@Entity(tableName = "ssh_servers")
-data class SshServer(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val name: String,
-    val host: String,
-    val port: Int,
-    val user: String,
-    val encryptedPassword: String?,
-    val sshKeyIds: List<Int>? = null,
-    val knownHosts: List<String> = emptyList(),
-    val commands: List<Command> = listOf(Command("Uptime", "uptime", true)),
-)
+class IdentityViewModelFactory(
+    private val identityRepository: IdentityRepository,
+    private val cryptoManager: CryptoManager,
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(IdentityViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return IdentityViewModel(identityRepository, cryptoManager) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}

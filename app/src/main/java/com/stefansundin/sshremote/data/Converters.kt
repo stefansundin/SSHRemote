@@ -21,7 +21,7 @@ package com.stefansundin.sshremote.data
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.stefansundin.sshremote.data.sshserver.Command
+import com.stefansundin.sshremote.data.host.Command
 import java.time.OffsetDateTime
 
 class Converters {

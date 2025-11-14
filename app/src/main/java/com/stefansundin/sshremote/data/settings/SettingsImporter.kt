@@ -24,8 +24,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
-import com.stefansundin.sshremote.data.sshserver.SshServer
-import com.stefansundin.sshremote.data.sshserver.SshServerRepository
+import com.stefansundin.sshremote.data.host.Host
+import com.stefansundin.sshremote.data.host.HostRepository
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
 
@@ -34,7 +34,7 @@ class ImportException(message: String) : Exception(message)
 class SettingsImporter(
     private val context: Context,
     private val settingsRepository: SettingsRepository,
-    private val sshServerRepository: SshServerRepository,
+    private val hostRepository: HostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
 
@@ -47,7 +47,7 @@ class SettingsImporter(
             val settings: ExportedSettings = Gson().fromJson(json, ExportedSettings::class.java)
                 ?: throw ImportException("Not a valid JSON file")
 
-            if (settings.sshServers == null) {
+            if (settings.hosts == null) {
                 throw ImportException("Invalid file format")
             }
 
@@ -59,22 +59,22 @@ class SettingsImporter(
             }
 
             if (!merge) {
-                sshServerRepository.deleteAll()
+                hostRepository.deleteAll()
                 adHocCommandRepository.clear()
             }
 
-            settings.sshServers.forEach { exportedServer ->
-                val server = SshServer(
-                    name = exportedServer.name,
-                    host = exportedServer.host,
-                    port = exportedServer.port,
-                    user = exportedServer.user,
+            settings.hosts.forEach { exportedHost ->
+                val host = Host(
+                    name = exportedHost.name,
+                    hostname = exportedHost.hostname,
+                    port = exportedHost.port,
+                    user = exportedHost.user,
                     encryptedPassword = null,
-                    sshKeyIds = if (exportedServer.allowSshKeys) null else emptyList(),
-                    knownHosts = exportedServer.knownHosts,
-                    commands = exportedServer.commands,
+                    identityIds = if (exportedHost.allowIdentities) null else emptyList(),
+                    knownHosts = exportedHost.knownHosts,
+                    commands = exportedHost.commands,
                 )
-                sshServerRepository.upsert(server)
+                hostRepository.upsert(host)
             }
 
             settings.adHocCommands?.forEach { exportedAdHocCommand ->
@@ -89,7 +89,7 @@ class SettingsImporter(
                 }
             }
 
-            return settings.sshServers.size
+            return settings.hosts.size
         } catch (e: ImportException) {
             throw e
         } catch (_: JsonSyntaxException) {

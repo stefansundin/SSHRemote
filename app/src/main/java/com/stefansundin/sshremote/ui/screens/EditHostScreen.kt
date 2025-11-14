@@ -63,43 +63,43 @@ import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.decryptString
 import com.stefansundin.sshremote.data.encryptString
-import com.stefansundin.sshremote.data.sshkey.SshKey
-import com.stefansundin.sshremote.data.sshserver.SshServer
+import com.stefansundin.sshremote.data.identity.Identity
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEditSshServerScreen(
-    server: SshServer?,
-    sshKeys: List<SshKey>,
-    onServerSaved: (SshServer) -> Unit,
+fun EditHostScreen(
+    host: Host?,
+    identities: List<Identity>,
+    onSave: (Host) -> Unit,
     onNavigateUp: () -> Unit,
     cryptoManager: CryptoManager?, // null allowed for preview
 ) {
-    var name by remember(server) { mutableStateOf(server?.name ?: "") }
-    var host by remember(server) { mutableStateOf(server?.host ?: "") }
-    var port by remember(server) { mutableStateOf(server?.port?.toString() ?: "22") }
-    var user by remember(server) { mutableStateOf(server?.user ?: "") }
-    val initialPassword = remember(server, cryptoManager) {
-        if (cryptoManager != null && server?.encryptedPassword != null) {
-            decryptString(server.encryptedPassword, cryptoManager)
+    var name by remember(host) { mutableStateOf(host?.name ?: "") }
+    var hostname by remember(host) { mutableStateOf(host?.hostname ?: "") }
+    var port by remember(host) { mutableStateOf(host?.port?.toString() ?: "22") }
+    var user by remember(host) { mutableStateOf(host?.user ?: "") }
+    val initialPassword = remember(host, cryptoManager) {
+        if (cryptoManager != null && host?.encryptedPassword != null) {
+            decryptString(host.encryptedPassword, cryptoManager)
         } else {
             ""
         }
     }
     var password by remember(initialPassword) { mutableStateOf(initialPassword) }
-    var selectedSshKeyIds by remember(server, sshKeys) {
-        mutableStateOf(server?.sshKeyIds?.filter { id -> sshKeys.any { it.id == id } })
+    var selectedIdentityIds by remember(host, identities) {
+        mutableStateOf(host?.identityIds?.filter { id -> identities.any { it.id == id } })
     }
-    var sshKeyDropdownExpanded by remember { mutableStateOf(false) }
-    var knownHosts by remember(server) { mutableStateOf(server?.knownHosts ?: emptyList()) }
+    var identityDropdownExpanded by remember { mutableStateOf(false) }
+    var knownHosts by remember(host) { mutableStateOf(host?.knownHosts ?: emptyList()) }
 
     var passwordVisible by remember { mutableStateOf(false) }
     var hasBeenSubmitted by remember { mutableStateOf(false) }
     val onSubmit = { hasBeenSubmitted = true }
 
     val isNameValid by remember(name) { derivedStateOf { Validations.validateName(name) } }
-    val isHostValid by remember(host) { derivedStateOf { Validations.validateHost(host) } }
+    val isHostValid by remember(hostname) { derivedStateOf { Validations.validateHost(hostname) } }
     val isUserValid by remember(user) { derivedStateOf { Validations.validateUser(user) } }
     val isPortValid by remember(port) { derivedStateOf { Validations.validatePort(port) } }
 
@@ -107,13 +107,13 @@ fun AddEditSshServerScreen(
         derivedStateOf { isNameValid && isHostValid && isUserValid && isPortValid }
     }
 
-    val hasUnsavedChanges = (name != (server?.name ?: "")) ||
-            (host != (server?.host ?: "")) ||
-            (port != (server?.port?.toString() ?: "22")) ||
-            (user != (server?.user ?: "")) ||
+    val hasUnsavedChanges = (name != (host?.name ?: "")) ||
+            (hostname != (host?.hostname ?: "")) ||
+            (port != (host?.port?.toString() ?: "22")) ||
+            (user != (host?.user ?: "")) ||
             (password != initialPassword) ||
-            (selectedSshKeyIds != server?.sshKeyIds) ||
-            (knownHosts != (server?.knownHosts ?: emptyList<String>()))
+            (selectedIdentityIds != host?.identityIds) ||
+            (knownHosts != (host?.knownHosts ?: emptyList<String>()))
 
     var showSaveDialog by remember { mutableStateOf(false) }
 
@@ -125,17 +125,17 @@ fun AddEditSshServerScreen(
                     encryptString(password, cryptoManager)
                 } else null
 
-            val serverToSave = SshServer(
-                id = server?.id ?: 0,
+            val hostToSave = Host(
+                id = host?.id ?: 0,
                 name = name,
-                host = host,
+                hostname = hostname,
                 port = port.toInt(),
                 user = user,
                 encryptedPassword = encryptedPassword,
-                sshKeyIds = selectedSshKeyIds,
+                identityIds = selectedIdentityIds,
                 knownHosts = knownHosts,
             )
-            onServerSaved(serverToSave)
+            onSave(hostToSave)
         }
     }
 
@@ -143,7 +143,7 @@ fun AddEditSshServerScreen(
         AlertDialog(
             onDismissRequest = { showSaveDialog = false },
             title = { Text("Unsaved changes") },
-            text = { Text("Do you want to save the server before leaving?") },
+            text = { Text("Do you want to save the host before leaving?") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -175,8 +175,8 @@ fun AddEditSshServerScreen(
     }
 
     val title = when {
-        server == null -> "Add Host"
-        server.id == 0 -> "Clone Host"
+        host == null -> "Add Host"
+        host.id == 0 -> "Clone Host"
         else -> "Edit Host"
     }
 
@@ -240,14 +240,14 @@ fun AddEditSshServerScreen(
                 ),
             )
 
-            // HOST FIELD
+            // HOSTNAME FIELD
             OutlinedTextField(
-                value = host,
-                onValueChange = { newHost ->
+                value = hostname,
+                onValueChange = { newHostname ->
                     // Disallow spaces and newlines
-                    host = newHost.replace(" ", "").replace("\n", "").take(255)
+                    hostname = newHostname.replace(" ", "").replace("\n", "").take(255)
                 },
-                label = { Text("Host") },
+                label = { Text("Hostname or IP") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = hasBeenSubmitted && !isHostValid,
                 singleLine = true,
@@ -321,51 +321,51 @@ fun AddEditSshServerScreen(
 
             // SSH KEY SELECTION DROPDOWN
             ExposedDropdownMenuBox(
-                expanded = sshKeyDropdownExpanded,
-                onExpandedChange = { sshKeyDropdownExpanded = !sshKeyDropdownExpanded },
+                expanded = identityDropdownExpanded,
+                onExpandedChange = { identityDropdownExpanded = !identityDropdownExpanded },
             ) {
                 OutlinedTextField(
                     readOnly = true,
-                    value = if (selectedSshKeyIds == null) {
+                    value = if (selectedIdentityIds == null) {
                         "Use any key"
-                    } else if (selectedSshKeyIds!!.isEmpty()) {
+                    } else if (selectedIdentityIds!!.isEmpty()) {
                         "Do not use keys"
-                    } else sshKeys.filter { selectedSshKeyIds!!.contains(it.id) }
+                    } else identities.filter { selectedIdentityIds!!.contains(it.id) }
                         .joinToString(", ") { it.name },
                     onValueChange = { },
                     label = { Text("SSH Key") },
                     trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sshKeyDropdownExpanded)
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = identityDropdownExpanded)
                     },
                     modifier = Modifier
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                         .fillMaxWidth(),
                 )
                 ExposedDropdownMenu(
-                    expanded = sshKeyDropdownExpanded,
-                    onDismissRequest = { sshKeyDropdownExpanded = false },
+                    expanded = identityDropdownExpanded,
+                    onDismissRequest = { identityDropdownExpanded = false },
                 ) {
                     DropdownMenuItem(
                         text = { Text("Use any key") },
                         onClick = {
-                            selectedSshKeyIds = null
-                            sshKeyDropdownExpanded = false
+                            selectedIdentityIds = null
+                            identityDropdownExpanded = false
                         },
                     )
                     DropdownMenuItem(
                         text = { Text("Do not use keys") },
                         onClick = {
-                            selectedSshKeyIds = listOf()
-                            sshKeyDropdownExpanded = false
+                            selectedIdentityIds = listOf()
+                            identityDropdownExpanded = false
                         },
                     )
-                    sshKeys.forEach { key ->
+                    identities.forEach { key ->
                         DropdownMenuItem(
                             text = { Text(key.name) },
                             onClick = {
                                 // Later this might support multiple key assignments
-                                selectedSshKeyIds = listOf(key.id)
-                                sshKeyDropdownExpanded = false
+                                selectedIdentityIds = listOf(key.id)
+                                identityDropdownExpanded = false
                             },
                         )
                     }
@@ -373,7 +373,7 @@ fun AddEditSshServerScreen(
             }
 
             // KNOWN HOSTS MANAGEMENT
-            if (server != null) {
+            if (host != null) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -398,13 +398,13 @@ fun AddEditSshServerScreen(
 
 @Preview(showBackground = true, name = "Add Host Preview")
 @Composable
-fun AddSshServerScreenPreview() {
+fun AddHostScreenPreview() {
     SSHRemoteTheme {
-        AddEditSshServerScreen(
-            server = null,
-            onServerSaved = {},
+        EditHostScreen(
+            host = null,
+            onSave = {},
             onNavigateUp = {},
-            sshKeys = emptyList(),
+            identities = emptyList(),
             cryptoManager = null,
         )
     }
@@ -412,14 +412,14 @@ fun AddSshServerScreenPreview() {
 
 @Preview(showBackground = true, name = "Edit Host Preview")
 @Composable
-fun EditSshServerScreenPreview() {
+fun EditHostScreenPreview() {
     SSHRemoteTheme {
-        val sampleServer = SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
-        AddEditSshServerScreen(
-            server = sampleServer,
-            onServerSaved = {},
+        val sampleHost = Host(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
+        EditHostScreen(
+            host = sampleHost,
+            onSave = {},
             onNavigateUp = {},
-            sshKeys = emptyList(),
+            identities = emptyList(),
             cryptoManager = null,
         )
     }
@@ -427,14 +427,14 @@ fun EditSshServerScreenPreview() {
 
 @Preview(showBackground = true, name = "Clone Host Preview")
 @Composable
-fun CloneSshServerScreenPreview() {
+fun CloneHostScreenPreview() {
     SSHRemoteTheme {
-        val sampleServer = SshServer(0, "Copy of Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
-        AddEditSshServerScreen(
-            server = sampleServer,
-            onServerSaved = {},
+        val sampleHost = Host(0, "Copy of Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
+        EditHostScreen(
+            host = sampleHost,
+            onSave = {},
             onNavigateUp = {},
-            sshKeys = emptyList(),
+            identities = emptyList(),
             cryptoManager = null,
         )
     }

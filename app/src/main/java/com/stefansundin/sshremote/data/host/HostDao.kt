@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshserver
+package com.stefansundin.sshremote.data.host
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -26,23 +26,23 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface SshServerDao {
+interface HostDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(server: SshServer)
+    suspend fun upsert(host: Host)
 
     @Delete
-    suspend fun delete(server: SshServer)
+    suspend fun delete(host: Host)
 
-    @Query("DELETE FROM ssh_servers")
+    @Query("DELETE FROM hosts")
     suspend fun deleteAll()
 
-    @Query("SELECT * FROM ssh_servers ORDER BY name ASC")
-    fun getAllServers(): Flow<List<SshServer>>
+    @Query("SELECT * FROM hosts ORDER BY name ASC")
+    fun getAll(): Flow<List<Host>>
 
-    @Query("SELECT * FROM ssh_servers WHERE id = :id")
-    fun getServerById(id: Int): Flow<SshServer?>
+    @Query("SELECT * FROM hosts WHERE id = :id")
+    fun get(id: Int): Flow<Host?>
 
-    @Query("SELECT * FROM ssh_servers WHERE id = :id")
-    suspend fun getServerByIdOnce(id: Int): SshServer?
+    @Query("SELECT * FROM hosts WHERE id = :id")
+    suspend fun getOnce(id: Int): Host?
 }

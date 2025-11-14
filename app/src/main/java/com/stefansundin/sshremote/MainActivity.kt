@@ -44,38 +44,38 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
+import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.Host
+import com.stefansundin.sshremote.data.host.HostViewModel
+import com.stefansundin.sshremote.data.host.HostViewModelFactory
+import com.stefansundin.sshremote.data.identity.IdentityEvent
+import com.stefansundin.sshremote.data.identity.IdentityViewModel
+import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
-import com.stefansundin.sshremote.data.sshkey.SshKeyEvent
-import com.stefansundin.sshremote.data.sshkey.SshKeyViewModel
-import com.stefansundin.sshremote.data.sshkey.SshKeyViewModelFactory
-import com.stefansundin.sshremote.data.sshserver.Command
-import com.stefansundin.sshremote.data.sshserver.SshServer
-import com.stefansundin.sshremote.data.sshserver.SshServerViewModel
-import com.stefansundin.sshremote.data.sshserver.SshServerViewModelFactory
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
-import com.stefansundin.sshremote.ui.screens.AddEditSshServerScreen
-import com.stefansundin.sshremote.ui.screens.AddSshKeyScreen
+import com.stefansundin.sshremote.ui.screens.AddIdentityScreen
+import com.stefansundin.sshremote.ui.screens.CommandListScreen
 import com.stefansundin.sshremote.ui.screens.EditCommandsScreen
+import com.stefansundin.sshremote.ui.screens.EditHostScreen
+import com.stefansundin.sshremote.ui.screens.HostScreen
+import com.stefansundin.sshremote.ui.screens.IdentityListScreen
 import com.stefansundin.sshremote.ui.screens.SettingsScreen
-import com.stefansundin.sshremote.ui.screens.SshKeysScreen
-import com.stefansundin.sshremote.ui.screens.SshServerScreen
-import com.stefansundin.sshremote.ui.screens.SshTerminalScreen
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 enum class Screen {
-    LIST,
-    EDIT,
-    TERMINAL,
-    SETTINGS,
-    SSH_KEYS,
-    ADD_SSH_KEY,
+    HOST_LIST,
+    HOST_EDIT,
+    COMMAND_LIST,
     EDIT_COMMANDS,
     AD_HOC_COMMAND,
+    SETTINGS,
+    IDENTITY_LIST,
+    ADD_IDENTITY,
 }
 
 enum class Theme {
@@ -92,11 +92,11 @@ class MainActivity : ComponentActivity() {
         SshRepository(app.settingsRepository)
     }
 
-    private val sshServerViewModel: SshServerViewModel by viewModels {
+    private val hostViewModel: HostViewModel by viewModels {
         val app = (application as SshRemoteApplication)
-        SshServerViewModelFactory(
-            app.sshServerRepository,
-            app.sshKeyRepository,
+        HostViewModelFactory(
+            app.hostRepository,
+            app.identityRepository,
             sshRepository,
             cryptoManager,
         )
@@ -104,13 +104,13 @@ class MainActivity : ComponentActivity() {
 
     private val settingsViewModel: SettingsViewModel by viewModels {
         val app = (application as SshRemoteApplication)
-        SettingsViewModelFactory(app.settingsRepository, app.sshServerRepository, app.adHocCommandRepository)
+        SettingsViewModelFactory(app.settingsRepository, app.hostRepository, app.adHocCommandRepository)
     }
 
-    private val sshKeyViewModel: SshKeyViewModel by viewModels {
+    private val identityViewModel: IdentityViewModel by viewModels {
         val app = (application as SshRemoteApplication)
-        SshKeyViewModelFactory(
-            app.sshKeyRepository,
+        IdentityViewModelFactory(
+            app.identityRepository,
             cryptoManager,
         )
     }
@@ -132,8 +132,8 @@ class MainActivity : ComponentActivity() {
             }
 
             SSHRemoteTheme(darkTheme = useDarkTheme) {
-                var selectedServer by remember { mutableStateOf<SshServer?>(null) }
-                var currentScreen by remember { mutableStateOf(Screen.LIST) }
+                var selectedHost by remember { mutableStateOf<Host?>(null) }
+                var currentScreen by remember { mutableStateOf(Screen.HOST_LIST) }
 
                 var showPublicKeyDialog by remember { mutableStateOf(false) }
                 var publicKeyToShow by remember { mutableStateOf("") }
@@ -246,28 +246,28 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                val uiState by sshServerViewModel.uiState.collectAsState()
+                val uiState by hostViewModel.uiState.collectAsState()
                 uiState.commandOutput?.let { output ->
                     CommandOutputDialog(
                         output = output,
-                        onDismiss = { sshServerViewModel.clearCommandOutput() },
+                        onDismiss = { hostViewModel.clearCommandOutput() },
                     )
                 }
 
                 LaunchedEffect(Unit) {
-                    sshKeyViewModel.eventFlow.collectLatest { event ->
+                    identityViewModel.eventFlow.collectLatest { event ->
                         when (event) {
-                            is SshKeyEvent.ShowPublicKey -> {
+                            is IdentityEvent.ShowPublicKey -> {
                                 publicKeyToShow = event.publicKey
                                 showPublicKeyDialog = true
                             }
 
-                            is SshKeyEvent.ExportPublicKey -> {
+                            is IdentityEvent.ExportPublicKey -> {
                                 fileToExport = event.filename to "${event.content}\n"
                                 fileSaverLauncher.launch(event.filename)
                             }
 
-                            is SshKeyEvent.Error -> {
+                            is IdentityEvent.Error -> {
                                 scope.launch { snackbarHostState.showSnackbar(event.message) }
                             }
                         }
@@ -285,65 +285,65 @@ class MainActivity : ComponentActivity() {
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                 ) { paddingValues ->
                     when (currentScreen) {
-                        Screen.LIST -> {
-                            val servers by sshServerViewModel.allServers.collectAsState()
-                            SshServerScreen(
-                                servers = servers,
-                                onConnectClicked = { server: SshServer ->
-                                    selectedServer = server
-                                    currentScreen = Screen.TERMINAL
-                                    sshServerViewModel.connectToServer(server)
+                        Screen.HOST_LIST -> {
+                            val hosts by hostViewModel.allHosts.collectAsState()
+                            HostScreen(
+                                hosts = hosts,
+                                onConnectClicked = { host: Host ->
+                                    selectedHost = host
+                                    currentScreen = Screen.COMMAND_LIST
+                                    hostViewModel.connect(host)
                                 },
-                                onAddServerClicked = {
-                                    selectedServer = null
-                                    currentScreen = Screen.EDIT
+                                onAddClicked = {
+                                    selectedHost = null
+                                    currentScreen = Screen.HOST_EDIT
                                 },
-                                onEditServerClicked = { server ->
-                                    selectedServer = server
-                                    currentScreen = Screen.EDIT
+                                onEditClicked = { host ->
+                                    selectedHost = host
+                                    currentScreen = Screen.HOST_EDIT
                                 },
-                                onCloneServerClicked = { server ->
-                                    selectedServer = server.copy(id = 0, name = "Copy of ${server.name}")
-                                    currentScreen = Screen.EDIT
+                                onCloneClicked = { host ->
+                                    selectedHost = host.copy(id = 0, name = "Copy of ${host.name}")
+                                    currentScreen = Screen.HOST_EDIT
                                 },
-                                onDeleteServerClicked = { server -> sshServerViewModel.delete(server) },
-                                onUndoDeleteClicked = { sshServerViewModel.undoDelete() },
+                                onDeleteClicked = { host -> hostViewModel.delete(host) },
+                                onUndoDeleteClicked = { hostViewModel.undoDelete() },
                                 onSettingsClicked = {
                                     currentScreen = Screen.SETTINGS
                                 },
                             )
                         }
 
-                        Screen.EDIT -> {
-                            val sshKeys by sshKeyViewModel.sshKeys.collectAsState()
-                            AddEditSshServerScreen(
-                                server = selectedServer,
-                                sshKeys = sshKeys,
-                                onServerSaved = { server ->
-                                    sshServerViewModel.upsert(server)
-                                    selectedServer = null
-                                    currentScreen = Screen.LIST
+                        Screen.HOST_EDIT -> {
+                            val identities by identityViewModel.identities.collectAsState()
+                            EditHostScreen(
+                                host = selectedHost,
+                                identities = identities,
+                                onSave = { host ->
+                                    hostViewModel.upsert(host)
+                                    selectedHost = null
+                                    currentScreen = Screen.HOST_LIST
                                 },
                                 onNavigateUp = {
-                                    selectedServer = null
-                                    currentScreen = Screen.LIST
+                                    selectedHost = null
+                                    currentScreen = Screen.HOST_LIST
                                 },
                                 cryptoManager = cryptoManager,
                             )
                         }
 
-                        Screen.TERMINAL -> {
-                            SshTerminalScreen(
+                        Screen.COMMAND_LIST -> {
+                            CommandListScreen(
                                 uiState = uiState,
-                                onRunCommand = { sshServerViewModel.runCommand(it) },
+                                onRunCommand = { hostViewModel.runCommand(it) },
                                 onDisconnect = {
-                                    sshServerViewModel.disconnect()
-                                    selectedServer = null
-                                    currentScreen = Screen.LIST
+                                    hostViewModel.disconnect()
+                                    selectedHost = null
+                                    currentScreen = Screen.HOST_LIST
                                 },
                                 onEditCommands = { currentScreen = Screen.EDIT_COMMANDS },
                                 onAdHocCommandClicked = { currentScreen = Screen.AD_HOC_COMMAND },
-                                onClearError = { sshServerViewModel.clearError() },
+                                onClearError = { hostViewModel.clearError() },
                             )
                         }
 
@@ -351,53 +351,12 @@ class MainActivity : ComponentActivity() {
                             EditCommandsScreen(
                                 commands = uiState.commands,
                                 onSave = {
-                                    selectedServer?.let { server ->
-                                        sshServerViewModel.upsert(server.copy(commands = it))
+                                    selectedHost?.let { host ->
+                                        hostViewModel.upsert(host.copy(commands = it))
                                     }
-                                    currentScreen = Screen.TERMINAL
+                                    currentScreen = Screen.COMMAND_LIST
                                 },
-                                onNavigateBack = { currentScreen = Screen.TERMINAL },
-                            )
-                        }
-
-                        Screen.SETTINGS -> {
-                            SettingsScreen(
-                                settingsViewModel = settingsViewModel,
-                                onNavigateToSshKeys = { currentScreen = Screen.SSH_KEYS },
-                                onNavigateUp = {
-                                    selectedServer = null
-                                    currentScreen = Screen.LIST
-                                },
-                            )
-                        }
-
-                        Screen.SSH_KEYS -> {
-                            SshKeysScreen(
-                                cryptoManager = cryptoManager,
-                                sshKeyViewModel = sshKeyViewModel,
-                                onNavigateToAddSshKey = { currentScreen = Screen.ADD_SSH_KEY },
-                                onNavigateUp = {
-                                    currentScreen = Screen.SETTINGS
-                                },
-                                onShowPublicKey = { key -> sshKeyViewModel.showPublicKeyFor(key) },
-                                onExportPublicKey = { key -> sshKeyViewModel.exportPublicKeyFor(key) },
-                                onDeleteKey = { key -> sshKeyViewModel.delete(key) },
-                                onRenameKey = { key, newName -> sshKeyViewModel.rename(key, newName) },
-                                onUndoDeleteKey = { sshKeyViewModel.undoDelete() },
-                            )
-                        }
-
-                        Screen.ADD_SSH_KEY -> {
-                            AddSshKeyScreen(
-                                onKeySaved = { name, privateKey ->
-                                    sshKeyViewModel.insert(name, privateKey)
-                                    currentScreen = Screen.SSH_KEYS
-                                },
-                                onKeyGenerated = { name, type, comment ->
-                                    sshKeyViewModel.generateAndInsert(name, type, comment)
-                                    currentScreen = Screen.SSH_KEYS
-                                },
-                                onNavigateUp = { currentScreen = Screen.SSH_KEYS },
+                                onNavigateBack = { currentScreen = Screen.COMMAND_LIST },
                             )
                         }
 
@@ -407,16 +366,58 @@ class MainActivity : ComponentActivity() {
                                 commands = adHocCommands,
                                 onExecuteCommand = { command, popUpToPrevious ->
                                     adHocCommandViewModel.addAdHocCommand(command)
-                                    sshServerViewModel.runCommand(Command(command, command, true))
+                                    hostViewModel.runCommand(Command(command, command, true))
                                     if (popUpToPrevious) {
-                                        currentScreen = Screen.TERMINAL
+                                        currentScreen = Screen.COMMAND_LIST
                                     }
                                 },
                                 onDeleteCommand = { adHocCommandViewModel.deleteAdHocCommand(it) },
                                 onClearHistory = { adHocCommandViewModel.clearAdHocCommands() },
-                                onNavigateUp = { currentScreen = Screen.TERMINAL },
+                                onNavigateUp = { currentScreen = Screen.COMMAND_LIST },
                             )
                         }
+
+                        Screen.SETTINGS -> {
+                            SettingsScreen(
+                                settingsViewModel = settingsViewModel,
+                                onNavigateToIdentityList = { currentScreen = Screen.IDENTITY_LIST },
+                                onNavigateUp = {
+                                    selectedHost = null
+                                    currentScreen = Screen.HOST_LIST
+                                },
+                            )
+                        }
+
+                        Screen.IDENTITY_LIST -> {
+                            IdentityListScreen(
+                                cryptoManager = cryptoManager,
+                                identityViewModel = identityViewModel,
+                                onNavigateToAddIdentity = { currentScreen = Screen.ADD_IDENTITY },
+                                onNavigateUp = {
+                                    currentScreen = Screen.SETTINGS
+                                },
+                                onShowPublicKey = { key -> identityViewModel.showPublicKeyFor(key) },
+                                onExportPublicKey = { key -> identityViewModel.exportPublicKeyFor(key) },
+                                onDelete = { key -> identityViewModel.delete(key) },
+                                onRename = { key, newName -> identityViewModel.rename(key, newName) },
+                                onUndoDelete = { identityViewModel.undoDelete() },
+                            )
+                        }
+
+                        Screen.ADD_IDENTITY -> {
+                            AddIdentityScreen(
+                                onKeySaved = { name, privateKey ->
+                                    identityViewModel.insert(name, privateKey)
+                                    currentScreen = Screen.IDENTITY_LIST
+                                },
+                                onKeyGenerated = { name, type, comment ->
+                                    identityViewModel.generateAndInsert(name, type, comment)
+                                    currentScreen = Screen.IDENTITY_LIST
+                                },
+                                onNavigateUp = { currentScreen = Screen.IDENTITY_LIST },
+                            )
+                        }
+
                     }
                 }
             }

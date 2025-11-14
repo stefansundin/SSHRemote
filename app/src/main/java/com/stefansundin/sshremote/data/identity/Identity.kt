@@ -16,27 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshkey
+package com.stefansundin.sshremote.data.identity
 
-import kotlinx.coroutines.flow.Flow
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.time.OffsetDateTime
 
-class SshKeyRepository(private val sshKeyDao: SshKeyDao) {
-
-    fun getAllKeys(): Flow<List<SshKey>> {
-        return sshKeyDao.getAllKeys()
-    }
-
-    fun getKeyById(id: Int): Flow<SshKey?> = sshKeyDao.getKeyById(id)
-
-    suspend fun insert(sshKey: SshKey) {
-        sshKeyDao.insert(sshKey)
-    }
-
-    suspend fun update(sshKey: SshKey) {
-        sshKeyDao.update(sshKey)
-    }
-
-    suspend fun delete(sshKey: SshKey) {
-        sshKeyDao.delete(sshKey)
-    }
-}
+/**
+ * An identity is a private/public key pair that can be used to authenticate to an SSH server.
+ *
+ * An identity is also known as an SSH key, which is the term used in the app UI.
+ */
+@Entity(tableName = "identities")
+data class Identity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),
+    val name: String,
+    val encryptedPrivateKey: ByteArray,
+)

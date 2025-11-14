@@ -23,7 +23,7 @@ import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import com.jcraft.jsch.UserInfo
 import com.stefansundin.sshremote.data.settings.SettingsRepository
-import com.stefansundin.sshremote.data.sshserver.SshServerConnectionDetails
+import com.stefansundin.sshremote.data.host.HostConnectionDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,22 +40,22 @@ sealed class Result {
 
 data class HostKeyVerification(
     val message: String,
-    val response: CompletableDeferred<Boolean>
+    val response: CompletableDeferred<Boolean>,
 )
 
 data class PasswordPrompt(
     val message: String,
-    val response: CompletableDeferred<String?>
+    val response: CompletableDeferred<String?>,
 )
 
 data class PassphrasePrompt(
     val message: String,
-    val response: CompletableDeferred<String?>
+    val response: CompletableDeferred<String?>,
 )
 
 data class Message(
     val message: String,
-    val response: CompletableDeferred<Unit>
+    val response: CompletableDeferred<Unit>,
 )
 
 /**
@@ -78,13 +78,13 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
     val passphrasePrompt = _passphrasePrompt.asStateFlow()
 
     /**
-     * Connects to an SSH server. This is a suspending function and must be called
+     * Connects to a host. This is a suspending function and must be called
      * from a coroutine, preferably on an IO dispatcher.
      *
-     * @param details The server details from the database.
+     * @param details The connection details from the database.
      * @throws Exception if connection fails.
      */
-    suspend fun connect(details: SshServerConnectionDetails): List<String> {
+    suspend fun connect(details: HostConnectionDetails): List<String> {
         return withContext(Dispatchers.IO) {
             if (session?.isConnected == true) {
                 session?.disconnect()
@@ -103,7 +103,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 jsch.addIdentity("privateKey-$index", key.toByteArray(), null, null)
             }
 
-            session = jsch.getSession(details.user, details.host, details.port)
+            session = jsch.getSession(details.user, details.hostname, details.port)
 
             session?.userInfo = object : UserInfo {
                 var passwordPromptMessage: String? = null
@@ -144,7 +144,8 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
 
                 override fun getPassphrase(): String? {
                     val deferred = CompletableDeferred<String?>()
-                    _passphrasePrompt.value = PassphrasePrompt(passphrasePromptMessage ?: "Enter passphrase for private key", deferred)
+                    _passphrasePrompt.value =
+                        PassphrasePrompt(passphrasePromptMessage ?: "Enter passphrase for private key", deferred)
                     val result = kotlinx.coroutines.runBlocking { deferred.await() }
                     _passphrasePrompt.value = null
                     if (result == null) {
@@ -205,7 +206,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
             val session = session
 
             if (session == null || !session.isConnected) {
-                return@withContext Result.Error("SSH session is not active or target server mismatch. Please reconnect.")
+                return@withContext Result.Error("SSH session is not active. Please reconnect.")
             }
 
             var channel: ChannelExec? = null

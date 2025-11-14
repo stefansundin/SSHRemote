@@ -53,20 +53,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.SettingsEvent
-import com.stefansundin.sshremote.data.settings.SettingsRepository
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
-import com.stefansundin.sshremote.data.sshserver.SshServer
-import com.stefansundin.sshremote.data.sshserver.SshServerDao
-import com.stefansundin.sshremote.data.sshserver.SshServerRepository
 import com.stefansundin.sshremote.ui.components.ThemeSettingDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -77,7 +69,7 @@ import java.util.Locale
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     onNavigateUp: () -> Unit,
-    onNavigateToSshKeys: () -> Unit,
+    onNavigateToIdentityList: () -> Unit,
 ) {
     val context = LocalContext.current
     val savedTheme by settingsViewModel.theme.collectAsState()
@@ -97,23 +89,24 @@ fun SettingsScreen(
             uri?.let {
                 settingsViewModel.exportSettings(context, uri)
             }
-        }
+        },
     )
 
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri ->
             uri?.let { importUri = it }
-        }
+        },
     )
 
     LaunchedEffect(Unit) {
         settingsViewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is SettingsEvent.ImportSuccess -> {
-                    val message = "Successfully imported ${event.count} servers."
+                    val message = "Successfully imported ${event.count} hosts."
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
+
                 is SettingsEvent.ImportError -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
@@ -125,14 +118,14 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { importUri = null },
             title = { Text("Import settings") },
-            text = { Text("Do you want to merge with existing servers or overwrite them? Overwriting will delete all current servers before importing.") },
+            text = { Text("Do you want to merge with existing hosts or overwrite them?") },
             confirmButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(
                         onClick = {
                             settingsViewModel.importSettings(context, uri, false)
                             importUri = null
-                        }
+                        },
                     ) {
                         Text("Overwrite")
                     }
@@ -140,7 +133,7 @@ fun SettingsScreen(
                         onClick = {
                             settingsViewModel.importSettings(context, uri, true)
                             importUri = null
-                        }
+                        },
                     ) {
                         Text("Merge")
                     }
@@ -148,7 +141,7 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { importUri = null }
+                    onClick = { importUri = null },
                 ) {
                     Text("Cancel")
                 }
@@ -231,7 +224,7 @@ fun SettingsScreen(
 
                 Column(
                     modifier = Modifier
-                        .clickable { onNavigateToSshKeys() }
+                        .clickable { onNavigateToIdentityList() }
                         .fillMaxWidth()
                         .padding(vertical = 12.dp, horizontal = 16.dp),
                 ) {

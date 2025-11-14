@@ -16,21 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshkey
+package com.stefansundin.sshremote.data.identity
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.stefansundin.sshremote.data.CryptoManager
+import kotlinx.coroutines.flow.Flow
 
-class SshKeyViewModelFactory(
-    private val sshKeyRepository: SshKeyRepository,
-    private val cryptoManager: CryptoManager,
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SshKeyViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return SshKeyViewModel(sshKeyRepository, cryptoManager) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+class IdentityRepository(private val identityDao: IdentityDao) {
+
+    fun getAll(): Flow<List<Identity>> {
+        return identityDao.getAll()
+    }
+
+    fun get(id: Int): Flow<Identity?> = identityDao.get(id)
+
+    suspend fun insert(identity: Identity) {
+        identityDao.insert(identity)
+    }
+
+    suspend fun update(identity: Identity) {
+        identityDao.update(identity)
+    }
+
+    suspend fun delete(identity: Identity) {
+        identityDao.delete(identity)
     }
 }

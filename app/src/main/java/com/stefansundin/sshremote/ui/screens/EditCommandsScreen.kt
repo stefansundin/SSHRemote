@@ -55,7 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.sshserver.Command
+import com.stefansundin.sshremote.data.host.Command
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

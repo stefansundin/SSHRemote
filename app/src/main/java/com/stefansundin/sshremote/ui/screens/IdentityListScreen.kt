@@ -29,7 +29,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -62,26 +61,26 @@ import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
 import com.stefansundin.sshremote.data.CryptoManager
-import com.stefansundin.sshremote.data.sshkey.SshKey
-import com.stefansundin.sshremote.data.sshkey.SshKeyViewModel
+import com.stefansundin.sshremote.data.identity.Identity
+import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SshKeysScreen(
-    sshKeyViewModel: SshKeyViewModel,
+fun IdentityListScreen(
+    identityViewModel: IdentityViewModel,
     cryptoManager: CryptoManager,
-    onNavigateToAddSshKey: () -> Unit,
+    onNavigateToAddIdentity: () -> Unit,
     onNavigateUp: () -> Unit,
-    onShowPublicKey: (SshKey) -> Unit,
-    onExportPublicKey: (SshKey) -> Unit,
-    onDeleteKey: (SshKey) -> Unit,
-    onRenameKey: (SshKey, String) -> Unit,
-    onUndoDeleteKey: () -> Unit,
+    onShowPublicKey: (Identity) -> Unit,
+    onExportPublicKey: (Identity) -> Unit,
+    onDelete: (Identity) -> Unit,
+    onRename: (Identity, String) -> Unit,
+    onUndoDelete: () -> Unit,
 ) {
-    val sshKeys by sshKeyViewModel.sshKeys.collectAsState()
+    val identities by identityViewModel.identities.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -101,7 +100,7 @@ fun SshKeysScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToAddSshKey) {
+            FloatingActionButton(onClick = onNavigateToAddIdentity) {
                 Icon(Icons.Default.Add, contentDescription = "Add SSH Key")
             }
         },
@@ -111,7 +110,7 @@ fun SshKeysScreen(
                 .padding(innerPadding)
                 .fillMaxSize(),
         ) {
-            if (sshKeys.isEmpty()) {
+            if (identities.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -126,14 +125,14 @@ fun SshKeysScreen(
                 }
             } else {
                 LazyColumn {
-                    items(sshKeys) { sshKey ->
-                        SshKeyItem(
-                            sshKey = sshKey,
+                    items(identities) { identity ->
+                        IdentityItem(
+                            identity = identity,
                             cryptoManager = cryptoManager,
-                            onShowPublicKey = { onShowPublicKey(sshKey) },
-                            onExportPublicKey = { onExportPublicKey(sshKey) },
+                            onShowPublicKey = { onShowPublicKey(identity) },
+                            onExportPublicKey = { onExportPublicKey(identity) },
                             onDelete = {
-                                onDeleteKey(sshKey)
+                                onDelete(identity)
                                 scope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     val result = snackbarHostState.showSnackbar(
@@ -141,11 +140,11 @@ fun SshKeysScreen(
                                         actionLabel = "Undo",
                                     )
                                     if (result == SnackbarResult.ActionPerformed) {
-                                        onUndoDeleteKey()
+                                        onUndoDelete()
                                     }
                                 }
                             },
-                            onRename = { newName -> onRenameKey(sshKey, newName) },
+                            onRename = { newName -> onRename(identity, newName) },
                         )
                     }
                 }
@@ -155,8 +154,8 @@ fun SshKeysScreen(
 }
 
 @Composable
-fun SshKeyItem(
-    sshKey: SshKey,
+fun IdentityItem(
+    identity: Identity,
     cryptoManager: CryptoManager,
     onShowPublicKey: () -> Unit,
     onExportPublicKey: () -> Unit,
@@ -165,19 +164,19 @@ fun SshKeyItem(
 ) {
     var isContextMenuVisible by remember { mutableStateOf(false) }
     var isRenameDialogVisible by remember { mutableStateOf(false) }
-    var newName by remember { mutableStateOf(sshKey.name) }
+    var newName by remember { mutableStateOf(identity.name) }
 
-    val privateKey = cryptoManager.decrypt(sshKey.encryptedPrivateKey)
+    val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
     val keypair = KeyPair.load(JSch(), privateKey, null)
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
-    val keyInfo = "${keypair.keyTypeString} - ${sshKey.createdAt.format(formatter)}"
+    val keyInfo = "${keypair.keyTypeString} - ${identity.createdAt.format(formatter)}"
     val isEncrypted = keypair.isEncrypted
     keypair.dispose()
 
     ListItem(
         headlineContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(sshKey.name)
+                Text(identity.name)
                 if (isEncrypted) {
                     Icon(
                         imageVector = Icons.Default.Lock,
@@ -251,7 +250,7 @@ fun SshKeyItem(
                         onRename(newName)
                         isRenameDialogVisible = false
                     },
-                    enabled = newName.isNotBlank()
+                    enabled = newName.isNotBlank(),
                 ) {
                     Text("Rename")
                 }
@@ -260,7 +259,7 @@ fun SshKeyItem(
                 TextButton(onClick = { isRenameDialogVisible = false }) {
                     Text("Cancel")
                 }
-            }
+            },
         )
     }
 }

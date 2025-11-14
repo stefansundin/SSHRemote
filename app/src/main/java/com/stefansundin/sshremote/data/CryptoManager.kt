@@ -49,13 +49,13 @@ class CryptoManager {
             init(
                 KeyGenParameterSpec.Builder(
                     "ssh_password_key",
-                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
                 )
                     .setBlockModes(BLOCK_MODE)
                     .setEncryptionPaddings(PADDING)
                     .setUserAuthenticationRequired(false)
                     .setRandomizedEncryptionRequired(true)
-                    .build()
+                    .build(),
             )
         }.generateKey()
     }

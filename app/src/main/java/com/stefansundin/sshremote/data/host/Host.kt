@@ -16,29 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshkey
+package com.stefansundin.sshremote.data.host
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
-import kotlinx.coroutines.flow.Flow
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@Dao
-interface SshKeyDao {
-    @Query("SELECT * FROM ssh_keys ORDER BY id DESC")
-    fun getAllKeys(): Flow<List<SshKey>>
-
-    @Query("SELECT * FROM ssh_keys WHERE id = :id")
-    fun getKeyById(id: Int): Flow<SshKey?>
-
-    @Insert
-    suspend fun insert(sshKey: SshKey)
-
-    @Update
-    suspend fun update(sshKey: SshKey)
-
-    @Delete
-    suspend fun delete(sshKey: SshKey)
-}
+/**
+ * A host is an network device that can be accessed via SSH.
+ *
+ * A host is also known as an SSH server, but in this app the term host is used consistently, including in the UI.
+ */
+@Entity(tableName = "hosts")
+data class Host(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val name: String,
+    val hostname: String,
+    val port: Int,
+    val user: String,
+    val encryptedPassword: String?,
+    val identityIds: List<Int>? = null,
+    val knownHosts: List<String> = emptyList(),
+    val commands: List<Command> = listOf(Command("Uptime", "uptime", true)),
+)

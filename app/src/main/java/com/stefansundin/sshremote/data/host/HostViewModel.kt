@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshserver
+package com.stefansundin.sshremote.data.host
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -26,7 +26,7 @@ import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.SshRepository
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.decryptString
-import com.stefansundin.sshremote.data.sshkey.SshKeyRepository
+import com.stefansundin.sshremote.data.identity.IdentityRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -41,97 +41,97 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SshServerViewModel(
-    private val repository: SshServerRepository,
-    private val sshKeyRepository: SshKeyRepository,
+class HostViewModel(
+    private val repository: HostRepository,
+    private val identityRepository: IdentityRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SshTerminalUiState())
+    private val _uiState = MutableStateFlow(RemoteUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var currentServer: SshServer? = null
-    private var serverStateJob: Job? = null
+    private var currentHost: Host? = null
+    private var hostStateJob: Job? = null
 
-    private var lastDeletedServer: SshServer? = null
+    private var lastDeletedHost: Host? = null
 
-    val allServers: StateFlow<List<SshServer>> = repository.getAllServers()
+    val allHosts: StateFlow<List<Host>> = repository.getAll()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList(),
         )
 
-    fun upsert(server: SshServer) = viewModelScope.launch {
-        repository.upsert(server)
+    fun upsert(host: Host) = viewModelScope.launch {
+        repository.upsert(host)
     }
 
-    fun delete(server: SshServer) = viewModelScope.launch {
-        lastDeletedServer = server
-        repository.delete(server)
+    fun delete(host: Host) = viewModelScope.launch {
+        lastDeletedHost = host
+        repository.delete(host)
     }
 
     fun undoDelete() = viewModelScope.launch {
-        lastDeletedServer?.let { repository.upsert(it) }
+        lastDeletedHost?.let { repository.upsert(it) }
     }
 
-    fun setActiveServer(server: SshServer) {
-        currentServer = server
-        serverStateJob?.cancel()
-        serverStateJob = viewModelScope.launch {
-            repository.getServerById(server.id).filterNotNull().collectLatest { updatedServer ->
-                currentServer = updatedServer
+    fun setActiveHost(host: Host) {
+        currentHost = host
+        hostStateJob?.cancel()
+        hostStateJob = viewModelScope.launch {
+            repository.get(host.id).filterNotNull().collectLatest { updatedHost ->
+                currentHost = updatedHost
                 _uiState.update {
                     it.copy(
-                        serverName = updatedServer.name,
-                        commands = updatedServer.commands,
+                        hostName = updatedHost.name,
+                        commands = updatedHost.commands,
                     )
                 }
             }
         }
     }
 
-    fun connectToServer(server: SshServer) {
-        setActiveServer(server)
+    fun connect(host: Host) {
+        setActiveHost(host)
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
-                    serverName = server.name,
+                    hostName = host.name,
                     connectionStatus = ConnectionStatus.CONNECTING,
                 )
             }
             try {
-                val sshKeys = server.sshKeyIds?.map { id ->
-                    async { sshKeyRepository.getKeyById(id).first() }
-                }?.awaitAll()?.filterNotNull() ?: sshKeyRepository.getAllKeys().first()
+                val identities = host.identityIds?.map { id ->
+                    async { identityRepository.get(id).first() }
+                }?.awaitAll()?.filterNotNull() ?: identityRepository.getAll().first()
 
-                val privateKeys = sshKeys.map { key ->
+                val privateKeys = identities.map { key ->
                     cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8)
                 }
 
-                val password = if (server.encryptedPassword != null) {
-                    decryptString(server.encryptedPassword, cryptoManager)
+                val password = if (host.encryptedPassword != null) {
+                    decryptString(host.encryptedPassword, cryptoManager)
                 } else null
 
-                val connectionDetails = SshServerConnectionDetails(
-                    host = server.host,
-                    port = server.port,
-                    user = server.user,
+                val connectionDetails = HostConnectionDetails(
+                    hostname = host.hostname,
+                    port = host.port,
+                    user = host.user,
                     password = password,
                     privateKeys = privateKeys,
-                    knownHosts = server.knownHosts,
+                    knownHosts = host.knownHosts,
                 )
 
                 val newKnownHosts = sshRepository.connect(connectionDetails)
                 if (newKnownHosts != connectionDetails.knownHosts) {
-                    val updatedServer = server.copy(knownHosts = newKnownHosts)
-                    repository.upsert(updatedServer)
+                    val updatedHost = host.copy(knownHosts = newKnownHosts)
+                    repository.upsert(updatedHost)
                 }
                 _uiState.update { it.copy(connectionStatus = ConnectionStatus.CONNECTED) }
 
             } catch (e: Exception) {
-                Log.e("SshServerViewModel", "Error connecting to server", e)
+                Log.e("HostViewModel", "Error connecting to host", e)
                 _uiState.update {
                     it.copy(
                         connectionStatus = ConnectionStatus.DISCONNECTED,
@@ -192,9 +192,8 @@ enum class ConnectionStatus {
     DISCONNECTED
 }
 
-// Data class to hold the UI state for the terminal screen
-data class SshTerminalUiState(
-    val serverName: String? = null,
+data class RemoteUiState(
+    val hostName: String? = null,
     val commandOutput: String? = null,
     val isLoading: Boolean = false,
     val commands: List<Command> = emptyList(),
@@ -202,18 +201,18 @@ data class SshTerminalUiState(
     val error: String? = null,
 )
 
-class SshServerViewModelFactory(
-    private val repository: SshServerRepository,
-    private val sshKeyRepository: SshKeyRepository,
+class HostViewModelFactory(
+    private val repository: HostRepository,
+    private val identityRepository: IdentityRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SshServerViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(HostViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SshServerViewModel(
+            return HostViewModel(
                 repository,
-                sshKeyRepository,
+                identityRepository,
                 sshRepository,
                 cryptoManager,
             ) as T

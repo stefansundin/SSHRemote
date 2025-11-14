@@ -25,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
-import com.stefansundin.sshremote.data.sshserver.SshServerRepository
+import com.stefansundin.sshremote.data.host.HostRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
-    private val sshServerRepository: SshServerRepository,
+    private val hostRepository: HostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) : ViewModel() {
 
@@ -70,7 +70,7 @@ class SettingsViewModel(
 
     fun exportSettings(context: Context, uri: Uri) {
         viewModelScope.launch {
-            SettingsExporter(context, settingsRepository, sshServerRepository, adHocCommandRepository).export(uri)
+            SettingsExporter(context, settingsRepository, hostRepository, adHocCommandRepository).export(uri)
         }
     }
 
@@ -78,7 +78,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             try {
                 val count =
-                    SettingsImporter(context, settingsRepository, sshServerRepository, adHocCommandRepository)
+                    SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
                         .import(uri, merge)
                 _eventFlow.emit(SettingsEvent.ImportSuccess(count))
             } catch (e: ImportException) {
@@ -95,14 +95,14 @@ sealed class SettingsEvent {
 
 class SettingsViewModelFactory(
     private val settingsRepository: SettingsRepository,
-    private val sshServerRepository: SshServerRepository,
+    private val hostRepository: HostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(settingsRepository, sshServerRepository, adHocCommandRepository) as T
+            return SettingsViewModel(settingsRepository, hostRepository, adHocCommandRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

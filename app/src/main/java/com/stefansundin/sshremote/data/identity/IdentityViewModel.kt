@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshkey
+package com.stefansundin.sshremote.data.identity
 
 import android.util.Base64
 import androidx.lifecycle.ViewModel
@@ -40,20 +40,19 @@ import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 import java.security.KeyPairGenerator
 import java.security.Security
-import kotlin.concurrent.atomics.update
 
-class SshKeyViewModel(
-    private val sshKeyRepository: SshKeyRepository,
+class IdentityViewModel(
+    private val identityRepository: IdentityRepository,
     private val cryptoManager: CryptoManager,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
-    private val _eventChannel = Channel<SshKeyEvent>()
+    private val _eventChannel = Channel<IdentityEvent>()
     val eventFlow = _eventChannel.receiveAsFlow()
 
-    private var lastDeletedKey: SshKey? = null
+    private var lastDeletedKey: Identity? = null
 
-    val sshKeys: StateFlow<List<SshKey>> = sshKeyRepository.getAllKeys()
+    val identities: StateFlow<List<Identity>> = identityRepository.getAll()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -72,14 +71,14 @@ class SshKeyViewModel(
         viewModelScope.launch {
             try {
                 val encryptedPrivateKey = cryptoManager.encrypt(privateKey.toByteArray())
-                sshKeyRepository.insert(
-                    SshKey(
+                identityRepository.insert(
+                    Identity(
                         name = name,
                         encryptedPrivateKey = encryptedPrivateKey,
                     ),
                 )
             } catch (_: Exception) {
-                _eventChannel.send(SshKeyEvent.Error("Failed to save the imported key."))
+                _eventChannel.send(IdentityEvent.Error("Failed to save the imported key."))
             }
         }
     }
@@ -89,15 +88,15 @@ class SshKeyViewModel(
             try {
                 val (privateKey, publicKey) = generateKeyPair(type, comment)
                 val encryptedPrivateKey = cryptoManager.encrypt(privateKey.toByteArray())
-                sshKeyRepository.insert(
-                    SshKey(
+                identityRepository.insert(
+                    Identity(
                         name = name,
                         encryptedPrivateKey = encryptedPrivateKey,
                     ),
                 )
-                _eventChannel.send(SshKeyEvent.ShowPublicKey(publicKey))
+                _eventChannel.send(IdentityEvent.ShowPublicKey(publicKey))
             } catch (e: Exception) {
-                _eventChannel.send(SshKeyEvent.Error("Failed to generate and save key pair: ${e.message}"))
+                _eventChannel.send(IdentityEvent.Error("Failed to generate and save key pair: ${e.message}"))
             }
         }
     }
@@ -169,63 +168,63 @@ class SshKeyViewModel(
         return Pair(privateKeyPem, publicKeyString)
     }
 
-    fun rename(sshKey: SshKey, newName: String) {
+    fun rename(identity: Identity, newName: String) {
         viewModelScope.launch {
             try {
-                sshKeyRepository.update(sshKey.copy(name = newName))
+                identityRepository.update(identity.copy(name = newName))
             } catch (e: Exception) {
-                _eventChannel.send(SshKeyEvent.Error("Failed to rename key: ${e.message}"))
+                _eventChannel.send(IdentityEvent.Error("Failed to rename key: ${e.message}"))
             }
         }
     }
 
-    fun delete(sshKey: SshKey) {
+    fun delete(identity: Identity) {
         viewModelScope.launch {
             try {
-                lastDeletedKey = sshKey
-                sshKeyRepository.delete(sshKey)
+                lastDeletedKey = identity
+                identityRepository.delete(identity)
             } catch (_: Exception) {
-                _eventChannel.send(SshKeyEvent.Error("Failed to delete the key."))
+                _eventChannel.send(IdentityEvent.Error("Failed to delete the key."))
             }
         }
     }
 
     fun undoDelete() {
         viewModelScope.launch {
-            lastDeletedKey?.let { sshKeyRepository.insert(it) }
+            lastDeletedKey?.let { identityRepository.insert(it) }
         }
     }
 
-    fun showPublicKeyFor(sshKey: SshKey) {
+    fun showPublicKeyFor(identity: Identity) {
         viewModelScope.launch {
             try {
-                val publicKey = getPublicKey(sshKey)
-                _eventChannel.send(SshKeyEvent.ShowPublicKey(publicKey))
+                val publicKey = getPublicKey(identity)
+                _eventChannel.send(IdentityEvent.ShowPublicKey(publicKey))
             } catch (e: Exception) {
-                _eventChannel.send(SshKeyEvent.Error("Failed to derive public key: ${e.message}"))
+                _eventChannel.send(IdentityEvent.Error("Failed to derive public key: ${e.message}"))
             }
         }
     }
 
-    fun exportPublicKeyFor(sshKey: SshKey) {
+    fun exportPublicKeyFor(identity: Identity) {
         viewModelScope.launch {
             try {
-                val publicKey = getPublicKey(sshKey)
+                val publicKey = getPublicKey(identity)
                 // Extract key type from the public key string (e.g., "ssh-rsa")
                 val keyType = publicKey.split(" ")[0].replace("ssh-", "")
-                val filename = "${sshKey.name}_id_${keyType}.pub"
-                _eventChannel.send(SshKeyEvent.ExportPublicKey(filename, publicKey))
+                val filename = "${identity.name}_id_${keyType}.pub"
+                _eventChannel.send(IdentityEvent.ExportPublicKey(filename, publicKey))
             } catch (e: Exception) {
-                _eventChannel.send(SshKeyEvent.Error("Failed to prepare key for export: ${e.message}"))
+                _eventChannel.send(IdentityEvent.Error("Failed to prepare key for export: ${e.message}"))
             }
         }
     }
 
-    private suspend fun getPublicKey(sshKey: SshKey): String = withContext(ioDispatcher) {
-        val privateKey = cryptoManager.decrypt(sshKey.encryptedPrivateKey)
+    private suspend fun getPublicKey(identity: Identity): String = withContext(ioDispatcher) {
+        val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
         val keypair = KeyPair.load(JSch(), privateKey, null)
         val outputStream = ByteArrayOutputStream()
-        val comment = sshKey.name.ifEmpty { keypair.publicKeyComment }
+        val comment = identity.name.ifEmpty { keypair.publicKeyComment }
         keypair.writePublicKey(outputStream, comment)
         val publicKeyString = outputStream.toString(Charsets.UTF_8.name())
         keypair.dispose()
@@ -233,9 +232,9 @@ class SshKeyViewModel(
     }
 }
 
-sealed class SshKeyEvent {
-    data class ShowPublicKey(val publicKey: String) : SshKeyEvent()
-    data class ExportPublicKey(val filename: String, val content: String) : SshKeyEvent()
+sealed class IdentityEvent {
+    data class ShowPublicKey(val publicKey: String) : IdentityEvent()
+    data class ExportPublicKey(val filename: String, val content: String) : IdentityEvent()
 
-    data class Error(val message: String) : SshKeyEvent()
+    data class Error(val message: String) : IdentityEvent()
 }

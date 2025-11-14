@@ -60,19 +60,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.sshserver.SshServer
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SshServerScreen(
-    servers: List<SshServer>,
-    onConnectClicked: (SshServer) -> Unit,
-    onAddServerClicked: () -> Unit,
-    onEditServerClicked: (SshServer) -> Unit,
-    onCloneServerClicked: (SshServer) -> Unit,
-    onDeleteServerClicked: (SshServer) -> Unit,
+fun HostScreen(
+    hosts: List<Host>,
+    onConnectClicked: (Host) -> Unit,
+    onAddClicked: () -> Unit,
+    onEditClicked: (Host) -> Unit,
+    onCloneClicked: (Host) -> Unit,
+    onDeleteClicked: (Host) -> Unit,
     onUndoDeleteClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
     modifier: Modifier = Modifier,
@@ -101,12 +101,12 @@ fun SshServerScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddServerClicked) {
+            FloatingActionButton(onClick = onAddClicked) {
                 Icon(Icons.Filled.Add, contentDescription = "Add SSH Host")
             }
         },
     ) { innerPadding ->
-        if (servers.isEmpty()) {
+        if (hosts.isEmpty()) {
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -127,14 +127,14 @@ fun SshServerScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(16.dp),
             ) {
-                items(items = servers, key = { server -> server.id }) { server ->
-                    SshServerItem(
-                        server = server,
-                        onConnect = { onConnectClicked(server) },
-                        onEdit = { onEditServerClicked(server) },
-                        onClone = { onCloneServerClicked(server) },
+                items(items = hosts, key = { host -> host.id }) { host ->
+                    HostItem(
+                        host = host,
+                        onConnect = { onConnectClicked(host) },
+                        onEdit = { onEditClicked(host) },
+                        onClone = { onCloneClicked(host) },
                         onDelete = {
-                            onDeleteServerClicked(server)
+                            onDeleteClicked(host)
                             scope.launch {
                                 snackbarHostState.currentSnackbarData?.dismiss()
                                 val result = snackbarHostState.showSnackbar(
@@ -155,8 +155,8 @@ fun SshServerScreen(
 
 
 @Composable
-fun SshServerItem(
-    server: SshServer,
+fun HostItem(
+    host: Host,
     onConnect: () -> Unit,
     onEdit: () -> Unit,
     onClone: () -> Unit,
@@ -184,15 +184,15 @@ fun SshServerItem(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = server.name,
+                    text = host.name,
                     style = MaterialTheme.typography.bodyLarge,
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
 
-                val portString = if (server.port != 22) ":${server.port}" else ""
+                val portString = if (host.port != 22) ":${host.port}" else ""
                 Text(
-                    text = "${server.user}@${server.host}${portString}",
+                    text = "${host.user}@${host.hostname}${portString}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -239,19 +239,19 @@ fun SshServerItem(
 
 @Preview(showBackground = true)
 @Composable
-fun SshServerScreenPreview() {
+fun HostScreenPreview() {
     SSHRemoteTheme {
-        val sampleServers = listOf(
-            SshServer(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null),
-            SshServer(2, "Example Host", "example.com", 2222, "admin", null),
+        val sampleHosts = listOf(
+            Host(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null),
+            Host(2, "Example Host", "example.com", 2222, "admin", null),
         )
-        SshServerScreen(
-            servers = sampleServers,
+        HostScreen(
+            hosts = sampleHosts,
             onConnectClicked = {},
-            onAddServerClicked = {},
-            onEditServerClicked = {},
-            onCloneServerClicked = {},
-            onDeleteServerClicked = {},
+            onAddClicked = {},
+            onEditClicked = {},
+            onCloneClicked = {},
+            onDeleteClicked = {},
             onUndoDeleteClicked = {},
             onSettingsClicked = {},
         )

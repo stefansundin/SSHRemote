@@ -77,7 +77,7 @@ val keyTypes = mapOf(KeyPair.ED25519 to "ED25519", KeyPair.RSA to "RSA")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddSshKeyScreen(
+fun AddIdentityScreen(
     onKeySaved: (name: String, privateKey: String) -> Unit,
     onKeyGenerated: (name: String, type: Int, comment: String) -> Unit,
     onNavigateUp: () -> Unit,
@@ -273,7 +273,7 @@ fun ImportFileTab(
                     error = null
                 } catch (e: Exception) {
                     error = e.message
-                    Log.e("AddSshKeyScreen", "Error parsing key", e)
+                    Log.e("AddIdentityScreen", "Error parsing key", e)
                 }
             }
         }
@@ -369,7 +369,7 @@ fun ManualEntryTab(
                 }
                 keypair.dispose()
             } catch (e: Exception) {
-                Log.e("AddSshKeyScreen", "Error parsing key", e)
+                Log.e("AddIdentityScreen", "Error parsing key", e)
             }
         }
     }
@@ -407,8 +407,8 @@ fun ManualEntryTab(
 
 @Preview(showBackground = true)
 @Composable
-fun AddSshKeyScreenPreview_ImportTab() {
-    AddSshKeyScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _ -> }, onNavigateUp = {})
+fun AddIdentityScreenPreview_ImportTab() {
+    AddIdentityScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _ -> }, onNavigateUp = {})
 }
 
 @Preview(showBackground = true)

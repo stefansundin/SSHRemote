@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshserver
+package com.stefansundin.sshremote.data.host
 
 /**
  * A simple data holder for the information needed to establish an SSH connection.
- * This is separate from the Room @Entity to keep the database model clean, and has decrypted data.
  */
-data class SshServerConnectionDetails(
-    val host: String,
+data class HostConnectionDetails(
+    val hostname: String,
     val port: Int,
     val user: String,
     val password: String?,

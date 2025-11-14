@@ -22,13 +22,13 @@ import android.content.Context
 import android.net.Uri
 import com.google.gson.Gson
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
-import com.stefansundin.sshremote.data.sshserver.SshServerRepository
+import com.stefansundin.sshremote.data.host.HostRepository
 import kotlinx.coroutines.flow.first
 
 class SettingsExporter(
     private val context: Context,
     private val settingsRepository: SettingsRepository,
-    private val sshServerRepository: SshServerRepository,
+    private val hostRepository: HostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
 
@@ -44,15 +44,15 @@ class SettingsExporter(
     private suspend fun getSettingsToExport(): ExportedSettings {
         val theme = settingsRepository.theme.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
-        val sshServers = sshServerRepository.getAllServers().first().map { server ->
-            ExportedSshServer(
-                name = server.name,
-                host = server.host,
-                port = server.port,
-                user = server.user,
-                allowSshKeys = server.sshKeyIds?.isNotEmpty() ?: true,
-                knownHosts = server.knownHosts,
-                commands = server.commands,
+        val hosts = hostRepository.getAll().first().map { host ->
+            ExportedHost(
+                name = host.name,
+                hostname = host.hostname,
+                port = host.port,
+                user = host.user,
+                allowIdentities = host.identityIds?.isNotEmpty() ?: true,
+                knownHosts = host.knownHosts,
+                commands = host.commands,
             )
         }
         val adHocCommands = adHocCommandRepository.getAdHocCommands().first().map { command ->
@@ -61,6 +61,6 @@ class SettingsExporter(
                 lastUsed = command.lastUsed.toString(),
             )
         }
-        return ExportedSettings(theme, strictHostKeyChecking, sshServers, adHocCommands)
+        return ExportedSettings(theme, strictHostKeyChecking, hosts, adHocCommands)
     }
 }

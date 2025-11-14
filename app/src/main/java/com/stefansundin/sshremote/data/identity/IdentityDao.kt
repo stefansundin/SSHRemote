@@ -16,18 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.sshkey
+package com.stefansundin.sshremote.data.identity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import java.time.OffsetDateTime
-import java.util.Date
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
-@Entity(tableName = "ssh_keys")
-data class SshKey(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val createdAt: OffsetDateTime = OffsetDateTime.now(),
-    val name: String,
-    val encryptedPrivateKey: ByteArray,
-)
+@Dao
+interface IdentityDao {
+    @Query("SELECT * FROM identities ORDER BY id DESC")
+    fun getAll(): Flow<List<Identity>>
+
+    @Query("SELECT * FROM identities WHERE id = :id")
+    fun get(id: Int): Flow<Identity?>
+
+    @Insert
+    suspend fun insert(identity: Identity)
+
+    @Update
+    suspend fun update(identity: Identity)
+
+    @Delete
+    suspend fun delete(identity: Identity)
+}
