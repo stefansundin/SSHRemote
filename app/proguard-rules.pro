@@ -1,21 +1,50 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+#================================================================================
+# ProGuard rules for SSH Remote
+#================================================================================
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# --- General Android & Debugging Rules ---
+# Keep line numbers for better stack traces in release builds.
+-keepattributes SourceFile,LineNumberTable
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# If you use WebView with a JavaScript interface, you would configure it here.
+# -keepclassmembers class fqcn.of.javascript.interface.for.webview { public *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+
+#================================================================================
+# Library: JSch (com.jcraft.jsch)
+#================================================================================
+
+# Keep the main library and its JCE crypto implementations.
+# JSch uses reflection to load crypto classes, so we must keep them explicitly.
+-keep class com.jcraft.jsch.** { *; }
+
+# Suppress warnings for JSch's optional, non-Android dependencies.
+# JSch was designed for desktop Java and includes optional support for features
+# that are not available on the Android platform.
+
+# Java Native Access (JNA) - used for native OS integration.
+-dontwarn com.sun.jna.**
+# Java Naming and Directory Interface (JNDI) - for enterprise resource lookup.
+-dontwarn javax.naming.**
+# Generic Security Service API (GSSAPI) - for Kerberos authentication.
+-dontwarn org.ietf.jgss.**
+# Optional logging frameworks.
+-dontwarn org.apache.logging.log4j.**
+-dontwarn org.slf4j.**
+# Optional Unix socket support.
+-dontwarn org.newsclub.net.unix.**
+
+
+#================================================================================
+# Library: Bouncy Castle (org.bouncycastle)
+#================================================================================
+
+# Keep the Bouncy Castle provider and its crypto implementations.
+# It is used as a security provider by JSch.
+-keep class org.bouncycastle.** { *; }
+
+# Keep the constructors of all security providers.
+-keepclassmembers class * extends java.security.Provider {
+  public <init>();
+  public <init>(java.lang.String);
+}

@@ -18,6 +18,9 @@
 
 package com.stefansundin.sshremote.data.host
 
+import androidx.annotation.Keep
+
+@Keep
 data class Command(
     val name: String,
     val command: String,

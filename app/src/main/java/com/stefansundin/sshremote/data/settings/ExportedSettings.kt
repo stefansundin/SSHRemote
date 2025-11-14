@@ -18,9 +18,11 @@
 
 package com.stefansundin.sshremote.data.settings
 
+import androidx.annotation.Keep
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.host.Command
 
+@Keep
 data class ExportedHost(
     val name: String,
     val hostname: String,
@@ -31,11 +33,13 @@ data class ExportedHost(
     val commands: List<Command>,
 )
 
+@Keep
 data class ExportedAdHocCommand(
     val command: String,
     val lastUsed: String,
 )
 
+@Keep
 data class ExportedSettings(
     val theme: Theme?,
     val strictHostKeyChecking: Boolean?,

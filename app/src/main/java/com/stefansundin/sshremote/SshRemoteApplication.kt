@@ -21,9 +21,11 @@ package com.stefansundin.sshremote
 import android.app.Application
 import com.stefansundin.sshremote.data.AppDatabase
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
-import com.stefansundin.sshremote.data.settings.SettingsRepository
-import com.stefansundin.sshremote.data.identity.IdentityRepository
 import com.stefansundin.sshremote.data.host.HostRepository
+import com.stefansundin.sshremote.data.identity.IdentityRepository
+import com.stefansundin.sshremote.data.settings.SettingsRepository
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import java.security.Security
 
 class SshRemoteApplication : Application() {
     private val database by lazy { AppDatabase.getInstance(this) }
@@ -31,4 +33,9 @@ class SshRemoteApplication : Application() {
     val identityRepository by lazy { IdentityRepository(database.identityDao()) }
     val adHocCommandRepository by lazy { AdHocCommandRepository(database.adHocCommandDao()) }
     val settingsRepository by lazy { SettingsRepository(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        Security.addProvider(BouncyCastleProvider())
+    }
 }
