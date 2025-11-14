@@ -85,7 +85,7 @@ fun CommandListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(uiState.hostName ?: "Remote") },
+                title = { Text(uiState.host?.name ?: "Remote") },
                 navigationIcon = {
                     IconButton(onClick = onDisconnect) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")

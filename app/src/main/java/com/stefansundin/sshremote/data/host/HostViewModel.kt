@@ -51,10 +51,11 @@ class HostViewModel(
     private val _uiState = MutableStateFlow(RemoteUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var currentHost: Host? = null
     private var hostStateJob: Job? = null
 
     private var lastDeletedHost: Host? = null
+
+    private var cloneHost: Host? = null
 
     val allHosts: StateFlow<List<Host>> = repository.getAll()
         .stateIn(
@@ -76,15 +77,23 @@ class HostViewModel(
         lastDeletedHost?.let { repository.upsert(it) }
     }
 
+    fun setCloneHost(host: Host) {
+        cloneHost = host
+    }
+
+    fun getCloneHost(): Host? {
+        val host = cloneHost
+        cloneHost = null
+        return host
+    }
+
     fun setActiveHost(host: Host) {
-        currentHost = host
         hostStateJob?.cancel()
         hostStateJob = viewModelScope.launch {
             repository.get(host.id).filterNotNull().collectLatest { updatedHost ->
-                currentHost = updatedHost
                 _uiState.update {
                     it.copy(
-                        hostName = updatedHost.name,
+                        host = updatedHost,
                         commands = updatedHost.commands,
                     )
                 }
@@ -97,7 +106,7 @@ class HostViewModel(
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
-                    hostName = host.name,
+                    host = host,
                     connectionStatus = ConnectionStatus.CONNECTING,
                 )
             }
@@ -193,7 +202,7 @@ enum class ConnectionStatus {
 }
 
 data class RemoteUiState(
-    val hostName: String? = null,
+    val host: Host? = null,
     val commandOutput: String? = null,
     val isLoading: Boolean = false,
     val commands: List<Command> = emptyList(),

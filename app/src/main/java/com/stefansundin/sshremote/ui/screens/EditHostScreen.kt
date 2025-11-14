@@ -46,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,8 +64,9 @@ import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.decryptString
 import com.stefansundin.sshremote.data.encryptString
-import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.host.Host
+import com.stefansundin.sshremote.data.host.HostViewModel
+import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,6 +77,7 @@ fun EditHostScreen(
     onSave: (Host) -> Unit,
     onNavigateUp: () -> Unit,
     cryptoManager: CryptoManager?, // null allowed for preview
+    hostViewModel: HostViewModel?, // null allowed for preview
 ) {
     var name by remember(host) { mutableStateOf(host?.name ?: "") }
     var hostname by remember(host) { mutableStateOf(host?.hostname ?: "") }
@@ -97,6 +100,22 @@ fun EditHostScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var hasBeenSubmitted by remember { mutableStateOf(false) }
     val onSubmit = { hasBeenSubmitted = true }
+
+    LaunchedEffect(Unit) {
+        hostViewModel?.getCloneHost()?.let { clone ->
+            name = "Copy of ${clone.name}"
+            hostname = clone.hostname
+            port = clone.port.toString()
+            user = clone.user
+            password = if (cryptoManager != null && clone.encryptedPassword != null) {
+                decryptString(clone.encryptedPassword, cryptoManager)
+            } else {
+                ""
+            }
+            selectedIdentityIds = clone.identityIds
+            knownHosts = clone.knownHosts
+        }
+    }
 
     val isNameValid by remember(name) { derivedStateOf { Validations.validateName(name) } }
     val isHostValid by remember(hostname) { derivedStateOf { Validations.validateHost(hostname) } }
@@ -406,6 +425,7 @@ fun AddHostScreenPreview() {
             onNavigateUp = {},
             identities = emptyList(),
             cryptoManager = null,
+            hostViewModel = null,
         )
     }
 }
@@ -421,6 +441,7 @@ fun EditHostScreenPreview() {
             onNavigateUp = {},
             identities = emptyList(),
             cryptoManager = null,
+            hostViewModel = null,
         )
     }
 }
@@ -436,6 +457,7 @@ fun CloneHostScreenPreview() {
             onNavigateUp = {},
             identities = emptyList(),
             cryptoManager = null,
+            hostViewModel = null,
         )
     }
 }

@@ -24,7 +24,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -39,13 +42,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
 import com.stefansundin.sshremote.data.host.Command
-import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
 import com.stefansundin.sshremote.data.identity.IdentityEvent
@@ -67,15 +75,21 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-enum class Screen {
-    HOST_LIST,
-    HOST_EDIT,
-    COMMAND_LIST,
-    EDIT_COMMANDS,
-    AD_HOC_COMMAND,
-    SETTINGS,
-    IDENTITY_LIST,
-    ADD_IDENTITY,
+sealed class Screen(val route: String) {
+    data object HostList : Screen("host_list")
+    data object HostEdit : Screen("host_edit/{hostId}") {
+        fun createRoute(hostId: Int?) = "host_edit/$hostId"
+    }
+
+    data object CommandList : Screen("command_list/{hostId}") {
+        fun createRoute(hostId: Int) = "command_list/$hostId"
+    }
+
+    data object EditCommands : Screen("edit_commands")
+    data object AdHocCommand : Screen("ad_hoc_command")
+    data object Settings : Screen("settings")
+    data object IdentityList : Screen("identity_list")
+    data object AddIdentity : Screen("add_identity")
 }
 
 enum class Theme {
@@ -132,9 +146,6 @@ class MainActivity : ComponentActivity() {
             }
 
             SSHRemoteTheme(darkTheme = useDarkTheme) {
-                var selectedHost by remember { mutableStateOf<Host?>(null) }
-                var currentScreen by remember { mutableStateOf(Screen.HOST_LIST) }
-
                 var showPublicKeyDialog by remember { mutableStateOf(false) }
                 var publicKeyToShow by remember { mutableStateOf("") }
                 var fileToExport by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -283,84 +294,103 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-                ) { paddingValues ->
-                    when (currentScreen) {
-                        Screen.HOST_LIST -> {
+                ) { innerPadding ->
+                    val navController = rememberNavController()
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.HostList.route,
+                        modifier = Modifier.padding(innerPadding),
+                        enterTransition = { EnterTransition.None },
+                        exitTransition = { ExitTransition.None },
+                    ) {
+                        composable(Screen.HostList.route) {
                             val hosts by hostViewModel.allHosts.collectAsState()
                             HostScreen(
                                 hosts = hosts,
-                                onConnectClicked = { host: Host ->
-                                    selectedHost = host
-                                    currentScreen = Screen.COMMAND_LIST
+                                onConnectClicked = { host ->
+                                    navController.navigate(Screen.CommandList.createRoute(host.id))
                                     hostViewModel.connect(host)
                                 },
                                 onAddClicked = {
-                                    selectedHost = null
-                                    currentScreen = Screen.HOST_EDIT
+                                    navController.navigate(Screen.HostEdit.createRoute(null))
                                 },
                                 onEditClicked = { host ->
-                                    selectedHost = host
-                                    currentScreen = Screen.HOST_EDIT
+                                    navController.navigate(Screen.HostEdit.createRoute(host.id))
                                 },
                                 onCloneClicked = { host ->
-                                    selectedHost = host.copy(id = 0, name = "Copy of ${host.name}")
-                                    currentScreen = Screen.HOST_EDIT
+                                    hostViewModel.setCloneHost(host)
+                                    navController.navigate(Screen.HostEdit.createRoute(null))
                                 },
                                 onDeleteClicked = { host -> hostViewModel.delete(host) },
                                 onUndoDeleteClicked = { hostViewModel.undoDelete() },
                                 onSettingsClicked = {
-                                    currentScreen = Screen.SETTINGS
+                                    navController.navigate(Screen.Settings.route)
                                 },
                             )
                         }
 
-                        Screen.HOST_EDIT -> {
+                        composable(
+                            Screen.HostEdit.route,
+                            arguments = listOf(navArgument("hostId") { type = NavType.StringType; nullable = true }),
+                        ) { backStackEntry ->
+                            val hostId = backStackEntry.arguments?.getString("hostId")?.toIntOrNull()
+                            val hosts by hostViewModel.allHosts.collectAsState()
+                            val host = hosts.find { it.id == hostId }
                             val identities by identityViewModel.identities.collectAsState()
                             EditHostScreen(
-                                host = selectedHost,
+                                host = host,
                                 identities = identities,
-                                onSave = { host ->
-                                    hostViewModel.upsert(host)
-                                    selectedHost = null
-                                    currentScreen = Screen.HOST_LIST
+                                onSave = { newHost ->
+                                    hostViewModel.upsert(newHost)
+                                    navController.popBackStack()
                                 },
                                 onNavigateUp = {
-                                    selectedHost = null
-                                    currentScreen = Screen.HOST_LIST
+                                    navController.popBackStack()
                                 },
                                 cryptoManager = cryptoManager,
+                                hostViewModel = hostViewModel,
                             )
                         }
 
-                        Screen.COMMAND_LIST -> {
+                        composable(
+                            Screen.CommandList.route,
+                            arguments = listOf(navArgument("hostId") { type = NavType.IntType }),
+                        ) { backStackEntry ->
+                            val hostId = backStackEntry.arguments?.getInt("hostId")
+                            val hosts by hostViewModel.allHosts.collectAsState()
+                            val host = hosts.find { it.id == hostId }
+                            LaunchedEffect(host) {
+                                if (host != null) {
+                                    hostViewModel.setActiveHost(host)
+                                }
+                            }
                             CommandListScreen(
                                 uiState = uiState,
                                 onRunCommand = { hostViewModel.runCommand(it) },
                                 onDisconnect = {
                                     hostViewModel.disconnect()
-                                    selectedHost = null
-                                    currentScreen = Screen.HOST_LIST
+                                    navController.popBackStack()
                                 },
-                                onEditCommands = { currentScreen = Screen.EDIT_COMMANDS },
-                                onAdHocCommandClicked = { currentScreen = Screen.AD_HOC_COMMAND },
+                                onEditCommands = { navController.navigate(Screen.EditCommands.route) },
+                                onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
                                 onClearError = { hostViewModel.clearError() },
                             )
                         }
 
-                        Screen.EDIT_COMMANDS -> {
+                        composable(Screen.EditCommands.route) {
                             EditCommandsScreen(
                                 commands = uiState.commands,
-                                onSave = {
-                                    selectedHost?.let { host ->
-                                        hostViewModel.upsert(host.copy(commands = it))
+                                onSave = { commands ->
+                                    uiState.host?.let { host ->
+                                        hostViewModel.upsert(host.copy(commands = commands))
                                     }
-                                    currentScreen = Screen.COMMAND_LIST
+                                    navController.popBackStack()
                                 },
-                                onNavigateBack = { currentScreen = Screen.COMMAND_LIST },
+                                onNavigateBack = { navController.popBackStack() },
                             )
                         }
 
-                        Screen.AD_HOC_COMMAND -> {
+                        composable(Screen.AdHocCommand.route) {
                             val adHocCommands by adHocCommandViewModel.adHocCommands.collectAsState()
                             AdHocCommandScreen(
                                 commands = adHocCommands,
@@ -368,33 +398,32 @@ class MainActivity : ComponentActivity() {
                                     adHocCommandViewModel.addAdHocCommand(command)
                                     hostViewModel.runCommand(Command(command, command, true))
                                     if (popUpToPrevious) {
-                                        currentScreen = Screen.COMMAND_LIST
+                                        navController.popBackStack()
                                     }
                                 },
                                 onDeleteCommand = { adHocCommandViewModel.deleteAdHocCommand(it) },
                                 onClearHistory = { adHocCommandViewModel.clearAdHocCommands() },
-                                onNavigateUp = { currentScreen = Screen.COMMAND_LIST },
+                                onNavigateUp = { navController.popBackStack() },
                             )
                         }
 
-                        Screen.SETTINGS -> {
+                        composable(Screen.Settings.route) {
                             SettingsScreen(
                                 settingsViewModel = settingsViewModel,
-                                onNavigateToIdentityList = { currentScreen = Screen.IDENTITY_LIST },
+                                onNavigateToIdentityList = { navController.navigate(Screen.IdentityList.route) },
                                 onNavigateUp = {
-                                    selectedHost = null
-                                    currentScreen = Screen.HOST_LIST
+                                    navController.popBackStack()
                                 },
                             )
                         }
 
-                        Screen.IDENTITY_LIST -> {
+                        composable(Screen.IdentityList.route) {
                             IdentityListScreen(
                                 cryptoManager = cryptoManager,
                                 identityViewModel = identityViewModel,
-                                onNavigateToAddIdentity = { currentScreen = Screen.ADD_IDENTITY },
+                                onNavigateToAddIdentity = { navController.navigate(Screen.AddIdentity.route) },
                                 onNavigateUp = {
-                                    currentScreen = Screen.SETTINGS
+                                    navController.popBackStack()
                                 },
                                 onShowPublicKey = { key -> identityViewModel.showPublicKeyFor(key) },
                                 onExportPublicKey = { key -> identityViewModel.exportPublicKeyFor(key) },
@@ -404,20 +433,19 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        Screen.ADD_IDENTITY -> {
+                        composable(Screen.AddIdentity.route) {
                             AddIdentityScreen(
                                 onKeySaved = { name, privateKey ->
                                     identityViewModel.insert(name, privateKey)
-                                    currentScreen = Screen.IDENTITY_LIST
+                                    navController.popBackStack()
                                 },
                                 onKeyGenerated = { name, type, comment ->
                                     identityViewModel.generateAndInsert(name, type, comment)
-                                    currentScreen = Screen.IDENTITY_LIST
+                                    navController.popBackStack()
                                 },
-                                onNavigateUp = { currentScreen = Screen.IDENTITY_LIST },
+                                onNavigateUp = { navController.popBackStack() },
                             )
                         }
-
                     }
                 }
             }
