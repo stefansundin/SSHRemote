@@ -45,4 +45,7 @@ interface HostDao {
 
     @Query("SELECT * FROM hosts WHERE id = :id")
     suspend fun getOnce(id: Int): Host?
+
+    @Query("SELECT COUNT(*) FROM hosts")
+    suspend fun count(): Int
 }

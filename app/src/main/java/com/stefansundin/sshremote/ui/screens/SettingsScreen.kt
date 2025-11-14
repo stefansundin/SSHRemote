@@ -82,6 +82,7 @@ fun SettingsScreen(
         Theme.DARK -> true
     }
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
+    val hasHosts by settingsViewModel.hasHosts.collectAsState()
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -115,38 +116,45 @@ fun SettingsScreen(
     }
 
     importUri?.let { uri ->
-        AlertDialog(
-            onDismissRequest = { importUri = null },
-            title = { Text("Import settings") },
-            text = { Text("Do you want to merge with existing hosts or overwrite them?") },
-            confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(
-                        onClick = {
-                            settingsViewModel.importSettings(context, uri, false)
-                            importUri = null
-                        },
-                    ) {
-                        Text("Overwrite")
+        if (hasHosts) {
+            AlertDialog(
+                onDismissRequest = { importUri = null },
+                title = { Text("Import settings") },
+                text = { Text("Do you want to merge with existing hosts or overwrite them?") },
+                confirmButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(
+                            onClick = {
+                                settingsViewModel.importSettings(context, uri, false)
+                                importUri = null
+                            },
+                        ) {
+                            Text("Overwrite")
+                        }
+                        TextButton(
+                            onClick = {
+                                settingsViewModel.importSettings(context, uri, true)
+                                importUri = null
+                            },
+                        ) {
+                            Text("Merge")
+                        }
                     }
+                },
+                dismissButton = {
                     TextButton(
-                        onClick = {
-                            settingsViewModel.importSettings(context, uri, true)
-                            importUri = null
-                        },
+                        onClick = { importUri = null },
                     ) {
-                        Text("Merge")
+                        Text("Cancel")
                     }
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { importUri = null },
-                ) {
-                    Text("Cancel")
-                }
-            },
-        )
+                },
+            )
+        } else {
+            LaunchedEffect(Unit) {
+                settingsViewModel.importSettings(context, uri, false)
+                importUri = null
+            }
+        }
     }
 
     SSHRemoteTheme(darkTheme = useDarkTheme) {

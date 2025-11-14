@@ -61,4 +61,9 @@ class HostRepository(private val hostDao: HostDao) {
     suspend fun deleteAll() {
         hostDao.deleteAll()
     }
+
+    /**
+     * Returns the number of hosts in the database.
+     */
+    suspend fun count(): Int = hostDao.count()
 }

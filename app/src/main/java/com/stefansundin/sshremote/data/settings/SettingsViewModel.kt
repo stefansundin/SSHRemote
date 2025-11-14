@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -54,6 +55,13 @@ class SettingsViewModel(
             settingsRepository.setTheme(theme)
         }
     }
+
+    val hasHosts: StateFlow<Boolean> = hostRepository.getAll().map { it.isNotEmpty() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false,
+        )
 
     val strictHostKeyChecking: StateFlow<Boolean> = settingsRepository.strictHostKeyChecking
         .stateIn(
