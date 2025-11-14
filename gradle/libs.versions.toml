@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.1"
 kotlin = "2.2.21"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -12,10 +12,11 @@ datastorePreferences = "1.1.7"
 room = "2.8.3"
 lifecycle = "2.9.4"
 securityCrypto = "1.1.0"
-jsch = "2.27.5"
+jsch = "2.27.6"
 bouncyCastle = "1.82"
 eddsa = "0.3.0"
 gson = "2.13.2"
+desugar = "2.1.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +46,7 @@ bouncycastle-bcprov-jdk18on = { group = "org.bouncycastle", name = "bcprov-jdk18
 bouncycastle-bcpkix-jdk18on = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncyCastle" }
 eddsa = { group = "net.i2p.crypto", name = "eddsa", version.ref = "eddsa" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
