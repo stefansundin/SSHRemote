@@ -87,7 +87,6 @@ fun EditCommandsScreen(
                 TextButton(
                     onClick = {
                         onSave(editingCommands)
-                        onNavigateBack()
                     },
                 ) {
                     Text("Save and leave")

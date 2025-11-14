@@ -59,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
+import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.KeyPair
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.identity.Identity
@@ -167,11 +168,19 @@ fun IdentityItem(
     var newName by remember { mutableStateOf(identity.name) }
 
     val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
-    val keypair = KeyPair.load(JSch(), privateKey, null)
-    val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
-    val keyInfo = "${keypair.keyTypeString} - ${identity.createdAt.format(formatter)}"
-    val isEncrypted = keypair.isEncrypted
-    keypair.dispose()
+    val (keyInfo, isEncrypted) = remember(identity, cryptoManager) {
+        val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
+        try {
+            val keypair = KeyPair.load(JSch(), privateKey, null)
+            val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+            val info = "${keypair.keyTypeString} - ${identity.createdAt.format(formatter)}"
+            val encrypted = keypair.isEncrypted
+            keypair.dispose()
+            Pair(info, encrypted)
+        } catch (e: JSchException) {
+            Pair("Invalid key", false)
+        }
+    }
 
     ListItem(
         headlineContent = {

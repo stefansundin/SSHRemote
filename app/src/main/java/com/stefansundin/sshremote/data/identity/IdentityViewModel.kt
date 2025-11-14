@@ -86,7 +86,7 @@ class IdentityViewModel(
     fun generateAndInsert(name: String, type: Int, comment: String) {
         viewModelScope.launch {
             try {
-                val (privateKey, publicKey) = generateKeyPair(type, comment)
+                val privateKey = generateKeyPair(type, comment)
                 val encryptedPrivateKey = cryptoManager.encrypt(privateKey.toByteArray())
                 identityRepository.insert(
                     Identity(
@@ -94,14 +94,13 @@ class IdentityViewModel(
                         encryptedPrivateKey = encryptedPrivateKey,
                     ),
                 )
-                _eventChannel.send(IdentityEvent.ShowPublicKey(publicKey))
             } catch (e: Exception) {
                 _eventChannel.send(IdentityEvent.Error("Failed to generate and save key pair: ${e.message}"))
             }
         }
     }
 
-    private suspend fun generateKeyPair(type: Int, comment: String): Pair<String, String> =
+    private suspend fun generateKeyPair(type: Int, comment: String): String =
         withContext(ioDispatcher) { // Use the injected dispatcher
             if (type == KeyPair.ED25519) {
                 generateEd25519KeyPair(comment)
@@ -110,7 +109,7 @@ class IdentityViewModel(
             }
         }
 
-    private fun generateJschKeyPair(type: Int, comment: String): Pair<String, String> {
+    private fun generateJschKeyPair(type: Int, comment: String): String {
         val jsch = JSch()
         // For RSA, 2048 is a reasonable default. For other types, JSch ignores it.
         val keyPair = KeyPair.genKeyPair(jsch, type, 2048)
@@ -120,16 +119,12 @@ class IdentityViewModel(
             keyPair.writePrivateKey(it)
             it.toString()
         }
-        val publicKeyString = ByteArrayOutputStream().use {
-            keyPair.writePublicKey(it, comment)
-            it.toString()
-        }
 
         keyPair.dispose()
-        return Pair(privateKeyString, publicKeyString)
+        return privateKeyString
     }
 
-    private fun generateEd25519KeyPair(comment: String): Pair<String, String> {
+    private fun generateEd25519KeyPair(comment: String): String {
         // JSch can't export ED25519 keys. https://github.com/mwiede/jsch/issues/118
         // Generate the key pair using the pre-registered security provider
         val generator = KeyPairGenerator.getInstance("EdDSA")
@@ -158,14 +153,7 @@ class IdentityViewModel(
         outputStream.write(byteArrayOf(0, 0, 0, ed25519Key.size.toByte()))
         outputStream.write(ed25519Key)
 
-        val publicKeyString = "ssh-ed25519 ${
-            Base64.encodeToString(
-                outputStream.toByteArray(),
-                Base64.NO_WRAP,
-            )
-        } $comment"
-
-        return Pair(privateKeyPem, publicKeyString)
+        return privateKeyPem
     }
 
     fun rename(identity: Identity, newName: String) {

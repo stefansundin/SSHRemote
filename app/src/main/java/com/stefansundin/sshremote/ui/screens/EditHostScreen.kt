@@ -166,9 +166,8 @@ fun EditHostScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        handleSave()
                         if (isFormValid) {
-                            onNavigateUp()
+                            handleSave()
                         } else {
                             showSaveDialog = false
                         }

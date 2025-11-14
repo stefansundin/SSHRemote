@@ -92,6 +92,9 @@ fun AddIdentityScreen(
     var showSaveDialog by remember { mutableStateOf(false) }
 
     val hasUnsavedChanges = privateKey.isNotBlank()
+    val isFormValid = (selectedTabIndex == 0 && isKeyContentValid) ||
+            (selectedTabIndex == 1) ||
+            (selectedTabIndex == 2 && isKeyContentValid)
 
     fun handleSave() {
         val finalName = name.ifBlank {
@@ -118,12 +121,7 @@ fun AddIdentityScreen(
             title = { Text("Unsaved changes") },
             text = { Text("Do you want to save the key before leaving?") },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        handleSave()
-                        onNavigateUp()
-                    },
-                ) {
+                TextButton(onClick = { handleSave() }) {
                     Text("Save and leave")
                 }
             },
@@ -135,7 +133,7 @@ fun AddIdentityScreen(
         )
     }
 
-    BackHandler(enabled = hasUnsavedChanges) {
+    BackHandler(enabled = hasUnsavedChanges && isFormValid) {
         showSaveDialog = true
     }
 
@@ -160,10 +158,6 @@ fun AddIdentityScreen(
         }
     }
 
-    val isFormValid = (selectedTabIndex == 0 && isKeyContentValid) ||
-            (selectedTabIndex == 1) ||
-            (selectedTabIndex == 2 && isKeyContentValid)
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -171,7 +165,7 @@ fun AddIdentityScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            if (hasUnsavedChanges) {
+                            if (hasUnsavedChanges && isFormValid) {
                                 showSaveDialog = true
                             } else {
                                 onNavigateUp()
