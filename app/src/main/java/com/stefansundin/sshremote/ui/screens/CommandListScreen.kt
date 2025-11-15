@@ -64,6 +64,7 @@ fun CommandListScreen(
     onDisconnect: () -> Unit,
     onEditCommands: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
+    onCopyPublicKeyClicked: () -> Unit,
     onClearError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -122,6 +123,13 @@ fun CommandListScreen(
                             onClick = {
                                 showMenu = false
                                 onEditCommands()
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Copy public key") },
+                            onClick = {
+                                showMenu = false
+                                onCopyPublicKeyClicked()
                             },
                         )
                     }

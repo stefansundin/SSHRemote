@@ -18,7 +18,6 @@
 
 package com.stefansundin.sshremote.data.identity
 
-import android.util.Base64
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jcraft.jsch.JSch
@@ -208,7 +207,7 @@ class IdentityViewModel(
         }
     }
 
-    private suspend fun getPublicKey(identity: Identity): String = withContext(ioDispatcher) {
+    suspend fun getPublicKey(identity: Identity): String = withContext(ioDispatcher) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
         val keypair = KeyPair.load(JSch(), privateKey, null)
         val outputStream = ByteArrayOutputStream()

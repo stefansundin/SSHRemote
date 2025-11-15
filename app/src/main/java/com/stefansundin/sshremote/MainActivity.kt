@@ -63,6 +63,7 @@ import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
+import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
 import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
 import com.stefansundin.sshremote.ui.screens.AddIdentityScreen
 import com.stefansundin.sshremote.ui.screens.CommandListScreen
@@ -147,6 +148,7 @@ class MainActivity : ComponentActivity() {
 
             SSHRemoteTheme(darkTheme = useDarkTheme) {
                 var showPublicKeyDialog by remember { mutableStateOf(false) }
+                var showSelectIdentityDialog by remember { mutableStateOf(false) }
                 var publicKeyToShow by remember { mutableStateOf("") }
                 var fileToExport by remember { mutableStateOf<Pair<String, String>?>(null) }
 
@@ -292,6 +294,24 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                if (showSelectIdentityDialog) {
+                    val identities by identityViewModel.identities.collectAsState()
+                    SelectIdentityDialog(
+                        identities = identities,
+                        onIdentitySelected = {
+                            scope.launch {
+                                val publicKey = identityViewModel.getPublicKey(it)
+                                val command =
+                                    """exec sh -c 'cd; umask 077; echo "\n$publicKey" >> ~/.ssh/authorized_keys'"""
+                                hostViewModel.runCommand(Command("Copy public key", command, false))
+                                snackbarHostState.showSnackbar("Public key copied to host.")
+                            }
+                            showSelectIdentityDialog = false
+                        },
+                        onDismiss = { showSelectIdentityDialog = false },
+                    )
+                }
+
                 Scaffold(
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                 ) { innerPadding ->
@@ -373,6 +393,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onEditCommands = { navController.navigate(Screen.EditCommands.route) },
                                 onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
+                                onCopyPublicKeyClicked = { showSelectIdentityDialog = true },
                                 onClearError = { hostViewModel.clearError() },
                             )
                         }
