@@ -20,7 +20,7 @@ package com.stefansundin.sshremote.data.settings
 
 import android.content.Context
 import android.net.Uri
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
 import kotlinx.coroutines.flow.first
@@ -34,7 +34,7 @@ class SettingsExporter(
 
     suspend fun export(uri: Uri) {
         val settings = getSettingsToExport()
-        val json = Gson().toJson(settings)
+        val json = GsonBuilder().setPrettyPrinting().create().toJson(settings)
 
         context.contentResolver.openOutputStream(uri)?.use { outputStream ->
             outputStream.write(json.toByteArray())
