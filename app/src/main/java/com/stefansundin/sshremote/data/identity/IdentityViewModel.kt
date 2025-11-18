@@ -110,17 +110,16 @@ class IdentityViewModel(
 
     private fun generateJschKeyPair(type: Int, comment: String): String {
         val jsch = JSch()
-        // For RSA, 2048 is a reasonable default. For other types, JSch ignores it.
         val keyPair = KeyPair.genKeyPair(jsch, type, 2048)
         keyPair.setPublicKeyComment(comment)
 
-        val privateKeyString = ByteArrayOutputStream().use {
+        val privateKeyPem = ByteArrayOutputStream().use {
             keyPair.writePrivateKey(it)
             it.toString()
         }
 
         keyPair.dispose()
-        return privateKeyString
+        return privateKeyPem
     }
 
     private fun generateEd25519KeyPair(comment: String): String {
@@ -130,6 +129,7 @@ class IdentityViewModel(
         val keyPair = generator.generateKeyPair()
 
         // Format the private key to modern OpenSSH PEM format (PKCS8)
+        // It would be nice if the comment was written in here but I can't figure out how without writing the PEM ourselves.
         val privateKeyPem = StringWriter().use { stringWriter ->
             JcaPEMWriter(stringWriter).use { pemWriter ->
                 val pkcs8Generator = JcaPKCS8Generator(keyPair.private, null)
@@ -137,20 +137,6 @@ class IdentityViewModel(
             }
             stringWriter.toString()
         }
-
-        // Format the public key to the standard OpenSSH format (ssh-ed25519 AAAA...)
-        val publicKeyBytes = keyPair.public.encoded
-        // The actual key part is the last 32 bytes of the encoded public key
-        val ed25519Key = publicKeyBytes.takeLast(32).toByteArray()
-
-        val outputStream = ByteArrayOutputStream()
-        val keyType = "ssh-ed25519".toByteArray()
-
-        // Encode the public key in the required format: [key_type_len][key_type][key_len][key]
-        outputStream.write(byteArrayOf(0, 0, 0, keyType.size.toByte()))
-        outputStream.write(keyType)
-        outputStream.write(byteArrayOf(0, 0, 0, ed25519Key.size.toByte()))
-        outputStream.write(ed25519Key)
 
         return privateKeyPem
     }

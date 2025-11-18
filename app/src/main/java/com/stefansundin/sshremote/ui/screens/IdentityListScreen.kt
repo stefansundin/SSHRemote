@@ -167,7 +167,6 @@ fun IdentityItem(
     var isRenameDialogVisible by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf(identity.name) }
 
-    val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
     val (keyInfo, isEncrypted) = remember(identity, cryptoManager) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
         try {
