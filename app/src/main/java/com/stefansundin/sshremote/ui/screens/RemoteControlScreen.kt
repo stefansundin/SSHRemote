@@ -18,28 +18,22 @@
 
 package com.stefansundin.sshremote.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,21 +45,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
-import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteUiState
+import com.stefansundin.sshremote.ui.components.RemoteControl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommandListScreen(
+fun RemoteControlScreen(
     uiState: RemoteUiState,
     onRunCommand: (Command) -> Unit,
     onDisconnect: () -> Unit,
-    onEditCommands: () -> Unit,
+    onSwitchToCommandList: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
-    onSwitchToRemoteControl: () -> Unit,
+    onEditRemoteControlClicked: () -> Unit,
     onCopyPublicKeyClicked: () -> Unit,
     onClearError: () -> Unit,
     modifier: Modifier = Modifier,
@@ -106,8 +99,8 @@ fun CommandListScreen(
                         connectionStatus = uiState.connectionStatus,
                         modifier = Modifier.padding(end = 8.dp),
                     )
-                    IconButton(onClick = onSwitchToRemoteControl) {
-                        Icon(Icons.Default.SettingsRemote, contentDescription = "Switch to remote control")
+                    IconButton(onClick = onSwitchToCommandList) {
+                        Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Switch to command list")
                     }
                     IconButton(onClick = { showMenu = !showMenu }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "More options")
@@ -124,10 +117,10 @@ fun CommandListScreen(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Edit commands") },
+                            text = { Text("Edit remote control") },
                             onClick = {
                                 showMenu = false
-                                onEditCommands()
+                                onEditRemoteControlClicked()
                             },
                         )
                         DropdownMenuItem(
@@ -143,53 +136,22 @@ fun CommandListScreen(
         },
         modifier = modifier,
     ) { padding ->
-        if (uiState.commands.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text("No commands have been added.", style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    "Use the menu to add commands.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp),
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(padding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                uiState.commands.forEach { command ->
-                    Button(
-                        onClick = { onRunCommand(command) },
-                        enabled = uiState.connectionStatus == ConnectionStatus.CONNECTED,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(command.name)
+        val commands = uiState.host?.remoteCommands ?: emptyMap()
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            RemoteControl(
+                onKeyClicked = { key ->
+                    commands[key]?.let { command ->
+                        onRunCommand(Command(command, command, false))
                     }
-                }
-            }
+                },
+            )
         }
     }
-}
-
-@Composable
-fun ConnectionStatusIndicator(connectionStatus: ConnectionStatus, modifier: Modifier = Modifier) {
-    val color = when (connectionStatus) {
-        ConnectionStatus.CONNECTED -> Color.Green
-        ConnectionStatus.CONNECTING -> Color.Yellow
-        ConnectionStatus.DISCONNECTED -> Color.Red
-    }
-    Box(
-        modifier = modifier
-            .size(12.dp)
-            .background(color, shape = CircleShape),
-    )
 }

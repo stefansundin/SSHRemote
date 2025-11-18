@@ -53,6 +53,8 @@ class SettingsExporter(
                 allowIdentities = host.identityIds?.isNotEmpty() ?: true,
                 knownHosts = host.knownHosts,
                 commands = host.commands,
+                remoteCommands = host.remoteCommands,
+                startScreen = host.startScreen,
             )
         }
         val adHocCommands = adHocCommandRepository.getAdHocCommands().first().map { command ->

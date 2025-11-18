@@ -22,6 +22,7 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 import java.time.OffsetDateTime
 
 class Converters {
@@ -77,5 +78,19 @@ class Converters {
         }
         val listType = object : TypeToken<List<String>>() {}.type
         return gson.fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun fromRemoteCommandsMap(map: Map<RemoteControlKey, String>?): String? {
+        return gson.toJson(map)
+    }
+
+    @TypeConverter
+    fun toRemoteCommandsMap(value: String?): Map<RemoteControlKey, String>? {
+        if (value == null) {
+            return null
+        }
+        val mapType = object : TypeToken<Map<RemoteControlKey, String>>() {}.type
+        return gson.fromJson(value, mapType)
     }
 }

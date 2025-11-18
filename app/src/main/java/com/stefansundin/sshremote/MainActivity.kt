@@ -56,6 +56,7 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
+import com.stefansundin.sshremote.data.host.StartScreen
 import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
@@ -69,8 +70,10 @@ import com.stefansundin.sshremote.ui.screens.AddIdentityScreen
 import com.stefansundin.sshremote.ui.screens.CommandListScreen
 import com.stefansundin.sshremote.ui.screens.EditCommandsScreen
 import com.stefansundin.sshremote.ui.screens.EditHostScreen
+import com.stefansundin.sshremote.ui.screens.EditRemoteControlScreen
 import com.stefansundin.sshremote.ui.screens.HostScreen
 import com.stefansundin.sshremote.ui.screens.IdentityListScreen
+import com.stefansundin.sshremote.ui.screens.RemoteControlScreen
 import com.stefansundin.sshremote.ui.screens.SettingsScreen
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -85,6 +88,12 @@ sealed class Screen(val route: String) {
     data object CommandList : Screen("command_list/{hostId}") {
         fun createRoute(hostId: Int) = "command_list/$hostId"
     }
+
+    data object RemoteControl : Screen("remote_control/{hostId}") {
+        fun createRoute(hostId: Int) = "remote_control/$hostId"
+    }
+
+    data object EditRemoteControl : Screen("edit_remote_control")
 
     data object EditCommands : Screen("edit_commands")
     data object AdHocCommand : Screen("ad_hoc_command")
@@ -328,7 +337,11 @@ class MainActivity : ComponentActivity() {
                             HostScreen(
                                 hosts = hosts,
                                 onConnectClicked = { host ->
-                                    navController.navigate(Screen.CommandList.createRoute(host.id))
+                                    val route = when (host.startScreen) {
+                                        StartScreen.COMMAND_LIST -> Screen.CommandList.createRoute(host.id)
+                                        StartScreen.REMOTE_CONTROL -> Screen.RemoteControl.createRoute(host.id)
+                                    }
+                                    navController.navigate(route)
                                     hostViewModel.connect(host)
                                 },
                                 onAddClicked = {
@@ -376,7 +389,7 @@ class MainActivity : ComponentActivity() {
                             Screen.CommandList.route,
                             arguments = listOf(navArgument("hostId") { type = NavType.IntType }),
                         ) { backStackEntry ->
-                            val hostId = backStackEntry.arguments?.getInt("hostId")
+                            val hostId = backStackEntry.arguments?.getInt("hostId")!!
                             val hosts by hostViewModel.allHosts.collectAsState()
                             val host = hosts.find { it.id == hostId }
                             LaunchedEffect(host) {
@@ -393,8 +406,72 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onEditCommands = { navController.navigate(Screen.EditCommands.route) },
                                 onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
+                                onSwitchToRemoteControl = {
+                                    navController.navigate(Screen.RemoteControl.createRoute(hostId)) {
+                                        popUpTo(Screen.CommandList.createRoute(hostId)) {
+                                            inclusive = true
+                                        }
+                                    }
+                                },
                                 onCopyPublicKeyClicked = { showSelectIdentityDialog = true },
                                 onClearError = { hostViewModel.clearError() },
+                            )
+                        }
+
+                        composable(
+                            Screen.RemoteControl.route,
+                            arguments = listOf(navArgument("hostId") { type = NavType.IntType }),
+                        ) { backStackEntry ->
+                            val hostId = backStackEntry.arguments?.getInt("hostId")!!
+                            val hosts by hostViewModel.allHosts.collectAsState()
+                            val host = hosts.find { it.id == hostId }
+                            LaunchedEffect(host) {
+                                if (host != null) {
+                                    hostViewModel.setActiveHost(host)
+                                }
+                            }
+                            RemoteControlScreen(
+                                uiState = uiState,
+                                onRunCommand = { hostViewModel.runCommand(it) },
+                                onDisconnect = {
+                                    hostViewModel.disconnect()
+                                    navController.popBackStack()
+                                },
+                                onSwitchToCommandList = {
+                                    navController.navigate(Screen.CommandList.createRoute(hostId)) {
+                                        popUpTo(Screen.RemoteControl.createRoute(hostId)) {
+                                            inclusive = true
+                                        }
+                                    }
+                                },
+                                onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
+                                onEditRemoteControlClicked = { navController.navigate(Screen.EditRemoteControl.route) },
+                                onCopyPublicKeyClicked = { showSelectIdentityDialog = true },
+                                onClearError = { hostViewModel.clearError() },
+                            )
+                        }
+
+                        composable(Screen.EditRemoteControl.route) {
+                            EditRemoteControlScreen(
+                                commands = uiState.host?.remoteCommands ?: emptyMap(),
+                                onSave = { commands ->
+                                    uiState.host?.let { host ->
+                                        hostViewModel.upsert(host.copy(remoteCommands = commands))
+                                    }
+                                },
+                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateToEditCommands = {
+                                    navController.navigate(Screen.EditCommands.route) {
+                                        popUpTo(Screen.EditRemoteControl.route) {
+                                            inclusive = true
+                                        }
+                                    }
+                                },
+                                onSetAsDefaultScreen = { startScreen ->
+                                    uiState.host?.let { host ->
+                                        hostViewModel.upsert(host.copy(startScreen = startScreen))
+                                    }
+                                },
                             )
                         }
 
@@ -405,9 +482,20 @@ class MainActivity : ComponentActivity() {
                                     uiState.host?.let { host ->
                                         hostViewModel.upsert(host.copy(commands = commands))
                                     }
-                                    navController.popBackStack()
                                 },
                                 onNavigateBack = { navController.popBackStack() },
+                                onNavigateToEditRemoteControl = {
+                                    navController.navigate(Screen.EditRemoteControl.route) {
+                                        popUpTo(Screen.EditCommands.route) {
+                                            inclusive = true
+                                        }
+                                    }
+                                },
+                                onSetAsDefaultScreen = { startScreen ->
+                                    uiState.host?.let { host ->
+                                        hostViewModel.upsert(host.copy(startScreen = startScreen))
+                                    }
+                                },
                             )
                         }
 

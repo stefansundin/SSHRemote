@@ -26,6 +26,7 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
+import com.stefansundin.sshremote.data.host.StartScreen
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
 
@@ -73,6 +74,8 @@ class SettingsImporter(
                     identityIds = if (exportedHost.allowIdentities) null else emptyList(),
                     knownHosts = exportedHost.knownHosts,
                     commands = exportedHost.commands,
+                    remoteCommands = exportedHost.remoteCommands ?: emptyMap(),
+                    startScreen = exportedHost.startScreen ?: StartScreen.COMMAND_LIST,
                 )
                 hostRepository.upsert(host)
             }

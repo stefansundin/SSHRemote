@@ -25,14 +25,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandDao
-import com.stefansundin.sshremote.data.identity.Identity
-import com.stefansundin.sshremote.data.identity.IdentityDao
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostDao
+import com.stefansundin.sshremote.data.identity.Identity
+import com.stefansundin.sshremote.data.identity.IdentityDao
 
 @Database(
     entities = [Host::class, Identity::class, AdHocCommand::class],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)

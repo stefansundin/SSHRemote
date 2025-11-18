@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,10 +32,17 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.StartScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,6 +73,8 @@ fun EditCommandsScreen(
     commands: List<Command>,
     onSave: (List<Command>) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToEditRemoteControl: () -> Unit,
+    onSetAsDefaultScreen: (StartScreen) -> Unit,
 ) {
     var editingCommands by remember { mutableStateOf(commands) }
     var showDialog by remember { mutableStateOf(false) }
@@ -72,21 +83,24 @@ fun EditCommandsScreen(
     val scope = rememberCoroutineScope()
 
     val hasUnsavedChanges = editingCommands != commands
-    var showUnsavedDialog by remember { mutableStateOf(false) }
+    var showUnsavedBackDialog by remember { mutableStateOf(false) }
+    var showUnsavedSwitchDialog by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     BackHandler(enabled = hasUnsavedChanges) {
-        showUnsavedDialog = true
+        showUnsavedBackDialog = true
     }
 
-    if (showUnsavedDialog) {
+    if (showUnsavedBackDialog) {
         AlertDialog(
-            onDismissRequest = { showUnsavedDialog = false },
+            onDismissRequest = { showUnsavedBackDialog = false },
             title = { Text("Unsaved changes") },
             text = { Text("Do you want to save your changes before leaving?") },
             confirmButton = {
                 TextButton(
                     onClick = {
                         onSave(editingCommands)
+                        onNavigateBack()
                     },
                 ) {
                     Text("Save and leave")
@@ -95,6 +109,29 @@ fun EditCommandsScreen(
             dismissButton = {
                 TextButton(onClick = onNavigateBack) {
                     Text("Discard and leave")
+                }
+            },
+        )
+    }
+
+    if (showUnsavedSwitchDialog) {
+        AlertDialog(
+            onDismissRequest = { showUnsavedSwitchDialog = false },
+            title = { Text("Unsaved changes") },
+            text = { Text("Do you want to save your changes before switching?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onSave(editingCommands)
+                        onNavigateToEditRemoteControl()
+                    },
+                ) {
+                    Text("Save and switch")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onNavigateToEditRemoteControl) {
+                    Text("Discard and switch")
                 }
             },
         )
@@ -109,7 +146,7 @@ fun EditCommandsScreen(
                     IconButton(
                         onClick = {
                             if (hasUnsavedChanges) {
-                                showUnsavedDialog = true
+                                showUnsavedBackDialog = true
                             } else {
                                 onNavigateBack()
                             }
@@ -119,11 +156,54 @@ fun EditCommandsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add command")
+                    IconButton(
+                        onClick = {
+                            if (hasUnsavedChanges) {
+                                showUnsavedSwitchDialog = true
+                            } else {
+                                onNavigateToEditRemoteControl()
+                            }
+                        },
+                    ) {
+                        Icon(Icons.Default.SettingsRemote, contentDescription = "Edit remote control")
+                    }
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Set as default screen") },
+                                onClick = {
+                                    onSetAsDefaultScreen(StartScreen.COMMAND_LIST)
+                                    showMenu = false
+                                },
+                            )
+                        }
                     }
                 },
             )
+        },
+        floatingActionButton = {
+            Column(horizontalAlignment = Alignment.End) {
+                ExtendedFloatingActionButton(
+                    icon = { Icon(Icons.Default.Add, contentDescription = "Add command") },
+                    text = { Text("Add") },
+                    onClick = { showDialog = true },
+                )
+                FloatingActionButton(
+                    modifier = Modifier.padding(top = 16.dp),
+                    onClick = {
+                        onSave(editingCommands)
+                        onNavigateBack()
+                    },
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = "Save")
+                }
+            }
         },
     ) { padding ->
         LazyColumn(
@@ -171,11 +251,6 @@ fun EditCommandsScreen(
                             tint = MaterialTheme.colorScheme.error,
                         )
                     }
-                }
-            }
-            item {
-                Button(onClick = { onSave(editingCommands) }) {
-                    Text("Save")
                 }
             }
         }

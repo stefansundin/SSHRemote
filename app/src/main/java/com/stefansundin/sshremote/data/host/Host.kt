@@ -21,6 +21,11 @@ package com.stefansundin.sshremote.data.host
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+enum class StartScreen {
+    COMMAND_LIST,
+    REMOTE_CONTROL
+}
+
 /**
  * A host is an network device that can be accessed via SSH.
  *
@@ -38,4 +43,6 @@ data class Host(
     val identityIds: List<Int>? = null,
     val knownHosts: List<String> = emptyList(),
     val commands: List<Command> = listOf(Command("Uptime", "uptime", true)),
+    val remoteCommands: Map<RemoteControlKey, String> = emptyMap(),
+    val startScreen: StartScreen = StartScreen.COMMAND_LIST,
 )
