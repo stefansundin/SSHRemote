@@ -22,8 +22,8 @@ import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import com.jcraft.jsch.UserInfo
-import com.stefansundin.sshremote.data.settings.SettingsRepository
 import com.stefansundin.sshremote.data.host.HostConnectionDetails
+import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +35,7 @@ import java.util.Properties
 
 sealed class Result {
     data class Success(val output: String) : Result()
-    data class Error(val message: String) : Result()
+    data class Error(val message: String, val isConnectionError: Boolean = false) : Result()
 }
 
 data class HostKeyVerification(
@@ -206,7 +206,10 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
             val session = session
 
             if (session == null || !session.isConnected) {
-                return@withContext Result.Error("SSH session is not active. Please reconnect.")
+                return@withContext Result.Error(
+                    "SSH session is not active. Please reconnect.",
+                    isConnectionError = true,
+                )
             }
 
             var channel: ChannelExec? = null
@@ -259,7 +262,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 channel?.disconnect()
-                return@withContext Result.Error("Execution failed: ${e.message}")
+                return@withContext Result.Error("Execution failed: ${e.message}", isConnectionError = true)
             } finally {
                 channel?.disconnect()
             }

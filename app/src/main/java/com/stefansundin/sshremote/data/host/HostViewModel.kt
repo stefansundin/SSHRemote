@@ -30,6 +30,7 @@ import com.stefansundin.sshremote.data.identity.IdentityRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -104,72 +105,115 @@ class HostViewModel(
     fun connect(host: Host) {
         setActiveHost(host)
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    host = host,
-                    connectionStatus = ConnectionStatus.CONNECTING,
-                )
-            }
-            try {
-                val identities = host.identityIds?.map { id ->
+            handleConnection(host)
+        }
+    }
+
+    private suspend fun handleConnection(host: Host) {
+        _uiState.update {
+            it.copy(
+                host = host,
+                connectionStatus = ConnectionStatus.CONNECTING,
+                error = null,
+            )
+        }
+        try {
+            val identities = coroutineScope {
+                host.identityIds?.map { id ->
                     async { identityRepository.get(id).first() }
                 }?.awaitAll()?.filterNotNull() ?: identityRepository.getAll().first()
+            }
 
-                val privateKeys = identities.map { key ->
-                    cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8)
-                }
+            val privateKeys = identities.map { key ->
+                cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8)
+            }
 
-                val password = if (host.encryptedPassword != null) {
-                    decryptString(host.encryptedPassword, cryptoManager)
-                } else null
+            val password = if (host.encryptedPassword != null) {
+                decryptString(host.encryptedPassword, cryptoManager)
+            } else null
 
-                val connectionDetails = HostConnectionDetails(
-                    hostname = host.hostname,
-                    port = host.port,
-                    user = host.user,
-                    password = password,
-                    privateKeys = privateKeys,
-                    knownHosts = host.knownHosts,
+            val connectionDetails = HostConnectionDetails(
+                hostname = host.hostname,
+                port = host.port,
+                user = host.user,
+                password = password,
+                privateKeys = privateKeys,
+                knownHosts = host.knownHosts,
+            )
+
+            val newKnownHosts = sshRepository.connect(connectionDetails)
+            if (newKnownHosts != connectionDetails.knownHosts) {
+                val updatedHost = host.copy(knownHosts = newKnownHosts)
+                repository.upsert(updatedHost)
+            }
+            _uiState.update { it.copy(connectionStatus = ConnectionStatus.CONNECTED) }
+
+        } catch (e: Exception) {
+            Log.e("HostViewModel", "Error connecting to host", e)
+            _uiState.update {
+                it.copy(
+                    connectionStatus = ConnectionStatus.DISCONNECTED,
+                    error = e.message,
                 )
-
-                val newKnownHosts = sshRepository.connect(connectionDetails)
-                if (newKnownHosts != connectionDetails.knownHosts) {
-                    val updatedHost = host.copy(knownHosts = newKnownHosts)
-                    repository.upsert(updatedHost)
-                }
-                _uiState.update { it.copy(connectionStatus = ConnectionStatus.CONNECTED) }
-
-            } catch (e: Exception) {
-                Log.e("HostViewModel", "Error connecting to host", e)
-                _uiState.update {
-                    it.copy(
-                        connectionStatus = ConnectionStatus.DISCONNECTED,
-                        error = e.message,
-                    )
-                }
             }
         }
     }
 
-    fun runCommand(command: Command) {
+    fun runCommand(command: Command, isRetry: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, commandOutput = null) }
+            _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
 
             val result = sshRepository.executeCommand(command.command)
-            val output = try {
-                when (result) {
-                    is Result.Success -> result.output
-                    is Result.Error -> result.message
-                }
-            } catch (e: Exception) {
-                "Error executing command: ${e.message}"
-            }
 
-            _uiState.update {
-                it.copy(
-                    commandOutput = if (result is Result.Error || command.showOutput) output else null,
-                    isLoading = false,
-                )
+            when (result) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            commandOutput = if (command.showOutput) result.output else null,
+                            isLoading = false,
+                        )
+                    }
+                }
+
+                is Result.Error -> {
+                    if (result.isConnectionError && !isRetry) {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = "Connection lost. Reconnecting...",
+                            )
+                        }
+                        val host = _uiState.value.host
+                        if (host != null) {
+                            handleConnection(host)
+                            if (_uiState.value.connectionStatus == ConnectionStatus.CONNECTED) {
+                                runCommand(command, isRetry = true)
+                            }
+                        } else {
+                            _uiState.update {
+                                it.copy(
+                                    connectionStatus = ConnectionStatus.DISCONNECTED,
+                                    error = "Cannot reconnect, no active host.",
+                                    isLoading = false,
+                                )
+                            }
+                        }
+                    } else {
+                        val errorMessage = if (result.isConnectionError) {
+                            "Failed to reconnect."
+                        } else {
+                            result.message
+                        }
+                        _uiState.update {
+                            it.copy(
+                                commandOutput = if (!result.isConnectionError) errorMessage else null,
+                                error = if (result.isConnectionError) errorMessage else null,
+                                connectionStatus = if (result.isConnectionError) ConnectionStatus.DISCONNECTED else it.connectionStatus,
+                                isLoading = false,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
