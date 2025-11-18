@@ -144,16 +144,24 @@ fun EditHostScreen(
                     encryptString(password, cryptoManager)
                 } else null
 
-            val hostToSave = Host(
-                id = host?.id ?: 0,
+            val hostToSave = host?.copy(
                 name = name,
                 hostname = hostname,
                 port = port.toInt(),
                 user = user,
                 encryptedPassword = encryptedPassword,
                 identityIds = selectedIdentityIds,
-                knownHosts = knownHosts,
+                knownHosts = knownHosts
             )
+                ?: Host(
+                    name = name,
+                    hostname = hostname,
+                    port = port.toInt(),
+                    user = user,
+                    encryptedPassword = encryptedPassword,
+                    identityIds = selectedIdentityIds,
+                    knownHosts = knownHosts
+                )
             onSave(hostToSave)
         }
     }
