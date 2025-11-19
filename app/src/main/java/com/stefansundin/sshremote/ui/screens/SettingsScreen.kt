@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.SettingsEvent
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
+import com.stefansundin.sshremote.ui.components.HapticFeedbackSettingDialog
 import com.stefansundin.sshremote.ui.components.ThemeSettingDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -75,7 +76,11 @@ fun SettingsScreen(
     val savedTheme by settingsViewModel.theme.collectAsState()
     var previewTheme by remember { mutableStateOf(savedTheme) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    val savedHapticFeedback by settingsViewModel.hapticFeedback.collectAsState()
+    var previewHapticFeedback by remember { mutableStateOf(savedHapticFeedback) }
+    var showHapticFeedbackDialog by remember { mutableStateOf(false) }
     var importUri by remember { mutableStateOf<Uri?>(null) }
+
     val useDarkTheme = when (previewTheme) {
         Theme.SYSTEM -> isSystemInDarkTheme()
         Theme.LIGHT -> false
@@ -175,6 +180,23 @@ fun SettingsScreen(
             )
         }
 
+        if (showHapticFeedbackDialog) {
+            HapticFeedbackSettingDialog(
+                currentHapticFeedback = previewHapticFeedback,
+                onHapticFeedbackSelected = { newHapticFeedback ->
+                    previewHapticFeedback = newHapticFeedback
+                },
+                onConfirm = {
+                    settingsViewModel.setHapticFeedback(previewHapticFeedback)
+                    showHapticFeedbackDialog = false
+                },
+                onDismiss = {
+                    previewHapticFeedback = savedHapticFeedback
+                    showHapticFeedbackDialog = false
+                },
+            )
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -220,6 +242,31 @@ fun SettingsScreen(
                     )
                     Text(
                         savedTheme.name.lowercase().replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Remote control", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .clickable {
+                            previewHapticFeedback = savedHapticFeedback
+                            showHapticFeedbackDialog = true
+                        }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "Haptic feedback",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = savedHapticFeedback.label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

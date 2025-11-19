@@ -22,11 +22,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.SshRepository
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.decryptString
 import com.stefansundin.sshremote.data.identity.IdentityRepository
+import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -47,6 +49,7 @@ class HostViewModel(
     private val identityRepository: IdentityRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RemoteUiState())
@@ -57,6 +60,14 @@ class HostViewModel(
     private var lastDeletedHost: Host? = null
 
     private var cloneHost: Host? = null
+
+    init {
+        viewModelScope.launch {
+            settingsRepository.hapticFeedback.collectLatest { hapticFeedback ->
+                _uiState.update { it.copy(hapticFeedback = hapticFeedback) }
+            }
+        }
+    }
 
     val allHosts: StateFlow<List<Host>> = repository.getAll()
         .stateIn(
@@ -252,6 +263,7 @@ data class RemoteUiState(
     val commands: List<Command> = emptyList(),
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val error: String? = null,
+    val hapticFeedback: HapticFeedback = HapticFeedback.Medium,
 )
 
 class HostViewModelFactory(
@@ -259,6 +271,7 @@ class HostViewModelFactory(
     private val identityRepository: IdentityRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HostViewModel::class.java)) {
@@ -268,6 +281,7 @@ class HostViewModelFactory(
                 identityRepository,
                 sshRepository,
                 cryptoManager,
+                settingsRepository,
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

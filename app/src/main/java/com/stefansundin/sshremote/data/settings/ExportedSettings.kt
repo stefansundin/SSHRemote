@@ -46,6 +46,7 @@ data class ExportedAdHocCommand(
 @Keep
 data class ExportedSettings(
     val theme: Theme?,
+    val hapticFeedbackDuration: Long?,
     val strictHostKeyChecking: Boolean?,
     val hosts: List<ExportedHost>?,
     val adHocCommands: List<ExportedAdHocCommand>?,

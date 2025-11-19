@@ -123,6 +123,7 @@ class MainActivity : ComponentActivity() {
             app.identityRepository,
             sshRepository,
             cryptoManager,
+            app.settingsRepository,
         )
     }
 

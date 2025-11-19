@@ -45,9 +45,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteUiState
+import com.stefansundin.sshremote.performHapticFeedback
 import com.stefansundin.sshremote.ui.components.RemoteControl
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,6 +66,7 @@ fun RemoteControlScreen(
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     if (uiState.error != null) {
         AlertDialog(
@@ -147,6 +150,7 @@ fun RemoteControlScreen(
         ) {
             RemoteControl(
                 onKeyClicked = { key ->
+                    performHapticFeedback(context, uiState.hapticFeedback)
                     commands[key]?.let { command ->
                         onRunCommand(Command(command, command, false))
                     }

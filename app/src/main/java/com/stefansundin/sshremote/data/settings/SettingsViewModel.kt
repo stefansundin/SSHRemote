@@ -23,6 +23,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
@@ -56,12 +57,18 @@ class SettingsViewModel(
         }
     }
 
-    val hasHosts: StateFlow<Boolean> = hostRepository.getAll().map { it.isNotEmpty() }
+    val hapticFeedback: StateFlow<HapticFeedback> = settingsRepository.hapticFeedback
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = false,
+            initialValue = HapticFeedback.Medium,
         )
+
+    fun setHapticFeedback(hapticFeedback: HapticFeedback) {
+        viewModelScope.launch {
+            settingsRepository.setHapticFeedback(hapticFeedback)
+        }
+    }
 
     val strictHostKeyChecking: StateFlow<Boolean> = settingsRepository.strictHostKeyChecking
         .stateIn(
@@ -75,6 +82,13 @@ class SettingsViewModel(
             settingsRepository.setStrictHostKeyChecking(strictHostKeyChecking)
         }
     }
+
+    val hasHosts: StateFlow<Boolean> = hostRepository.getAll().map { it.isNotEmpty() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false,
+        )
 
     fun exportSettings(context: Context, uri: Uri) {
         viewModelScope.launch {

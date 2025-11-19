@@ -23,8 +23,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -38,6 +40,7 @@ class SettingsRepository(context: Context) {
     private object PreferencesKeys {
         val THEME = stringPreferencesKey("theme")
         val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
+        val HAPTIC_FEEDBACK_DURATION = longPreferencesKey("haptic_feedback_duration")
     }
 
     val theme: Flow<Theme> = dataStore.data
@@ -56,6 +59,19 @@ class SettingsRepository(context: Context) {
         }
     }
 
+    val hapticFeedback: Flow<HapticFeedback> = dataStore.data
+        .map { preferences ->
+            val duration = preferences[PreferencesKeys.HAPTIC_FEEDBACK_DURATION]
+                ?: HapticFeedback.Medium.duration
+            HapticFeedback.fromDuration(duration)
+        }
+
+    suspend fun setHapticFeedback(hapticFeedback: HapticFeedback) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HAPTIC_FEEDBACK_DURATION] = hapticFeedback.duration
+        }
+    }
+
     val strictHostKeyChecking: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.STRICT_HOST_KEY_CHECKING] ?: true
@@ -66,5 +82,4 @@ class SettingsRepository(context: Context) {
             preferences[PreferencesKeys.STRICT_HOST_KEY_CHECKING] = strictHostKeyChecking
         }
     }
-
 }

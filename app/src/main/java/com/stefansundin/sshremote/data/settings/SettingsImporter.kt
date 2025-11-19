@@ -22,6 +22,7 @@ import android.content.Context
 import android.net.Uri
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.Host
@@ -54,6 +55,9 @@ class SettingsImporter(
 
             if (settings.theme != null) {
                 settingsRepository.setTheme(settings.theme)
+            }
+            if (settings.hapticFeedbackDuration != null) {
+                settingsRepository.setHapticFeedback(HapticFeedback.fromDuration(settings.hapticFeedbackDuration))
             }
             if (settings.strictHostKeyChecking != null) {
                 settingsRepository.setStrictHostKeyChecking(settings.strictHostKeyChecking)
