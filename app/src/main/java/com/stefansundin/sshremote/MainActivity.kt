@@ -313,7 +313,11 @@ class MainActivity : ComponentActivity() {
                                 val publicKey = identityViewModel.getPublicKey(it)
                                 val command =
                                     """exec sh -c 'cd; umask 077; echo "\n$publicKey" >> ~/.ssh/authorized_keys'"""
-                                hostViewModel.runCommand(Command("Copy public key", command, false))
+                                hostViewModel.runCommand(
+                                    Command("Copy public key", command, false),
+                                    isRetry = false,
+                                    reuseShell = false,
+                                )
                                 snackbarHostState.showSnackbar("Public key copied to host.")
                             }
                             showSelectIdentityDialog = false

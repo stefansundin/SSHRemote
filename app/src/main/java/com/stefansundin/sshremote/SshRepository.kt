@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote
 
 import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.ChannelShell
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import com.jcraft.jsch.UserInfo
@@ -29,9 +30,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.InputStream
+import java.io.OutputStream
 import java.util.Properties
+import java.util.UUID
 
 sealed class Result {
     data class Success(val output: String) : Result()
@@ -63,7 +68,12 @@ data class Message(
  */
 class SshRepository(private val settingsRepository: SettingsRepository) {
 
+    private val commandMutex = Mutex()
+
     private var session: Session? = null
+    private var channel: ChannelShell? = null
+    private var channelInputStream: InputStream? = null
+    private var channelOutputStream: OutputStream? = null
 
     private val _hostKeyVerification = MutableStateFlow<HostKeyVerification?>(null)
     val hostKeyVerification = _hostKeyVerification.asStateFlow()
@@ -195,14 +205,14 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
 
     /**
      * Executes a command on the currently connected SSH session.
+     * This function always opens a new shell channel.
      *
      * @param command The command string to execute.
-     * @return The output from the command.
+     * @return The result (output and exit code, or error information) from the command.
      * @throws Exception if not connected or command fails.
      */
     suspend fun executeCommand(command: String): Result {
         return withContext(Dispatchers.IO) {
-
             val session = session
 
             if (session == null || !session.isConnected) {
@@ -270,10 +280,115 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
     }
 
     /**
+     * Executes a command on the currently connected SSH session.
+     * This function reuses the existing channel if available, otherwise creates a new one.
+     *
+     * @param command The command string to execute.
+     * @return The result (output and exit code, or error information) from the command.
+     * @throws Exception if not connected or command fails.
+     */
+    suspend fun executeCommandReuseShell(command: String): Result {
+        return commandMutex.withLock {
+            withContext(Dispatchers.IO) {
+                try {
+                    val session = session
+                    if (session == null || !session.isConnected) {
+                        return@withContext Result.Error(
+                            "SSH session is not active. Please reconnect.",
+                            isConnectionError = true,
+                        )
+                    }
+
+                    if (channel == null || channel?.isConnected != true) {
+                        disconnectChannel()
+                        val newChannel = session.openChannel("shell") as ChannelShell
+                        newChannel.setPty(false)
+                        newChannel.connect(30000)
+                        channel = newChannel
+                        channelInputStream = newChannel.inputStream
+                        channelOutputStream = newChannel.outputStream
+                    }
+
+                    val outputStream = channelOutputStream ?: return@withContext Result.Error(
+                        "Channel output stream is null",
+                        isConnectionError = true,
+                    )
+                    val inputStream = channelInputStream ?: return@withContext Result.Error(
+                        "Channel input stream is null",
+                        isConnectionError = true,
+                    )
+
+                    // A unique separator is used to mark the end of the command output and carry the exit code
+                    val endMarker = "END_OF_COMMAND_${UUID.randomUUID()}"
+                    val fullCommand = "$command 2>&1; echo \"${endMarker}$?\"\n"
+                    outputStream.write(fullCommand.toByteArray())
+                    outputStream.flush()
+
+                    val buffer = ByteArray(1024)
+                    val output = StringBuilder()
+
+                    // Read until the marker appears in the output
+                    while (true) {
+                        val bytesRead = inputStream.read(buffer)
+                        if (bytesRead < 0) break
+                        val chunk = String(buffer, 0, bytesRead)
+                        output.append(chunk)
+
+                        val outputSoFar = output.toString()
+                        if (outputSoFar.contains(endMarker)) {
+                            val endMarkerIndex = outputSoFar.lastIndexOf(endMarker)
+                            if (endMarkerIndex != -1) {
+                                val rest = outputSoFar.substring(endMarkerIndex)
+                                if (rest.contains("\n")) {
+                                    break
+                                }
+                            }
+                        }
+                    }
+
+                    val outputString = output.toString()
+                    val endMarkerIndex = outputString.lastIndexOf(endMarker)
+
+                    if (endMarkerIndex == -1) {
+                        return@withContext Result.Error("Failed to determine command exit status. Output:\n$outputString")
+                    }
+
+                    // Extract the command output
+                    val commandOutput = outputString.take(endMarkerIndex).trim()
+
+                    // Extract the exit code
+                    val markerLine = outputString.substring(endMarkerIndex)
+                    val exitCodeString = markerLine.substring(endMarker.length).trim().lines().first()
+                    val exitStatus = exitCodeString.toIntOrNull() ?: -1
+
+                    if (exitStatus == 0) {
+                        Result.Success("Output:\n$commandOutput")
+                    } else {
+                        Result.Error("Command failed (Status $exitStatus). Output:\n$commandOutput")
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    disconnectChannel()
+                    Result.Error("Execution failed: ${e.message}", isConnectionError = true)
+                }
+            }
+        }
+    }
+
+    private fun disconnectChannel() {
+        channel?.disconnect()
+        channel = null
+        channelInputStream = null
+        channelOutputStream = null
+    }
+
+    /**
      * Disconnects the current session.
      */
     suspend fun disconnect() {
         withContext(Dispatchers.IO) {
+            disconnectChannel()
             session?.disconnect()
             session = null
         }

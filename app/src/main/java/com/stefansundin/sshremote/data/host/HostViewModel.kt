@@ -171,12 +171,16 @@ class HostViewModel(
         }
     }
 
-    fun runCommand(command: Command, isRetry: Boolean = false) {
+    fun runCommand(command: Command, isRetry: Boolean = false, reuseShell: Boolean = true) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
 
             val (result, duration) = measureTimedValue {
-                sshRepository.executeCommand(command.command)
+                if (reuseShell) {
+                    sshRepository.executeCommandReuseShell(command.command)
+                } else {
+                    sshRepository.executeCommand(command.command)
+                }
             }
             Log.d("HostViewModel", "executeCommand for '${command.command}' took $duration")
 
