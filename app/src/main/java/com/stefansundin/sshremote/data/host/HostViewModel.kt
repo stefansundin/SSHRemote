@@ -125,7 +125,7 @@ class HostViewModel(
             }
 
             val privateKeys = identities.map { key ->
-                cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8)
+                Pair(key.name, cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8))
             }
 
             val password = if (host.encryptedPassword != null) {

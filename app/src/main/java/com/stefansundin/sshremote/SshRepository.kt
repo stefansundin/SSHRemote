@@ -99,8 +99,8 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 details.knownHosts.joinToString("\n").let { jsch.setKnownHosts(it.byteInputStream()) }
             }
 
-            details.privateKeys?.forEachIndexed { index, key ->
-                jsch.addIdentity("privateKey-$index", key.toByteArray(), null, null)
+            details.privateKeys?.forEach { (name, key) ->
+                jsch.addIdentity(name, key.toByteArray(), null, null)
             }
 
             session = jsch.getSession(details.user, details.hostname, details.port)
