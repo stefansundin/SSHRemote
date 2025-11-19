@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.measureTimedValue
 
 class HostViewModel(
     private val repository: HostRepository,
@@ -174,7 +175,10 @@ class HostViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
 
-            val result = sshRepository.executeCommand(command.command)
+            val (result, duration) = measureTimedValue {
+                sshRepository.executeCommand(command.command)
+            }
+            Log.d("HostViewModel", "executeCommand for '${command.command}' took $duration")
 
             when (result) {
                 is Result.Success -> {
