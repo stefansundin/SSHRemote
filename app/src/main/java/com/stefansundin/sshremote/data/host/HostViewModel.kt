@@ -62,6 +62,11 @@ class HostViewModel(
 
     private var cloneHost: Host? = null
 
+    private var mouseMoveJob: Job? = null
+    private var pendingDx = 0f
+    private var pendingDy = 0f
+    private var activeMouseMoveTemplate: String? = null
+
     init {
         viewModelScope.launch {
             settingsRepository.hapticFeedback.collectLatest { hapticFeedback ->
@@ -232,6 +237,29 @@ class HostViewModel(
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+
+    fun onMouseMove(dx: Float, dy: Float, template: String) {
+        pendingDx += dx
+        pendingDy += dy
+        activeMouseMoveTemplate = template
+
+        if (mouseMoveJob?.isActive != true) {
+            mouseMoveJob = viewModelScope.launch {
+                while (pendingDx.toInt() != 0 || pendingDy.toInt() != 0) {
+                    val cx = pendingDx.toInt()
+                    val cy = pendingDy.toInt()
+                    pendingDx -= cx
+                    pendingDy -= cy
+
+                    val cmdStr = activeMouseMoveTemplate!!
+                        .replace("%dx", cx.toString())
+                        .replace("%dy", cy.toString())
+
+                    sshRepository.executeCommandReuseShell(cmdStr)
                 }
             }
         }

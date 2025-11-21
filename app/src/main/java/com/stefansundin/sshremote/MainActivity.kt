@@ -438,6 +438,7 @@ class MainActivity : ComponentActivity() {
                             RemoteControlScreen(
                                 uiState = uiState,
                                 onRunCommand = { hostViewModel.runCommand(it) },
+                                onMouseMove = { dx, dy, template -> hostViewModel.onMouseMove(dx, dy, template) },
                                 onDisconnect = {
                                     hostViewModel.disconnect()
                                     navController.popBackStack()

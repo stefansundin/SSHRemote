@@ -58,6 +58,7 @@ import com.stefansundin.sshremote.ui.components.RemoteControl
 fun RemoteControlScreen(
     uiState: RemoteUiState,
     onRunCommand: (Command) -> Unit,
+    onMouseMove: (Float, Float, String) -> Unit,
     onDisconnect: () -> Unit,
     onSwitchToCommandList: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
@@ -166,14 +167,11 @@ fun RemoteControlScreen(
                         MouseEvent.RightClick -> RemoteControlKey.MOUSE_RIGHT_CLICK
                     }
                     commands[key]?.let { commandTemplate ->
-                        val commandString = if (event is MouseEvent.Move) {
-                            commandTemplate
-                                .replace("%dx", event.dx.toInt().toString())
-                                .replace("%dy", event.dy.toInt().toString())
+                        if (event is MouseEvent.Move) {
+                            onMouseMove(event.dx, event.dy, commandTemplate)
                         } else {
-                            commandTemplate
+                            onRunCommand(Command(key.title, commandTemplate, false))
                         }
-                        onRunCommand(Command(key.title, commandString, false))
                     }
                 },
             )
