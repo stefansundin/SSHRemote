@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.performHapticFeedback
 import com.stefansundin.sshremote.ui.components.RemoteControl
@@ -153,6 +154,26 @@ fun RemoteControlScreen(
                     performHapticFeedback(context, uiState.hapticFeedback)
                     commands[key]?.let { command ->
                         onRunCommand(Command(command, command, false))
+                    }
+                },
+                onMouseEvent = { event ->
+                    if (event !is MouseEvent.Move) {
+                        performHapticFeedback(context, uiState.hapticFeedback)
+                    }
+                    val key = when (event) {
+                        is MouseEvent.Move -> RemoteControlKey.MOUSE_MOVE
+                        MouseEvent.LeftClick -> RemoteControlKey.MOUSE_LEFT_CLICK
+                        MouseEvent.RightClick -> RemoteControlKey.MOUSE_RIGHT_CLICK
+                    }
+                    commands[key]?.let { commandTemplate ->
+                        val commandString = if (event is MouseEvent.Move) {
+                            commandTemplate
+                                .replace("%dx", event.dx.toInt().toString())
+                                .replace("%dy", event.dy.toInt().toString())
+                        } else {
+                            commandTemplate
+                        }
+                        onRunCommand(Command(key.title, commandString, false))
                     }
                 },
             )

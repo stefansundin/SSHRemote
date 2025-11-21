@@ -36,6 +36,11 @@ enum class RemoteControlKey(val title: String) {
     PREVIOUS("Previous"),
     PLAY_PAUSE("Play/Pause"),
     NEXT("Next"),
+
+    // Mouse
+    MOUSE_MOVE("Mouse Move"),
+    MOUSE_LEFT_CLICK("Left Click"),
+    MOUSE_RIGHT_CLICK("Right Click"),
 }
 
 /**
@@ -57,6 +62,9 @@ val wtypePreset = mapOf(
     RemoteControlKey.PREVIOUS to "wtype -k XF86AudioPrev",
     RemoteControlKey.PLAY_PAUSE to "wtype -k XF86AudioPlay",
     RemoteControlKey.NEXT to "wtype -k XF86AudioNext",
+    RemoteControlKey.MOUSE_MOVE to "wtype -mm %dx %dy",
+    RemoteControlKey.MOUSE_LEFT_CLICK to "wtype -c left",
+    RemoteControlKey.MOUSE_RIGHT_CLICK to "wtype -c right",
 )
 
 /**
@@ -78,6 +86,9 @@ val xdotoolPreset = mapOf(
     RemoteControlKey.PREVIOUS to "DISPLAY=:0 xdotool key XF86AudioPrev",
     RemoteControlKey.PLAY_PAUSE to "DISPLAY=:0 xdotool key XF86AudioPlay",
     RemoteControlKey.NEXT to "DISPLAY=:0 xdotool key XF86AudioNext",
+    RemoteControlKey.MOUSE_MOVE to "DISPLAY=:0 xdotool mousemove_relative -- %dx %dy",
+    RemoteControlKey.MOUSE_LEFT_CLICK to "DISPLAY=:0 xdotool click 1",
+    RemoteControlKey.MOUSE_RIGHT_CLICK to "DISPLAY=:0 xdotool click 3",
 )
 
 /**

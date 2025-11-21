@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -31,6 +32,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,7 +53,11 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -62,12 +69,48 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.ui.screens.MouseEvent
+import com.stefansundin.sshremote.ui.screens.MousePadScreen
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RemoteControl(onKeyClicked: (RemoteControlKey) -> Unit, modifier: Modifier = Modifier) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val isLandscape = maxWidth > maxHeight
-        RemoteControlLayout(isLandscape, onKeyClicked)
+fun RemoteControl(
+    onKeyClicked: (RemoteControlKey) -> Unit,
+    onMouseEvent: (MouseEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val pagerState = rememberPagerState { 2 }
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(modifier = modifier.fillMaxSize()) {
+        TabRow(selectedTabIndex = pagerState.currentPage) {
+            Tab(
+                selected = pagerState.currentPage == 0,
+                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
+                text = { Text("Remote") },
+            )
+            Tab(
+                selected = pagerState.currentPage == 1,
+                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
+                text = { Text("Mouse") },
+            )
+        }
+
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+            when (page) {
+                0 -> {
+                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                        val isLandscape = maxWidth > maxHeight
+                        RemoteControlLayout(isLandscape, onKeyClicked)
+                    }
+                }
+
+                1 -> {
+                    MousePadScreen(onMouseEvent)
+                }
+            }
+        }
     }
 }
 

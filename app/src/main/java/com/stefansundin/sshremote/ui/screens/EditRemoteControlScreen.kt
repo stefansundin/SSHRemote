@@ -272,6 +272,14 @@ fun EditRemoteControlScreen(
                 onKeyClicked = { key ->
                     editingCommand = key to (editedCommands[key] ?: "")
                 },
+                onMouseEvent = { event ->
+                    val key = when (event) {
+                        is MouseEvent.Move -> RemoteControlKey.MOUSE_MOVE
+                        MouseEvent.LeftClick -> RemoteControlKey.MOUSE_LEFT_CLICK
+                        MouseEvent.RightClick -> RemoteControlKey.MOUSE_RIGHT_CLICK
+                    }
+                    editingCommand = key to (editedCommands[key] ?: "")
+                },
             )
         }
 
