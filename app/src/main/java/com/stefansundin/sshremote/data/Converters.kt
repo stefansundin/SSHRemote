@@ -19,14 +19,19 @@
 package com.stefansundin.sshremote.data
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import java.time.OffsetDateTime
 
 class Converters {
-    private val gson = Gson()
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(
+            object : TypeToken<Map<RemoteControlKey, String>>() {}.type,
+            LenientRemoteControlKeyMapTypeAdapter(),
+        )
+        .create()
 
     @TypeConverter
     fun fromOffsetDateTime(value: String?): OffsetDateTime? {
