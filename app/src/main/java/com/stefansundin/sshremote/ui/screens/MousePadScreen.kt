@@ -20,7 +20,8 @@ package com.stefansundin.sshremote.ui.screens
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -43,6 +46,7 @@ sealed interface MouseEvent {
     data class Move(val dx: Float, val dy: Float) : MouseEvent
     object LeftClick : MouseEvent
     object RightClick : MouseEvent
+    data class Pan(val dx: Float, val dy: Float) : MouseEvent
 }
 
 @Composable
@@ -60,6 +64,7 @@ fun MousePadScreen(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modi
     ) {
         TouchPad(
             onMove = { dx, dy -> onMouseEvent(MouseEvent.Move(dx, dy)) },
+            onPan = { dx, dy -> onMouseEvent(MouseEvent.Pan(dx, dy)) },
             modifier = Modifier.weight(1f),
         )
         Row(
@@ -77,14 +82,39 @@ fun MousePadScreen(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modi
 }
 
 @Composable
-private fun TouchPad(onMove: (dx: Float, dy: Float) -> Unit, modifier: Modifier = Modifier) {
+private fun TouchPad(
+    onMove: (dx: Float, dy: Float) -> Unit,
+    onPan: (dx: Float, dy: Float) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
-                    change.consume()
-                    onMove(dragAmount.x, dragAmount.y)
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    do {
+                        val event = awaitPointerEvent()
+                        val pressedChanges = event.changes.filter { it.pressed }
+                        when (pressedChanges.size) {
+                            1 -> {
+                                val change = pressedChanges.first().positionChange()
+                                onMove(change.x, change.y)
+                            }
+
+                            in 2..Int.MAX_VALUE -> {
+                                val centroid = pressedChanges
+                                    .map { it.position }
+                                    .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                val prevCentroid = pressedChanges
+                                    .map { it.previousPosition }
+                                    .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                val pan = centroid - prevCentroid
+                                onPan(pan.x, pan.y)
+                            }
+                        }
+                        event.changes.forEach { it.consume() }
+                    } while (pressedChanges.isNotEmpty())
                 }
             },
         shape = MaterialTheme.shapes.medium,
@@ -94,7 +124,10 @@ private fun TouchPad(onMove: (dx: Float, dy: Float) -> Unit, modifier: Modifier 
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            Text("Mouse Pad")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Mouse Pad")
+                Text("Scroll using two fingers")
+            }
         }
     }
 }

@@ -66,6 +66,7 @@ class HostViewModel(
     private var pendingDx = 0f
     private var pendingDy = 0f
     private var activeMouseMoveTemplate: String? = null
+    private var mousePanJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -261,6 +262,14 @@ class HostViewModel(
 
                     sshRepository.executeCommandReuseShell(cmdStr)
                 }
+            }
+        }
+    }
+
+    fun onMousePan(command: String) {
+        if (mousePanJob?.isActive != true) {
+            mousePanJob = viewModelScope.launch {
+                sshRepository.executeCommandReuseShell(command)
             }
         }
     }

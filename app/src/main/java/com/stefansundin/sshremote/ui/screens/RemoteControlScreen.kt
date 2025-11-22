@@ -52,6 +52,7 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.performHapticFeedback
 import com.stefansundin.sshremote.ui.components.RemoteControl
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +60,7 @@ fun RemoteControlScreen(
     uiState: RemoteUiState,
     onRunCommand: (Command) -> Unit,
     onMouseMove: (Float, Float, String) -> Unit,
+    onMousePan: (String) -> Unit,
     onDisconnect: () -> Unit,
     onSwitchToCommandList: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
@@ -165,12 +167,27 @@ fun RemoteControlScreen(
                         is MouseEvent.Move -> RemoteControlKey.MOUSE_MOVE
                         MouseEvent.LeftClick -> RemoteControlKey.MOUSE_LEFT_CLICK
                         MouseEvent.RightClick -> RemoteControlKey.MOUSE_RIGHT_CLICK
+                        is MouseEvent.Pan -> {
+                            if (abs(event.dx) > abs(event.dy)) {
+                                if (event.dx > 0) RemoteControlKey.MOUSE_PAN_RIGHT else RemoteControlKey.MOUSE_PAN_LEFT
+                            } else {
+                                if (event.dy > 0) RemoteControlKey.MOUSE_PAN_DOWN else RemoteControlKey.MOUSE_PAN_UP
+                            }
+                        }
                     }
                     commands[key]?.let { commandTemplate ->
-                        if (event is MouseEvent.Move) {
-                            onMouseMove(event.dx, event.dy, commandTemplate)
-                        } else {
-                            onRunCommand(Command(key.title, commandTemplate, false))
+                        when (event) {
+                            is MouseEvent.Move -> {
+                                onMouseMove(event.dx, event.dy, commandTemplate)
+                            }
+
+                            is MouseEvent.Pan -> {
+                                onMousePan(commandTemplate)
+                            }
+
+                            else -> {
+                                onRunCommand(Command(key.title, commandTemplate, false))
+                            }
                         }
                     }
                 },

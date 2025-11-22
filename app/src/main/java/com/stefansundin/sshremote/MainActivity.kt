@@ -439,6 +439,7 @@ class MainActivity : ComponentActivity() {
                                 uiState = uiState,
                                 onRunCommand = { hostViewModel.runCommand(it) },
                                 onMouseMove = { dx, dy, template -> hostViewModel.onMouseMove(dx, dy, template) },
+                                onMousePan = { command -> hostViewModel.onMousePan(command) },
                                 onDisconnect = {
                                     hostViewModel.disconnect()
                                     navController.popBackStack()

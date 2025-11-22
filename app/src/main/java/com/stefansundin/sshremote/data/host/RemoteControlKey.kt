@@ -41,6 +41,10 @@ enum class RemoteControlKey(val title: String) {
     MOUSE_MOVE("Mouse Move"),
     MOUSE_LEFT_CLICK("Left Click"),
     MOUSE_RIGHT_CLICK("Right Click"),
+    MOUSE_PAN_UP("Two-Finger Pan Up"),
+    MOUSE_PAN_DOWN("Two-Finger Pan Down"),
+    MOUSE_PAN_LEFT("Two-Finger Pan Left"),
+    MOUSE_PAN_RIGHT("Two-Finger Pan Right"),
 }
 
 /**
@@ -65,6 +69,10 @@ val wtypePreset = mapOf(
     RemoteControlKey.MOUSE_MOVE to "wtype -mm %dx %dy",
     RemoteControlKey.MOUSE_LEFT_CLICK to "wtype -c left",
     RemoteControlKey.MOUSE_RIGHT_CLICK to "wtype -c right",
+    RemoteControlKey.MOUSE_PAN_UP to "wtype -A axis_v 1",
+    RemoteControlKey.MOUSE_PAN_DOWN to "wtype -A axis_v -1",
+    RemoteControlKey.MOUSE_PAN_LEFT to "wtype -A axis_h 1",
+    RemoteControlKey.MOUSE_PAN_RIGHT to "wtype -A axis_h -1",
 )
 
 /**
@@ -89,6 +97,10 @@ val xdotoolPreset = mapOf(
     RemoteControlKey.MOUSE_MOVE to "DISPLAY=:0 xdotool mousemove_relative -- %dx %dy",
     RemoteControlKey.MOUSE_LEFT_CLICK to "DISPLAY=:0 xdotool click 1",
     RemoteControlKey.MOUSE_RIGHT_CLICK to "DISPLAY=:0 xdotool click 3",
+    RemoteControlKey.MOUSE_PAN_UP to "DISPLAY=:0 xdotool click 5",
+    RemoteControlKey.MOUSE_PAN_DOWN to "DISPLAY=:0 xdotool click 4",
+    RemoteControlKey.MOUSE_PAN_LEFT to "DISPLAY=:0 xdotool click 7",
+    RemoteControlKey.MOUSE_PAN_RIGHT to "DISPLAY=:0 xdotool click 6",
 )
 
 /**

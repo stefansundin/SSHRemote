@@ -55,6 +55,7 @@ import com.stefansundin.sshremote.data.host.macosVlcPreset
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.host.xdotoolPreset
 import com.stefansundin.sshremote.ui.components.RemoteControl
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -277,6 +278,13 @@ fun EditRemoteControlScreen(
                         is MouseEvent.Move -> RemoteControlKey.MOUSE_MOVE
                         MouseEvent.LeftClick -> RemoteControlKey.MOUSE_LEFT_CLICK
                         MouseEvent.RightClick -> RemoteControlKey.MOUSE_RIGHT_CLICK
+                        is MouseEvent.Pan -> {
+                            if (abs(event.dx) > abs(event.dy)) {
+                                if (event.dx > 0) RemoteControlKey.MOUSE_PAN_RIGHT else RemoteControlKey.MOUSE_PAN_LEFT
+                            } else {
+                                if (event.dy > 0) RemoteControlKey.MOUSE_PAN_DOWN else RemoteControlKey.MOUSE_PAN_UP
+                            }
+                        }
                     }
                     editingCommand = key to (editedCommands[key] ?: "")
                 },
