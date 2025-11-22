@@ -301,9 +301,9 @@ class HostViewModel(
 
                     _uiState.value.host?.remoteCommands?.get(key)?.let { command ->
                         val (result, duration) = measureTimedValue {
-                            sshRepository.executeCommandReuseShell(command)
+                            sshRepository.executeCommandReuseShell(command.command)
                         }
-                        Log.d("HostViewModel", "executeCommand for '${command}' took $duration")
+                        Log.d("HostViewModel", "executeCommand for '${command.command}' took $duration")
                     }
                 }
             }

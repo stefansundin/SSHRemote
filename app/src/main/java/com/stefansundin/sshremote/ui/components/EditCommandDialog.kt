@@ -20,9 +20,10 @@ package com.stefansundin.sshremote.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -31,51 +32,50 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 @Composable
-fun EditMouseCommandsDialog(
-    commands: Map<RemoteControlKey, Command>,
+fun EditCommandDialog(
+    command: Triple<RemoteControlKey, String, Boolean>,
     onDismiss: () -> Unit,
-    onSave: (Map<RemoteControlKey, Command>) -> Unit,
+    onSave: (RemoteControlKey, String, Boolean) -> Unit,
 ) {
-    var newCommands by remember { mutableStateOf(commands) }
+    val (key, initialCommandValue, initialRepeatValue) = command
+    var newCommand by remember { mutableStateOf(initialCommandValue) }
+    var repeatCommand by remember { mutableStateOf(initialRepeatValue) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Mouse Commands") },
+        title = { Text("Edit Command") },
         text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                val mouseKeys = listOf(
-                    RemoteControlKey.MOUSE_MOVE,
-                    RemoteControlKey.MOUSE_LEFT_CLICK,
-                    RemoteControlKey.MOUSE_RIGHT_CLICK,
-                    RemoteControlKey.MOUSE_PAN_UP,
-                    RemoteControlKey.MOUSE_PAN_DOWN,
-                    RemoteControlKey.MOUSE_PAN_LEFT,
-                    RemoteControlKey.MOUSE_PAN_RIGHT,
+            Column {
+                TextField(
+                    value = newCommand,
+                    onValueChange = { newCommand = it },
+                    label = { Text(key.title) },
                 )
-                mouseKeys.forEach { key ->
-                    TextField(
-                        value = newCommands[key]?.command ?: "",
-                        onValueChange = { value ->
-                            newCommands = newCommands.toMutableMap().apply {
-                                this[key] = (this[key] ?: Command("", key.title)).copy(command = value)
-                            }
-                        },
-                        label = { Text(key.title) },
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = repeatCommand,
+                        onCheckedChange = { repeatCommand = it },
                     )
+                    Text("Repeat command while button is pressed")
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(newCommands) }) {
+            TextButton(
+                onClick = {
+                    onSave(key, newCommand, repeatCommand)
+                },
+            ) {
                 Text("Save")
             }
         },

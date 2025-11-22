@@ -218,7 +218,7 @@ fun EditCommandsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = "${command.name}: ${command.command}", modifier = Modifier.weight(1f))
+                    Text(text = command.name ?: command.command, modifier = Modifier.weight(1f))
                     IconButton(
                         onClick = {
                             editingCommand = command
@@ -285,6 +285,7 @@ fun CommandDialog(
     var name by remember { mutableStateOf(command?.name ?: "") }
     var commandText by remember { mutableStateOf(command?.command ?: "") }
     var showOutput by remember { mutableStateOf(command?.showOutput ?: true) }
+    var repeat by remember { mutableStateOf(command?.repeat ?: false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -297,11 +298,15 @@ fun CommandDialog(
                     Checkbox(checked = showOutput, onCheckedChange = { showOutput = it })
                     Text("Show output")
                 }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = repeat, onCheckedChange = { repeat = it })
+                    Text("Repeat command while button is pressed")
+                }
             }
         },
         confirmButton = {
             Button(
-                onClick = { onSave(Command(name.ifBlank { commandText }, commandText, showOutput)) },
+                onClick = { onSave(Command(commandText, name.ifBlank { null }, showOutput, repeat)) },
                 enabled = commandText.isNotBlank(),
             ) {
                 Text("Save")

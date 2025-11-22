@@ -172,7 +172,7 @@ fun CommandListScreen(
                         enabled = uiState.connectionStatus == ConnectionStatus.CONNECTED,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(command.name)
+                        Text(command.name ?: command.command)
                     }
                 }
             }

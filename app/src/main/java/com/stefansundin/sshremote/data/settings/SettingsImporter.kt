@@ -20,13 +20,16 @@ package com.stefansundin.sshremote.data.settings
 
 import android.content.Context
 import android.net.Uri
-import com.google.gson.Gson
+import android.util.Log
 import com.google.gson.JsonSyntaxException
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
+import com.stefansundin.sshremote.data.gson
+import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.StartScreen
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
@@ -46,7 +49,7 @@ class SettingsImporter(
         } ?: throw ImportException("Could not read file")
 
         try {
-            val settings: ExportedSettings = Gson().fromJson(json, ExportedSettings::class.java)
+            val settings: ExportedSettings = gson.fromJson(json, ExportedSettings::class.java)
                 ?: throw ImportException("Not a valid JSON file")
 
             if (settings.hosts == null) {
@@ -68,6 +71,7 @@ class SettingsImporter(
                 adHocCommandRepository.clear()
             }
 
+            @Suppress("UNCHECKED_CAST")
             settings.hosts.forEach { exportedHost ->
                 val host = Host(
                     name = exportedHost.name,
@@ -77,8 +81,23 @@ class SettingsImporter(
                     encryptedPassword = null,
                     identityIds = if (exportedHost.allowIdentities) null else emptyList(),
                     knownHosts = exportedHost.knownHosts,
-                    commands = exportedHost.commands,
-                    remoteCommands = exportedHost.remoteCommands ?: emptyMap(),
+                    commands = exportedHost.commands.map {
+                        Command(
+                            command = it.command,
+                            name = it.name,
+                            showOutput = it.showOutput,
+                            repeat = it.repeat,
+                        )
+                    },
+                    remoteCommands = ((exportedHost.remoteCommands
+                        ?: emptyMap()).filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>).mapValues {
+                        Command(
+                            command = it.value.command,
+                            name = it.value.name,
+                            showOutput = it.value.showOutput,
+                            repeat = it.value.repeat,
+                        )
+                    },
                     startScreen = exportedHost.startScreen ?: StartScreen.COMMAND_LIST,
                 )
                 hostRepository.upsert(host)
@@ -101,7 +120,8 @@ class SettingsImporter(
             throw e
         } catch (_: JsonSyntaxException) {
             throw ImportException("Invalid file format")
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SettingsImporter", "Error importing settings", e)
             throw ImportException("Something went wrong")
         }
     }

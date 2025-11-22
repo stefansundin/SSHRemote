@@ -25,6 +25,13 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
 import kotlinx.coroutines.flow.first
 
+data class ExportedCommand(
+    val name: String?,
+    val command: String,
+    val showOutput: Boolean,
+    val repeat: Boolean,
+)
+
 class SettingsExporter(
     private val context: Context,
     private val settingsRepository: SettingsRepository,
@@ -53,8 +60,22 @@ class SettingsExporter(
                 user = host.user,
                 allowIdentities = host.identityIds?.isNotEmpty() ?: true,
                 knownHosts = host.knownHosts,
-                commands = host.commands,
-                remoteCommands = host.remoteCommands,
+                commands = host.commands.map {
+                    ExportedCommand(
+                        name = it.name,
+                        command = it.command,
+                        showOutput = it.showOutput,
+                        repeat = it.repeat,
+                    )
+                },
+                remoteCommands = host.remoteCommands.mapValues {
+                    ExportedCommand(
+                        name = it.value.name,
+                        command = it.value.command,
+                        showOutput = it.value.showOutput,
+                        repeat = it.value.repeat,
+                    )
+                },
                 startScreen = host.startScreen,
             )
         }

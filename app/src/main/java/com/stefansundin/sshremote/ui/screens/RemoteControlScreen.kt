@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +52,12 @@ import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.performHapticFeedback
+import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.components.RemoteControl
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +76,8 @@ fun RemoteControlScreen(
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    var repeatJob by remember { mutableStateOf<Job?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     if (uiState.error != null) {
         AlertDialog(
@@ -152,10 +160,40 @@ fun RemoteControlScreen(
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             RemoteControl(
-                onKeyClicked = { key ->
+                onKeyEvent = { event ->
                     performHapticFeedback(context, uiState.hapticFeedback)
-                    commands[key]?.let { command ->
-                        onRunCommand(Command(command, command, false))
+                    val command = when (event) {
+                        is KeyEvent.Down -> commands[event.key]
+                        is KeyEvent.Up -> commands[event.key]
+                        is KeyEvent.Click -> commands[event.key]
+                    } ?: return@RemoteControl
+                    when (event) {
+                        is KeyEvent.Down -> {
+                            if (command.repeat) {
+                                repeatJob?.cancel()
+                                repeatJob = coroutineScope.launch {
+                                    onRunCommand(command) // Fire once immediately
+                                    delay(500) // Initial delay
+                                    while (isActive) {
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                        onRunCommand(command)
+                                        delay(100) // Repeat rate
+                                    }
+                                }
+                            }
+                        }
+
+                        is KeyEvent.Up -> {
+                            if (command.repeat) {
+                                repeatJob?.cancel()
+                            }
+                        }
+
+                        is KeyEvent.Click -> {
+                            if (!command.repeat) {
+                                onRunCommand(command)
+                            }
+                        }
                     }
                 },
                 onMouseEvent = { event ->
@@ -165,19 +203,19 @@ fun RemoteControlScreen(
                     when (event) {
                         is MouseEvent.Move -> {
                             commands[RemoteControlKey.MOUSE_MOVE]?.let { commandTemplate ->
-                                onMouseMove(event.dx, event.dy, commandTemplate)
+                                onMouseMove(event.dx, event.dy, commandTemplate.command)
                             }
                         }
 
                         MouseEvent.LeftClick -> {
-                            commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.let { command ->
-                                onRunCommand(Command(RemoteControlKey.MOUSE_LEFT_CLICK.title, command, false))
+                            commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.let {
+                                onRunCommand(it)
                             }
                         }
 
                         MouseEvent.RightClick -> {
-                            commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.let { command ->
-                                onRunCommand(Command(RemoteControlKey.MOUSE_RIGHT_CLICK.title, command, false))
+                            commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.let {
+                                onRunCommand(it)
                             }
                         }
 

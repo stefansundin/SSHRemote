@@ -20,7 +20,6 @@ package com.stefansundin.sshremote.data.settings
 
 import androidx.annotation.Keep
 import com.stefansundin.sshremote.Theme
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.StartScreen
 
@@ -32,8 +31,8 @@ data class ExportedHost(
     val user: String,
     val allowIdentities: Boolean,
     val knownHosts: List<String>,
-    val commands: List<Command>,
-    val remoteCommands: Map<RemoteControlKey, String>?,
+    val commands: List<ExportedCommand>,
+    val remoteCommands: Map<RemoteControlKey?, ExportedCommand>?,
     val startScreen: StartScreen?,
 )
 

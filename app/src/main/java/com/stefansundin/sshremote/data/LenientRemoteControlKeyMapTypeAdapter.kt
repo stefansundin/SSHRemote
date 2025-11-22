@@ -19,14 +19,16 @@
 package com.stefansundin.sshremote.data
 
 import android.util.Log
+import com.google.gson.Gson
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
+import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
-class LenientRemoteControlKeyMapTypeAdapter : TypeAdapter<Map<RemoteControlKey, String>>() {
-    override fun write(writer: JsonWriter, value: Map<RemoteControlKey, String>?) {
+class LenientRemoteControlKeyMapTypeAdapter(private val gson: Gson) : TypeAdapter<Map<RemoteControlKey, Command>>() {
+    override fun write(writer: JsonWriter, value: Map<RemoteControlKey, Command>?) {
         if (value == null) {
             writer.nullValue()
             return
@@ -34,27 +36,39 @@ class LenientRemoteControlKeyMapTypeAdapter : TypeAdapter<Map<RemoteControlKey, 
         writer.beginObject()
         for ((key, v) in value) {
             writer.name(key.name)
-            writer.value(v)
+            gson.toJson(v, Command::class.java, writer)
         }
         writer.endObject()
     }
 
-    override fun read(reader: JsonReader): Map<RemoteControlKey, String>? {
+    override fun read(reader: JsonReader): Map<RemoteControlKey, Command>? {
         if (reader.peek() == JsonToken.NULL) {
             reader.nextNull()
             return null
         }
-        val map = mutableMapOf<RemoteControlKey, String>()
+        val map = mutableMapOf<RemoteControlKey, Command>()
         reader.beginObject()
         while (reader.hasNext()) {
             val name = reader.nextName()
             try {
-                val key = RemoteControlKey.valueOf(name)
-                val value = reader.nextString()
-                map[key] = value
-            } catch (_: IllegalArgumentException) {
+                val key: RemoteControlKey? = RemoteControlKey.valueOf(name)
+                if (key == null || key.toString() == "null") {
+                    Log.d("LenientRemoteControlKeyMapTypeAdapter", "Ignoring unknown key: $name")
+                    reader.skipValue()
+                    continue;
+                }
+                val command: Command? = if (reader.peek() == JsonToken.STRING) {
+                    Command(command = reader.nextString(), name = key.title)
+                } else {
+                    gson.fromJson(reader, Command::class.java)
+                }
+                // gson.fromJson can return null if the json value is "null"
+                if (command != null) {
+                    map[key] = command
+                }
+            } catch (e: IllegalArgumentException) {
                 // Ignore unknown keys
-                Log.d("LenientRemoteControlKeyMapTypeAdapter", "Ignoring unknown $name")
+                Log.d("LenientRemoteControlKeyMapTypeAdapter", "Ignoring unknown key: $name", e)
                 reader.skipValue()
             }
         }

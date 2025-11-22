@@ -16,14 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.host
+package com.stefansundin.sshremote.ui
 
-import androidx.annotation.Keep
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 
-@Keep
-data class Command(
-    val command: String,
-    val name: String? = null,
-    val showOutput: Boolean = false,
-    val repeat: Boolean = false,
-)
+sealed class KeyEvent {
+    data class Down(val key: RemoteControlKey) : KeyEvent()
+    data class Up(val key: RemoteControlKey) : KeyEvent()
+    data class Click(val key: RemoteControlKey) : KeyEvent()
+}

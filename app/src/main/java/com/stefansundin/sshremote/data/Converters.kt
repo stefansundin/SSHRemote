@@ -19,20 +19,12 @@
 package com.stefansundin.sshremote.data
 
 import androidx.room.TypeConverter
-import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import java.time.OffsetDateTime
 
 class Converters {
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(
-            object : TypeToken<Map<RemoteControlKey, String>>() {}.type,
-            LenientRemoteControlKeyMapTypeAdapter(),
-        )
-        .create()
-
     @TypeConverter
     fun fromOffsetDateTime(value: String?): OffsetDateTime? {
         return value?.let { OffsetDateTime.parse(it) }
@@ -44,21 +36,27 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromCommandsList(value: List<Command>?): String? {
+    fun fromCommandList(value: List<Command>?): String? {
+        if (value == null) {
+            return null
+        }
         return gson.toJson(value)
     }
 
     @TypeConverter
-    fun toCommandsList(value: String?): List<Command>? {
+    fun toCommandList(value: String?): List<Command>? {
         if (value == null) {
             return null
         }
-        val listType = object : TypeToken<List<Command>>() {}.type
-        return gson.fromJson(value, listType)
+        val type = object : TypeToken<List<Command>>() {}.type
+        return gson.fromJson(value, type)
     }
 
     @TypeConverter
     fun fromIntList(value: List<Int>?): String? {
+        if (value == null) {
+            return null
+        }
         return gson.toJson(value)
     }
 
@@ -67,12 +65,15 @@ class Converters {
         if (value == null) {
             return null
         }
-        val listType = object : TypeToken<List<Int>>() {}.type
-        return gson.fromJson(value, listType)
+        val type = object : TypeToken<List<Int>>() {}.type
+        return gson.fromJson(value, type)
     }
 
     @TypeConverter
     fun fromStringList(value: List<String>?): String? {
+        if (value == null) {
+            return null
+        }
         return gson.toJson(value)
     }
 
@@ -81,21 +82,24 @@ class Converters {
         if (value == null) {
             return null
         }
-        val listType = object : TypeToken<List<String>>() {}.type
-        return gson.fromJson(value, listType)
+        val type = object : TypeToken<List<String>>() {}.type
+        return gson.fromJson(value, type)
     }
 
     @TypeConverter
-    fun fromRemoteCommandsMap(map: Map<RemoteControlKey, String>?): String? {
-        return gson.toJson(map)
-    }
-
-    @TypeConverter
-    fun toRemoteCommandsMap(value: String?): Map<RemoteControlKey, String>? {
+    fun fromRemoteControlKeyMap(value: Map<RemoteControlKey, Command>?): String? {
         if (value == null) {
             return null
         }
-        val mapType = object : TypeToken<Map<RemoteControlKey, String>>() {}.type
-        return gson.fromJson(value, mapType)
+        return gson.toJson(value)
+    }
+
+    @TypeConverter
+    fun toRemoteControlKeyMap(value: String?): Map<RemoteControlKey, Command>? {
+        if (value == null) {
+            return null
+        }
+        val type = object : TypeToken<Map<RemoteControlKey, Command>>() {}.type
+        return gson.fromJson(value, type)
     }
 }

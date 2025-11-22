@@ -39,7 +39,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,35 +47,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.StartScreen
 import com.stefansundin.sshremote.data.host.cecClientPreset
 import com.stefansundin.sshremote.data.host.macosVlcPreset
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.host.xdotoolPreset
+import com.stefansundin.sshremote.ui.KeyEvent
+import com.stefansundin.sshremote.ui.components.EditCommandDialog
 import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
 import com.stefansundin.sshremote.ui.components.RemoteControl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRemoteControlScreen(
-    commands: Map<RemoteControlKey, String>,
-    onSave: (Map<RemoteControlKey, String>) -> Unit,
+    commands: Map<RemoteControlKey, Command>,
+    onSave: (Map<RemoteControlKey, Command>) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToEditCommands: () -> Unit,
     onSetAsDefaultScreen: (StartScreen) -> Unit,
 ) {
-    val initialCommands = (if (commands.values.any { it.contains("wtype") }) {
+    val initialCommands = (if (commands.values.any { it.command.contains("wtype") }) {
         wtypePreset
-    } else if (commands.values.any { it.contains("cec-client") }) {
+    } else if (commands.values.any { it.command.contains("cec-client") }) {
         cecClientPreset
-    } else if (commands.values.any { it.contains("osascript") }) {
+    } else if (commands.values.any { it.command.contains("osascript") }) {
         macosVlcPreset
     } else {
         xdotoolPreset
     }) + commands
 
-    var editingCommand by remember { mutableStateOf<Pair<RemoteControlKey, String>?>(null) }
+    var editingCommand by remember { mutableStateOf<Triple<RemoteControlKey, String, Boolean>?>(null) }
     var editedCommands by remember { mutableStateOf(initialCommands) }
     val hasUnsavedChanges = editedCommands != initialCommands
     var showUnsavedBackDialog by remember { mutableStateOf(false) }
@@ -282,8 +284,11 @@ fun EditRemoteControlScreen(
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             RemoteControl(
-                onKeyClicked = { key ->
-                    editingCommand = key to (editedCommands[key] ?: "")
+                onKeyEvent = { event ->
+                    if (event is KeyEvent.Click) {
+                        val command = editedCommands[event.key] ?: Command("", event.key.title)
+                        editingCommand = Triple(event.key, command.command, command.repeat)
+                    }
                 },
                 onMouseEvent = {
                     showEditMouseCommandsDialog = true
@@ -291,34 +296,18 @@ fun EditRemoteControlScreen(
             )
         }
 
-        editingCommand?.let { (key, command) ->
-            var newCommand by remember { mutableStateOf(command) }
-            AlertDialog(
-                onDismissRequest = { editingCommand = null },
-                title = { Text("Edit Command") },
-                text = {
-                    TextField(
-                        value = newCommand,
-                        onValueChange = { newCommand = it },
-                        label = { Text(key.title) },
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            editedCommands = editedCommands.toMutableMap().apply {
-                                this[key] = newCommand
-                            }
-                            editingCommand = null
-                        },
-                    ) {
-                        Text("Save")
+        editingCommand?.let { (key, command, repeat) ->
+            EditCommandDialog(
+                command = Triple(key, command, repeat),
+                onDismiss = { editingCommand = null },
+                onSave = { editedKey, newCommand, newRepeat ->
+                    editedCommands = editedCommands.toMutableMap().apply {
+                        this[editedKey] = (this[editedKey] ?: Command("", editedKey.title)).copy(
+                            command = newCommand,
+                            repeat = newRepeat,
+                        )
                     }
-                },
-                dismissButton = {
-                    TextButton(onClick = { editingCommand = null }) {
-                        Text("Cancel")
-                    }
+                    editingCommand = null
                 },
             )
         }

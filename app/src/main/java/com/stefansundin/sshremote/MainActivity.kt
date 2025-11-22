@@ -314,7 +314,7 @@ class MainActivity : ComponentActivity() {
                                 val command =
                                     """exec sh -c 'cd; umask 077; echo "\n$publicKey" >> ~/.ssh/authorized_keys'"""
                                 hostViewModel.runCommand(
-                                    Command("Copy public key", command, false),
+                                    Command(command, "Copy public key", false),
                                     isRetry = false,
                                     reuseShell = false,
                                 )
@@ -512,7 +512,7 @@ class MainActivity : ComponentActivity() {
                                 commands = adHocCommands,
                                 onExecuteCommand = { command, popUpToPrevious ->
                                     adHocCommandViewModel.addAdHocCommand(command)
-                                    hostViewModel.runCommand(Command(command, command, true))
+                                    hostViewModel.runCommand(Command(command, showOutput = true))
                                     if (popUpToPrevious) {
                                         navController.popBackStack()
                                     }
