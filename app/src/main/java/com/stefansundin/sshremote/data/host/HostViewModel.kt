@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.time.measureTimedValue
 
 class HostViewModel(
@@ -67,6 +68,8 @@ class HostViewModel(
     private var pendingDy = 0f
     private var activeMouseMoveTemplate: String? = null
     private var mousePanJob: Job? = null
+    private var pendingPanDx = 0f
+    private var pendingPanDy = 0f
 
     init {
         viewModelScope.launch {
@@ -260,16 +263,40 @@ class HostViewModel(
                         .replace("%dx", cx.toString())
                         .replace("%dy", cy.toString())
 
-                    sshRepository.executeCommandReuseShell(cmdStr)
+                    val (result, duration) = measureTimedValue {
+                        sshRepository.executeCommandReuseShell(cmdStr)
+                    }
+                    Log.d("HostViewModel", "executeCommand for '${cmdStr}' took $duration")
                 }
             }
         }
     }
 
-    fun onMousePan(command: String) {
+    fun onMousePan(dx: Float, dy: Float) {
+        pendingPanDx += dx
+        pendingPanDy += dy
+
         if (mousePanJob?.isActive != true) {
             mousePanJob = viewModelScope.launch {
-                sshRepository.executeCommandReuseShell(command)
+                while (pendingPanDx.toInt() != 0 || pendingPanDy.toInt() != 0) {
+                    val panDx = pendingPanDx
+                    val panDy = pendingPanDy
+                    pendingPanDx = 0f
+                    pendingPanDy = 0f
+
+                    val key = if (abs(panDx) > abs(panDy)) {
+                        if (panDx > 0) RemoteControlKey.MOUSE_PAN_RIGHT else RemoteControlKey.MOUSE_PAN_LEFT
+                    } else {
+                        if (panDy > 0) RemoteControlKey.MOUSE_PAN_DOWN else RemoteControlKey.MOUSE_PAN_UP
+                    }
+
+                    _uiState.value.host?.remoteCommands?.get(key)?.let { command ->
+                        val (result, duration) = measureTimedValue {
+                            sshRepository.executeCommandReuseShell(command)
+                        }
+                        Log.d("HostViewModel", "executeCommand for '${command}' took $duration")
+                    }
+                }
             }
         }
     }

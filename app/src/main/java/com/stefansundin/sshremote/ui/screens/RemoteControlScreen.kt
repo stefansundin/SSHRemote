@@ -52,7 +52,6 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.performHapticFeedback
 import com.stefansundin.sshremote.ui.components.RemoteControl
-import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +59,7 @@ fun RemoteControlScreen(
     uiState: RemoteUiState,
     onRunCommand: (Command) -> Unit,
     onMouseMove: (Float, Float, String) -> Unit,
-    onMousePan: (String) -> Unit,
+    onMousePan: (Float, Float) -> Unit,
     onDisconnect: () -> Unit,
     onSwitchToCommandList: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
@@ -160,34 +159,30 @@ fun RemoteControlScreen(
                     }
                 },
                 onMouseEvent = { event ->
-                    if (event !is MouseEvent.Move) {
+                    if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
                         performHapticFeedback(context, uiState.hapticFeedback)
                     }
-                    val key = when (event) {
-                        is MouseEvent.Move -> RemoteControlKey.MOUSE_MOVE
-                        MouseEvent.LeftClick -> RemoteControlKey.MOUSE_LEFT_CLICK
-                        MouseEvent.RightClick -> RemoteControlKey.MOUSE_RIGHT_CLICK
-                        is MouseEvent.Pan -> {
-                            if (abs(event.dx) > abs(event.dy)) {
-                                if (event.dx > 0) RemoteControlKey.MOUSE_PAN_RIGHT else RemoteControlKey.MOUSE_PAN_LEFT
-                            } else {
-                                if (event.dy > 0) RemoteControlKey.MOUSE_PAN_DOWN else RemoteControlKey.MOUSE_PAN_UP
-                            }
-                        }
-                    }
-                    commands[key]?.let { commandTemplate ->
-                        when (event) {
-                            is MouseEvent.Move -> {
+                    when (event) {
+                        is MouseEvent.Move -> {
+                            commands[RemoteControlKey.MOUSE_MOVE]?.let { commandTemplate ->
                                 onMouseMove(event.dx, event.dy, commandTemplate)
                             }
+                        }
 
-                            is MouseEvent.Pan -> {
-                                onMousePan(commandTemplate)
+                        MouseEvent.LeftClick -> {
+                            commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.let { command ->
+                                onRunCommand(Command(RemoteControlKey.MOUSE_LEFT_CLICK.title, command, false))
                             }
+                        }
 
-                            else -> {
-                                onRunCommand(Command(key.title, commandTemplate, false))
+                        MouseEvent.RightClick -> {
+                            commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.let { command ->
+                                onRunCommand(Command(RemoteControlKey.MOUSE_RIGHT_CLICK.title, command, false))
                             }
+                        }
+
+                        is MouseEvent.Pan -> {
+                            onMousePan(event.dx, event.dy)
                         }
                     }
                 },

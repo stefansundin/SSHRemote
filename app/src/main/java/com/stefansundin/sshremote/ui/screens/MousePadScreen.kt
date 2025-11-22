@@ -41,6 +41,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 sealed interface MouseEvent {
     data class Move(val dx: Float, val dy: Float) : MouseEvent
@@ -65,6 +68,8 @@ fun MousePadScreen(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modi
         TouchPad(
             onMove = { dx, dy -> onMouseEvent(MouseEvent.Move(dx, dy)) },
             onPan = { dx, dy -> onMouseEvent(MouseEvent.Pan(dx, dy)) },
+            onLeftClick = { onMouseEvent(MouseEvent.LeftClick) },
+            onRightClick = { onMouseEvent(MouseEvent.RightClick) },
             modifier = Modifier.weight(1f),
         )
         Row(
@@ -81,40 +86,85 @@ fun MousePadScreen(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modi
     }
 }
 
+private enum class GestureState {
+    Undecided,
+    LongPress,
+    Move,
+    Scroll,
+}
+
 @Composable
 private fun TouchPad(
     onMove: (dx: Float, dy: Float) -> Unit,
     onPan: (dx: Float, dy: Float) -> Unit,
+    onLeftClick: () -> Unit,
+    onRightClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = false)
-                    do {
-                        val event = awaitPointerEvent()
-                        val pressedChanges = event.changes.filter { it.pressed }
-                        when (pressedChanges.size) {
-                            1 -> {
-                                val change = pressedChanges.first().positionChange()
-                                onMove(change.x, change.y)
+                coroutineScope {
+                    awaitEachGesture {
+                        var state = GestureState.Undecided
+                        val down = awaitFirstDown(requireUnconsumed = false)
+
+                        val longPressJob = launch {
+                            delay(viewConfiguration.longPressTimeoutMillis)
+                            state = GestureState.LongPress
+                            onRightClick()
+                        }
+
+                        do {
+                            val event = awaitPointerEvent()
+                            val pressedChanges = event.changes.filter { it.pressed }
+
+                            if (state == GestureState.Undecided) {
+                                val pointer = pressedChanges.find { it.id == down.id }
+                                if (pointer != null) {
+                                    val distance = pointer.position - down.position
+                                    if (pressedChanges.size > 1) {
+                                        longPressJob.cancel()
+                                        state = GestureState.Scroll
+                                    } else if (distance.getDistanceSquared() > viewConfiguration.touchSlop * viewConfiguration.touchSlop) {
+                                        longPressJob.cancel()
+                                        state = GestureState.Move
+                                    }
+                                }
                             }
 
-                            in 2..Int.MAX_VALUE -> {
-                                val centroid = pressedChanges
-                                    .map { it.position }
-                                    .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
-                                val prevCentroid = pressedChanges
-                                    .map { it.previousPosition }
-                                    .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
-                                val pan = centroid - prevCentroid
-                                onPan(pan.x, pan.y)
+                            if (state == GestureState.Move && pressedChanges.size > 1) {
+                                state = GestureState.Scroll
                             }
+
+                            if (state == GestureState.Move) {
+                                val pointer = pressedChanges.find { it.id == down.id }
+                                if (pointer != null) {
+                                    val change = pointer.positionChange()
+                                    onMove(change.x, change.y)
+                                }
+                            } else if (state == GestureState.Scroll) {
+                                if (pressedChanges.size >= 2) {
+                                    val centroid = pressedChanges
+                                        .map { it.position }
+                                        .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                    val prevCentroid = pressedChanges
+                                        .map { it.previousPosition }
+                                        .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                    val pan = centroid - prevCentroid
+                                    onPan(pan.x, pan.y)
+                                }
+                            }
+                            event.changes.forEach { it.consume() }
+                        } while (event.changes.any { it.pressed } && state != GestureState.LongPress)
+
+                        longPressJob.cancel()
+
+                        if (state == GestureState.Undecided) {
+                            onLeftClick()
                         }
-                        event.changes.forEach { it.consume() }
-                    } while (pressedChanges.isNotEmpty())
+                    }
                 }
             },
         shape = MaterialTheme.shapes.medium,
@@ -126,6 +176,8 @@ private fun TouchPad(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Mouse Pad")
+                Text("Tap for left click")
+                Text("Long press for right click")
                 Text("Scroll using two fingers")
             }
         }
