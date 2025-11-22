@@ -181,6 +181,9 @@ class HostViewModel(
     }
 
     fun runCommand(command: Command, isRetry: Boolean = false, reuseShell: Boolean = true) {
+        if (_uiState.value.connectionStatus != ConnectionStatus.CONNECTED) {
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
 
@@ -247,6 +250,9 @@ class HostViewModel(
     }
 
     fun onMouseMove(dx: Float, dy: Float, template: String) {
+        if (_uiState.value.connectionStatus != ConnectionStatus.CONNECTED) {
+            return
+        }
         pendingDx += dx
         pendingDy += dy
         activeMouseMoveTemplate = template
@@ -273,6 +279,9 @@ class HostViewModel(
     }
 
     fun onMousePan(dx: Float, dy: Float) {
+        if (_uiState.value.connectionStatus != ConnectionStatus.CONNECTED) {
+            return
+        }
         pendingPanDx += dx
         pendingPanDy += dy
 
@@ -304,11 +313,18 @@ class HostViewModel(
     fun disconnect() {
         viewModelScope.launch {
             sshRepository.disconnect()
+            hostStateJob?.cancel()
+            mouseMoveJob?.cancel()
+            mousePanJob?.cancel()
+
+            pendingDx = 0f
+            pendingDy = 0f
+            activeMouseMoveTemplate = null
+            pendingPanDx = 0f
+            pendingPanDy = 0f
+
             _uiState.update {
-                it.copy(
-                    connectionStatus = ConnectionStatus.DISCONNECTED,
-                    error = null,
-                )
+                RemoteUiState(hapticFeedback = it.hapticFeedback)
             }
         }
     }
