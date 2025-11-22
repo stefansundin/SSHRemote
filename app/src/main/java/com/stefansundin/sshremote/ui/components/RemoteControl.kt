@@ -53,8 +53,8 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -84,7 +84,7 @@ fun RemoteControl(
     val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = pagerState.currentPage) {
+        PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
             Tab(
                 selected = pagerState.currentPage == 0,
                 onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
@@ -97,13 +97,14 @@ fun RemoteControl(
             )
         }
 
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+            userScrollEnabled = false,
+        ) { page ->
             when (page) {
                 0 -> {
-                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                        val isLandscape = maxWidth > maxHeight
-                        RemoteControlLayout(isLandscape, onKeyClicked)
-                    }
+                    RemoteControlPage(onKeyClicked)
                 }
 
                 1 -> {
@@ -111,6 +112,14 @@ fun RemoteControl(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RemoteControlPage(onKeyClicked: (RemoteControlKey) -> Unit) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val isLandscape = maxWidth > maxHeight
+        RemoteControlLayout(isLandscape, onKeyClicked)
     }
 }
 
