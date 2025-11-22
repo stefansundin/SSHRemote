@@ -54,8 +54,8 @@ import com.stefansundin.sshremote.data.host.cecClientPreset
 import com.stefansundin.sshremote.data.host.macosVlcPreset
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.host.xdotoolPreset
+import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
 import com.stefansundin.sshremote.ui.components.RemoteControl
-import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,6 +84,7 @@ fun EditRemoteControlScreen(
     var activeMenu by remember { mutableStateOf("") } // "main" or "reset"
     var showResetDialog by remember { mutableStateOf(false) }
     var resetToPreset by remember { mutableStateOf("") }
+    var showEditMouseCommandsDialog by remember { mutableStateOf(false) }
 
     BackHandler(enabled = hasUnsavedChanges) {
         showUnsavedBackDialog = true
@@ -159,6 +160,17 @@ fun EditRemoteControlScreen(
                 TextButton(onClick = { showResetDialog = false }) {
                     Text("Cancel")
                 }
+            },
+        )
+    }
+
+    if (showEditMouseCommandsDialog) {
+        EditMouseCommandsDialog(
+            commands = editedCommands,
+            onDismiss = { showEditMouseCommandsDialog = false },
+            onSave = {
+                editedCommands = it
+                showEditMouseCommandsDialog = false
             },
         )
     }
@@ -273,20 +285,8 @@ fun EditRemoteControlScreen(
                 onKeyClicked = { key ->
                     editingCommand = key to (editedCommands[key] ?: "")
                 },
-                onMouseEvent = { event ->
-                    val key = when (event) {
-                        is MouseEvent.Move -> RemoteControlKey.MOUSE_MOVE
-                        MouseEvent.LeftClick -> RemoteControlKey.MOUSE_LEFT_CLICK
-                        MouseEvent.RightClick -> RemoteControlKey.MOUSE_RIGHT_CLICK
-                        is MouseEvent.Pan -> {
-                            if (abs(event.dx) > abs(event.dy)) {
-                                if (event.dx > 0) RemoteControlKey.MOUSE_PAN_RIGHT else RemoteControlKey.MOUSE_PAN_LEFT
-                            } else {
-                                if (event.dy > 0) RemoteControlKey.MOUSE_PAN_DOWN else RemoteControlKey.MOUSE_PAN_UP
-                            }
-                        }
-                    }
-                    editingCommand = key to (editedCommands[key] ?: "")
+                onMouseEvent = {
+                    showEditMouseCommandsDialog = true
                 },
             )
         }
