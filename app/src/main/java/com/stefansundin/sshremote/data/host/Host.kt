@@ -42,7 +42,7 @@ data class Host(
     val encryptedPassword: String?,
     val identityIds: List<Int>? = null,
     val knownHosts: List<String> = emptyList(),
-    val commands: List<Command> = listOf(Command("uptime", "Uptime", true)),
+    val commands: List<Command> = listOf(Command("uptime", name = "Uptime", showOutput = true)),
     val remoteCommands: Map<RemoteControlKey, Command> = emptyMap(),
     val startScreen: StartScreen = StartScreen.COMMAND_LIST,
 )

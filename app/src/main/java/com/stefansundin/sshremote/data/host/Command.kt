@@ -23,6 +23,7 @@ import androidx.annotation.Keep
 @Keep
 data class Command(
     val command: String,
+    val longPressCommand: String? = null,
     val name: String? = null,
     val showOutput: Boolean = false,
     val repeat: Boolean = false,

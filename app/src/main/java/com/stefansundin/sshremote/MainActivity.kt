@@ -53,7 +53,6 @@ import androidx.navigation.navArgument
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
 import com.stefansundin.sshremote.data.host.StartScreen
@@ -314,7 +313,8 @@ class MainActivity : ComponentActivity() {
                                 val command =
                                     """exec sh -c 'cd; umask 077; echo "\n$publicKey" >> ~/.ssh/authorized_keys'"""
                                 hostViewModel.runCommand(
-                                    Command(command, "Copy public key", false),
+                                    command = command,
+                                    showOutput = false,
                                     isRetry = false,
                                     reuseShell = false,
                                 )
@@ -406,7 +406,7 @@ class MainActivity : ComponentActivity() {
                             }
                             CommandListScreen(
                                 uiState = uiState,
-                                onRunCommand = { hostViewModel.runCommand(it) },
+                                onRunCommand = { command -> hostViewModel.runCommand(command.command, command.showOutput) },
                                 onDisconnect = {
                                     hostViewModel.disconnect()
                                     navController.popBackStack()
@@ -439,7 +439,7 @@ class MainActivity : ComponentActivity() {
                             }
                             RemoteControlScreen(
                                 uiState = uiState,
-                                onRunCommand = { hostViewModel.runCommand(it) },
+                                onRunCommand = { command -> hostViewModel.runCommand(command.command, command.showOutput) },
                                 onMouseMove = { dx, dy, template -> hostViewModel.onMouseMove(dx, dy, template) },
                                 onMousePan = { dx, dy -> hostViewModel.onMousePan(dx, dy) },
                                 onDisconnect = {
@@ -536,7 +536,7 @@ class MainActivity : ComponentActivity() {
                                 commands = adHocCommands,
                                 onExecuteCommand = { command, popUpToPrevious ->
                                     adHocCommandViewModel.addAdHocCommand(command)
-                                    hostViewModel.runCommand(Command(command, showOutput = true))
+                                    hostViewModel.runCommand(command, showOutput = true)
                                     if (popUpToPrevious) {
                                         navController.popBackStack()
                                     }

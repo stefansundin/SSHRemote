@@ -55,8 +55,8 @@ import com.stefansundin.sshremote.data.host.macosVlcPreset
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.host.xdotoolPreset
 import com.stefansundin.sshremote.ui.KeyEvent
-import com.stefansundin.sshremote.ui.components.EditCommandDialog
 import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
+import com.stefansundin.sshremote.ui.components.EditRemoteCommandDialog
 import com.stefansundin.sshremote.ui.components.RemoteControl
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +78,7 @@ fun EditRemoteControlScreen(
         xdotoolPreset
     }) + commands
 
-    var editingCommand by remember { mutableStateOf<Triple<RemoteControlKey, String, Boolean>?>(null) }
+    var editingCommand by remember { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
     var editedCommands by remember { mutableStateOf(initialCommands) }
     val hasUnsavedChanges = editedCommands != initialCommands
     var showUnsavedBackDialog by remember { mutableStateOf(false) }
@@ -284,8 +284,8 @@ fun EditRemoteControlScreen(
             RemoteControl(
                 onKeyEvent = { event ->
                     if (event is KeyEvent.Click) {
-                        val command = editedCommands[event.key] ?: Command("", event.key.title)
-                        editingCommand = Triple(event.key, command.command, command.repeat)
+                        val command = editedCommands[event.key] ?: Command("", name = event.key.title)
+                        editingCommand = event.key to command
                     }
                 },
                 onMouseEvent = {
@@ -294,16 +294,13 @@ fun EditRemoteControlScreen(
             )
         }
 
-        editingCommand?.let { (key, command, repeat) ->
-            EditCommandDialog(
-                command = Triple(key, command, repeat),
+        editingCommand?.let { command ->
+            EditRemoteCommandDialog(
+                command = command,
                 onDismiss = { editingCommand = null },
-                onSave = { editedKey, newCommand, newRepeat ->
+                onSave = { key, newCommand ->
                     editedCommands = editedCommands.toMutableMap().apply {
-                        this[editedKey] = (this[editedKey] ?: Command("", editedKey.title)).copy(
-                            command = newCommand,
-                            repeat = newRepeat,
-                        )
+                        this[key] = newCommand
                     }
                     editingCommand = null
                 },

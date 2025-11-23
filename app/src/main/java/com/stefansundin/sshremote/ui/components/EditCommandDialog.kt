@@ -21,11 +21,10 @@ package com.stefansundin.sshremote.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,54 +32,50 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.data.host.Command
 
 @Composable
 fun EditCommandDialog(
-    command: Triple<RemoteControlKey, String, Boolean>,
+    command: Command?,
     onDismiss: () -> Unit,
-    onSave: (RemoteControlKey, String, Boolean) -> Unit,
+    onSave: (Command) -> Unit,
 ) {
-    val (key, initialCommandValue, initialRepeatValue) = command
-    var newCommand by remember { mutableStateOf(initialCommandValue) }
-    var repeatCommand by remember { mutableStateOf(initialRepeatValue) }
+    var name by remember { mutableStateOf(command?.name ?: "") }
+    var commandText by remember { mutableStateOf(command?.command ?: "") }
+    var showOutput by remember { mutableStateOf(command?.showOutput ?: true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Command") },
+        title = { Text(if (command == null) "Add Command" else "Edit Command") },
         text = {
-            Column {
-                TextField(
-                    value = newCommand,
-                    onValueChange = { newCommand = it },
-                    label = { Text(key.title) },
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = repeatCommand,
-                        onCheckedChange = { repeatCommand = it },
-                    )
-                    Text("Repeat command while button is pressed")
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextField(value = name, onValueChange = { name = it }, label = { Text("Name (optional)") })
+                TextField(value = commandText, onValueChange = { commandText = it }, label = { Text("Command") })
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = showOutput, onCheckedChange = { showOutput = it })
+                    Text("Show output")
                 }
             }
         },
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
-                    onSave(key, newCommand, repeatCommand)
+                    onSave(
+                        Command(
+                            command = commandText,
+                            name = name.ifBlank { null },
+                            showOutput = showOutput,
+                        ),
+                    )
                 },
+                enabled = commandText.isNotBlank(),
             ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            Button(onClick = onDismiss) {
                 Text("Cancel")
             }
         },

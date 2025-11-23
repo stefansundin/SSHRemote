@@ -36,8 +36,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,7 +50,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -65,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.StartScreen
+import com.stefansundin.sshremote.ui.components.EditCommandDialog
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,7 +251,7 @@ fun EditCommandsScreen(
     }
 
     if (showDialog) {
-        CommandDialog(
+        EditCommandDialog(
             command = editingCommand,
             onDismiss = {
                 showDialog = false
@@ -270,48 +268,4 @@ fun EditCommandsScreen(
             },
         )
     }
-}
-
-@Composable
-fun CommandDialog(
-    command: Command?,
-    onDismiss: () -> Unit,
-    onSave: (Command) -> Unit,
-) {
-    var name by remember { mutableStateOf(command?.name ?: "") }
-    var commandText by remember { mutableStateOf(command?.command ?: "") }
-    var showOutput by remember { mutableStateOf(command?.showOutput ?: true) }
-    var repeat by remember { mutableStateOf(command?.repeat ?: false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (command == null) "Add Command" else "Edit Command") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = name, onValueChange = { name = it }, label = { Text("Name (optional)") })
-                TextField(value = commandText, onValueChange = { commandText = it }, label = { Text("Command") })
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = showOutput, onCheckedChange = { showOutput = it })
-                    Text("Show output")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = repeat, onCheckedChange = { repeat = it })
-                    Text("Repeat command while button is pressed")
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onSave(Command(commandText, name.ifBlank { null }, showOutput, repeat)) },
-                enabled = commandText.isNotBlank(),
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        },
-    )
 }

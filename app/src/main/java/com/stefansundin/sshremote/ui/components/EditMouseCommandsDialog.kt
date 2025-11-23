@@ -66,7 +66,7 @@ fun EditMouseCommandsDialog(
                         value = newCommands[key]?.command ?: "",
                         onValueChange = { value ->
                             newCommands = newCommands.toMutableMap().apply {
-                                this[key] = (this[key] ?: Command("", key.title)).copy(command = value)
+                                this[key] = (this[key] ?: Command("", name = key.title)).copy(command = value)
                             }
                         },
                         label = { Text(key.title) },

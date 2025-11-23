@@ -183,7 +183,7 @@ class HostViewModel(
         }
     }
 
-    fun runCommand(command: Command, isRetry: Boolean = false, reuseShell: Boolean = true) {
+    fun runCommand(command: String, showOutput: Boolean, isRetry: Boolean = false, reuseShell: Boolean = true) {
         if (_uiState.value.connectionStatus != ConnectionStatus.CONNECTED) {
             return
         }
@@ -192,18 +192,18 @@ class HostViewModel(
 
             val (result, duration) = measureTimedValue {
                 if (reuseShell) {
-                    sshRepository.executeCommandReuseShell(command.command)
+                    sshRepository.executeCommandReuseShell(command)
                 } else {
-                    sshRepository.executeCommand(command.command)
+                    sshRepository.executeCommand(command)
                 }
             }
-            Log.d("HostViewModel", "executeCommand for '${command.command}' took $duration")
+            Log.d("HostViewModel", "executeCommand for '${command}' took $duration")
 
             when (result) {
                 is Result.Success -> {
                     _uiState.update {
                         it.copy(
-                            commandOutput = if (command.showOutput) result.output else null,
+                            commandOutput = if (showOutput) result.output else null,
                             isLoading = false,
                         )
                     }
@@ -221,7 +221,7 @@ class HostViewModel(
                         if (host != null) {
                             handleConnection(host)
                             if (_uiState.value.connectionStatus == ConnectionStatus.CONNECTED) {
-                                runCommand(command, isRetry = true)
+                                runCommand(command, showOutput, isRetry = true)
                             }
                         } else {
                             _uiState.update {
