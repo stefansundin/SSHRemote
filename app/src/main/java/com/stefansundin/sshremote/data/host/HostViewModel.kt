@@ -86,7 +86,7 @@ class HostViewModel(
             initialValue = emptyList(),
         )
 
-    fun upsert(host: Host) = viewModelScope.launch {
+    suspend fun upsert(host: Host) {
         repository.upsert(host)
     }
 
@@ -109,15 +109,18 @@ class HostViewModel(
         return host
     }
 
+    fun updateActiveHostInUiState(host: Host) {
+        _uiState.update {
+            it.copy(host = host)
+        }
+    }
+
     fun setActiveHost(host: Host) {
         hostStateJob?.cancel()
         hostStateJob = viewModelScope.launch {
             repository.get(host.id).filterNotNull().collectLatest { updatedHost ->
                 _uiState.update {
-                    it.copy(
-                        host = updatedHost,
-                        commands = updatedHost.commands,
-                    )
+                    it.copy(host = updatedHost)
                 }
             }
         }
@@ -348,7 +351,6 @@ data class RemoteUiState(
     val host: Host? = null,
     val commandOutput: String? = null,
     val isLoading: Boolean = false,
-    val commands: List<Command> = emptyList(),
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val error: String? = null,
     val hapticFeedback: HapticFeedback = HapticFeedback.Medium,

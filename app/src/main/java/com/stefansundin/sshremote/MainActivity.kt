@@ -379,8 +379,10 @@ class MainActivity : ComponentActivity() {
                                 host = host,
                                 identities = identities,
                                 onSave = { newHost ->
-                                    hostViewModel.upsert(newHost)
-                                    navController.popBackStack()
+                                    scope.launch {
+                                        hostViewModel.upsert(newHost)
+                                        navController.popBackStack()
+                                    }
                                 },
                                 onNavigateUp = {
                                     navController.popBackStack()
@@ -461,9 +463,16 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.EditRemoteControl.route) {
                             EditRemoteControlScreen(
                                 commands = uiState.host?.remoteCommands ?: emptyMap(),
-                                onSave = { commands ->
-                                    uiState.host?.let { host ->
-                                        hostViewModel.upsert(host.copy(remoteCommands = commands))
+                                onSave = { commands, navigateBack ->
+                                    scope.launch {
+                                        uiState.host?.let { host ->
+                                            val updatedHost = host.copy(remoteCommands = commands)
+                                            hostViewModel.upsert(updatedHost)
+                                            hostViewModel.updateActiveHostInUiState(updatedHost)
+                                            if (navigateBack) {
+                                                navController.popBackStack()
+                                            }
+                                        }
                                     }
                                 },
                                 onNavigateBack = { navController.popBackStack() },
@@ -475,8 +484,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onSetAsDefaultScreen = { startScreen ->
-                                    uiState.host?.let { host ->
-                                        hostViewModel.upsert(host.copy(startScreen = startScreen))
+                                    scope.launch {
+                                        uiState.host?.let { host ->
+                                            val updatedHost = host.copy(startScreen = startScreen)
+                                            hostViewModel.upsert(updatedHost)
+                                            hostViewModel.updateActiveHostInUiState(updatedHost)
+                                        }
                                     }
                                 },
                             )
@@ -484,10 +497,17 @@ class MainActivity : ComponentActivity() {
 
                         composable(Screen.EditCommands.route) {
                             EditCommandsScreen(
-                                commands = uiState.commands,
-                                onSave = { commands ->
-                                    uiState.host?.let { host ->
-                                        hostViewModel.upsert(host.copy(commands = commands))
+                                commands = uiState.host?.commands ?: emptyList(),
+                                onSave = { commands, navigateBack ->
+                                    scope.launch {
+                                        uiState.host?.let { host ->
+                                            val updatedHost = host.copy(commands = commands)
+                                            hostViewModel.upsert(updatedHost)
+                                            hostViewModel.updateActiveHostInUiState(updatedHost)
+                                            if (navigateBack) {
+                                                navController.popBackStack()
+                                            }
+                                        }
                                     }
                                 },
                                 onNavigateBack = { navController.popBackStack() },
@@ -499,8 +519,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onSetAsDefaultScreen = { startScreen ->
-                                    uiState.host?.let { host ->
-                                        hostViewModel.upsert(host.copy(startScreen = startScreen))
+                                    scope.launch {
+                                        uiState.host?.let { host ->
+                                            val updatedHost = host.copy(startScreen = startScreen)
+                                            hostViewModel.upsert(updatedHost)
+                                            hostViewModel.updateActiveHostInUiState(updatedHost)
+                                        }
                                     }
                                 },
                             )

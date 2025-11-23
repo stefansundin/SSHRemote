@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditCommandsScreen(
     commands: List<Command>,
-    onSave: (List<Command>) -> Unit,
+    onSave: (List<Command>, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToEditRemoteControl: () -> Unit,
     onSetAsDefaultScreen: (StartScreen) -> Unit,
@@ -98,10 +98,7 @@ fun EditCommandsScreen(
             text = { Text("Do you want to save your changes before leaving?") },
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        onSave(editingCommands)
-                        onNavigateBack()
-                    },
+                    onClick = { onSave(editingCommands, true) },
                 ) {
                     Text("Save and leave")
                 }
@@ -122,7 +119,7 @@ fun EditCommandsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onSave(editingCommands)
+                        onSave(editingCommands, false)
                         onNavigateToEditRemoteControl()
                     },
                 ) {
@@ -197,8 +194,7 @@ fun EditCommandsScreen(
                 FloatingActionButton(
                     modifier = Modifier.padding(top = 16.dp),
                     onClick = {
-                        onSave(editingCommands)
-                        onNavigateBack()
+                        onSave(editingCommands, true)
                     },
                 ) {
                     Icon(Icons.Default.Save, contentDescription = "Save")

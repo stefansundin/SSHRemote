@@ -143,7 +143,9 @@ fun CommandListScreen(
         },
         modifier = modifier,
     ) { padding ->
-        if (uiState.commands.isEmpty()) {
+        val commands = uiState.host?.commands ?: emptyList()
+
+        if (commands.isEmpty()) {
             Column(
                 modifier = Modifier
                     .padding(padding)
@@ -166,7 +168,7 @@ fun CommandListScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                uiState.commands.forEach { command ->
+                commands.forEach { command ->
                     Button(
                         onClick = { onRunCommand(command) },
                         enabled = uiState.connectionStatus == ConnectionStatus.CONNECTED,

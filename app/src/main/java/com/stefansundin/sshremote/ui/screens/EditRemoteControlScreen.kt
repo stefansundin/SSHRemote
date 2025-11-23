@@ -63,7 +63,7 @@ import com.stefansundin.sshremote.ui.components.RemoteControl
 @Composable
 fun EditRemoteControlScreen(
     commands: Map<RemoteControlKey, Command>,
-    onSave: (Map<RemoteControlKey, Command>) -> Unit,
+    onSave: (Map<RemoteControlKey, Command>, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToEditCommands: () -> Unit,
     onSetAsDefaultScreen: (StartScreen) -> Unit,
@@ -100,8 +100,7 @@ fun EditRemoteControlScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onSave(editedCommands)
-                        onNavigateBack()
+                        onSave(editedCommands, true)
                     },
                 ) {
                     Text("Save and leave")
@@ -123,7 +122,7 @@ fun EditRemoteControlScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onSave(editedCommands)
+                        onSave(editedCommands, false)
                         onNavigateToEditCommands()
                     },
                 ) {
@@ -268,8 +267,7 @@ fun EditRemoteControlScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    onSave(editedCommands)
-                    onNavigateBack()
+                    onSave(editedCommands, true)
                 },
             ) {
                 Icon(Icons.Default.Save, contentDescription = "Save")
