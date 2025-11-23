@@ -161,7 +161,6 @@ fun RemoteControlScreen(
         ) {
             RemoteControl(
                 onKeyEvent = { event ->
-                    performHapticFeedback(context, uiState.hapticFeedback)
                     val command = when (event) {
                         is KeyEvent.Down -> commands[event.key]
                         is KeyEvent.Up -> commands[event.key]
@@ -172,6 +171,7 @@ fun RemoteControlScreen(
                             if (command.repeat) {
                                 repeatJob?.cancel()
                                 repeatJob = coroutineScope.launch {
+                                    performHapticFeedback(context, uiState.hapticFeedback)
                                     onRunCommand(command) // Fire once immediately
                                     delay(500) // Initial delay
                                     while (isActive) {
@@ -191,6 +191,7 @@ fun RemoteControlScreen(
 
                         is KeyEvent.Click -> {
                             if (!command.repeat) {
+                                performHapticFeedback(context, uiState.hapticFeedback)
                                 onRunCommand(command)
                             }
                         }
