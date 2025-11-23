@@ -98,7 +98,7 @@ class SettingsImporter(
                             repeat = it.value.repeat,
                         )
                     },
-                    startScreen = exportedHost.startScreen ?: StartScreen.COMMAND_LIST,
+                    startScreen = exportedHost.startScreen ?: StartScreen.Default,
                 )
                 hostRepository.upsert(host)
             }

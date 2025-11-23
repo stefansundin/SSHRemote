@@ -22,8 +22,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 enum class StartScreen {
-    COMMAND_LIST,
-    REMOTE_CONTROL
+    REMOTE,
+    MOUSE,
+    COMMANDS;
+
+    companion object {
+        val Default = REMOTE
+    }
 }
 
 /**
@@ -44,5 +49,5 @@ data class Host(
     val knownHosts: List<String> = emptyList(),
     val commands: List<Command> = listOf(Command("uptime", name = "Uptime", showOutput = true)),
     val remoteCommands: Map<RemoteControlKey, Command> = emptyMap(),
-    val startScreen: StartScreen = StartScreen.COMMAND_LIST,
+    val startScreen: StartScreen = StartScreen.Default,
 )

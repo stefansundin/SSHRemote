@@ -19,24 +19,41 @@
 package com.stefansundin.sshremote.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -44,9 +61,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.StartScreen
@@ -55,20 +74,24 @@ import com.stefansundin.sshremote.data.host.macosVlcPreset
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.host.xdotoolPreset
 import com.stefansundin.sshremote.ui.KeyEvent
+import com.stefansundin.sshremote.ui.components.EditCommandDialog
 import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
 import com.stefansundin.sshremote.ui.components.EditRemoteCommandDialog
+import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun EditRemoteControlScreen(
     commands: Map<RemoteControlKey, Command>,
-    onSave: (Map<RemoteControlKey, Command>, navigateBack: Boolean) -> Unit,
+    onSave: (Map<RemoteControlKey, Command>, List<Command>, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToEditCommands: () -> Unit,
     onSetAsDefaultScreen: (StartScreen) -> Unit,
+    initialCommands: List<Command>,
+    initialPage: Int = 0,
 ) {
-    val initialCommands = (if (commands.values.any { it.command.contains("wtype") }) {
+    val initialRemoteCommands = (if (commands.values.any { it.command.contains("wtype") }) {
         wtypePreset
     } else if (commands.values.any { it.command.contains("cec-client") }) {
         cecClientPreset
@@ -79,14 +102,22 @@ fun EditRemoteControlScreen(
     }) + commands
 
     var editingCommand by remember { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
+    var editedRemoteCommands by remember { mutableStateOf(initialRemoteCommands) }
     var editedCommands by remember { mutableStateOf(initialCommands) }
-    val hasUnsavedChanges = editedCommands != initialCommands
-    var showUnsavedBackDialog by remember { mutableStateOf(false) }
-    var showUnsavedSwitchDialog by remember { mutableStateOf(false) }
-    var activeMenu by remember { mutableStateOf("") } // "main" or "reset"
-    var showResetDialog by remember { mutableStateOf(false) }
-    var resetToPreset by remember { mutableStateOf("") }
+    var showEditCommandDialog by remember { mutableStateOf(false) }
+    var editingCommandInList by remember { mutableStateOf<Command?>(null) }
     var showEditMouseCommandsDialog by remember { mutableStateOf(false) }
+
+    val hasUnsavedChanges = editedRemoteCommands != initialRemoteCommands || editedCommands != initialCommands
+    var showUnsavedBackDialog by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
+    var resetToPreset by remember { mutableStateOf("") }
+    var showResetDialog by remember { mutableStateOf(false) }
+    var showSelectPresetDialog by remember { mutableStateOf(false) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(initialPage = initialPage) { 3 }
 
     BackHandler(enabled = hasUnsavedChanges) {
         showUnsavedBackDialog = true
@@ -100,7 +131,7 @@ fun EditRemoteControlScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onSave(editedCommands, true)
+                        onSave(editedRemoteCommands, editedCommands, true)
                     },
                 ) {
                     Text("Save and leave")
@@ -114,29 +145,6 @@ fun EditRemoteControlScreen(
         )
     }
 
-    if (showUnsavedSwitchDialog) {
-        AlertDialog(
-            onDismissRequest = { showUnsavedSwitchDialog = false },
-            title = { Text("Unsaved changes") },
-            text = { Text("Do you want to save your changes before switching?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onSave(editedCommands, false)
-                        onNavigateToEditCommands()
-                    },
-                ) {
-                    Text("Save and switch")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onNavigateToEditCommands) {
-                    Text("Discard and switch")
-                }
-            },
-        )
-    }
-
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
@@ -145,7 +153,7 @@ fun EditRemoteControlScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        editedCommands = when (resetToPreset) {
+                        editedRemoteCommands = when (resetToPreset) {
                             "wtype" -> wtypePreset
                             "cec-client" -> cecClientPreset
                             "macOS VLC" -> macosVlcPreset
@@ -165,18 +173,40 @@ fun EditRemoteControlScreen(
         )
     }
 
-    if (showEditMouseCommandsDialog) {
-        EditMouseCommandsDialog(
-            commands = editedCommands,
-            onDismiss = { showEditMouseCommandsDialog = false },
-            onSave = {
-                editedCommands = it
-                showEditMouseCommandsDialog = false
+    if (showSelectPresetDialog) {
+        val presets = listOf("wtype", "xdotool", "cec-client", "macOS VLC")
+        AlertDialog(
+            onDismissRequest = { showSelectPresetDialog = false },
+            title = { Text("Reset to preset") },
+            text = {
+                Column {
+                    presets.forEach { preset ->
+                        Text(
+                            text = preset,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    resetToPreset = preset
+                                    showSelectPresetDialog = false
+                                    showResetDialog = true
+                                }
+                                .padding(vertical = 12.dp),
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showSelectPresetDialog = false },
+                ) {
+                    Text("Cancel")
+                }
             },
         )
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Edit Remote Control") },
@@ -194,68 +224,32 @@ fun EditRemoteControlScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            if (hasUnsavedChanges) {
-                                showUnsavedSwitchDialog = true
-                            } else {
-                                onNavigateToEditCommands()
-                            }
-                        },
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Edit commands")
-                    }
                     Box {
-                        IconButton(onClick = { activeMenu = "main" }) {
+                        IconButton(onClick = { showMenu = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More options")
                         }
                         DropdownMenu(
-                            expanded = activeMenu.isNotEmpty(),
-                            onDismissRequest = { activeMenu = "" },
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
                         ) {
-                            if (activeMenu == "main") {
-                                DropdownMenuItem(
-                                    text = { Text("Set as default screen") },
-                                    onClick = {
-                                        onSetAsDefaultScreen(StartScreen.REMOTE_CONTROL)
-                                        activeMenu = ""
-                                    },
-                                )
+                            DropdownMenuItem(
+                                text = { Text("Set as default tab") },
+                                onClick = {
+                                    val startScreen = when (pagerState.currentPage) {
+                                        0 -> StartScreen.REMOTE
+                                        1 -> StartScreen.MOUSE
+                                        else -> StartScreen.COMMANDS
+                                    }
+                                    onSetAsDefaultScreen(startScreen)
+                                    showMenu = false
+                                },
+                            )
+                            if (pagerState.currentPage == 0) {
                                 DropdownMenuItem(
                                     text = { Text("Reset to preset") },
-                                    onClick = { activeMenu = "reset" },
-                                )
-                            } else if (activeMenu == "reset") {
-                                DropdownMenuItem(
-                                    text = { Text("wtype") },
                                     onClick = {
-                                        resetToPreset = "wtype"
-                                        activeMenu = ""
-                                        showResetDialog = true
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("xdotool") },
-                                    onClick = {
-                                        resetToPreset = "xdotool"
-                                        activeMenu = ""
-                                        showResetDialog = true
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("cec-client") },
-                                    onClick = {
-                                        resetToPreset = "cec-client"
-                                        activeMenu = ""
-                                        showResetDialog = true
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("macOS VLC") },
-                                    onClick = {
-                                        resetToPreset = "macOS VLC"
-                                        activeMenu = ""
-                                        showResetDialog = true
+                                        showMenu = false
+                                        showSelectPresetDialog = true
                                     },
                                 )
                             }
@@ -265,12 +259,27 @@ fun EditRemoteControlScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    onSave(editedCommands, true)
-                },
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Icon(Icons.Default.Save, contentDescription = "Save")
+                if (pagerState.currentPage == 2) {
+                    FloatingActionButton(
+                        onClick = {
+                            editingCommandInList = null
+                            showEditCommandDialog = true
+                        },
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Add command")
+                    }
+                }
+                ExtendedFloatingActionButton(
+                    text = { Text("Save") },
+                    icon = { Icon(Icons.Default.Save, contentDescription = "Save") },
+                    onClick = {
+                        onSave(editedRemoteCommands, editedCommands, true)
+                    },
+                )
             }
         },
     ) { padding ->
@@ -278,33 +287,152 @@ fun EditRemoteControlScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
-            RemoteControl(
-                onKeyEvent = { event ->
-                    if (event is KeyEvent.Click) {
-                        val command = editedCommands[event.key] ?: Command("", name = event.key.title)
-                        editingCommand = event.key to command
+            PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
+                Tab(
+                    selected = pagerState.currentPage == 0,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
+                    text = { Text("Remote") },
+                )
+                Tab(
+                    selected = pagerState.currentPage == 1,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
+                    text = { Text("Mouse") },
+                )
+                Tab(
+                    selected = pagerState.currentPage == 2,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
+                    text = { Text("Commands") },
+                )
+            }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                userScrollEnabled = true,
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            RemoteControl(
+                                onKeyEvent = { event ->
+                                    if (event is KeyEvent.Click) {
+                                        val command =
+                                            editedRemoteCommands[event.key] ?: Command("", name = event.key.title)
+                                        editingCommand = event.key to command
+                                    }
+                                },
+                            )
+                        }
                     }
-                },
-                onMouseEvent = {
-                    showEditMouseCommandsDialog = true
-                },
-            )
-        }
 
-        editingCommand?.let { command ->
-            EditRemoteCommandDialog(
-                command = command,
-                onDismiss = { editingCommand = null },
-                onSave = { key, newCommand ->
-                    editedCommands = editedCommands.toMutableMap().apply {
-                        this[key] = newCommand
+                    1 -> {
+                        MousePad(
+                            onMouseEvent = {
+                                showEditMouseCommandsDialog = true
+                            },
+                        )
                     }
-                    editingCommand = null
-                },
-            )
+
+                    2 -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(editedCommands) { command ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(text = command.name ?: command.command, modifier = Modifier.weight(1f))
+                                    IconButton(
+                                        onClick = {
+                                            editingCommandInList = command
+                                            showEditCommandDialog = true
+                                        },
+                                    ) {
+                                        Icon(Icons.Default.Edit, contentDescription = "Edit command")
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            val deletedCommandIndex = editedCommands.indexOf(command)
+                                            editedCommands = editedCommands.filter { it != command }
+                                            snackbarHostState.currentSnackbarData?.dismiss()
+                                            scope.launch {
+                                                val result = snackbarHostState.showSnackbar(
+                                                    message = "Command deleted",
+                                                    actionLabel = "Undo",
+                                                )
+                                                if (result == SnackbarResult.ActionPerformed) {
+                                                    val currentCommands = editedCommands.toMutableList()
+                                                    currentCommands.add(deletedCommandIndex, command)
+                                                    editedCommands = currentCommands
+                                                }
+                                            }
+                                        },
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete command",
+                                            tint = MaterialTheme.colorScheme.error,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    if (showEditCommandDialog) {
+        EditCommandDialog(
+            command = editingCommandInList,
+            onDismiss = {
+                showEditCommandDialog = false
+                editingCommandInList = null
+            },
+            onSave = { command ->
+                editedCommands = if (editingCommandInList != null) {
+                    editedCommands.map { if (it == editingCommandInList) command else it }
+                } else {
+                    editedCommands + command
+                }
+                showEditCommandDialog = false
+                editingCommandInList = null
+            },
+        )
+    }
+
+    if (showEditMouseCommandsDialog) {
+        EditMouseCommandsDialog(
+            commands = editedRemoteCommands,
+            onDismiss = { showEditMouseCommandsDialog = false },
+            onSave = {
+                editedRemoteCommands = it
+                showEditMouseCommandsDialog = false
+            },
+        )
+    }
+
+    editingCommand?.let { command ->
+        EditRemoteCommandDialog(
+            command = command,
+            onDismiss = { editingCommand = null },
+            onSave = { key, newCommand ->
+                editedRemoteCommands = editedRemoteCommands.toMutableMap().apply {
+                    this[key] = newCommand
+                }
+                editingCommand = null
+            },
+        )
     }
 }

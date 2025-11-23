@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.ui.screens
+package com.stefansundin.sshremote.ui.components
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -41,21 +41,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.ui.MouseEvent
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-sealed interface MouseEvent {
-    data class Move(val dx: Float, val dy: Float) : MouseEvent
-    object LeftClick : MouseEvent
-    object RightClick : MouseEvent
-    data class Pan(val dx: Float, val dy: Float) : MouseEvent
-}
-
 @Composable
-fun MousePadScreen(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modifier) {
+fun MousePad(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modifier) {
     BackHandler(enabled = true) {
-        // Prevent back gesture while this screen is active
+        // Prevent back gesture while this component is active
     }
 
     Column(
@@ -186,11 +180,11 @@ private fun TouchPad(
 
 @Preview
 @Composable
-private fun MousePadScreenPreview() {
+private fun MousePadPreview() {
     MaterialTheme {
-        MousePadScreen(
+        MousePad(
             onMouseEvent = { event ->
-                Log.d("MousePadScreen", "Received event: $event")
+                Log.d("MousePad", "Received event: $event")
             },
         )
     }

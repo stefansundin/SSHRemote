@@ -66,7 +66,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HostScreen(
+fun HostListScreen(
     hosts: List<Host>,
     onConnectClicked: (Host) -> Unit,
     onAddClicked: () -> Unit,
@@ -239,13 +239,13 @@ fun HostItem(
 
 @Preview(showBackground = true)
 @Composable
-fun HostScreenPreview() {
+fun HostListScreenPreview() {
     SSHRemoteTheme {
         val sampleHosts = listOf(
             Host(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null),
             Host(2, "Example Host", "example.com", 2222, "admin", null),
         )
-        HostScreen(
+        HostListScreen(
             hosts = sampleHosts,
             onConnectClicked = {},
             onAddClicked = {},

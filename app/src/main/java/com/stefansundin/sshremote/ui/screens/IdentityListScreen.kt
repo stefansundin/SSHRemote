@@ -18,6 +18,8 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +51,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,13 +60,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.KeyPair
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.identity.Identity
+import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
+import com.stefansundin.sshremote.ui.components.PublicKeyDialog
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -75,8 +82,6 @@ fun IdentityListScreen(
     cryptoManager: CryptoManager,
     onNavigateToAddIdentity: () -> Unit,
     onNavigateUp: () -> Unit,
-    onShowPublicKey: (Identity) -> Unit,
-    onExportPublicKey: (Identity) -> Unit,
     onDelete: (Identity) -> Unit,
     onRename: (Identity, String) -> Unit,
     onUndoDelete: () -> Unit,
@@ -84,6 +89,52 @@ fun IdentityListScreen(
     val identities by identityViewModel.identities.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    var showPublicKeyDialog by remember { mutableStateOf(false) }
+    var publicKeyToShow by remember { mutableStateOf("") }
+    var fileToExport by remember { mutableStateOf<Pair<String, String>?>(null) }
+
+    val context = LocalContext.current
+    val fileSaverLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("attachment/plain"),
+        onResult = { uri ->
+            uri?.let {
+                fileToExport?.let { (_, content) ->
+                    context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                        outputStream.write(content.toByteArray())
+                    }
+                }
+            }
+            fileToExport = null
+        },
+    )
+
+    LaunchedEffect(Unit) {
+        identityViewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is IdentityEvent.ShowPublicKey -> {
+                    publicKeyToShow = event.publicKey
+                    showPublicKeyDialog = true
+                }
+
+                is IdentityEvent.ExportPublicKey -> {
+                    fileToExport = event.filename to "${event.content}\n"
+                    fileSaverLauncher.launch(event.filename)
+                }
+
+                is IdentityEvent.Error -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+            }
+        }
+    }
+
+    if (showPublicKeyDialog) {
+        PublicKeyDialog(
+            publicKey = publicKeyToShow,
+            onDismiss = { showPublicKeyDialog = false },
+        )
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -130,8 +181,8 @@ fun IdentityListScreen(
                         IdentityItem(
                             identity = identity,
                             cryptoManager = cryptoManager,
-                            onShowPublicKey = { onShowPublicKey(identity) },
-                            onExportPublicKey = { onExportPublicKey(identity) },
+                            onShowPublicKey = { identityViewModel.showPublicKeyFor(identity) },
+                            onExportPublicKey = { identityViewModel.exportPublicKeyFor(identity) },
                             onDelete = {
                                 onDelete(identity)
                                 scope.launch {

@@ -20,31 +20,20 @@ package com.stefansundin.sshremote
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -56,26 +45,19 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
 import com.stefansundin.sshremote.data.host.StartScreen
-import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
-import com.stefansundin.sshremote.ui.components.CommandOutputDialog
-import com.stefansundin.sshremote.ui.components.PublicKeyDialog
-import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
 import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
 import com.stefansundin.sshremote.ui.screens.AddIdentityScreen
-import com.stefansundin.sshremote.ui.screens.CommandListScreen
-import com.stefansundin.sshremote.ui.screens.EditCommandsScreen
 import com.stefansundin.sshremote.ui.screens.EditHostScreen
 import com.stefansundin.sshremote.ui.screens.EditRemoteControlScreen
-import com.stefansundin.sshremote.ui.screens.HostScreen
+import com.stefansundin.sshremote.ui.screens.HostListScreen
 import com.stefansundin.sshremote.ui.screens.IdentityListScreen
 import com.stefansundin.sshremote.ui.screens.RemoteControlScreen
 import com.stefansundin.sshremote.ui.screens.SettingsScreen
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
@@ -84,17 +66,14 @@ sealed class Screen(val route: String) {
         fun createRoute(hostId: Int?) = "host_edit/$hostId"
     }
 
-    data object CommandList : Screen("command_list/{hostId}") {
-        fun createRoute(hostId: Int) = "command_list/$hostId"
+    data object RemoteControl : Screen("remote_control/{hostId}/{initialPage}") {
+        fun createRoute(hostId: Int, initialPage: Int = 0) = "remote_control/$hostId/$initialPage"
     }
 
-    data object RemoteControl : Screen("remote_control/{hostId}") {
-        fun createRoute(hostId: Int) = "remote_control/$hostId"
+    data object EditRemoteControl : Screen("edit_remote_control/{initialPage}") {
+        fun createRoute(initialPage: Int = 0) = "edit_remote_control/$initialPage"
     }
 
-    data object EditRemoteControl : Screen("edit_remote_control")
-
-    data object EditCommands : Screen("edit_commands")
     data object AdHocCommand : Screen("ad_hoc_command")
     data object Settings : Screen("settings")
     data object IdentityList : Screen("identity_list")
@@ -146,6 +125,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         setContent {
             val theme by settingsViewModel.theme.collectAsState()
@@ -156,197 +136,31 @@ class MainActivity : ComponentActivity() {
             }
 
             SSHRemoteTheme(darkTheme = useDarkTheme) {
-                var showPublicKeyDialog by remember { mutableStateOf(false) }
-                var showSelectIdentityDialog by remember { mutableStateOf(false) }
-                var publicKeyToShow by remember { mutableStateOf("") }
-                var fileToExport by remember { mutableStateOf<Pair<String, String>?>(null) }
-
-                val snackbarHostState = remember { SnackbarHostState() }
-                val scope = rememberCoroutineScope()
-                val context = LocalContext.current
-
-                val fileSaverLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.CreateDocument("attachment/plain"),
-                    onResult = { uri ->
-                        uri?.let {
-                            fileToExport?.let { (_, content) ->
-                                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                                    outputStream.write(content.toByteArray())
-                                }
-                            }
-                        }
-                        fileToExport = null
-                    },
-                )
-
-                val hostKeyVerification by sshRepository.hostKeyVerification.collectAsState()
-                hostKeyVerification?.let { verification ->
-                    AlertDialog(
-                        onDismissRequest = { sshRepository.onHostKeyVerificationComplete(false) },
-                        title = { Text("Host Key Verification") },
-                        text = { Text(verification.message) },
-                        confirmButton = {
-                            TextButton(onClick = { sshRepository.onHostKeyVerificationComplete(true) }) {
-                                Text("Accept")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { sshRepository.onHostKeyVerificationComplete(false) }) {
-                                Text("Reject")
-                            }
-                        },
-                    )
-                }
-
-                val message by sshRepository.message.collectAsState()
-                message?.let { message ->
-                    AlertDialog(
-                        onDismissRequest = { sshRepository.onMessageDismissed() },
-                        title = { Text("Message") },
-                        text = { Text(message.message) },
-                        confirmButton = {
-                            TextButton(onClick = { sshRepository.onMessageDismissed() }) {
-                                Text("OK")
-                            }
-                        },
-                    )
-                }
-
-                val passwordPrompt by sshRepository.passwordPrompt.collectAsState()
-                passwordPrompt?.let { prompt ->
-                    var password by remember { mutableStateOf("") }
-                    AlertDialog(
-                        onDismissRequest = { sshRepository.onPasswordPromptComplete(null) },
-                        title = { Text(prompt.message) },
-                        text = {
-                            TextField(
-                                value = password,
-                                onValueChange = { password = it },
-                                label = { Text("Password") },
-                                visualTransformation = PasswordVisualTransformation(),
-                                singleLine = true,
-                            )
-                        },
-                        confirmButton = {
-                            TextButton(onClick = { sshRepository.onPasswordPromptComplete(password) }) {
-                                Text("OK")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { sshRepository.onPasswordPromptComplete(null) }) {
-                                Text("Cancel")
-                            }
-                        },
-                    )
-                }
-
-                val passphrasePrompt by sshRepository.passphrasePrompt.collectAsState()
-                passphrasePrompt?.let { prompt ->
-                    var passphrase by remember { mutableStateOf("") }
-                    AlertDialog(
-                        onDismissRequest = { sshRepository.onPassphrasePromptComplete(null) },
-                        title = { Text(prompt.message) },
-                        text = {
-                            TextField(
-                                value = passphrase,
-                                onValueChange = { passphrase = it },
-                                label = { Text("Passphrase") },
-                                visualTransformation = PasswordVisualTransformation(),
-                                singleLine = true,
-                            )
-                        },
-                        confirmButton = {
-                            TextButton(onClick = { sshRepository.onPassphrasePromptComplete(passphrase) }) {
-                                Text("OK")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { sshRepository.onPassphrasePromptComplete(null) }) {
-                                Text("Cancel")
-                            }
-                        },
-                    )
-                }
-
-                val uiState by hostViewModel.uiState.collectAsState()
-                uiState.commandOutput?.let { output ->
-                    CommandOutputDialog(
-                        output = output,
-                        onDismiss = { hostViewModel.clearCommandOutput() },
-                    )
-                }
-
-                LaunchedEffect(Unit) {
-                    identityViewModel.eventFlow.collectLatest { event ->
-                        when (event) {
-                            is IdentityEvent.ShowPublicKey -> {
-                                publicKeyToShow = event.publicKey
-                                showPublicKeyDialog = true
-                            }
-
-                            is IdentityEvent.ExportPublicKey -> {
-                                fileToExport = event.filename to "${event.content}\n"
-                                fileSaverLauncher.launch(event.filename)
-                            }
-
-                            is IdentityEvent.Error -> {
-                                scope.launch { snackbarHostState.showSnackbar(event.message) }
-                            }
-                        }
-                    }
-                }
-
-                if (showPublicKeyDialog) {
-                    PublicKeyDialog(
-                        publicKey = publicKeyToShow,
-                        onDismiss = { showPublicKeyDialog = false },
-                    )
-                }
-
-                if (showSelectIdentityDialog) {
-                    val identities by identityViewModel.identities.collectAsState()
-                    SelectIdentityDialog(
-                        identities = identities,
-                        onIdentitySelected = {
-                            scope.launch {
-                                val publicKey = identityViewModel.getPublicKey(it)
-                                val command =
-                                    """exec sh -c 'cd; umask 077; echo "\n$publicKey" >> ~/.ssh/authorized_keys'"""
-                                hostViewModel.runCommand(
-                                    command = command,
-                                    showOutput = false,
-                                    isRetry = false,
-                                    reuseShell = false,
-                                )
-                                snackbarHostState.showSnackbar("Public key copied to host.")
-                            }
-                            showSelectIdentityDialog = false
-                        },
-                        onDismiss = { showSelectIdentityDialog = false },
-                    )
-                }
-
-                Scaffold(
-                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-                ) { innerPadding ->
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    val scope = rememberCoroutineScope()
+                    val uiState by hostViewModel.uiState.collectAsState()
                     val navController = rememberNavController()
+
                     NavHost(
                         navController = navController,
                         startDestination = Screen.HostList.route,
-                        modifier = Modifier.padding(innerPadding),
                         enterTransition = { EnterTransition.None },
                         exitTransition = { ExitTransition.None },
                     ) {
                         composable(Screen.HostList.route) {
                             val hosts by hostViewModel.allHosts.collectAsState()
-                            HostScreen(
+                            HostListScreen(
                                 hosts = hosts,
                                 onConnectClicked = { host ->
-                                    val route = when (host.startScreen) {
-                                        StartScreen.COMMAND_LIST -> Screen.CommandList.createRoute(host.id)
-                                        StartScreen.REMOTE_CONTROL -> Screen.RemoteControl.createRoute(host.id)
+                                    val initialPage = when (host.startScreen) {
+                                        StartScreen.REMOTE -> 0
+                                        StartScreen.MOUSE -> 1
+                                        StartScreen.COMMANDS -> 2
                                     }
-                                    navController.navigate(route)
+                                    navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
                                     hostViewModel.connect(host)
                                 },
                                 onAddClicked = {
@@ -393,43 +207,14 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(
-                            Screen.CommandList.route,
-                            arguments = listOf(navArgument("hostId") { type = NavType.IntType }),
-                        ) { backStackEntry ->
-                            val hostId = backStackEntry.arguments?.getInt("hostId")!!
-                            val hosts by hostViewModel.allHosts.collectAsState()
-                            val host = hosts.find { it.id == hostId }
-                            LaunchedEffect(host) {
-                                if (host != null) {
-                                    hostViewModel.setActiveHost(host)
-                                }
-                            }
-                            CommandListScreen(
-                                uiState = uiState,
-                                onRunCommand = { command -> hostViewModel.runCommand(command.command, command.showOutput) },
-                                onDisconnect = {
-                                    hostViewModel.disconnect()
-                                    navController.popBackStack()
-                                },
-                                onEditCommands = { navController.navigate(Screen.EditCommands.route) },
-                                onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
-                                onSwitchToRemoteControl = {
-                                    navController.navigate(Screen.RemoteControl.createRoute(hostId)) {
-                                        popUpTo(Screen.CommandList.createRoute(hostId)) {
-                                            inclusive = true
-                                        }
-                                    }
-                                },
-                                onCopyPublicKeyClicked = { showSelectIdentityDialog = true },
-                                onClearError = { hostViewModel.clearError() },
-                            )
-                        }
-
-                        composable(
                             Screen.RemoteControl.route,
-                            arguments = listOf(navArgument("hostId") { type = NavType.IntType }),
+                            arguments = listOf(
+                                navArgument("hostId") { type = NavType.IntType },
+                                navArgument("initialPage") { type = NavType.IntType },
+                            ),
                         ) { backStackEntry ->
                             val hostId = backStackEntry.arguments?.getInt("hostId")!!
+                            val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
                             val hosts by hostViewModel.allHosts.collectAsState()
                             val host = hosts.find { it.id == hostId }
                             LaunchedEffect(host) {
@@ -439,34 +224,45 @@ class MainActivity : ComponentActivity() {
                             }
                             RemoteControlScreen(
                                 uiState = uiState,
-                                onRunCommand = { command -> hostViewModel.runCommand(command.command, command.showOutput) },
+                                identityViewModel = identityViewModel,
+                                hostViewModel = hostViewModel,
+                                sshRepository = sshRepository,
                                 onMouseMove = { dx, dy, template -> hostViewModel.onMouseMove(dx, dy, template) },
                                 onMousePan = { dx, dy -> hostViewModel.onMousePan(dx, dy) },
                                 onDisconnect = {
                                     hostViewModel.disconnect()
                                     navController.popBackStack()
                                 },
-                                onSwitchToCommandList = {
-                                    navController.navigate(Screen.CommandList.createRoute(hostId)) {
-                                        popUpTo(Screen.RemoteControl.createRoute(hostId)) {
-                                            inclusive = true
-                                        }
-                                    }
-                                },
                                 onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
-                                onEditRemoteControlClicked = { navController.navigate(Screen.EditRemoteControl.route) },
-                                onCopyPublicKeyClicked = { showSelectIdentityDialog = true },
+                                onEditRemoteControlClicked = { page ->
+                                    navController.navigate(
+                                        Screen.EditRemoteControl.createRoute(
+                                            page,
+                                        ),
+                                    )
+                                },
                                 onClearError = { hostViewModel.clearError() },
+                                initialPage = initialPage,
                             )
                         }
 
-                        composable(Screen.EditRemoteControl.route) {
+                        composable(
+                            Screen.EditRemoteControl.route,
+                            arguments = listOf(
+                                navArgument("initialPage") { type = NavType.IntType },
+                            ),
+                        ) { backStackEntry ->
+                            val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
                             EditRemoteControlScreen(
                                 commands = uiState.host?.remoteCommands ?: emptyMap(),
-                                onSave = { commands, navigateBack ->
+                                initialCommands = uiState.host?.commands ?: emptyList(),
+                                onSave = { remoteCommands, commands, navigateBack ->
                                     scope.launch {
                                         uiState.host?.let { host ->
-                                            val updatedHost = host.copy(remoteCommands = commands)
+                                            val updatedHost = host.copy(
+                                                remoteCommands = remoteCommands,
+                                                commands = commands,
+                                            )
                                             hostViewModel.upsert(updatedHost)
                                             hostViewModel.updateActiveHostInUiState(updatedHost)
                                             if (navigateBack) {
@@ -476,13 +272,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onNavigateBack = { navController.popBackStack() },
-                                onNavigateToEditCommands = {
-                                    navController.navigate(Screen.EditCommands.route) {
-                                        popUpTo(Screen.EditRemoteControl.route) {
-                                            inclusive = true
-                                        }
-                                    }
-                                },
                                 onSetAsDefaultScreen = { startScreen ->
                                     scope.launch {
                                         uiState.host?.let { host ->
@@ -492,41 +281,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                 },
-                            )
-                        }
-
-                        composable(Screen.EditCommands.route) {
-                            EditCommandsScreen(
-                                commands = uiState.host?.commands ?: emptyList(),
-                                onSave = { commands, navigateBack ->
-                                    scope.launch {
-                                        uiState.host?.let { host ->
-                                            val updatedHost = host.copy(commands = commands)
-                                            hostViewModel.upsert(updatedHost)
-                                            hostViewModel.updateActiveHostInUiState(updatedHost)
-                                            if (navigateBack) {
-                                                navController.popBackStack()
-                                            }
-                                        }
-                                    }
-                                },
-                                onNavigateBack = { navController.popBackStack() },
-                                onNavigateToEditRemoteControl = {
-                                    navController.navigate(Screen.EditRemoteControl.route) {
-                                        popUpTo(Screen.EditCommands.route) {
-                                            inclusive = true
-                                        }
-                                    }
-                                },
-                                onSetAsDefaultScreen = { startScreen ->
-                                    scope.launch {
-                                        uiState.host?.let { host ->
-                                            val updatedHost = host.copy(startScreen = startScreen)
-                                            hostViewModel.upsert(updatedHost)
-                                            hostViewModel.updateActiveHostInUiState(updatedHost)
-                                        }
-                                    }
-                                },
+                                initialPage = initialPage,
                             )
                         }
 
@@ -565,8 +320,6 @@ class MainActivity : ComponentActivity() {
                                 onNavigateUp = {
                                     navController.popBackStack()
                                 },
-                                onShowPublicKey = { key -> identityViewModel.showPublicKeyFor(key) },
-                                onExportPublicKey = { key -> identityViewModel.exportPublicKeyFor(key) },
                                 onDelete = { key -> identityViewModel.delete(key) },
                                 onRename = { key, newName -> identityViewModel.rename(key, newName) },
                                 onUndoDelete = { identityViewModel.undoDelete() },
