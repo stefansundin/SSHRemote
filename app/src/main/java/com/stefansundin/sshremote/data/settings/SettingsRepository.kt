@@ -39,8 +39,9 @@ class SettingsRepository(context: Context) {
 
     private object PreferencesKeys {
         val THEME = stringPreferencesKey("theme")
-        val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
         val HAPTIC_FEEDBACK_DURATION = longPreferencesKey("haptic_feedback_duration")
+        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
     }
 
     val theme: Flow<Theme> = dataStore.data
@@ -69,6 +70,17 @@ class SettingsRepository(context: Context) {
     suspend fun setHapticFeedback(hapticFeedback: HapticFeedback) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HAPTIC_FEEDBACK_DURATION] = hapticFeedback.duration
+        }
+    }
+
+    val notificationsEnabled: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: false
+        }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
         }
     }
 

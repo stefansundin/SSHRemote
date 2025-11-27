@@ -24,6 +24,7 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.identity.IdentityRepository
 import com.stefansundin.sshremote.data.settings.SettingsRepository
+import com.stefansundin.sshremote.notification.NotificationService
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
@@ -37,5 +38,6 @@ class SshRemoteApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         Security.addProvider(BouncyCastleProvider())
+        NotificationService.createNotificationChannel(this)
     }
 }

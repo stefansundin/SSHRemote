@@ -18,7 +18,13 @@
 
 package com.stefansundin.sshremote
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,11 +35,15 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,11 +54,13 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.StartScreen
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
+import com.stefansundin.sshremote.notification.NotificationService
 import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
 import com.stefansundin.sshremote.ui.screens.AddIdentityScreen
 import com.stefansundin.sshremote.ui.screens.EditHostScreen
@@ -134,6 +146,8 @@ class MainActivity : ComponentActivity() {
                 Theme.LIGHT -> false
                 Theme.DARK -> true
             }
+
+            CommandBroadcastReceiver(hostViewModel)
 
             SSHRemoteTheme(darkTheme = useDarkTheme) {
                 Surface(
@@ -243,6 +257,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onClearError = { hostViewModel.clearError() },
                                 initialPage = initialPage,
+                                settingsViewModel = settingsViewModel,
                             )
                         }
 
@@ -342,6 +357,73 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
+    val context = LocalContext.current
+
+    DisposableEffect(context, hostViewModel) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == NotificationService.ACTION_EXECUTE_COMMAND) {
+                    val hostIdString = intent.getStringExtra(NotificationService.EXTRA_HOST_ID)
+                    val remoteControlKeyString = intent.getStringExtra(NotificationService.EXTRA_REMOTE_CONTROL_KEY)
+
+                    if (remoteControlKeyString != null && hostIdString != null) {
+                        val hostId = hostIdString.toIntOrNull()
+                        if (hostId == null) {
+                            Log.e("CommandBroadcastReceiver", "Invalid host ID received: $hostIdString")
+                            return
+                        }
+
+                        val remoteControlKey: RemoteControlKey
+                        try {
+                            remoteControlKey = RemoteControlKey.valueOf(remoteControlKeyString)
+                        } catch (e: IllegalArgumentException) {
+                            Log.e(
+                                "CommandBroadcastReceiver",
+                                "Invalid RemoteControlKey received: $remoteControlKeyString",
+                                e,
+                            )
+                            return
+                        }
+
+                        val allHosts = hostViewModel.allHosts.value
+                        val targetHost = allHosts.find { it.id == hostId }
+
+                        if (targetHost != null) {
+                            val command = targetHost.remoteCommands[remoteControlKey]
+                            if (command != null) {
+                                hostViewModel.runCommand(command.command, showOutput = false)
+                                Log.d("CommandBroadcastReceiver", "Executing command on host: ${targetHost.name}")
+                            } else {
+                                Log.w(
+                                    "CommandBroadcastReceiver",
+                                    "Command key '$remoteControlKey' not defined for host '${targetHost.name}'",
+                                )
+                            }
+                        } else {
+                            Log.w("CommandBroadcastReceiver", "Host with ID $hostId not found.")
+                        }
+                    }
+                }
+            }
+        }
+
+        val intentFilter = IntentFilter(NotificationService.ACTION_EXECUTE_COMMAND)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.registerReceiver(context, receiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            context.registerReceiver(receiver, intentFilter)
+        }
+
+        onDispose {
+            context.unregisterReceiver(receiver)
         }
     }
 }

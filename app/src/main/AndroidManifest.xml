@@ -20,8 +20,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:name=".SshRemoteApplication"
@@ -37,13 +41,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.SSHRemote"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".notification.NotificationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <receiver
+            android:name=".notification.NotificationBroadcastReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>

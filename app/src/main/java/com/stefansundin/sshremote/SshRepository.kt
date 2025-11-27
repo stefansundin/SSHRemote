@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote
 
+import android.util.Log
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.ChannelShell
 import com.jcraft.jsch.JSch
@@ -293,6 +294,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 try {
                     val session = session
                     if (session == null || !session.isConnected) {
+                        Log.e("SshRepository", "Cannot execute command, session is null or not connected.")
                         return@withContext Result.Error(
                             "SSH session is not active. Please reconnect.",
                             isConnectionError = true,

@@ -18,7 +18,9 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.Manifest
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -80,6 +82,7 @@ fun SettingsScreen(
     var previewHapticFeedback by remember { mutableStateOf(savedHapticFeedback) }
     var showHapticFeedbackDialog by remember { mutableStateOf(false) }
     var importUri by remember { mutableStateOf<Uri?>(null) }
+    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
 
     val useDarkTheme = when (previewTheme) {
         Theme.SYSTEM -> isSystemInDarkTheme()
@@ -88,6 +91,16 @@ fun SettingsScreen(
     }
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
     val hasHosts by settingsViewModel.hasHosts.collectAsState()
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            settingsViewModel.setNotificationsEnabled(true)
+        } else {
+            Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -115,6 +128,12 @@ fun SettingsScreen(
 
                 is SettingsEvent.ImportError -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is SettingsEvent.RequestPostNotificationsPermission -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
                 }
             }
         }
@@ -269,6 +288,33 @@ fun SettingsScreen(
                         text = savedHapticFeedback.label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "Show notification",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Switch(
+                        checked = notificationsEnabled,
+                        onCheckedChange = {
+                            if (it) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    settingsViewModel.setNotificationsEnabled(true)
+                                }
+                            } else {
+                                settingsViewModel.setNotificationsEnabled(false)
+                            }
+                        },
                     )
                 }
 

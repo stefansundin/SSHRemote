@@ -70,6 +70,9 @@ import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
+import com.stefansundin.sshremote.data.settings.SettingsViewModel
+import com.stefansundin.sshremote.notification.NotificationService
+import com.stefansundin.sshremote.notification.toNotificationHost
 import com.stefansundin.sshremote.performHapticFeedback
 import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.MouseEvent
@@ -90,6 +93,7 @@ fun RemoteControlScreen(
     uiState: RemoteUiState,
     identityViewModel: IdentityViewModel,
     hostViewModel: HostViewModel,
+    settingsViewModel: SettingsViewModel,
     sshRepository: SshRepository,
     onMouseMove: (Float, Float, String) -> Unit,
     onMousePan: (Float, Float) -> Unit,
@@ -100,9 +104,9 @@ fun RemoteControlScreen(
     modifier: Modifier = Modifier,
     initialPage: Int = 0,
 ) {
+    val context = LocalContext.current
     var showMenu by remember { mutableStateOf(false) }
     var isFullscreen by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     var repeatJob by remember { mutableStateOf<Job?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -116,6 +120,15 @@ fun RemoteControlScreen(
                 val insetsController = WindowCompat.getInsetsController(window, view)
                 insetsController.show(WindowInsetsCompat.Type.systemBars())
             }
+            NotificationService.stop(context) // TODO: Remove this when NotificationService can maintain its own SSH connection
+        }
+    }
+
+    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
+
+    LaunchedEffect(uiState.connectionStatus) {
+        if (notificationsEnabled) {
+            uiState.host?.let { NotificationService.start(context, it.toNotificationHost(uiState.connectionStatus)) }
         }
     }
 

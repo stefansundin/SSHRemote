@@ -70,6 +70,19 @@ class SettingsViewModel(
         }
     }
 
+    val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false,
+        )
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setNotificationsEnabled(enabled)
+        }
+    }
+
     val strictHostKeyChecking: StateFlow<Boolean> = settingsRepository.strictHostKeyChecking
         .stateIn(
             scope = viewModelScope,
@@ -99,10 +112,13 @@ class SettingsViewModel(
     fun importSettings(context: Context, uri: Uri, merge: Boolean) {
         viewModelScope.launch {
             try {
-                val count =
+                val (count, requestNotificationPermission) =
                     SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
                         .import(uri, merge)
                 _eventFlow.emit(SettingsEvent.ImportSuccess(count))
+                if (requestNotificationPermission) {
+                    _eventFlow.emit(SettingsEvent.RequestPostNotificationsPermission)
+                }
             } catch (e: ImportException) {
                 _eventFlow.emit(SettingsEvent.ImportError(e.message ?: "Unknown error"))
             }
@@ -113,6 +129,7 @@ class SettingsViewModel(
 sealed class SettingsEvent {
     data class ImportSuccess(val count: Int) : SettingsEvent()
     data class ImportError(val message: String) : SettingsEvent()
+    object RequestPostNotificationsPermission : SettingsEvent()
 }
 
 class SettingsViewModelFactory(

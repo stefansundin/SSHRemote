@@ -52,6 +52,7 @@ class SettingsExporter(
         val theme = settingsRepository.theme.first()
         val hapticFeedback = settingsRepository.hapticFeedback.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
+        val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val hosts = hostRepository.getAll().first().map { host ->
             ExportedHost(
                 name = host.name,
@@ -89,6 +90,7 @@ class SettingsExporter(
             theme,
             hapticFeedback.duration,
             strictHostKeyChecking,
+            notificationsEnabled,
             hosts,
             adHocCommands,
         )

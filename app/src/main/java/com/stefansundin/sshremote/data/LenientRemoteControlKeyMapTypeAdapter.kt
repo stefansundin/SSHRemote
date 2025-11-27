@@ -51,11 +51,11 @@ class LenientRemoteControlKeyMapTypeAdapter(private val gson: Gson) : TypeAdapte
         while (reader.hasNext()) {
             val name = reader.nextName()
             try {
-                val key: RemoteControlKey? = RemoteControlKey.valueOf(name)
+                val key = RemoteControlKey.valueOf(name) as RemoteControlKey?
                 if (key == null || key.toString() == "null") {
                     Log.d("LenientRemoteControlKeyMapTypeAdapter", "Ignoring unknown key: $name")
                     reader.skipValue()
-                    continue;
+                    continue
                 }
                 val command: Command? = if (reader.peek() == JsonToken.STRING) {
                     Command(command = reader.nextString(), name = key.title)

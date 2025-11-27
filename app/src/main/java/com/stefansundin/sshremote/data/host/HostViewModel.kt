@@ -341,12 +341,6 @@ class HostViewModel(
     }
 }
 
-enum class ConnectionStatus {
-    CONNECTED,
-    CONNECTING,
-    DISCONNECTED
-}
-
 data class RemoteUiState(
     val host: Host? = null,
     val commandOutput: String? = null,

@@ -43,10 +43,12 @@ class SettingsImporter(
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
 
-    suspend fun import(uri: Uri, merge: Boolean): Int {
+    suspend fun import(uri: Uri, merge: Boolean): Pair<Int, Boolean> {
         val json = context.contentResolver.openInputStream(uri)?.use { inputStream ->
             inputStream.bufferedReader().use { it.readText() }
         } ?: throw ImportException("Could not read file")
+
+        var requestNotificationPermission = false
 
         try {
             val settings: ExportedSettings = gson.fromJson(json, ExportedSettings::class.java)
@@ -61,6 +63,12 @@ class SettingsImporter(
             }
             if (settings.hapticFeedbackDuration != null) {
                 settingsRepository.setHapticFeedback(HapticFeedback.fromDuration(settings.hapticFeedbackDuration))
+            }
+            if (settings.notificationsEnabled != null) {
+                settingsRepository.setNotificationsEnabled(settings.notificationsEnabled)
+                if (settings.notificationsEnabled) {
+                    requestNotificationPermission = true
+                }
             }
             if (settings.strictHostKeyChecking != null) {
                 settingsRepository.setStrictHostKeyChecking(settings.strictHostKeyChecking)
@@ -115,7 +123,7 @@ class SettingsImporter(
                 }
             }
 
-            return settings.hosts.size
+            return Pair(settings.hosts.size, requestNotificationPermission)
         } catch (e: ImportException) {
             throw e
         } catch (_: JsonSyntaxException) {
