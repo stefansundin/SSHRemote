@@ -64,6 +64,9 @@ class SettingsImporter(
             if (settings.hapticFeedbackDuration != null) {
                 settingsRepository.setHapticFeedback(HapticFeedback.fromDuration(settings.hapticFeedbackDuration))
             }
+            if (settings.keepScreenOn != null) {
+                settingsRepository.setKeepScreenOn(settings.keepScreenOn)
+            }
             if (settings.notificationsEnabled != null) {
                 settingsRepository.setNotificationsEnabled(settings.notificationsEnabled)
                 if (settings.notificationsEnabled) {

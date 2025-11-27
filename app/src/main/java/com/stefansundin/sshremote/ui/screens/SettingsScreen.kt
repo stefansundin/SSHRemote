@@ -83,6 +83,7 @@ fun SettingsScreen(
     var showHapticFeedbackDialog by remember { mutableStateOf(false) }
     var importUri by remember { mutableStateOf<Uri?>(null) }
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
+    val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
 
     val useDarkTheme = when (previewTheme) {
         Theme.SYSTEM -> isSystemInDarkTheme()
@@ -288,6 +289,25 @@ fun SettingsScreen(
                         text = savedHapticFeedback.label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "Keep screen on",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Switch(
+                        checked = keepScreenOn,
+                        onCheckedChange = {
+                            settingsViewModel.setKeepScreenOn(it)
+                        },
                     )
                 }
 

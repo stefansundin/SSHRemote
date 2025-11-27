@@ -51,8 +51,9 @@ class SettingsExporter(
     private suspend fun getSettingsToExport(): ExportedSettings {
         val theme = settingsRepository.theme.first()
         val hapticFeedback = settingsRepository.hapticFeedback.first()
-        val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
+        val keepScreenOn = settingsRepository.keepScreenOn.first()
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
+        val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
         val hosts = hostRepository.getAll().first().map { host ->
             ExportedHost(
                 name = host.name,
@@ -89,8 +90,9 @@ class SettingsExporter(
         return ExportedSettings(
             theme,
             hapticFeedback.duration,
-            strictHostKeyChecking,
+            keepScreenOn,
             notificationsEnabled,
+            strictHostKeyChecking,
             hosts,
             adHocCommands,
         )

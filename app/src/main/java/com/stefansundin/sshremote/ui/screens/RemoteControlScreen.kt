@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.screens
 
 import android.app.Activity
+import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -113,12 +114,24 @@ fun RemoteControlScreen(
     var showSelectIdentityDialog by remember { mutableStateOf(false) }
 
     val view = LocalView.current
-    DisposableEffect(Unit) {
+    val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
+
+    DisposableEffect(keepScreenOn) {
+        val window = (view.context as? Activity)?.window
+        if (window != null) {
+            if (keepScreenOn) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
         onDispose {
-            val window = (view.context as? Activity)?.window
             if (window != null) {
                 val insetsController = WindowCompat.getInsetsController(window, view)
                 insetsController.show(WindowInsetsCompat.Type.systemBars())
+                if (keepScreenOn) {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
             }
             NotificationService.stop(context) // TODO: Remove this when NotificationService can maintain its own SSH connection
         }

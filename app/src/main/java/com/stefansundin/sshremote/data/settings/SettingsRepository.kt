@@ -42,6 +42,7 @@ class SettingsRepository(context: Context) {
         val HAPTIC_FEEDBACK_DURATION = longPreferencesKey("haptic_feedback_duration")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
+        val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     }
 
     val theme: Flow<Theme> = dataStore.data
@@ -70,6 +71,17 @@ class SettingsRepository(context: Context) {
     suspend fun setHapticFeedback(hapticFeedback: HapticFeedback) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HAPTIC_FEEDBACK_DURATION] = hapticFeedback.duration
+        }
+    }
+
+    val keepScreenOn: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.KEEP_SCREEN_ON] ?: true
+        }
+
+    suspend fun setKeepScreenOn(keepScreenOn: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.KEEP_SCREEN_ON] = keepScreenOn
         }
     }
 

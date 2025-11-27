@@ -70,6 +70,19 @@ class SettingsViewModel(
         }
     }
 
+    val keepScreenOn: StateFlow<Boolean> = settingsRepository.keepScreenOn
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = true,
+        )
+
+    fun setKeepScreenOn(keepScreenOn: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setKeepScreenOn(keepScreenOn)
+        }
+    }
+
     val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
         .stateIn(
             scope = viewModelScope,
