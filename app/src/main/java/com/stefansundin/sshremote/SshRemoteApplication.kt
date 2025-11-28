@@ -20,23 +20,45 @@ package com.stefansundin.sshremote
 
 import android.app.Application
 import com.stefansundin.sshremote.data.AppDatabase
+import com.stefansundin.sshremote.data.EncryptedAppDatabase
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.identity.IdentityRepository
 import com.stefansundin.sshremote.data.settings.SettingsRepository
 import com.stefansundin.sshremote.notification.NotificationService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
 class SshRemoteApplication : Application() {
     private val database by lazy { AppDatabase.getInstance(this) }
+    private val encryptedDatabase by lazy { EncryptedAppDatabase.getInstance(this) }
+
     val hostRepository by lazy { HostRepository(database.hostDao()) }
-    val identityRepository by lazy { IdentityRepository(database.identityDao()) }
+    val identityRepository by lazy { IdentityRepository(encryptedDatabase.identityDao()) }
+    val passwordDao by lazy { encryptedDatabase.passwordDao() }
     val adHocCommandRepository by lazy { AdHocCommandRepository(database.adHocCommandDao()) }
     val settingsRepository by lazy { SettingsRepository(this) }
 
+    var isRestoredFromBackup: Boolean = false
+
     override fun onCreate() {
         super.onCreate()
+
+        // The encrypted database is not included in backups, so inform the user if it is missing
+        isRestoredFromBackup = run {
+            val databaseExists = getDatabasePath("database").exists()
+            val encryptedDatabaseExists = getDatabasePath("encrypted_database").exists()
+            databaseExists && !encryptedDatabaseExists
+        }
+        // Initialize both databases to ensure we don't accidentally trigger isRestoredFromBackup
+        CoroutineScope(Dispatchers.IO).launch {
+            encryptedDatabase.openHelper.writableDatabase
+            database.openHelper.writableDatabase
+        }
+
         Security.addProvider(BouncyCastleProvider())
         NotificationService.createNotificationChannel(this)
     }

@@ -27,11 +27,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface IdentityDao {
-    @Query("SELECT * FROM identities ORDER BY id DESC")
+    @Query("SELECT * FROM identities ORDER BY createdAt DESC")
     fun getAll(): Flow<List<Identity>>
 
     @Query("SELECT * FROM identities WHERE id = :id")
-    fun get(id: Int): Flow<Identity?>
+    fun get(id: String): Flow<Identity?>
 
     @Insert
     suspend fun insert(identity: Identity)

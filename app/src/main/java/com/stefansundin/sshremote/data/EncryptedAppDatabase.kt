@@ -23,32 +23,32 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
-import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandDao
-import com.stefansundin.sshremote.data.host.Host
-import com.stefansundin.sshremote.data.host.HostDao
+import com.stefansundin.sshremote.data.identity.Identity
+import com.stefansundin.sshremote.data.identity.IdentityDao
+import com.stefansundin.sshremote.data.password.Password
+import com.stefansundin.sshremote.data.password.PasswordDao
 
 @Database(
-    entities = [Host::class, AdHocCommand::class],
-    version = 5,
+    entities = [Identity::class, Password::class],
+    version = 1,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
-abstract class AppDatabase : RoomDatabase() {
+abstract class EncryptedAppDatabase : RoomDatabase() {
 
-    abstract fun hostDao(): HostDao
-    abstract fun adHocCommandDao(): AdHocCommandDao
+    abstract fun identityDao(): IdentityDao
+    abstract fun passwordDao(): PasswordDao
 
     companion object {
         @Volatile
-        private var INSTANCE: AppDatabase? = null
+        private var INSTANCE: EncryptedAppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase {
+        fun getInstance(context: Context): EncryptedAppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    AppDatabase::class.java,
-                    "database",
+                    EncryptedAppDatabase::class.java,
+                    "encrypted_database",
                 )
                     .fallbackToDestructiveMigration(true)
                     .build()

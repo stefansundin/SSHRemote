@@ -16,39 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.host
+package com.stefansundin.sshremote.data.password
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface HostDao {
-
+interface PasswordDao {
     @Insert
-    suspend fun insert(host: Host): Long
+    suspend fun insert(password: Password)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(host: Host)
+    @Query("SELECT * FROM passwords WHERE id = :id")
+    suspend fun getPassword(id: String): Password?
 
     @Delete
-    suspend fun delete(host: Host)
+    suspend fun delete(password: Password)
 
-    @Query("DELETE FROM hosts")
-    suspend fun deleteAll()
-
-    @Query("SELECT * FROM hosts ORDER BY name ASC")
-    fun getAll(): Flow<List<Host>>
-
-    @Query("SELECT * FROM hosts WHERE id = :id")
-    fun get(id: Int): Flow<Host?>
-
-    @Query("SELECT * FROM hosts WHERE id = :id")
-    suspend fun getOnce(id: Int): Host?
-
-    @Query("SELECT COUNT(*) FROM hosts")
-    suspend fun count(): Int
+    @Query("DELETE FROM passwords WHERE id = :id")
+    suspend fun delete(id: String)
 }

@@ -42,6 +42,13 @@ class HostRepository(private val hostDao: HostDao) {
     suspend fun getOnce(id: Int): Host? = hostDao.getOnce(id)
 
     /**
+     * Inserts a host in the database.
+     */
+    suspend fun insert(host: Host): Long {
+        return hostDao.insert(host)
+    }
+
+    /**
      * Inserts or updates a host in the database.
      */
     suspend fun upsert(host: Host) {

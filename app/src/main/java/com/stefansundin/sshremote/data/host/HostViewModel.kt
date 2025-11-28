@@ -27,6 +27,8 @@ import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.SshRepository
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.identity.IdentityRepository
+import com.stefansundin.sshremote.data.password.Password
+import com.stefansundin.sshremote.data.password.PasswordDao
 import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -51,6 +53,7 @@ class HostViewModel(
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
     private val settingsRepository: SettingsRepository,
+    private val passwordDao: PasswordDao,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RemoteUiState())
@@ -59,8 +62,6 @@ class HostViewModel(
     private var hostStateJob: Job? = null
 
     private var lastDeletedHost: Host? = null
-
-    private var cloneHost: Host? = null
 
     private var mouseMoveJob: Job? = null
     private var pendingDx = 0f
@@ -85,27 +86,65 @@ class HostViewModel(
             initialValue = emptyList(),
         )
 
+    suspend fun saveHost(host: Host, password: String?) {
+        var hostToSave = host
+        if (password != null) {
+            // Delete the old password if it exists
+            host.passwordId?.let { oldPasswordId ->
+                passwordDao.delete(oldPasswordId)
+            }
+
+            if (password.isEmpty()) {
+                // Clear the password
+                hostToSave = host.copy(passwordId = null)
+            } else {
+                // Update with new password
+                val encryptedPassword = cryptoManager.encrypt(password)
+                val passwordEntity = Password(encryptedPassword = encryptedPassword)
+                passwordDao.insert(passwordEntity)
+                hostToSave = host.copy(passwordId = passwordEntity.id)
+            }
+        }
+
+        // If password is null, no changes are made to the passwordId and the host is saved as is
+        repository.upsert(hostToSave)
+    }
+
+    fun cloneHost(host: Host, onHostCloned: (Int) -> Unit) {
+        viewModelScope.launch {
+            val newPasswordId = host.passwordId?.let { passwordId ->
+                passwordDao.getPassword(passwordId)?.let { password ->
+                    val newPassword = Password(encryptedPassword = password.encryptedPassword)
+                    passwordDao.insert(newPassword)
+                    newPassword.id
+                }
+            }
+            val clonedHost = host.copy(
+                id = 0,
+                name = "Copy of ${host.name}",
+                passwordId = newPasswordId,
+            )
+            val newHostId = repository.insert(clonedHost)
+            onHostCloned(newHostId.toInt())
+        }
+    }
+
+    suspend fun isPasswordLost(passwordId: String): Boolean {
+        return passwordDao.getPassword(passwordId) == null
+    }
+
     suspend fun upsert(host: Host) {
         repository.upsert(host)
     }
 
     fun delete(host: Host) = viewModelScope.launch {
         lastDeletedHost = host
+        host.passwordId?.let { passwordDao.delete(it) }
         repository.delete(host)
     }
 
     fun undoDelete() = viewModelScope.launch {
         lastDeletedHost?.let { repository.upsert(it) }
-    }
-
-    fun setCloneHost(host: Host) {
-        cloneHost = host
-    }
-
-    fun getCloneHost(): Host? {
-        val host = cloneHost
-        cloneHost = null
-        return host
     }
 
     fun updateActiveHostInUiState(host: Host) {
@@ -151,9 +190,11 @@ class HostViewModel(
                 Pair(key.name, cryptoManager.decryptToString(key.encryptedPrivateKey))
             }
 
-            val password = if (host.encryptedPassword != null) {
-                cryptoManager.decryptToString(host.encryptedPassword)
-            } else null
+            val password = host.passwordId?.let {
+                passwordDao.getPassword(it)?.let { password ->
+                    cryptoManager.decryptToString(password.encryptedPassword)
+                }
+            }
 
             val connectionDetails = HostConnectionDetails(
                 hostname = host.hostname,
@@ -355,6 +396,7 @@ class HostViewModelFactory(
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
     private val settingsRepository: SettingsRepository,
+    private val passwordDao: PasswordDao,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HostViewModel::class.java)) {
@@ -365,6 +407,7 @@ class HostViewModelFactory(
                 sshRepository,
                 cryptoManager,
                 settingsRepository,
+                passwordDao,
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

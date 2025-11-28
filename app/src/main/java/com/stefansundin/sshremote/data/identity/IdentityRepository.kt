@@ -26,7 +26,7 @@ class IdentityRepository(private val identityDao: IdentityDao) {
         return identityDao.getAll()
     }
 
-    fun get(id: Int): Flow<Identity?> = identityDao.get(id)
+    fun get(id: String): Flow<Identity?> = identityDao.get(id)
 
     suspend fun insert(identity: Identity) {
         identityDao.insert(identity)

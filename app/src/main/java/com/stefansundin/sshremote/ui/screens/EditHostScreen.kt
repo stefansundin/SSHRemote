@@ -61,35 +61,61 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.Validations
-import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+
+private enum class PasswordState {
+    LOADING,
+    LOST,
+    SET
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditHostScreen(
     host: Host?,
     identities: List<Identity>,
-    onSave: (Host) -> Unit,
+    onSave: (Host, String?) -> Unit,
     onNavigateUp: () -> Unit,
-    cryptoManager: CryptoManager?, // null allowed for preview
     hostViewModel: HostViewModel?, // null allowed for preview
 ) {
     var name by remember(host) { mutableStateOf(host?.name ?: "") }
     var hostname by remember(host) { mutableStateOf(host?.hostname ?: "") }
     var port by remember(host) { mutableStateOf(host?.port?.toString() ?: "22") }
     var user by remember(host) { mutableStateOf(host?.user ?: "") }
-    var initialEncryptedPassword by remember(host) { mutableStateOf(host?.encryptedPassword) }
 
-    val isPasswordSet = initialEncryptedPassword?.isNotEmpty() == true
+    var passwordState by remember { mutableStateOf(PasswordState.LOADING) }
+    LaunchedEffect(host?.passwordId) {
+        val currentPasswordId = host?.passwordId
+        passwordState = if (currentPasswordId != null && hostViewModel != null) {
+            if (hostViewModel.isPasswordLost(currentPasswordId)) {
+                PasswordState.LOST
+            } else {
+                PasswordState.SET
+            }
+        } else {
+            PasswordState.SET
+        }
+    }
+
+    val isPasswordSet = host?.passwordId != null
     var userWantsToChangePassword by remember { mutableStateOf(false) }
     val showPasswordField = !isPasswordSet || userWantsToChangePassword
 
     var password by remember { mutableStateOf("") }
     var selectedIdentityIds by remember(host, identities) {
-        mutableStateOf(host?.identityIds?.filter { id -> identities.any { it.id == id } })
+        val originalIds = host?.identityIds
+        val validIds = originalIds?.filter { id -> identities.any { it.id == id } }
+        val resultIds = if (originalIds != null && originalIds.isNotEmpty() && validIds?.isEmpty() == true) {
+            // Stale reference case: all selected keys are gone. Switch to "Use any key".
+            null
+        } else {
+            // Otherwise, use the valid ones (or the original null/empty list)
+            validIds ?: originalIds
+        }
+        mutableStateOf(resultIds)
     }
     var identityDropdownExpanded by remember { mutableStateOf(false) }
     var knownHosts by remember(host) { mutableStateOf(host?.knownHosts ?: emptyList()) }
@@ -97,19 +123,6 @@ fun EditHostScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var hasBeenSubmitted by remember { mutableStateOf(false) }
     val onSubmit = { hasBeenSubmitted = true }
-
-    LaunchedEffect(Unit) {
-        hostViewModel?.getCloneHost()?.let { clone ->
-            name = "Copy of ${clone.name}"
-            hostname = clone.hostname
-            port = clone.port.toString()
-            user = clone.user
-            password = ""
-            selectedIdentityIds = clone.identityIds
-            knownHosts = clone.knownHosts
-            initialEncryptedPassword = clone.encryptedPassword
-        }
-    }
 
     val isNameValid by remember(name) { derivedStateOf { Validations.validateName(name) } }
     val isHostValid by remember(hostname) { derivedStateOf { Validations.validateHost(hostname) } }
@@ -138,21 +151,11 @@ fun EditHostScreen(
     fun handleSave() {
         onSubmit()
         if (isFormValid) {
-            val encryptedPassword =
-                if (showPasswordField) {
-                    if (cryptoManager != null && password.isNotEmpty()) {
-                        cryptoManager.encrypt(password)
-                    } else null
-                } else {
-                    initialEncryptedPassword
-                }
-
             val hostToSave = host?.copy(
                 name = name,
                 hostname = hostname,
                 port = port.toInt(),
                 user = user,
-                encryptedPassword = encryptedPassword,
                 identityIds = selectedIdentityIds,
                 knownHosts = knownHosts,
             )
@@ -161,11 +164,10 @@ fun EditHostScreen(
                     hostname = hostname,
                     port = port.toInt(),
                     user = user,
-                    encryptedPassword = encryptedPassword,
                     identityIds = selectedIdentityIds,
                     knownHosts = knownHosts,
                 )
-            onSave(hostToSave)
+            onSave(hostToSave, if (showPasswordField) password else null)
         }
     }
 
@@ -203,11 +205,7 @@ fun EditHostScreen(
         showSaveDialog = true
     }
 
-    val title = when {
-        host == null -> "Add Host"
-        host.id == 0 -> "Clone Host"
-        else -> "Edit Host"
-    }
+    val title = if (host == null) "Add Host" else "Edit Host"
 
     Scaffold(
         topBar = {
@@ -321,51 +319,55 @@ fun EditHostScreen(
             )
 
             // PASSWORD FIELD
-            if (showPasswordField) {
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password") },
-                    supportingText = {
-                        if (isPasswordSet) {
-                            Text("Enter a new password, or leave empty to clear it.")
-                        } else {
-                            Text("Optional, will be prompted for if not provided")
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done,
-                    ),
-                    trailingIcon = {
-                        val image =
-                            if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        val description = if (passwordVisible) "Hide password" else "Show password"
-                        IconToggleButton(
-                            checked = passwordVisible,
-                            onCheckedChange = { passwordVisible = it },
-                        ) {
-                            Icon(imageVector = image, contentDescription = description)
-                        }
-                    },
-                )
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = "Password saved",
-                        modifier = Modifier.padding(start = 8.dp),
+            if (passwordState != PasswordState.LOADING) {
+                if (showPasswordField) {
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("Password") },
+                        supportingText = {
+                            if (passwordState == PasswordState.LOST) {
+                                Text("Passwords are not backed up, please re-enter")
+                            } else if (isPasswordSet) {
+                                Text("Enter a new password, or leave empty to clear it")
+                            } else {
+                                Text("Optional, will be prompted for if not provided")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done,
+                        ),
+                        trailingIcon = {
+                            val image =
+                                if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                            val description = if (passwordVisible) "Hide password" else "Show password"
+                            IconToggleButton(
+                                checked = passwordVisible,
+                                onCheckedChange = { passwordVisible = it },
+                            ) {
+                                Icon(imageVector = image, contentDescription = description)
+                            }
+                        },
                     )
-                    TextButton(
-                        onClick = { userWantsToChangePassword = true },
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Change or Clear")
+                        Text(
+                            text = if (passwordState == PasswordState.LOST) "Password lost" else "Password saved",
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                        TextButton(
+                            onClick = { userWantsToChangePassword = true },
+                        ) {
+                            Text(if (passwordState == PasswordState.LOST) "Re-enter" else "Change or Clear")
+                        }
                     }
                 }
             }
@@ -453,10 +455,9 @@ fun AddHostScreenPreview() {
     SSHRemoteTheme {
         EditHostScreen(
             host = null,
-            onSave = {},
+            onSave = { _, _ -> },
             onNavigateUp = {},
             identities = emptyList(),
-            cryptoManager = null,
             hostViewModel = null,
         )
     }
@@ -466,13 +467,12 @@ fun AddHostScreenPreview() {
 @Composable
 fun EditHostScreenPreview() {
     SSHRemoteTheme {
-        val sampleHost = Host(1, "Raspberry Pi", "192.168.1.10", 22, "pi", "password".toByteArray(), emptyList())
+        val sampleHost = Host(1, "Raspberry Pi", "192.168.1.10", 22, "pi", "passwordId", emptyList())
         EditHostScreen(
             host = sampleHost,
-            onSave = {},
+            onSave = { _, _ -> },
             onNavigateUp = {},
             identities = emptyList(),
-            cryptoManager = null,
             hostViewModel = null,
         )
     }
@@ -485,10 +485,9 @@ fun CloneHostScreenPreview() {
         val sampleHost = Host(0, "Copy of Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
         EditHostScreen(
             host = sampleHost,
-            onSave = {},
+            onSave = { _, _ -> },
             onNavigateUp = {},
             identities = emptyList(),
-            cryptoManager = null,
             hostViewModel = null,
         )
     }

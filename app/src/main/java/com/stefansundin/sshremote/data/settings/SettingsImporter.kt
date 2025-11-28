@@ -89,7 +89,7 @@ class SettingsImporter(
                     hostname = exportedHost.hostname,
                     port = exportedHost.port,
                     user = exportedHost.user,
-                    encryptedPassword = null,
+                    passwordId = null,
                     identityIds = if (exportedHost.allowIdentities) null else emptyList(),
                     knownHosts = exportedHost.knownHosts,
                     commands = exportedHost.commands.map {

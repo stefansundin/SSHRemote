@@ -33,14 +33,20 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -114,6 +120,7 @@ class MainActivity : ComponentActivity() {
             sshRepository,
             cryptoManager,
             app.settingsRepository,
+            app.passwordDao,
         )
     }
 
@@ -157,6 +164,29 @@ class MainActivity : ComponentActivity() {
                     val scope = rememberCoroutineScope()
                     val uiState by hostViewModel.uiState.collectAsState()
                     val navController = rememberNavController()
+                    val app = LocalContext.current.applicationContext as SshRemoteApplication
+                    var showBackupRestoredDialog by remember { mutableStateOf(app.isRestoredFromBackup) }
+
+                    if (showBackupRestoredDialog) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                showBackupRestoredDialog = false
+                                app.isRestoredFromBackup = false
+                            },
+                            title = { Text("Restored from backup") },
+                            text = { Text("The application data was restored from a backup. For security reasons, encrypted data such as SSH keys and passwords are not included in backups.\n\nPlease configure these again.") },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        showBackupRestoredDialog = false
+                                        app.isRestoredFromBackup = false
+                                    },
+                                ) {
+                                    Text("OK")
+                                }
+                            },
+                        )
+                    }
 
                     NavHost(
                         navController = navController,
@@ -184,8 +214,9 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate(Screen.HostEdit.createRoute(host.id))
                                 },
                                 onCloneClicked = { host ->
-                                    hostViewModel.setCloneHost(host)
-                                    navController.navigate(Screen.HostEdit.createRoute(null))
+                                    hostViewModel.cloneHost(host) { newHostId ->
+                                        navController.navigate(Screen.HostEdit.createRoute(newHostId))
+                                    }
                                 },
                                 onDeleteClicked = { host -> hostViewModel.delete(host) },
                                 onUndoDeleteClicked = { hostViewModel.undoDelete() },
@@ -206,16 +237,15 @@ class MainActivity : ComponentActivity() {
                             EditHostScreen(
                                 host = host,
                                 identities = identities,
-                                onSave = { newHost ->
+                                onSave = { newHost, password ->
                                     scope.launch {
-                                        hostViewModel.upsert(newHost)
+                                        hostViewModel.saveHost(newHost, password)
                                         navController.popBackStack()
                                     }
                                 },
                                 onNavigateUp = {
                                     navController.popBackStack()
                                 },
-                                cryptoManager = cryptoManager,
                                 hostViewModel = hostViewModel,
                             )
                         }

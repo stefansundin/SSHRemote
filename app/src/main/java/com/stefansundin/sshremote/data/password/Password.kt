@@ -16,23 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.data.identity
+package com.stefansundin.sshremote.data.password
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.OffsetDateTime
 import java.util.UUID
 
-/**
- * An identity is a private/public key pair that can be used to authenticate to an SSH server.
- *
- * An identity is also known as an SSH key, which is the term used in the app UI.
- */
-@Entity(tableName = "identities")
-data class Identity(
+@Entity(tableName = "passwords")
+data class Password(
     @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
-    val createdAt: OffsetDateTime = OffsetDateTime.now(),
-    val name: String,
-    val encryptedPrivateKey: ByteArray,
+    val encryptedPassword: ByteArray,
 )
