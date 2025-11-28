@@ -57,7 +57,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.BuildConfig
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.SettingsEvent
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
@@ -120,6 +122,8 @@ fun SettingsScreen(
             uri?.let { importUri = it }
         },
     )
+
+    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(Unit) {
         settingsViewModel.eventFlow.collectLatest { event ->
@@ -425,6 +429,111 @@ fun SettingsScreen(
                     )
                     Text(
                         "Import settings from a file.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("About SSH Remote", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "App version",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        BuildConfig.VERSION_NAME,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "Author",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "Developed by Stefan Sundin",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .clickable { uriHandler.openUri("https://stefansundin.github.io/donate") }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "Donate",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "Support the developer",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .clickable { uriHandler.openUri("https://www.gnu.org/licenses/gpl-3.0.html") }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "License",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "GNU General Public License v3.0",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .clickable { uriHandler.openUri("https://github.com/stefansundin/SSHRemote") }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "Source code",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "View on GitHub",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .clickable { uriHandler.openUri("https://github.com/mwiede/jsch") }
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    Text(
+                        "SSH library",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        "Using mwiede/jsch ${BuildConfig.JSCH_VERSION}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

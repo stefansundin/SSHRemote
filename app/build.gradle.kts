@@ -24,6 +24,8 @@ android {
         base.archivesName = "ssh-remote-$versionName"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "JSCH_VERSION", "\"${libs.versions.jsch.get()}\"")
     }
 
     buildTypes {
@@ -32,7 +34,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -48,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
