@@ -18,7 +18,11 @@
 
 package com.stefansundin.sshremote
 
-sealed class HapticFeedback(val duration: kotlin.Long) {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+sealed class HapticFeedback(val duration: kotlin.Long) : Parcelable {
     data object Off : HapticFeedback(0)
     data object Short : HapticFeedback(20)
     data object Medium : HapticFeedback(40)

@@ -55,8 +55,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,14 +82,14 @@ fun AddIdentityScreen(
     onKeyGenerated: (name: String, type: Int, comment: String) -> Unit,
     onNavigateUp: () -> Unit,
 ) {
-    var name by remember { mutableStateOf("") }
-    var privateKey by remember { mutableStateOf("") }
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var name by rememberSaveable { mutableStateOf("") }
+    var privateKey by rememberSaveable { mutableStateOf("") }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabTitles = listOf("Import File", "Generate", "Enter Manually")
-    var isKeyContentValid by remember { mutableStateOf(false) }
-    var selectedKeyType by remember { mutableStateOf<Int?>(null) }
+    var isKeyContentValid by rememberSaveable { mutableStateOf(false) }
+    var selectedKeyType by rememberSaveable { mutableStateOf<Int?>(null) }
 
-    var showSaveDialog by remember { mutableStateOf(false) }
+    var showSaveDialog by rememberSaveable { mutableStateOf(false) }
 
     val hasUnsavedChanges = privateKey.isNotBlank()
     val isFormValid = (selectedTabIndex == 0 && isKeyContentValid) ||
@@ -139,8 +139,9 @@ fun AddIdentityScreen(
 
     LaunchedEffect(privateKey, selectedTabIndex) {
         isKeyContentValid = if (selectedTabIndex == 0 || selectedTabIndex == 2) {
-            if (privateKey.isBlank()) false
-            else {
+            if (privateKey.isBlank()) {
+                false
+            } else {
                 try {
                     val jsch = JSch()
                     val keyPair = KeyPair.load(jsch, privateKey.toByteArray(), null)
@@ -249,8 +250,8 @@ fun ImportFileTab(
     onNameSuggestion: (String) -> Unit,
 ) {
     val context = LocalContext.current
-    var keyContentForParsing by remember { mutableStateOf<String?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var keyContentForParsing by rememberSaveable { mutableStateOf<String?>(null) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(keyContentForParsing) {
         keyContentForParsing?.let { content ->
@@ -337,8 +338,9 @@ fun getClipEntryText(clipData: ClipData): String? {
     for (i in 0..<itemCount) {
         val item = clipData.getItemAt(i)
         val text = item?.text
-        if (text != null)
+        if (text != null) {
             textFull += text
+        }
     }
     return textFull.ifEmpty { null }
 }

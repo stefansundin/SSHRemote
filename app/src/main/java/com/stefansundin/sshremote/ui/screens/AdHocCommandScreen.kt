@@ -48,7 +48,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,9 +72,9 @@ fun AdHocCommandScreen(
     onClearHistory: () -> Unit,
     onNavigateUp: () -> Unit,
 ) {
-    var commandText by remember { mutableStateOf("") }
-    var showMenu by remember { mutableStateOf(false) }
-    var showContextMenuFor by remember { mutableStateOf<AdHocCommand?>(null) }
+    var commandText by rememberSaveable { mutableStateOf("") }
+    var showMenu by rememberSaveable { mutableStateOf(false) }
+    var showContextMenuFor by rememberSaveable { mutableStateOf<AdHocCommand?>(null) }
 
     val executeAndStay: () -> Unit = { onExecuteCommand(commandText, false) }
     val executeAndGoBack: () -> Unit = { onExecuteCommand(commandText, true) }
@@ -116,7 +116,7 @@ fun AdHocCommandScreen(
                 .imePadding(),
         ) {
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(commands) { command ->
+                items(commands, key = { it.command }) { command ->
                     Box {
                         Text(
                             text = command.command,

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
@@ -51,10 +53,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,7 +65,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +80,34 @@ fun HostListScreen(
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    var undoableDeletedHostId by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(undoableDeletedHostId) {
+        val id = undoableDeletedHostId
+        if (id != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Host deleted",
+                actionLabel = "Undo",
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onUndoDeleteClicked()
+            } else {
+                undoableDeletedHostId = null
+            }
+        }
+    }
+
+    LaunchedEffect(hosts, undoableDeletedHostId) {
+        val id = undoableDeletedHostId
+        if (id != null) {
+            val index = hosts.indexOfFirst { it.id == id }
+            if (index != -1) {
+                listState.animateScrollToItem(index)
+                undoableDeletedHostId = null
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -106,47 +135,40 @@ fun HostListScreen(
             }
         },
     ) { innerPadding ->
-        if (hosts.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text("No SSH hosts added yet.", style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    "Tap the + button to add one.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp),
-                )
-            }
-        } else {
-            LazyColumn(
-                contentPadding = innerPadding,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(16.dp),
-            ) {
-                items(items = hosts, key = { host -> host.id }) { host ->
-                    HostItem(
-                        host = host,
-                        onConnect = { onConnectClicked(host) },
-                        onEdit = { onEditClicked(host) },
-                        onClone = { onCloneClicked(host) },
-                        onDelete = {
-                            onDeleteClicked(host)
-                            scope.launch {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                val result = snackbarHostState.showSnackbar(
-                                    message = "Host deleted",
-                                    actionLabel = "Undo",
-                                )
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    onUndoDeleteClicked()
-                                }
-                            }
-                        },
+        Box(modifier = Modifier.padding(innerPadding)) {
+            if (hosts.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("No SSH hosts added yet.", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "Tap the + button to add one.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp),
                     )
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    items(items = hosts, key = { host -> host.id }) { host ->
+                        HostItem(
+                            host = host,
+                            onConnect = { onConnectClicked(host) },
+                            onEdit = { onEditClicked(host) },
+                            onClone = { onCloneClicked(host) },
+                            onDelete = {
+                                onDeleteClicked(host)
+                                undoableDeletedHostId = host.id
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -163,7 +185,7 @@ fun HostItem(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isContextMenuVisible by remember { mutableStateOf(false) }
+    var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
 
     Card(
         modifier = modifier

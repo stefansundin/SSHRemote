@@ -18,13 +18,16 @@
 
 package com.stefansundin.sshremote.data.host
 
+import android.os.Parcelable
 import androidx.annotation.Keep
+import kotlinx.parcelize.Parcelize
 
 @Keep
+@Parcelize
 data class Command(
     val command: String,
     val longPressCommand: String? = null,
     val name: String? = null,
     val showOutput: Boolean = false,
     val repeat: Boolean = false,
-)
+) : Parcelable

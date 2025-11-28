@@ -42,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,8 +68,8 @@ fun HapticFeedbackSettingDialog(
         }
     }
 
-    var hasUserEdited by remember { mutableStateOf(!HapticFeedback.presets.contains(currentHapticFeedback)) }
-    var customDurationString by remember { mutableStateOf(if (hasUserEdited) currentHapticFeedback.duration.toString() else "") }
+    var hasUserEdited by rememberSaveable { mutableStateOf(!HapticFeedback.presets.contains(currentHapticFeedback)) }
+    var customDurationString by rememberSaveable { mutableStateOf(if (hasUserEdited) currentHapticFeedback.duration.toString() else "") }
 
     // This effect runs on initial composition and whenever the selection changes.
     // It updates the text field, but only if the user hasn't manually edited it.

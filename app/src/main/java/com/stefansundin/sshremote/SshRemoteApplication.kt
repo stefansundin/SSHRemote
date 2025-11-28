@@ -43,6 +43,7 @@ class SshRemoteApplication : Application() {
     val settingsRepository by lazy { SettingsRepository(this) }
 
     var isRestoredFromBackup: Boolean = false
+        private set
 
     override fun onCreate() {
         super.onCreate()

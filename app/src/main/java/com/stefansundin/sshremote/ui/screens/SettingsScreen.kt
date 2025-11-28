@@ -52,7 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,12 +78,12 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val savedTheme by settingsViewModel.theme.collectAsState()
-    var previewTheme by remember { mutableStateOf(savedTheme) }
-    var showThemeDialog by remember { mutableStateOf(false) }
+    var previewTheme by rememberSaveable { mutableStateOf(savedTheme) }
+    var showThemeDialog by rememberSaveable { mutableStateOf(false) }
     val savedHapticFeedback by settingsViewModel.hapticFeedback.collectAsState()
-    var previewHapticFeedback by remember { mutableStateOf(savedHapticFeedback) }
-    var showHapticFeedbackDialog by remember { mutableStateOf(false) }
-    var importUri by remember { mutableStateOf<Uri?>(null) }
+    var previewHapticFeedback by rememberSaveable { mutableStateOf(savedHapticFeedback) }
+    var showHapticFeedbackDialog by rememberSaveable { mutableStateOf(false) }
+    var importUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
 

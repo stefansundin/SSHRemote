@@ -56,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,12 +107,12 @@ fun RemoteControlScreen(
     initialPage: Int = 0,
 ) {
     val context = LocalContext.current
-    var showMenu by remember { mutableStateOf(false) }
-    var isFullscreen by remember { mutableStateOf(false) }
+    var showMenu by rememberSaveable { mutableStateOf(false) }
+    var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var repeatJob by remember { mutableStateOf<Job?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    var showSelectIdentityDialog by remember { mutableStateOf(false) }
+    var showSelectIdentityDialog by rememberSaveable { mutableStateOf(false) }
 
     val view = LocalView.current
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
@@ -216,7 +217,7 @@ fun RemoteControlScreen(
     }
 
     passwordPrompt?.let { prompt ->
-        var password by remember { mutableStateOf("") }
+        var password by rememberSaveable { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { sshRepository.onPasswordPromptComplete(null) },
             title = { Text(prompt.message) },
@@ -243,7 +244,7 @@ fun RemoteControlScreen(
     }
 
     passphrasePrompt?.let { prompt ->
-        var passphrase by remember { mutableStateOf("") }
+        var passphrase by rememberSaveable { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { sshRepository.onPassphrasePromptComplete(null) },
             title = { Text(prompt.message) },

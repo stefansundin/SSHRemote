@@ -31,7 +31,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,9 +46,9 @@ fun EditRemoteCommandDialog(
     onSave: (RemoteControlKey, Command) -> Unit,
 ) {
     val (key, initialCommand) = command
-    var newCommand by remember { mutableStateOf(initialCommand.command) }
-    var newLongPressCommand by remember { mutableStateOf(initialCommand.longPressCommand ?: "") }
-    var repeatCommand by remember { mutableStateOf(initialCommand.repeat) }
+    var newCommand by rememberSaveable { mutableStateOf(initialCommand.command) }
+    var newLongPressCommand by rememberSaveable { mutableStateOf(initialCommand.longPressCommand ?: "") }
+    var repeatCommand by rememberSaveable { mutableStateOf(initialCommand.repeat) }
 
     AlertDialog(
         onDismissRequest = onDismiss,

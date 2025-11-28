@@ -44,8 +44,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -165,13 +165,12 @@ class MainActivity : ComponentActivity() {
                     val uiState by hostViewModel.uiState.collectAsState()
                     val navController = rememberNavController()
                     val app = LocalContext.current.applicationContext as SshRemoteApplication
-                    var showBackupRestoredDialog by remember { mutableStateOf(app.isRestoredFromBackup) }
+                    var showBackupRestoredDialog by rememberSaveable { mutableStateOf(app.isRestoredFromBackup) }
 
                     if (showBackupRestoredDialog) {
                         AlertDialog(
                             onDismissRequest = {
                                 showBackupRestoredDialog = false
-                                app.isRestoredFromBackup = false
                             },
                             title = { Text("Restored from backup") },
                             text = { Text("The application data was restored from a backup. For security reasons, encrypted data such as SSH keys and passwords are not included in backups.\n\nPlease configure these again.") },
@@ -179,7 +178,6 @@ class MainActivity : ComponentActivity() {
                                 TextButton(
                                     onClick = {
                                         showBackupRestoredDialog = false
-                                        app.isRestoredFromBackup = false
                                     },
                                 ) {
                                     Text("OK")

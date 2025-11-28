@@ -18,16 +18,19 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -56,7 +59,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +74,6 @@ import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -88,11 +90,12 @@ fun IdentityListScreen(
 ) {
     val identities by identityViewModel.identities.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
 
-    var showPublicKeyDialog by remember { mutableStateOf(false) }
-    var publicKeyToShow by remember { mutableStateOf("") }
-    var fileToExport by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var showPublicKeyDialog by rememberSaveable { mutableStateOf(false) }
+    var publicKeyToShow by rememberSaveable { mutableStateOf("") }
+    var fileToExport by rememberSaveable { mutableStateOf<Pair<String, String>?>(null) }
+    var undoableDeletedIdentityId by rememberSaveable { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
     val fileSaverLauncher = rememberLauncherForActivityResult(
@@ -108,6 +111,32 @@ fun IdentityListScreen(
             fileToExport = null
         },
     )
+
+    LaunchedEffect(undoableDeletedIdentityId) {
+        val id = undoableDeletedIdentityId
+        if (id != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = "SSH key deleted",
+                actionLabel = "Undo",
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onUndoDelete()
+            } else {
+                undoableDeletedIdentityId = null
+            }
+        }
+    }
+
+    LaunchedEffect(identities, undoableDeletedIdentityId) {
+        val id = undoableDeletedIdentityId
+        if (id != null) {
+            val index = identities.indexOfFirst { it.id == id }
+            if (index != -1) {
+                listState.animateScrollToItem(index)
+                undoableDeletedIdentityId = null
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         identityViewModel.eventFlow.collectLatest { event ->
@@ -176,8 +205,11 @@ fun IdentityListScreen(
                     )
                 }
             } else {
-                LazyColumn {
-                    items(identities) { identity ->
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                ) {
+                    items(identities, key = { it.id }) { identity ->
                         IdentityItem(
                             identity = identity,
                             cryptoManager = cryptoManager,
@@ -185,16 +217,7 @@ fun IdentityListScreen(
                             onExportPublicKey = { identityViewModel.exportPublicKeyFor(identity) },
                             onDelete = {
                                 onDelete(identity)
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = "SSH key deleted",
-                                        actionLabel = "Undo",
-                                    )
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        onUndoDelete()
-                                    }
-                                }
+                                undoableDeletedIdentityId = identity.id
                             },
                             onRename = { newName -> onRename(identity, newName) },
                         )
@@ -214,9 +237,9 @@ fun IdentityItem(
     onDelete: () -> Unit,
     onRename: (String) -> Unit,
 ) {
-    var isContextMenuVisible by remember { mutableStateOf(false) }
-    var isRenameDialogVisible by remember { mutableStateOf(false) }
-    var newName by remember { mutableStateOf(identity.name) }
+    var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
+    var isRenameDialogVisible by rememberSaveable { mutableStateOf(false) }
+    var newName by rememberSaveable { mutableStateOf(identity.name) }
 
     val (keyInfo, isEncrypted) = remember(identity, cryptoManager) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
@@ -228,6 +251,7 @@ fun IdentityItem(
             keypair.dispose()
             Pair(info, encrypted)
         } catch (e: JSchException) {
+            Log.e("IdentityItem", "Invalid key", e)
             Pair("Invalid key", false)
         }
     }

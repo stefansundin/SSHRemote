@@ -24,12 +24,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -58,10 +60,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,23 +105,54 @@ fun EditRemoteControlScreen(
         xdotoolPreset
     }) + commands
 
-    var editingCommand by remember { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
-    var editedRemoteCommands by remember { mutableStateOf(initialRemoteCommands) }
-    var editedCommands by remember { mutableStateOf(initialCommands) }
-    var showEditCommandDialog by remember { mutableStateOf(false) }
-    var editingCommandInList by remember { mutableStateOf<Command?>(null) }
-    var showEditMouseCommandsDialog by remember { mutableStateOf(false) }
+    var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
+    var editedRemoteCommands by rememberSaveable { mutableStateOf(initialRemoteCommands) }
+    var editedCommands by rememberSaveable { mutableStateOf(initialCommands) }
+    var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
+    var editingCommandInList by rememberSaveable { mutableStateOf<Command?>(null) }
+    var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
 
     val hasUnsavedChanges = editedRemoteCommands != initialRemoteCommands || editedCommands != initialCommands
-    var showUnsavedBackDialog by remember { mutableStateOf(false) }
-    var showMenu by remember { mutableStateOf(false) }
-    var resetToPreset by remember { mutableStateOf("") }
-    var showResetDialog by remember { mutableStateOf(false) }
-    var showSelectPresetDialog by remember { mutableStateOf(false) }
+    var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
+    var showMenu by rememberSaveable { mutableStateOf(false) }
+    var resetToPreset by rememberSaveable { mutableStateOf("") }
+    var showResetDialog by rememberSaveable { mutableStateOf(false) }
+    var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = initialPage) { 3 }
+    val commandsListState = rememberLazyListState()
+    var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
+
+    LaunchedEffect(undoableDeletedCommand) {
+        val deletedCommand = undoableDeletedCommand
+        if (deletedCommand != null) {
+            val (index, command) = deletedCommand
+            val result = snackbarHostState.showSnackbar(
+                message = "Command deleted",
+                actionLabel = "Undo",
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                val currentCommands = editedCommands.toMutableList()
+                currentCommands.add(index, command)
+                editedCommands = currentCommands
+            } else {
+                undoableDeletedCommand = null
+            }
+        }
+    }
+
+    LaunchedEffect(editedCommands, undoableDeletedCommand) {
+        val deletedCommand = undoableDeletedCommand
+        if (deletedCommand != null) {
+            val (index, command) = deletedCommand
+            if (index < editedCommands.size && editedCommands[index] == command) {
+                commandsListState.animateScrollToItem(index)
+                undoableDeletedCommand = null
+            }
+        }
+    }
 
     BackHandler(enabled = hasUnsavedChanges) {
         showUnsavedBackDialog = true
@@ -340,9 +375,11 @@ fun EditRemoteControlScreen(
 
                     2 -> {
                         LazyColumn(
+                            state = commandsListState,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(16.dp),
+                            contentPadding = PaddingValues(bottom = 160.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(editedCommands) { command ->
@@ -364,18 +401,7 @@ fun EditRemoteControlScreen(
                                         onClick = {
                                             val deletedCommandIndex = editedCommands.indexOf(command)
                                             editedCommands = editedCommands.filter { it != command }
-                                            snackbarHostState.currentSnackbarData?.dismiss()
-                                            scope.launch {
-                                                val result = snackbarHostState.showSnackbar(
-                                                    message = "Command deleted",
-                                                    actionLabel = "Undo",
-                                                )
-                                                if (result == SnackbarResult.ActionPerformed) {
-                                                    val currentCommands = editedCommands.toMutableList()
-                                                    currentCommands.add(deletedCommandIndex, command)
-                                                    editedCommands = currentCommands
-                                                }
-                                            }
+                                            undoableDeletedCommand = deletedCommandIndex to command
                                         },
                                     ) {
                                         Icon(

@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -39,6 +40,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
@@ -53,6 +55,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,12 +86,12 @@ fun EditHostScreen(
     onNavigateUp: () -> Unit,
     hostViewModel: HostViewModel?, // null allowed for preview
 ) {
-    var name by remember(host) { mutableStateOf(host?.name ?: "") }
-    var hostname by remember(host) { mutableStateOf(host?.hostname ?: "") }
-    var port by remember(host) { mutableStateOf(host?.port?.toString() ?: "22") }
-    var user by remember(host) { mutableStateOf(host?.user ?: "") }
+    var name by rememberSaveable(host) { mutableStateOf(host?.name ?: "") }
+    var hostname by rememberSaveable(host) { mutableStateOf(host?.hostname ?: "") }
+    var port by rememberSaveable(host) { mutableStateOf(host?.port?.toString() ?: "22") }
+    var user by rememberSaveable(host) { mutableStateOf(host?.user ?: "") }
 
-    var passwordState by remember { mutableStateOf(PasswordState.LOADING) }
+    var passwordState by rememberSaveable { mutableStateOf(PasswordState.LOADING) }
     LaunchedEffect(host?.passwordId) {
         val currentPasswordId = host?.passwordId
         passwordState = if (currentPasswordId != null && hostViewModel != null) {
@@ -103,11 +106,11 @@ fun EditHostScreen(
     }
 
     val isPasswordSet = host?.passwordId != null
-    var userWantsToChangePassword by remember { mutableStateOf(false) }
+    var userWantsToChangePassword by rememberSaveable { mutableStateOf(false) }
     val showPasswordField = !isPasswordSet || userWantsToChangePassword
 
-    var password by remember { mutableStateOf("") }
-    var selectedIdentityIds by remember(host, identities) {
+    var password by rememberSaveable { mutableStateOf("") }
+    var selectedIdentityIds by rememberSaveable(host, identities) {
         val originalIds = host?.identityIds
         val validIds = originalIds?.filter { id -> identities.any { it.id == id } }
         val resultIds = if (originalIds != null && originalIds.isNotEmpty() && validIds?.isEmpty() == true) {
@@ -119,11 +122,11 @@ fun EditHostScreen(
         }
         mutableStateOf(resultIds)
     }
-    var identityDropdownExpanded by remember { mutableStateOf(false) }
-    var knownHosts by remember(host) { mutableStateOf(host?.knownHosts ?: emptyList()) }
+    var identityDropdownExpanded by rememberSaveable { mutableStateOf(false) }
+    var knownHosts by rememberSaveable(host) { mutableStateOf(host?.knownHosts ?: emptyList()) }
 
-    var passwordVisible by remember { mutableStateOf(false) }
-    var hasBeenSubmitted by remember { mutableStateOf(false) }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var hasBeenSubmitted by rememberSaveable { mutableStateOf(false) }
     val onSubmit = { hasBeenSubmitted = true }
 
     val isNameValid by remember(name) { derivedStateOf { Validations.validateName(name) } }
@@ -148,7 +151,7 @@ fun EditHostScreen(
             (selectedIdentityIds != host?.identityIds) ||
             (knownHosts != (host?.knownHosts ?: emptyList<String>()))
 
-    var showSaveDialog by remember { mutableStateOf(false) }
+    var showSaveDialog by rememberSaveable { mutableStateOf(false) }
 
     fun handleSave() {
         onSubmit()
@@ -229,16 +232,19 @@ fun EditHostScreen(
                         )
                     }
                 },
-                actions = {
-                    Button(
-                        onClick = {
-                            handleSave()
-                        },
-                    ) {
-                        Text("Save")
-                    }
-                },
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    handleSave()
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = "Save",
+                )
+            }
         },
     ) { innerPadding ->
         Column(

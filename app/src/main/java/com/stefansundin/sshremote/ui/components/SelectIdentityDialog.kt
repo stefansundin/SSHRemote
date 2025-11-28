@@ -24,7 +24,7 @@ fun SelectIdentityDialog(
         title = { Text("Select Identity to Copy") },
         text = {
             LazyColumn {
-                items(identities) { identity ->
+                items(identities, key = { it.id }) { identity ->
                     Text(
                         text = identity.name,
                         modifier = Modifier
