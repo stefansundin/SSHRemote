@@ -62,8 +62,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.CryptoManager
-import com.stefansundin.sshremote.data.decryptString
-import com.stefansundin.sshremote.data.encryptString
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.identity.Identity
@@ -85,7 +83,7 @@ fun EditHostScreen(
     var user by remember(host) { mutableStateOf(host?.user ?: "") }
     val initialPassword = remember(host, cryptoManager) {
         if (cryptoManager != null && host?.encryptedPassword != null) {
-            decryptString(host.encryptedPassword, cryptoManager)
+            cryptoManager.decryptToString(host.encryptedPassword)
         } else {
             ""
         }
@@ -108,7 +106,7 @@ fun EditHostScreen(
             port = clone.port.toString()
             user = clone.user
             password = if (cryptoManager != null && clone.encryptedPassword != null) {
-                decryptString(clone.encryptedPassword, cryptoManager)
+                cryptoManager.decryptToString(clone.encryptedPassword)
             } else {
                 ""
             }
@@ -141,7 +139,7 @@ fun EditHostScreen(
         if (isFormValid) {
             val encryptedPassword =
                 if (cryptoManager != null && password.isNotEmpty()) {
-                    encryptString(password, cryptoManager)
+                    cryptoManager.encrypt(password)
                 } else null
 
             val hostToSave = host?.copy(

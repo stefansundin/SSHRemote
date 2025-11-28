@@ -44,7 +44,7 @@ data class Host(
     val hostname: String,
     val port: Int,
     val user: String,
-    val encryptedPassword: String?,
+    val encryptedPassword: ByteArray?,
     val identityIds: List<Int>? = null,
     val knownHosts: List<String> = emptyList(),
     val commands: List<Command> = listOf(Command("uptime", name = "Uptime", showOutput = true)),

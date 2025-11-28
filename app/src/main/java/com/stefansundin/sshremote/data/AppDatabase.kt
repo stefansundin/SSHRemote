@@ -32,7 +32,7 @@ import com.stefansundin.sshremote.data.identity.IdentityDao
 
 @Database(
     entities = [Host::class, Identity::class, AdHocCommand::class],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)

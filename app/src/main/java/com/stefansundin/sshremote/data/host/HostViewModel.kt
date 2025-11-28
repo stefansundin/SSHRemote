@@ -26,7 +26,6 @@ import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.SshRepository
 import com.stefansundin.sshremote.data.CryptoManager
-import com.stefansundin.sshremote.data.decryptString
 import com.stefansundin.sshremote.data.identity.IdentityRepository
 import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.Job
@@ -149,11 +148,11 @@ class HostViewModel(
             }
 
             val privateKeys = identities.map { key ->
-                Pair(key.name, cryptoManager.decrypt(key.encryptedPrivateKey).toString(Charsets.UTF_8))
+                Pair(key.name, cryptoManager.decryptToString(key.encryptedPrivateKey))
             }
 
             val password = if (host.encryptedPassword != null) {
-                decryptString(host.encryptedPassword, cryptoManager)
+                cryptoManager.decryptToString(host.encryptedPassword)
             } else null
 
             val connectionDetails = HostConnectionDetails(
