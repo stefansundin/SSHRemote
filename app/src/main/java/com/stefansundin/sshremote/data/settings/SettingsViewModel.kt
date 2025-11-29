@@ -47,7 +47,7 @@ class SettingsViewModel(
     val theme: StateFlow<Theme> = settingsRepository.theme
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly,
             initialValue = Theme.SYSTEM,
         )
 
@@ -60,7 +60,7 @@ class SettingsViewModel(
     val hapticFeedback: StateFlow<HapticFeedback> = settingsRepository.hapticFeedback
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly,
             initialValue = HapticFeedback.Medium,
         )
 
@@ -73,7 +73,7 @@ class SettingsViewModel(
     val keepScreenOn: StateFlow<Boolean> = settingsRepository.keepScreenOn
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly,
             initialValue = true,
         )
 
@@ -86,7 +86,7 @@ class SettingsViewModel(
     val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly,
             initialValue = false,
         )
 
@@ -99,7 +99,7 @@ class SettingsViewModel(
     val strictHostKeyChecking: StateFlow<Boolean> = settingsRepository.strictHostKeyChecking
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly,
             initialValue = true,
         )
 
@@ -112,8 +112,8 @@ class SettingsViewModel(
     val startupHostId: StateFlow<Int?> = settingsRepository.startupHostId
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null
+            started = SharingStarted.Eagerly,
+            initialValue = null,
         )
 
     fun setStartupHostId(hostId: Int?) {
@@ -125,7 +125,7 @@ class SettingsViewModel(
     val hasHosts: StateFlow<Boolean> = hostRepository.getAll().map { it.isNotEmpty() }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly,
             initialValue = false,
         )
 
@@ -138,9 +138,12 @@ class SettingsViewModel(
     fun importSettings(context: Context, uri: Uri, merge: Boolean) {
         viewModelScope.launch {
             try {
-                val (count, requestNotificationPermission) =
+                val (count, requestNotificationPermission, theme) =
                     SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
                         .import(uri, merge)
+                if (theme != null) {
+                    setTheme(theme)
+                }
                 _eventFlow.emit(SettingsEvent.ImportSuccess(count))
                 if (requestNotificationPermission) {
                     _eventFlow.emit(SettingsEvent.RequestPostNotificationsPermission)

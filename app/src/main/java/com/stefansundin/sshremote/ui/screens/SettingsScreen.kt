@@ -125,6 +125,11 @@ fun SettingsScreen(
 
     val uriHandler = LocalUriHandler.current
 
+    // Required to react to theme changes when importing settings
+    LaunchedEffect(savedTheme) {
+        previewTheme = savedTheme
+    }
+
     LaunchedEffect(Unit) {
         settingsViewModel.eventFlow.collectLatest { event ->
             when (event) {

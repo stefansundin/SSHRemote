@@ -23,6 +23,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.gson.JsonSyntaxException
 import com.stefansundin.sshremote.HapticFeedback
+import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.gson
@@ -44,12 +45,13 @@ class SettingsImporter(
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
 
-    suspend fun import(uri: Uri, merge: Boolean): Pair<Int, Boolean> {
+    suspend fun import(uri: Uri, merge: Boolean): Triple<Int, Boolean, Theme?> {
         val json = context.contentResolver.openInputStream(uri)?.use { inputStream ->
             inputStream.bufferedReader().use { it.readText() }
         } ?: throw ImportException("Could not read file")
 
         var requestNotificationPermission = false
+        var importedTheme: Theme? = null
 
         try {
             val settings: ExportedSettings = gson.fromJson(json, ExportedSettings::class.java)
@@ -61,6 +63,7 @@ class SettingsImporter(
 
             if (settings.theme != null) {
                 settingsRepository.setTheme(settings.theme)
+                importedTheme = settings.theme
             }
             if (settings.hapticFeedbackDuration != null) {
                 settingsRepository.setHapticFeedback(HapticFeedback.fromDuration(settings.hapticFeedbackDuration))
@@ -135,7 +138,7 @@ class SettingsImporter(
                 }
             }
 
-            return Pair(settings.hosts.size, requestNotificationPermission)
+            return Triple(settings.hosts.size, requestNotificationPermission, importedTheme)
         } catch (e: ImportException) {
             throw e
         } catch (_: JsonSyntaxException) {
