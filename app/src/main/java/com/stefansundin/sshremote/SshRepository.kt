@@ -364,9 +364,9 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                     val exitStatus = exitCodeString.toIntOrNull() ?: -1
 
                     if (exitStatus == 0) {
-                        Result.Success("Output:\n$commandOutput")
+                        Result.Success(commandOutput)
                     } else {
-                        Result.Error("Command failed (Status $exitStatus). Output:\n$commandOutput")
+                        Result.Error("Command failed (Status $exitStatus).\nOutput:\n$commandOutput")
                     }
 
                 } catch (e: Exception) {

@@ -18,23 +18,55 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.ClipData
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.toClipEntry
+import kotlinx.coroutines.launch
 
 @Composable
 fun CommandOutputDialog(
     output: String,
     onDismiss: () -> Unit,
 ) {
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Command Output") },
         text = { Text(output) },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("OK")
+                Text("Close")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    val clipData = ClipData.newPlainText("Command output", output)
+                    scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
+                }
+            ) {
+                Icon(
+                    Icons.Outlined.ContentCopy,
+                    contentDescription = "Copy",
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text("Copy")
             }
         },
     )

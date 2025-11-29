@@ -19,8 +19,15 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.ClipData
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,18 +57,24 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
             )
         },
         confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        dismissButton = {
             TextButton(
                 onClick = {
                     val clipData = ClipData.newPlainText("Public SSH key", publicKey)
                     scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
                 },
             ) {
+                Icon(
+                    Icons.Outlined.ContentCopy,
+                    contentDescription = "Copy",
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text("Copy")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
             }
         },
     )
