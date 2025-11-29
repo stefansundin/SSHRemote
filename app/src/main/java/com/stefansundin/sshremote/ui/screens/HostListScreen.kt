@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -65,11 +66,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HostListScreen(
     hosts: List<Host>,
+    startupHostId: Int?,
     onConnectClicked: (Host) -> Unit,
     onAddClicked: () -> Unit,
     onEditClicked: (Host) -> Unit,
@@ -77,11 +80,18 @@ fun HostListScreen(
     onDeleteClicked: (Host) -> Unit,
     onUndoDeleteClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
+    onSetStartupHost: (Host) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var undoableDeletedHostId by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(startupHostId) {
+        if (startupHostId != null) {
+            listState.animateScrollToItem(0)
+        }
+    }
 
     LaunchedEffect(undoableDeletedHostId) {
         val id = undoableDeletedHostId
@@ -160,6 +170,7 @@ fun HostListScreen(
                     items(items = hosts, key = { host -> host.id }) { host ->
                         HostItem(
                             host = host,
+                            isStartupHost = host.id == startupHostId,
                             onConnect = { onConnectClicked(host) },
                             onEdit = { onEditClicked(host) },
                             onClone = { onCloneClicked(host) },
@@ -167,6 +178,7 @@ fun HostListScreen(
                                 onDeleteClicked(host)
                                 undoableDeletedHostId = host.id
                             },
+                            onSetStartupHost = { onSetStartupHost(host) },
                         )
                     }
                 }
@@ -179,10 +191,12 @@ fun HostListScreen(
 @Composable
 fun HostItem(
     host: Host,
+    isStartupHost: Boolean,
     onConnect: () -> Unit,
     onEdit: () -> Unit,
     onClone: () -> Unit,
     onDelete: () -> Unit,
+    onSetStartupHost: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
@@ -205,10 +219,20 @@ fun HostItem(
                     .padding(vertical = 12.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(
-                    text = host.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isStartupHost) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Startup host",
+                            modifier = Modifier.padding(end = 8.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    Text(
+                        text = host.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(2.dp))
 
@@ -247,6 +271,16 @@ fun HostItem(
                         },
                     )
                     DropdownMenuItem(
+                        text = {
+                            val text = if (isStartupHost) "Don't connect on startup" else "Connect on startup"
+                            Text(text)
+                        },
+                        onClick = {
+                            onSetStartupHost()
+                            isContextMenuVisible = false
+                        },
+                    )
+                    DropdownMenuItem(
                         text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                         onClick = {
                             onDelete()
@@ -269,6 +303,7 @@ fun HostListScreenPreview() {
         )
         HostListScreen(
             hosts = sampleHosts,
+            startupHostId = 1,
             onConnectClicked = {},
             onAddClicked = {},
             onEditClicked = {},
@@ -276,6 +311,7 @@ fun HostListScreenPreview() {
             onDeleteClicked = {},
             onUndoDeleteClicked = {},
             onSettingsClicked = {},
+            onSetStartupHost = {},
         )
     }
 }

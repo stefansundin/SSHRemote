@@ -51,8 +51,8 @@ class HostRepository(private val hostDao: HostDao) {
     /**
      * Inserts or updates a host in the database.
      */
-    suspend fun upsert(host: Host) {
-        hostDao.upsert(host)
+    suspend fun upsert(host: Host): Long {
+        return hostDao.upsert(host)
     }
 
     /**

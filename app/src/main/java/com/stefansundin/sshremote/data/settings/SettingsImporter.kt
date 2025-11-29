@@ -31,6 +31,7 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.StartScreen
+import kotlinx.coroutines.flow.first
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
 
@@ -78,6 +79,7 @@ class SettingsImporter(
             }
 
             if (!merge) {
+                settingsRepository.setStartupHostId(null)
                 hostRepository.deleteAll()
                 adHocCommandRepository.clear()
             }
@@ -111,7 +113,14 @@ class SettingsImporter(
                     },
                     startScreen = exportedHost.startScreen ?: StartScreen.Default,
                 )
-                hostRepository.upsert(host)
+                val newHostId = hostRepository.upsert(host)
+
+                if (exportedHost.connectOnStartup == true) {
+                    val currentStartupHost = settingsRepository.startupHostId.first()
+                    if (currentStartupHost == null) {
+                        settingsRepository.setStartupHostId(newHostId.toInt())
+                    }
+                }
             }
 
             settings.adHocCommands?.forEach { exportedAdHocCommand ->

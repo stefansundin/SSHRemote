@@ -32,7 +32,7 @@ interface HostDao {
     suspend fun insert(host: Host): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(host: Host)
+    suspend fun upsert(host: Host): Long
 
     @Delete
     suspend fun delete(host: Host)

@@ -34,6 +34,7 @@ data class ExportedHost(
     val commands: List<ExportedCommand>,
     val remoteCommands: Map<RemoteControlKey?, ExportedCommand>?,
     val startScreen: StartScreen?,
+    val connectOnStartup: Boolean? = null,
 )
 
 @Keep

@@ -23,6 +23,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -43,6 +44,7 @@ class SettingsRepository(context: Context) {
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val STARTUP_HOST_ID = intPreferencesKey("startup_host_id")
     }
 
     val theme: Flow<Theme> = dataStore.data
@@ -104,6 +106,21 @@ class SettingsRepository(context: Context) {
     suspend fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.STRICT_HOST_KEY_CHECKING] = strictHostKeyChecking
+        }
+    }
+
+    val startupHostId: Flow<Int?> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.STARTUP_HOST_ID]
+        }
+
+    suspend fun setStartupHostId(hostId: Int?) {
+        dataStore.edit { preferences ->
+            if (hostId == null) {
+                preferences.remove(PreferencesKeys.STARTUP_HOST_ID)
+            } else {
+                preferences[PreferencesKeys.STARTUP_HOST_ID] = hostId
+            }
         }
     }
 }

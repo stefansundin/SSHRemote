@@ -166,6 +166,32 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val app = LocalContext.current.applicationContext as SshRemoteApplication
                     var showBackupRestoredDialog by rememberSaveable { mutableStateOf(app.isRestoredFromBackup) }
+                    val startupHostId by settingsViewModel.startupHostId.collectAsState()
+                    val hosts by hostViewModel.allHosts.collectAsState()
+                    var startupConnectAttempted by rememberSaveable { mutableStateOf(false) }
+
+                    LaunchedEffect(hosts, startupHostId) {
+                        if (!startupConnectAttempted && hosts.isNotEmpty()) {
+                            startupConnectAttempted = true
+                            if (startupHostId != null) {
+                                val hostToConnect = hosts.find { it.id == startupHostId }
+                                if (hostToConnect != null) {
+                                    val initialPage = when (hostToConnect.startScreen) {
+                                        StartScreen.REMOTE -> 0
+                                        StartScreen.MOUSE -> 1
+                                        StartScreen.COMMANDS -> 2
+                                    }
+                                    navController.navigate(
+                                        Screen.RemoteControl.createRoute(
+                                            hostToConnect.id,
+                                            initialPage
+                                        )
+                                    )
+                                    hostViewModel.connect(hostToConnect)
+                                }
+                            }
+                        }
+                    }
 
                     if (showBackupRestoredDialog) {
                         AlertDialog(
@@ -193,9 +219,10 @@ class MainActivity : ComponentActivity() {
                         exitTransition = { ExitTransition.None },
                     ) {
                         composable(Screen.HostList.route) {
-                            val hosts by hostViewModel.allHosts.collectAsState()
+                            val sortedHosts = hosts.sortedByDescending { it.id == startupHostId }
                             HostListScreen(
-                                hosts = hosts,
+                                hosts = sortedHosts,
+                                startupHostId = startupHostId,
                                 onConnectClicked = { host ->
                                     val initialPage = when (host.startScreen) {
                                         StartScreen.REMOTE -> 0
@@ -221,6 +248,9 @@ class MainActivity : ComponentActivity() {
                                 onSettingsClicked = {
                                     navController.navigate(Screen.Settings.route)
                                 },
+                                onSetStartupHost = { host ->
+                                    settingsViewModel.setStartupHostId(if (host.id == startupHostId) null else host.id)
+                                },
                             )
                         }
 
@@ -229,7 +259,6 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("hostId") { type = NavType.StringType; nullable = true }),
                         ) { backStackEntry ->
                             val hostId = backStackEntry.arguments?.getString("hostId")?.toIntOrNull()
-                            val hosts by hostViewModel.allHosts.collectAsState()
                             val host = hosts.find { it.id == hostId }
                             val identities by identityViewModel.identities.collectAsState()
                             EditHostScreen(
@@ -257,7 +286,6 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val hostId = backStackEntry.arguments?.getInt("hostId")!!
                             val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
-                            val hosts by hostViewModel.allHosts.collectAsState()
                             val host = hosts.find { it.id == hostId }
                             LaunchedEffect(host) {
                                 if (host != null) {
