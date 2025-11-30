@@ -45,6 +45,10 @@ enum class RemoteControlKey(val title: String) {
     MOUSE_PAN_DOWN("Two-Finger Pan Down"),
     MOUSE_PAN_LEFT("Two-Finger Pan Left"),
     MOUSE_PAN_RIGHT("Two-Finger Pan Right"),
+
+    // Keyboard
+    KEYBOARD_TYPE_INPUT("Keyboard Type"),
+    KEYBOARD_KEY_INPUT("Keyboard Key"),
 }
 
 /**
@@ -73,6 +77,8 @@ val wtypePreset = mapOf(
     RemoteControlKey.MOUSE_PAN_DOWN to Command("wtype -A axis_v -1"),
     RemoteControlKey.MOUSE_PAN_LEFT to Command("wtype -A axis_h 1"),
     RemoteControlKey.MOUSE_PAN_RIGHT to Command("wtype -A axis_h -1"),
+    RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("wtype '%s'"),
+    RemoteControlKey.KEYBOARD_KEY_INPUT to Command("wtype -k %s"),
 )
 
 /**
@@ -101,6 +107,8 @@ val xdotoolPreset = mapOf(
     RemoteControlKey.MOUSE_PAN_DOWN to Command("DISPLAY=:0 xdotool click 4"),
     RemoteControlKey.MOUSE_PAN_LEFT to Command("DISPLAY=:0 xdotool click 7"),
     RemoteControlKey.MOUSE_PAN_RIGHT to Command("DISPLAY=:0 xdotool click 6"),
+    RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("DISPLAY=:0 xdotool type '%s'"),
+    RemoteControlKey.KEYBOARD_KEY_INPUT to Command("DISPLAY=:0 xdotool key %s"),
 )
 
 /**

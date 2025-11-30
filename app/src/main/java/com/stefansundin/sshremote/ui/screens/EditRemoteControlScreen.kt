@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,6 +80,7 @@ import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.host.xdotoolPreset
 import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.components.EditCommandDialog
+import com.stefansundin.sshremote.ui.components.EditKeyboardCommandDialog
 import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
 import com.stefansundin.sshremote.ui.components.EditRemoteCommandDialog
 import com.stefansundin.sshremote.ui.components.MousePad
@@ -111,6 +113,7 @@ fun EditRemoteControlScreen(
     var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
     var editingCommandInList by rememberSaveable { mutableStateOf<Command?>(null) }
     var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
+    var showEditKeyboardCommandDialog by rememberSaveable { mutableStateOf(false) }
 
     val hasUnsavedChanges = editedRemoteCommands != initialRemoteCommands || editedCommands != initialCommands
     var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
@@ -121,7 +124,7 @@ fun EditRemoteControlScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(initialPage = initialPage) { 3 }
+    val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
     val commandsListState = rememberLazyListState()
     var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
 
@@ -298,7 +301,7 @@ fun EditRemoteControlScreen(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                if (pagerState.currentPage == 2) {
+                if (pagerState.currentPage == 3) {
                     FloatingActionButton(
                         onClick = {
                             editingCommandInList = null
@@ -326,17 +329,22 @@ fun EditRemoteControlScreen(
             PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
                 Tab(
                     selected = pagerState.currentPage == 0,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
+                    onClick = { scope.launch { pagerState.scrollToPage(0) } },
                     text = { Text("Remote") },
                 )
                 Tab(
                     selected = pagerState.currentPage == 1,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
+                    onClick = { scope.launch { pagerState.scrollToPage(1) } },
                     text = { Text("Mouse") },
                 )
                 Tab(
                     selected = pagerState.currentPage == 2,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
+                    onClick = { scope.launch { pagerState.scrollToPage(2) } },
+                    text = { Text("Keyboard") },
+                )
+                Tab(
+                    selected = pagerState.currentPage == 3,
+                    onClick = { scope.launch { pagerState.scrollToPage(3) } },
                     text = { Text("Commands") },
                 )
             }
@@ -374,6 +382,21 @@ fun EditRemoteControlScreen(
                     }
 
                     2 -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                        ) {
+                            Button(
+                                onClick = {
+                                    showEditKeyboardCommandDialog = true
+                                },
+                            ) {
+                                Text("Edit keyboard command")
+                            }
+                        }
+                    }
+
+                    3 -> {
                         LazyColumn(
                             state = commandsListState,
                             modifier = Modifier
@@ -445,6 +468,27 @@ fun EditRemoteControlScreen(
             onSave = {
                 editedRemoteCommands = it
                 showEditMouseCommandsDialog = false
+            },
+        )
+    }
+
+    if (showEditKeyboardCommandDialog) {
+        EditKeyboardCommandDialog(
+            typeCommand = editedRemoteCommands[RemoteControlKey.KEYBOARD_TYPE_INPUT] ?: Command(
+                "",
+                name = RemoteControlKey.KEYBOARD_TYPE_INPUT.title,
+            ),
+            keyCommand = editedRemoteCommands[RemoteControlKey.KEYBOARD_KEY_INPUT] ?: Command(
+                "",
+                name = RemoteControlKey.KEYBOARD_KEY_INPUT.title,
+            ),
+            onDismiss = { showEditKeyboardCommandDialog = false },
+            onSave = { newTypeCommand, newKeyCommand ->
+                editedRemoteCommands = editedRemoteCommands.toMutableMap().apply {
+                    this[RemoteControlKey.KEYBOARD_TYPE_INPUT] = newTypeCommand
+                    this[RemoteControlKey.KEYBOARD_KEY_INPUT] = newKeyCommand
+                }
+                showEditKeyboardCommandDialog = false
             },
         )
     }

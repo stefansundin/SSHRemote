@@ -23,6 +23,7 @@ import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -61,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -81,9 +83,11 @@ import com.stefansundin.sshremote.ui.MouseEvent
 import com.stefansundin.sshremote.ui.components.CommandList
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
 import com.stefansundin.sshremote.ui.components.ConnectionStatusIndicator
+import com.stefansundin.sshremote.ui.components.KeyboardInput
 import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
+import com.stefansundin.sshremote.ui.components.SpecialKeysRow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -293,7 +297,15 @@ fun RemoteControlScreen(
         )
     }
 
-    val pagerState = rememberPagerState(initialPage = initialPage) { 3 }
+    val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
+
+    // Hide the virtual keyboard when the Keyboard tab is no longer focused:
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage != 2) {
+            focusManager.clearFocus()
+        }
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -367,17 +379,22 @@ fun RemoteControlScreen(
             PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
                 Tab(
                     selected = pagerState.currentPage == 0,
-                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
+                    onClick = { coroutineScope.launch { pagerState.scrollToPage(0) } },
                     text = { Text("Remote") },
                 )
                 Tab(
                     selected = pagerState.currentPage == 1,
-                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
+                    onClick = { coroutineScope.launch { pagerState.scrollToPage(1) } },
                     text = { Text("Mouse") },
                 )
                 Tab(
                     selected = pagerState.currentPage == 2,
-                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(2) } },
+                    onClick = { coroutineScope.launch { pagerState.scrollToPage(2) } },
+                    text = { Text("Keyboard") },
+                )
+                Tab(
+                    selected = pagerState.currentPage == 3,
+                    onClick = { coroutineScope.launch { pagerState.scrollToPage(3) } },
                     text = { Text("Commands") },
                 )
             }
@@ -468,6 +485,32 @@ fun RemoteControlScreen(
                     }
 
                     2 -> {
+                        val onKey = { key: String ->
+                            commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.let { commandTemplate ->
+                                val command = commandTemplate.command.format(key)
+                                hostViewModel.runCommand(command, commandTemplate.showOutput)
+                            }
+                        }
+                        Column(modifier = Modifier
+                            .fillMaxSize()
+                            .imePadding()) {
+                            KeyboardInput(
+                                isCurrentlySelected = pagerState.currentPage == 2,
+                                onKey = { key -> onKey(key) },
+                                onType = { text ->
+                                    commands[RemoteControlKey.KEYBOARD_TYPE_INPUT]?.let { commandTemplate ->
+                                        val escapedText = text.replace("'", "'\\''")
+                                        val command = commandTemplate.command.format(escapedText)
+                                        hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                            )
+                            SpecialKeysRow(onKey = { key -> onKey(key) })
+                        }
+                    }
+
+                    3 -> {
                         CommandList(
                             uiState = uiState,
                             hostViewModel = hostViewModel,
