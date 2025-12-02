@@ -407,6 +407,7 @@ fun RemoteControlScreen(
                 when (page) {
                     0 -> {
                         RemoteControl(
+                            commands = commands,
                             onKeyEvent = { event ->
                                 val command = when (event) {
                                     is KeyEvent.Down -> commands[event.key]
@@ -453,6 +454,7 @@ fun RemoteControlScreen(
 
                     1 -> {
                         MousePad(
+                            commands = commands,
                             onMouseEvent = { event ->
                                 if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
                                     performHapticFeedback(context, uiState.hapticFeedback)
@@ -491,9 +493,11 @@ fun RemoteControlScreen(
                                 hostViewModel.runCommand(command, commandTemplate.showOutput)
                             }
                         }
-                        Column(modifier = Modifier
-                            .fillMaxSize()
-                            .imePadding()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .imePadding(),
+                        ) {
                             KeyboardInput(
                                 isCurrentlySelected = pagerState.currentPage == 2,
                                 onKey = { key -> onKey(key) },
@@ -505,8 +509,12 @@ fun RemoteControlScreen(
                                     }
                                 },
                                 modifier = Modifier.weight(1f),
+                                commands = commands,
                             )
-                            SpecialKeysRow(onKey = { key -> onKey(key) })
+                            SpecialKeysRow(
+                                onKey = { key -> onKey(key) },
+                                commands = commands,
+                            )
                         }
                     }
 

@@ -41,16 +41,25 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.MouseEvent
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun MousePad(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modifier) {
+fun MousePad(
+    onMouseEvent: (MouseEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    commands: Map<RemoteControlKey, Command>? = null,
+) {
     BackHandler(enabled = true) {
         // Prevent back gesture while this component is active
     }
+
+    val leftClickEnabled = commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty()
+    val rightClickEnabled = commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty()
 
     Column(
         modifier = modifier
@@ -64,16 +73,24 @@ fun MousePad(onMouseEvent: (MouseEvent) -> Unit, modifier: Modifier = Modifier) 
             onPan = { dx, dy -> onMouseEvent(MouseEvent.Pan(dx, dy)) },
             onLeftClick = { onMouseEvent(MouseEvent.LeftClick) },
             onRightClick = { onMouseEvent(MouseEvent.RightClick) },
+            leftClickEnabled = leftClickEnabled,
+            rightClickEnabled = rightClickEnabled,
             modifier = Modifier.weight(1f),
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
         ) {
-            Button(onClick = { onMouseEvent(MouseEvent.LeftClick) }) {
+            Button(
+                onClick = { onMouseEvent(MouseEvent.LeftClick) },
+                enabled = leftClickEnabled,
+            ) {
                 Text("Left Click")
             }
-            Button(onClick = { onMouseEvent(MouseEvent.RightClick) }) {
+            Button(
+                onClick = { onMouseEvent(MouseEvent.RightClick) },
+                enabled = rightClickEnabled,
+            ) {
                 Text("Right Click")
             }
         }
@@ -93,18 +110,21 @@ private fun TouchPad(
     onPan: (dx: Float, dy: Float) -> Unit,
     onLeftClick: () -> Unit,
     onRightClick: () -> Unit,
+    leftClickEnabled: Boolean,
+    rightClickEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .pointerInput(Unit) {
+            .pointerInput(leftClickEnabled, rightClickEnabled) {
                 coroutineScope {
                     awaitEachGesture {
                         var state = GestureState.Undecided
                         val down = awaitFirstDown(requireUnconsumed = false)
 
                         val longPressJob = launch {
+                            if (!rightClickEnabled) return@launch
                             delay(viewConfiguration.longPressTimeoutMillis)
                             state = GestureState.LongPress
                             onRightClick()
@@ -156,7 +176,9 @@ private fun TouchPad(
                         longPressJob.cancel()
 
                         if (state == GestureState.Undecided) {
-                            onLeftClick()
+                            if (leftClickEnabled) {
+                                onLeftClick()
+                            }
                         }
                     }
                 }

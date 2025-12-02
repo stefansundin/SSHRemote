@@ -145,8 +145,6 @@ val macosVlcPreset = mapOf(
     RemoteControlKey.MUTE to Command("osascript -e 'tell application \"VLC\" to mute'"),
     RemoteControlKey.VOLUME_UP to Command("osascript -e 'tell application \"VLC\" to volumeUp'"),
     RemoteControlKey.BACK to Command("osascript -e 'tell application \"VLC\" to stop'"),
-    RemoteControlKey.HOME to Command("osascript -e 'tell application \"VLC\" to stop'"),
-    RemoteControlKey.MENU to Command("osascript -e 'tell application \"VLC\" to stop'"),
     RemoteControlKey.PREVIOUS to Command("osascript -e 'tell application \"VLC\" to previous'"),
     RemoteControlKey.PLAY_PAUSE to Command("osascript -e 'tell application \"VLC\" to play'"),
     RemoteControlKey.NEXT to Command("osascript -e 'tell application \"VLC\" to next'"),

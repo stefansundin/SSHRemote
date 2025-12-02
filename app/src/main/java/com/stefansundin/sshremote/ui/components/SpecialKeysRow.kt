@@ -23,18 +23,20 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SpecialKeysRow(
     onKey: (String) -> Unit,
     modifier: Modifier = Modifier,
+    commands: Map<RemoteControlKey, Command>? = null,
 ) {
     val specialKeys = listOf(
         "Esc" to "Escape",
@@ -53,7 +55,10 @@ fun SpecialKeysRow(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         specialKeys.forEach { (label, key) ->
-            Button(onClick = { onKey(key) }) {
+            Button(
+                onClick = { onKey(key) },
+                enabled = commands == null || !commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty(),
+            ) {
                 Text(label)
             }
         }

@@ -33,6 +33,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 @Composable
 fun KeyboardInput(
@@ -40,6 +42,7 @@ fun KeyboardInput(
     onKey: (String) -> Unit,
     onType: (String) -> Unit,
     modifier: Modifier = Modifier,
+    commands: Map<RemoteControlKey, Command>? = null,
 ) {
     val zeroWidthSpace = "\u200B"
     var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -97,6 +100,9 @@ fun KeyboardInput(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester),
+        enabled = commands == null ||
+                (!commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty() &&
+                        !commands[RemoteControlKey.KEYBOARD_TYPE_INPUT]?.command.isNullOrEmpty()),
     )
 
     // Bring up the virtual keyboard when the Keyboard tab is focused:
