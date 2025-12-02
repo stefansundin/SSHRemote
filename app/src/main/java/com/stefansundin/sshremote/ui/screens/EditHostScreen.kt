@@ -82,6 +82,7 @@ private enum class PasswordState {
 fun EditHostScreen(
     host: Host?,
     identities: List<Identity>,
+    allUsers: List<String>,
     onSave: (Host, String?) -> Unit,
     onNavigateUp: () -> Unit,
     hostViewModel: HostViewModel?, // null allowed for preview
@@ -312,20 +313,49 @@ fun EditHostScreen(
             )
 
             // USER FIELD
-            OutlinedTextField(
-                value = user,
-                onValueChange = { newUser ->
-                    // Disallow spaces and newlines
-                    user = newUser.replace(" ", "").replace("\n", "").take(32)
-                },
-                label = { Text("User") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = hasBeenSubmitted && !isUserValid,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                ),
-            )
+            var userDropdownExpanded by rememberSaveable { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = userDropdownExpanded,
+                onExpandedChange = { userDropdownExpanded = !userDropdownExpanded },
+            ) {
+                OutlinedTextField(
+                    value = user,
+                    onValueChange = { newUser ->
+                        // Disallow spaces and newlines
+                        user = newUser.replace(" ", "").replace("\n", "").take(32)
+                    },
+                    label = { Text("User") },
+                    modifier = Modifier
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                        .fillMaxWidth(),
+                    isError = hasBeenSubmitted && !isUserValid,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                    ),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = userDropdownExpanded)
+                    },
+                )
+
+                val suggestedUsers = allUsers.distinct().sorted()
+                if (suggestedUsers.isNotEmpty()) {
+                    ExposedDropdownMenu(
+                        expanded = userDropdownExpanded,
+                        onDismissRequest = { userDropdownExpanded = false },
+                    ) {
+                        suggestedUsers.forEach { suggestedUser ->
+                            DropdownMenuItem(
+                                text = { Text(suggestedUser) },
+                                onClick = {
+                                    user = suggestedUser
+                                    userDropdownExpanded = false
+                                },
+                            )
+                        }
+                    }
+                }
+            }
 
             // PASSWORD FIELD
             if (passwordState != PasswordState.LOADING) {
@@ -467,6 +497,7 @@ fun AddHostScreenPreview() {
             onSave = { _, _ -> },
             onNavigateUp = {},
             identities = emptyList(),
+            allUsers = emptyList(),
             hostViewModel = null,
         )
     }
@@ -482,6 +513,7 @@ fun EditHostScreenPreview() {
             onSave = { _, _ -> },
             onNavigateUp = {},
             identities = emptyList(),
+            allUsers = emptyList(),
             hostViewModel = null,
         )
     }
@@ -497,6 +529,7 @@ fun CloneHostScreenPreview() {
             onSave = { _, _ -> },
             onNavigateUp = {},
             identities = emptyList(),
+            allUsers = emptyList(),
             hostViewModel = null,
         )
     }

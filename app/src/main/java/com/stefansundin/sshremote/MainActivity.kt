@@ -303,6 +303,7 @@ class MainActivity : ComponentActivity() {
                             EditHostScreen(
                                 host = host,
                                 identities = identities,
+                                allUsers = hosts.map { it.user },
                                 onSave = { newHost, password ->
                                     scope.launch {
                                         hostViewModel.saveHost(newHost, password)
