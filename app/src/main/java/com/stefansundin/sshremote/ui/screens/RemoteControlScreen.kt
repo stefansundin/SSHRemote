@@ -414,6 +414,7 @@ fun RemoteControlScreen(
                 when (page) {
                     0 -> {
                         RemoteControl(
+                            connectionStatus = uiState.connectionStatus,
                             commands = commands,
                             onKeyEvent = { event ->
                                 val command = when (event) {
@@ -461,6 +462,7 @@ fun RemoteControlScreen(
 
                     1 -> {
                         MousePad(
+                            connectionStatus = uiState.connectionStatus,
                             commands = commands,
                             onMouseEvent = { event ->
                                 if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {

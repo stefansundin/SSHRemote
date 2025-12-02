@@ -22,7 +22,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -35,9 +37,22 @@ fun ConnectionStatusIndicator(connectionStatus: ConnectionStatus, modifier: Modi
         ConnectionStatus.CONNECTING -> Color.Yellow
         ConnectionStatus.DISCONNECTED -> Color.Red
     }
-    Box(
-        modifier = modifier
-            .size(12.dp)
-            .background(color, shape = CircleShape),
-    )
+    Box(modifier = modifier) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(24.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(color, shape = CircleShape),
+            )
+            if (connectionStatus == ConnectionStatus.CONNECTING) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                )
+            }
+        }
+    }
 }

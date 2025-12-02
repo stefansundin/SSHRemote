@@ -42,6 +42,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.MouseEvent
 import kotlinx.coroutines.coroutineScope
@@ -53,13 +54,15 @@ fun MousePad(
     onMouseEvent: (MouseEvent) -> Unit,
     modifier: Modifier = Modifier,
     commands: Map<RemoteControlKey, Command>? = null,
+    connectionStatus: ConnectionStatus? = null,
 ) {
     BackHandler(enabled = true) {
         // Prevent back gesture while this component is active
     }
 
-    val leftClickEnabled = commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty()
-    val rightClickEnabled = commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty()
+    val isEnabled = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
+    val leftClickEnabled = isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty())
+    val rightClickEnabled = isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty())
 
     Column(
         modifier = modifier
@@ -208,6 +211,7 @@ private fun MousePadPreview() {
             onMouseEvent = { event ->
                 Log.d("MousePad", "Received event: $event")
             },
+            connectionStatus = ConnectionStatus.CONNECTED
         )
     }
 }
