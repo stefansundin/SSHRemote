@@ -105,8 +105,7 @@ class SettingsImporter(
                             repeat = it.repeat,
                         )
                     },
-                    remoteCommands = ((exportedHost.remoteCommands
-                        ?: emptyMap()).filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>).mapValues {
+                    remoteCommands = (exportedHost.remoteCommands?.filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>?)?.mapValues {
                         Command(
                             command = it.value.command,
                             name = it.value.name,

@@ -71,7 +71,7 @@ class SettingsExporter(
                         repeat = it.repeat,
                     )
                 },
-                remoteCommands = host.remoteCommands.mapValues {
+                remoteCommands = host.remoteCommands?.mapValues {
                     ExportedCommand(
                         name = it.value.name,
                         command = it.value.command,

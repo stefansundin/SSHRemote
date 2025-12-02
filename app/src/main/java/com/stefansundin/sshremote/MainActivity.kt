@@ -31,8 +31,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,11 +48,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -58,10 +64,16 @@ import androidx.navigation.navArgument
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
+import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.StartScreen
+import com.stefansundin.sshremote.data.host.cecClientPreset
+import com.stefansundin.sshremote.data.host.macosVlcPreset
+import com.stefansundin.sshremote.data.host.wtypePreset
+import com.stefansundin.sshremote.data.host.xdotoolPreset
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
@@ -170,24 +182,59 @@ class MainActivity : ComponentActivity() {
                     val hosts by hostViewModel.allHosts.collectAsState()
                     var startupConnectAttempted by rememberSaveable { mutableStateOf(false) }
 
+                    var hostForPresetSelection by remember { mutableStateOf<Host?>(null) }
+                    var showGettingStartedDialog by rememberSaveable { mutableStateOf(false) }
+                    var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
+
+                    val onConnect = { host: Host ->
+                        if (host.remoteCommands == null) {
+                            hostForPresetSelection = host
+                            showGettingStartedDialog = true
+                        } else {
+                            val initialPage = when (host.startScreen) {
+                                StartScreen.REMOTE -> 0
+                                StartScreen.MOUSE -> 1
+                                StartScreen.COMMANDS -> 3
+                            }
+                            navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
+                        }
+                    }
+
+                    if (showGettingStartedDialog) {
+                        GettingStartedDialog(
+                            onDismiss = { showGettingStartedDialog = false },
+                            onConfirm = {
+                                showGettingStartedDialog = false
+                                showSelectPresetDialog = true
+                            },
+                        )
+                    }
+
+                    if (showSelectPresetDialog) {
+                        SelectPresetDialog(
+                            onDismiss = { showSelectPresetDialog = false },
+                            onPresetSelected = { presetMap ->
+                                hostForPresetSelection?.let { host ->
+                                    hostViewModel.updateRemoteCommands(host, presetMap)
+                                    val initialPage = when (host.startScreen) {
+                                        StartScreen.REMOTE -> 0
+                                        StartScreen.MOUSE -> 1
+                                        StartScreen.COMMANDS -> 3
+                                    }
+                                    navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
+                                }
+                                showSelectPresetDialog = false
+                            },
+                        )
+                    }
+
                     LaunchedEffect(hosts, startupHostId) {
                         if (!startupConnectAttempted && hosts.isNotEmpty()) {
                             startupConnectAttempted = true
                             if (startupHostId != null) {
                                 val hostToConnect = hosts.find { it.id == startupHostId }
                                 if (hostToConnect != null) {
-                                    val initialPage = when (hostToConnect.startScreen) {
-                                        StartScreen.REMOTE -> 0
-                                        StartScreen.MOUSE -> 1
-                                        StartScreen.COMMANDS -> 2
-                                    }
-                                    navController.navigate(
-                                        Screen.RemoteControl.createRoute(
-                                            hostToConnect.id,
-                                            initialPage
-                                        )
-                                    )
-                                    hostViewModel.connect(hostToConnect)
+                                    onConnect(hostToConnect)
                                 }
                             }
                         }
@@ -223,15 +270,7 @@ class MainActivity : ComponentActivity() {
                             HostListScreen(
                                 hosts = sortedHosts,
                                 startupHostId = startupHostId,
-                                onConnectClicked = { host ->
-                                    val initialPage = when (host.startScreen) {
-                                        StartScreen.REMOTE -> 0
-                                        StartScreen.MOUSE -> 1
-                                        StartScreen.COMMANDS -> 2
-                                    }
-                                    navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
-                                    hostViewModel.connect(host)
-                                },
+                                onConnectClicked = onConnect,
                                 onAddClicked = {
                                     navController.navigate(Screen.HostEdit.createRoute(null))
                                 },
@@ -418,6 +457,52 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Getting started") },
+        text = { Text("The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Select preset")
+            }
+        },
+    )
+}
+
+@Composable
+private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>) -> Unit) {
+    val presets = listOf("wtype", "xdotool", "cec-client", "macOS VLC", "No preset")
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select preset") },
+        text = {
+            Column {
+                presets.forEach { preset ->
+                    Text(
+                        text = preset,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val presetMap = when (preset) {
+                                    "wtype" -> wtypePreset
+                                    "xdotool" -> xdotoolPreset
+                                    "cec-client" -> cecClientPreset
+                                    "macOS VLC" -> macosVlcPreset
+                                    else -> emptyMap()
+                                }
+                                onPresetSelected(presetMap)
+                            }
+                            .padding(vertical = 12.dp),
+                    )
+                }
+            }
+        },
+        confirmButton = {},
+    )
+}
+
+@Composable
 fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
     val context = LocalContext.current
 
@@ -451,7 +536,7 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
                         val targetHost = allHosts.find { it.id == hostId }
 
                         if (targetHost != null) {
-                            val command = targetHost.remoteCommands[remoteControlKey]
+                            val command = targetHost.remoteCommands?.get(remoteControlKey)
                             if (command != null) {
                                 hostViewModel.runCommand(command.command, showOutput = false)
                                 Log.d("CommandBroadcastReceiver", "Executing command on host: ${targetHost.name}")

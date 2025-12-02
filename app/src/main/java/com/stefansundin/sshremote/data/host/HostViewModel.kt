@@ -379,6 +379,13 @@ class HostViewModel(
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }
+
+    fun updateRemoteCommands(host: Host, remoteCommands: Map<RemoteControlKey, Command>) {
+        viewModelScope.launch {
+            val updatedHost = host.copy(remoteCommands = remoteCommands)
+            repository.upsert(updatedHost)
+        }
+    }
 }
 
 data class RemoteUiState(

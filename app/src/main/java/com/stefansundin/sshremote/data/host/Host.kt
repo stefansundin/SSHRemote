@@ -48,6 +48,6 @@ data class Host(
     val identityIds: List<String>? = null,
     val knownHosts: List<String> = emptyList(),
     val commands: List<Command> = listOf(Command("uptime", name = "Uptime", showOutput = true)),
-    val remoteCommands: Map<RemoteControlKey, Command> = emptyMap(),
+    val remoteCommands: Map<RemoteControlKey, Command>? = null,
     val startScreen: StartScreen = StartScreen.Default,
 )

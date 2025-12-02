@@ -70,6 +70,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.stefansundin.sshremote.SshRepository
+import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
@@ -161,6 +162,12 @@ fun RemoteControlScreen(
             } else {
                 insetsController.show(WindowInsetsCompat.Type.systemBars())
             }
+        }
+    }
+
+    LaunchedEffect(uiState.host) {
+        if (uiState.host != null && uiState.connectionStatus == ConnectionStatus.DISCONNECTED) {
+            hostViewModel.connect(uiState.host)
         }
     }
 

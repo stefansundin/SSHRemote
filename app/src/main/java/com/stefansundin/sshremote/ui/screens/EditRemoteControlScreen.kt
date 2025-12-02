@@ -97,25 +97,15 @@ fun EditRemoteControlScreen(
     initialCommands: List<Command>,
     initialPage: Int = 0,
 ) {
-    val initialRemoteCommands = (if (commands.values.any { it.command.contains("wtype") }) {
-        wtypePreset
-    } else if (commands.values.any { it.command.contains("cec-client") }) {
-        cecClientPreset
-    } else if (commands.values.any { it.command.contains("osascript") }) {
-        macosVlcPreset
-    } else {
-        xdotoolPreset
-    }) + commands
-
     var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
-    var editedRemoteCommands by rememberSaveable { mutableStateOf(initialRemoteCommands) }
+    var editedRemoteCommands by rememberSaveable { mutableStateOf(commands) }
     var editedCommands by rememberSaveable { mutableStateOf(initialCommands) }
     var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
     var editingCommandInList by rememberSaveable { mutableStateOf<Command?>(null) }
     var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
     var showEditKeyboardCommandDialog by rememberSaveable { mutableStateOf(false) }
 
-    val hasUnsavedChanges = editedRemoteCommands != initialRemoteCommands || editedCommands != initialCommands
+    val hasUnsavedChanges = editedRemoteCommands != commands || editedCommands != initialCommands
     var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var resetToPreset by rememberSaveable { mutableStateOf("") }
