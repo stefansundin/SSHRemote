@@ -16,14 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.stefansundin.sshremote.ui
+package com.stefansundin.sshremote.data.host
 
-import com.stefansundin.sshremote.data.host.RemoteControlKey
+import android.os.Parcelable
+import androidx.annotation.Keep
+import kotlinx.parcelize.Parcelize
 
-sealed class KeyEvent {
-    abstract val key: RemoteControlKey
-
-    data class Down(override val key: RemoteControlKey) : KeyEvent()
-    data class Up(override val key: RemoteControlKey) : KeyEvent()
-    data class Click(override val key: RemoteControlKey) : KeyEvent()
-}
+@Keep
+@Parcelize
+data class SmartVolumeSettings(
+    val readCurrentVolume: Boolean = false,
+    val controlVolumeWithHardwareButtons: Boolean = false,
+) : Parcelable

@@ -211,6 +211,8 @@ class HostViewModel(
                 repository.upsert(updatedHost)
             }
             _uiState.update { it.copy(connectionStatus = ConnectionStatus.CONNECTED) }
+            readVolume()
+            readMuted()
 
         } catch (e: Exception) {
             Log.e("HostViewModel", "Error connecting to host", e)
@@ -288,6 +290,58 @@ class HostViewModel(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    fun runRemoteControlCommand(key: RemoteControlKey) {
+        val command = uiState.value.host?.remoteCommands?.get(key)
+        if (command != null) {
+            val oldVolume = uiState.value.volume
+            runCommand(command.command, command.showOutput)
+            viewModelScope.launch {
+                when (key) {
+                    RemoteControlKey.VOLUME_UP, RemoteControlKey.VOLUME_DOWN -> {
+                        readVolume()
+                        if (uiState.value.volume == "0%" || oldVolume == "0%") {
+                            // Maybe unnecessary? Maybe we can assume it is muted if volume is "0%"?
+                            readMuted()
+                        }
+                    }
+
+                    RemoteControlKey.MUTE -> {
+                        readMuted()
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    private suspend fun readVolume() {
+        val host = _uiState.value.host
+        if (host?.smartVolume?.readCurrentVolume == true) {
+            val result = sshRepository.executeCommandReuseShell("pactl get-sink-volume @DEFAULT_SINK@")
+            Log.d("HostViewModel", "readVolume result: $result")
+            if (result is Result.Success) {
+                // Extracts the first percent value from this output:
+                // Volume: front-left: 37345 /  57% / -14.65 dB,   front-right: 37345 /  57% / -14.65 dB
+                val volume = Regex("""\d+\s*%""").find(result.output)?.value
+                _uiState.update { it.copy(volume = volume) }
+            }
+        }
+    }
+
+    private suspend fun readMuted() {
+        val host = _uiState.value.host
+        if (host?.smartVolume?.readCurrentVolume == true) {
+            val result = sshRepository.executeCommandReuseShell("pactl get-sink-mute @DEFAULT_SINK@")
+            Log.d("HostViewModel", "readMuted result: $result")
+            if (result is Result.Success) {
+                // TODO: Is this output localized?
+                val muted = (result.output.trim() == "Mute: yes")
+                _uiState.update { it.copy(muted = muted) }
             }
         }
     }
@@ -395,6 +449,8 @@ data class RemoteUiState(
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val error: String? = null,
     val hapticFeedback: HapticFeedback = HapticFeedback.Medium,
+    val volume: String? = null,
+    val muted: Boolean? = null,
 )
 
 class HostViewModelFactory(

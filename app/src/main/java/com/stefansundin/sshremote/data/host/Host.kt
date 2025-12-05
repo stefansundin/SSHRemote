@@ -50,4 +50,5 @@ data class Host(
     val commands: List<Command> = listOf(Command("uptime", name = "Uptime", showOutput = true)),
     val remoteCommands: Map<RemoteControlKey, Command>? = null,
     val startScreen: StartScreen = StartScreen.Default,
+    val smartVolume: SmartVolumeSettings? = null,
 )

@@ -367,12 +367,14 @@ class MainActivity : ComponentActivity() {
                             EditRemoteControlScreen(
                                 commands = uiState.host?.remoteCommands ?: emptyMap(),
                                 initialCommands = uiState.host?.commands ?: emptyList(),
-                                onSave = { remoteCommands, commands, navigateBack ->
+                                initialSmartVolumeSettings = uiState.host?.smartVolume,
+                                onSave = { remoteCommands, commands, smartVolume, navigateBack ->
                                     scope.launch {
                                         uiState.host?.let { host ->
                                             val updatedHost = host.copy(
                                                 remoteCommands = remoteCommands,
                                                 commands = commands,
+                                                smartVolume = smartVolume,
                                             )
                                             hostViewModel.upsert(updatedHost)
                                             hostViewModel.updateActiveHostInUiState(updatedHost)
@@ -537,16 +539,8 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
                         val targetHost = allHosts.find { it.id == hostId }
 
                         if (targetHost != null) {
-                            val command = targetHost.remoteCommands?.get(remoteControlKey)
-                            if (command != null) {
-                                hostViewModel.runCommand(command.command, showOutput = false)
-                                Log.d("CommandBroadcastReceiver", "Executing command on host: ${targetHost.name}")
-                            } else {
-                                Log.w(
-                                    "CommandBroadcastReceiver",
-                                    "Command key '$remoteControlKey' not defined for host '${targetHost.name}'",
-                                )
-                            }
+                            hostViewModel.runRemoteControlCommand(remoteControlKey)
+                            Log.d("CommandBroadcastReceiver", "Executing command on host: ${targetHost.name}")
                         } else {
                             Log.w("CommandBroadcastReceiver", "Host with ID $hostId not found.")
                         }

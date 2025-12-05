@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.ui.KeyEvent
 
 @Composable
@@ -72,10 +74,13 @@ fun RemoteControl(
     modifier: Modifier = Modifier,
     commands: Map<RemoteControlKey, Command>? = null,
     connectionStatus: ConnectionStatus? = null,
+    smartVolumeSettings: SmartVolumeSettings? = null,
+    volume: String? = null,
+    muted: Boolean? = null,
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isLandscape = maxWidth > maxHeight
-        RemoteControlLayout(isLandscape, onKeyEvent, commands, connectionStatus)
+        RemoteControlLayout(isLandscape, onKeyEvent, commands, connectionStatus, smartVolumeSettings, volume, muted)
     }
 }
 
@@ -85,6 +90,9 @@ private fun RemoteControlLayout(
     onKeyEvent: (KeyEvent) -> Unit,
     commands: Map<RemoteControlKey, Command>? = null,
     connectionStatus: ConnectionStatus? = null,
+    smartVolumeSettings: SmartVolumeSettings? = null,
+    volume: String? = null,
+    muted: Boolean? = null,
 ) {
     if (isLandscape) {
         Row(
@@ -95,7 +103,13 @@ private fun RemoteControlLayout(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Dpad(onKeyEvent, commands, connectionStatus)
-            ActionButtons(onKeyEvent, commands, connectionStatus) // , modifier = Modifier.fillMaxHeight()
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            ) {
+                VolumeStatus(smartVolumeSettings, volume, muted)
+                ActionButtons(onKeyEvent, commands, connectionStatus)
+            }
         }
     } else {
         Column(
@@ -105,8 +119,21 @@ private fun RemoteControlLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
         ) {
+            VolumeStatus(smartVolumeSettings, volume, muted)
             Dpad(onKeyEvent, commands, connectionStatus)
             ActionButtons(onKeyEvent, commands, connectionStatus)
+        }
+    }
+}
+
+@Composable
+private fun VolumeStatus(smartVolumeSettings: SmartVolumeSettings?, volume: String?, muted: Boolean?) {
+    if (smartVolumeSettings?.readCurrentVolume == true) {
+        if (volume != null) {
+            Text("Volume: $volume${if (muted == true) " (muted)" else ""}")
+        } else {
+            // Render an empty Text to prevent components moving once we have the volume
+            Text("")
         }
     }
 }

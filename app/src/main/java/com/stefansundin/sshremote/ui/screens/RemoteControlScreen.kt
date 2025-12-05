@@ -21,6 +21,7 @@ package com.stefansundin.sshremote.ui.screens
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -61,6 +62,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
@@ -305,12 +309,15 @@ fun RemoteControlScreen(
     }
 
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
-
-    // Hide the virtual keyboard when the Keyboard tab is no longer focused:
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage != 2) {
+            // Hide the virtual keyboard when the Keyboard tab is no longer focused:
             focusManager.clearFocus()
+            // Focus the remote control so volume hardware buttons can be intercepted:
+            focusRequester.requestFocus()
         }
     }
 
@@ -374,14 +381,36 @@ fun RemoteControlScreen(
                 },
             )
         },
-        modifier = modifier,
+        modifier = modifier.onPreviewKeyEvent {
+            val smartVolume = uiState.host?.smartVolume
+            if (smartVolume?.controlVolumeWithHardwareButtons == true) {
+                when (it.nativeKeyEvent.keyCode) {
+                    android.view.KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                        if (it.nativeKeyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
+                            hostViewModel.runRemoteControlCommand(RemoteControlKey.VOLUME_DOWN)
+                        }
+                        return@onPreviewKeyEvent true
+                    }
+
+                    android.view.KeyEvent.KEYCODE_VOLUME_UP -> {
+                        if (it.nativeKeyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
+                            hostViewModel.runRemoteControlCommand(RemoteControlKey.VOLUME_UP)
+                        }
+                        return@onPreviewKeyEvent true
+                    }
+                }
+            }
+            false
+        },
     ) { padding ->
         val commands = uiState.host?.remoteCommands ?: emptyMap()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .focusRequester(focusRequester)
+                .focusable(),
         ) {
             PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
                 Tab(
@@ -416,26 +445,23 @@ fun RemoteControlScreen(
                         RemoteControl(
                             connectionStatus = uiState.connectionStatus,
                             commands = commands,
-                            onKeyEvent = { event ->
-                                val command = when (event) {
-                                    is KeyEvent.Down -> commands[event.key]
-                                    is KeyEvent.Up -> commands[event.key]
-                                    is KeyEvent.Click -> commands[event.key]
-                                } ?: return@RemoteControl
+                            smartVolumeSettings = uiState.host?.smartVolume,
+                            volume = uiState.volume,
+                            muted = uiState.muted,
+                            onKeyEvent = { event: KeyEvent ->
+                                val key = event.key
+                                val command = commands[key] ?: return@RemoteControl
                                 when (event) {
                                     is KeyEvent.Down -> {
                                         if (command.repeat) {
                                             repeatJob?.cancel()
                                             repeatJob = coroutineScope.launch {
                                                 performHapticFeedback(context, uiState.hapticFeedback)
-                                                hostViewModel.runCommand(
-                                                    command.command,
-                                                    command.showOutput,
-                                                ) // Fire once immediately
+                                                hostViewModel.runRemoteControlCommand(key) // Fire once immediately
                                                 delay(500) // Initial delay
                                                 while (isActive) {
                                                     performHapticFeedback(context, uiState.hapticFeedback)
-                                                    hostViewModel.runCommand(command.command, command.showOutput)
+                                                    hostViewModel.runRemoteControlCommand(key)
                                                     delay(100) // Repeat rate
                                                 }
                                             }
@@ -451,9 +477,8 @@ fun RemoteControlScreen(
                                     is KeyEvent.Click -> {
                                         if (!command.repeat) {
                                             performHapticFeedback(context, uiState.hapticFeedback)
-                                            hostViewModel.runCommand(command.command, command.showOutput)
+                                            hostViewModel.runRemoteControlCommand(key)
                                         }
-
                                     }
                                 }
                             },
@@ -476,15 +501,11 @@ fun RemoteControlScreen(
                                     }
 
                                     MouseEvent.LeftClick -> {
-                                        commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.let {
-                                            hostViewModel.runCommand(it.command, it.showOutput)
-                                        }
+                                        hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_LEFT_CLICK)
                                     }
 
                                     MouseEvent.RightClick -> {
-                                        commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.let {
-                                            hostViewModel.runCommand(it.command, it.showOutput)
-                                        }
+                                        hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_RIGHT_CLICK)
                                     }
 
                                     is MouseEvent.Pan -> {

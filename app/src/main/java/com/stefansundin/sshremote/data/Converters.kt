@@ -22,6 +22,7 @@ import androidx.room.TypeConverter
 import com.google.gson.reflect.TypeToken
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import java.time.OffsetDateTime
 
 class Converters {
@@ -100,6 +101,23 @@ class Converters {
             return null
         }
         val type = object : TypeToken<Map<RemoteControlKey, Command>>() {}.type
+        return gson.fromJson(value, type)
+    }
+
+    @TypeConverter
+    fun fromSmartVolumeSettings(value: SmartVolumeSettings?): String? {
+        if (value == null) {
+            return null
+        }
+        return gson.toJson(value)
+    }
+
+    @TypeConverter
+    fun toSmartVolumeSettings(value: String?): SmartVolumeSettings? {
+        if (value == null) {
+            return null
+        }
+        val type = object : TypeToken<SmartVolumeSettings>() {}.type
         return gson.fromJson(value, type)
     }
 }

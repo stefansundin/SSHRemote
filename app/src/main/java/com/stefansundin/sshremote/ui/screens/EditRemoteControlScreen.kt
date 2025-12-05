@@ -73,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.data.host.StartScreen
 import com.stefansundin.sshremote.data.host.cecClientPreset
 import com.stefansundin.sshremote.data.host.macosVlcPreset
@@ -85,27 +86,32 @@ import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
 import com.stefansundin.sshremote.ui.components.EditRemoteCommandDialog
 import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
+import com.stefansundin.sshremote.ui.components.SmartVolumeSettingsDialog
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun EditRemoteControlScreen(
     commands: Map<RemoteControlKey, Command>,
-    onSave: (Map<RemoteControlKey, Command>, List<Command>, navigateBack: Boolean) -> Unit,
+    onSave: (Map<RemoteControlKey, Command>, List<Command>, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onSetAsDefaultScreen: (StartScreen) -> Unit,
     initialCommands: List<Command>,
+    initialSmartVolumeSettings: SmartVolumeSettings?,
     initialPage: Int = 0,
 ) {
     var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
     var editedRemoteCommands by rememberSaveable { mutableStateOf(commands) }
     var editedCommands by rememberSaveable { mutableStateOf(initialCommands) }
+    var editedSmartVolumeSettings by rememberSaveable { mutableStateOf(initialSmartVolumeSettings) }
     var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
     var editingCommandInList by rememberSaveable { mutableStateOf<Command?>(null) }
     var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
     var showEditKeyboardCommandDialog by rememberSaveable { mutableStateOf(false) }
+    var showSmartVolumeSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
-    val hasUnsavedChanges = editedRemoteCommands != commands || editedCommands != initialCommands
+    val hasUnsavedChanges =
+        editedRemoteCommands != commands || editedCommands != initialCommands || editedSmartVolumeSettings != initialSmartVolumeSettings
     var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var resetToPreset by rememberSaveable { mutableStateOf("") }
@@ -159,7 +165,7 @@ fun EditRemoteControlScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onSave(editedRemoteCommands, editedCommands, true)
+                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
                     },
                 ) {
                     Text("Save and leave")
@@ -272,7 +278,14 @@ fun EditRemoteControlScreen(
                                     showMenu = false
                                 },
                             )
-                            if (pagerState.currentPage == 0) {
+                            DropdownMenuItem(
+                                text = { Text("Smart volume settings") },
+                                onClick = {
+                                    showMenu = false
+                                    showSmartVolumeSettingsDialog = true
+                                },
+                            )
+                            if (pagerState.currentPage != 3) {
                                 DropdownMenuItem(
                                     text = { Text("Reset to preset") },
                                     onClick = {
@@ -305,7 +318,7 @@ fun EditRemoteControlScreen(
                     text = { Text("Save") },
                     icon = { Icon(Icons.Default.Save, contentDescription = "Save") },
                     onClick = {
-                        onSave(editedRemoteCommands, editedCommands, true)
+                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
                     },
                 )
             }
@@ -479,6 +492,17 @@ fun EditRemoteControlScreen(
                     this[RemoteControlKey.KEYBOARD_KEY_INPUT] = newKeyCommand
                 }
                 showEditKeyboardCommandDialog = false
+            },
+        )
+    }
+
+    if (showSmartVolumeSettingsDialog) {
+        SmartVolumeSettingsDialog(
+            settings = editedSmartVolumeSettings,
+            onDismiss = { showSmartVolumeSettingsDialog = false },
+            onSave = {
+                editedSmartVolumeSettings = it
+                showSmartVolumeSettingsDialog = false
             },
         )
     }
