@@ -18,7 +18,12 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.annotation.SuppressLint
+import android.os.Build
 import android.util.Log
+import android.view.InputDevice
+import android.view.MotionEvent
+import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -37,10 +42,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteControlKey
@@ -61,8 +70,10 @@ fun MousePad(
     }
 
     val isEnabled = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
-    val leftClickEnabled = isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty())
-    val rightClickEnabled = isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty())
+    val leftClickEnabled =
+        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty())
+    val rightClickEnabled =
+        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty())
 
     Column(
         modifier = modifier
@@ -107,6 +118,7 @@ private enum class GestureState {
     Scroll,
 }
 
+@SuppressLint("ClickableViewAccessibility")
 @Composable
 private fun TouchPad(
     onMove: (dx: Float, dy: Float) -> Unit,
@@ -122,65 +134,90 @@ private fun TouchPad(
             .fillMaxWidth()
             .pointerInput(leftClickEnabled, rightClickEnabled) {
                 coroutineScope {
-                    awaitEachGesture {
-                        var state = GestureState.Undecided
-                        val down = awaitFirstDown(requireUnconsumed = false)
 
-                        val longPressJob = launch {
-                            if (!rightClickEnabled) return@launch
-                            delay(viewConfiguration.longPressTimeoutMillis)
-                            state = GestureState.LongPress
-                            onRightClick()
+                    // This coroutine handles mouse hover and scroll events.
+                    // It runs on the Initial pass to catch events before they are consumed by gesture detectors.
+                    launch {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                val change = event.changes.firstOrNull() ?: continue
+                                if (change.type != PointerType.Mouse) continue
+
+//                                if (event.buttons.isSecondaryPressed) {
+//                                    onRightClick()
+//                                }
+
+                                // Handle mouse scroll wheel for panning
+                                if (event.changes.any { it.scrollDelta != Offset.Zero }) {
+                                    val scroll = event.changes.sumOf { it.scrollDelta.y.toDouble() }.toFloat()
+                                    onPan(0f, -scroll * 20f) // Adjust multiplier for sensitivity
+                                }
+                            }
                         }
+                    }
 
-                        do {
-                            val event = awaitPointerEvent()
-                            val pressedChanges = event.changes.filter { it.pressed }
+                    launch {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            var state = GestureState.Undecided
 
-                            if (state == GestureState.Undecided) {
-                                val pointer = pressedChanges.find { it.id == down.id }
-                                if (pointer != null) {
-                                    val distance = pointer.position - down.position
-                                    if (pressedChanges.size > 1) {
-                                        longPressJob.cancel()
-                                        state = GestureState.Scroll
-                                    } else if (distance.getDistanceSquared() > viewConfiguration.touchSlop * viewConfiguration.touchSlop) {
-                                        longPressJob.cancel()
-                                        state = GestureState.Move
+                            val longPressJob = launch {
+                                if (!rightClickEnabled) return@launch
+                                delay(viewConfiguration.longPressTimeoutMillis)
+                                state = GestureState.LongPress
+                                onRightClick()
+                            }
+
+                            do {
+                                val event = awaitPointerEvent()
+                                val pressedChanges = event.changes.filter { it.pressed }
+
+                                if (state == GestureState.Undecided) {
+                                    val pointer = pressedChanges.find { it.id == down.id }
+                                    if (pointer != null) {
+                                        val distance = pointer.position - down.position
+                                        if (pressedChanges.size > 1) {
+                                            longPressJob.cancel()
+                                            state = GestureState.Scroll
+                                        } else if (distance.getDistanceSquared() > viewConfiguration.touchSlop * viewConfiguration.touchSlop) {
+                                            longPressJob.cancel()
+                                            state = GestureState.Move
+                                        }
                                     }
                                 }
-                            }
 
-                            if (state == GestureState.Move && pressedChanges.size > 1) {
-                                state = GestureState.Scroll
-                            }
-
-                            if (state == GestureState.Move) {
-                                val pointer = pressedChanges.find { it.id == down.id }
-                                if (pointer != null) {
-                                    val change = pointer.positionChange()
-                                    onMove(change.x, change.y)
+                                if (state == GestureState.Move && pressedChanges.size > 1) {
+                                    state = GestureState.Scroll
                                 }
-                            } else if (state == GestureState.Scroll) {
-                                if (pressedChanges.size >= 2) {
-                                    val centroid = pressedChanges
-                                        .map { it.position }
-                                        .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
-                                    val prevCentroid = pressedChanges
-                                        .map { it.previousPosition }
-                                        .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
-                                    val pan = centroid - prevCentroid
-                                    onPan(pan.x, pan.y)
+
+                                if (state == GestureState.Move) {
+                                    val pointer = pressedChanges.find { it.id == down.id }
+                                    if (pointer != null) {
+                                        val change = pointer.positionChange()
+                                        onMove(change.x, change.y)
+                                    }
+                                } else if (state == GestureState.Scroll) {
+                                    if (pressedChanges.size >= 2) {
+                                        val centroid = pressedChanges
+                                            .map { it.position }
+                                            .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                        val prevCentroid = pressedChanges
+                                            .map { it.previousPosition }
+                                            .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                        val pan = centroid - prevCentroid
+                                        onPan(pan.x, pan.y)
+                                    }
                                 }
-                            }
-                            event.changes.forEach { it.consume() }
-                        } while (event.changes.any { it.pressed } && state != GestureState.LongPress)
+                                event.changes.forEach { it.consume() }
+                            } while (event.changes.any { it.pressed } && state != GestureState.LongPress)
 
-                        longPressJob.cancel()
+                            longPressJob.cancel()
 
-                        if (state == GestureState.Undecided) {
-                            if (leftClickEnabled) {
-                                onLeftClick()
+                            if (state == GestureState.Undecided) {
+                                if (leftClickEnabled) {
+                                    onLeftClick()
+                                }
                             }
                         }
                     }
@@ -199,6 +236,89 @@ private fun TouchPad(
                 Text("Long press for right click")
                 Text("Scroll using two fingers")
             }
+
+            // Mouse Capture Interop View
+            val view = LocalView.current
+            AndroidView(
+                modifier = Modifier.matchParentSize(),
+                factory = { context ->
+                    object : View(context) {
+                        override fun onCapturedPointerEvent(event: MotionEvent): Boolean {
+                            // During capture, x and y are relative deltas
+                            val dx = event.x
+                            val dy = event.y
+
+                            if (dx != 0f || dy != 0f) {
+                                onMove(dx, dy)
+                            }
+
+                            val vScroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL)
+                            val hScroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL)
+                            if (vScroll != 0f || hScroll != 0f) {
+                                val config = android.view.ViewConfiguration.get(context)
+                                val vScale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    config.scaledVerticalScrollFactor
+                                } else {
+                                    64f
+                                }
+                                val hScale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    config.scaledHorizontalScrollFactor
+                                } else {
+                                    64f
+                                }
+                                onPan(hScroll * hScale, vScroll * vScale)
+                            }
+
+                            if (event.actionMasked == MotionEvent.ACTION_BUTTON_PRESS) {
+                                if (event.actionButton == MotionEvent.BUTTON_PRIMARY) {
+                                    if (leftClickEnabled) {
+                                        onLeftClick()
+                                    }
+                                } else if (event.actionButton == MotionEvent.BUTTON_SECONDARY) {
+                                    if (rightClickEnabled) {
+                                        onRightClick()
+                                    }
+                                }
+                            }
+
+                            // Release capture if the user releases the button
+                            if (event.action == MotionEvent.ACTION_UP ||
+                                event.action == MotionEvent.ACTION_BUTTON_RELEASE
+                            ) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    releasePointerCapture()
+                                }
+                            }
+                            return true
+                        }
+                    }.apply {
+                        isFocusable = true
+                        isFocusableInTouchMode = true
+
+                        setOnTouchListener { v, event ->
+                            // Check for Mouse input specifically
+                            if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                                if (event.action == MotionEvent.ACTION_DOWN) {
+
+                                    if (event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
+                                        // Start capture when mouse button is depressed
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            v.requestPointerCapture()
+                                        }
+                                    } else if (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)) {
+                                        onRightClick()
+                                    }
+
+                                    return@setOnTouchListener true
+                                }
+                            }
+                            // Return false to let standard touch events (fingers) pass through
+                            // to the Compose pointerInput handler
+                            false
+                        }
+                    }
+                },
+            )
         }
     }
 }
@@ -211,7 +331,7 @@ private fun MousePadPreview() {
             onMouseEvent = { event ->
                 Log.d("MousePad", "Received event: $event")
             },
-            connectionStatus = ConnectionStatus.CONNECTED
+            connectionStatus = ConnectionStatus.CONNECTED,
         )
     }
 }
