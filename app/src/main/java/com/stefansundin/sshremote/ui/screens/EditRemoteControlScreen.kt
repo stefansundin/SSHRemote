@@ -51,7 +51,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -63,6 +62,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -86,6 +86,7 @@ import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
 import com.stefansundin.sshremote.ui.components.EditRemoteCommandDialog
 import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
+import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SmartVolumeSettingsDialog
 import kotlinx.coroutines.launch
 
@@ -119,7 +120,7 @@ fun EditRemoteControlScreen(
     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
     val commandsListState = rememberLazyListState()
     var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
@@ -243,7 +244,7 @@ fun EditRemoteControlScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Edit Remote Control") },
+                title = { Text("Edit Remote Control", maxLines = 1) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -329,27 +330,21 @@ fun EditRemoteControlScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
-                Tab(
-                    selected = pagerState.currentPage == 0,
-                    onClick = { scope.launch { pagerState.scrollToPage(0) } },
-                    text = { Text("Remote") },
-                )
-                Tab(
-                    selected = pagerState.currentPage == 1,
-                    onClick = { scope.launch { pagerState.scrollToPage(1) } },
-                    text = { Text("Mouse") },
-                )
-                Tab(
-                    selected = pagerState.currentPage == 2,
-                    onClick = { scope.launch { pagerState.scrollToPage(2) } },
-                    text = { Text("Keyboard") },
-                )
-                Tab(
-                    selected = pagerState.currentPage == 3,
-                    onClick = { scope.launch { pagerState.scrollToPage(3) } },
-                    text = { Text("Commands") },
-                )
+            val tabTitles = listOf("Remote", "Mouse", "Keyboard", "Commands")
+
+            ResponsiveTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                edgePadding = 0.dp,
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    key(index) {
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick = { coroutineScope.launch { pagerState.scrollToPage(index) } },
+                            text = { Text(text = title, maxLines = 1) },
+                        )
+                    }
+                }
             }
             HorizontalPager(
                 state = pagerState,

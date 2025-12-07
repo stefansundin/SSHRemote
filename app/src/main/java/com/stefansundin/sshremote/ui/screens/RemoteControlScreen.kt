@@ -45,7 +45,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -59,6 +58,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -97,6 +97,7 @@ import com.stefansundin.sshremote.ui.components.ConnectionStatusIndicator
 import com.stefansundin.sshremote.ui.components.KeyboardInput
 import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
+import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
 import com.stefansundin.sshremote.ui.components.SpecialKeysRow
 import kotlinx.coroutines.Job
@@ -351,7 +352,7 @@ fun RemoteControlScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(uiState.host?.name ?: "Remote") },
+                title = { Text(uiState.host?.name ?: "Remote", maxLines = 1) },
                 navigationIcon = {
                     IconButton(onClick = onDisconnect) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")
@@ -438,28 +439,23 @@ fun RemoteControlScreen(
                 .focusRequester(focusRequester)
                 .focusable(),
         ) {
-            PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
-                Tab(
-                    selected = pagerState.currentPage == 0,
-                    onClick = { coroutineScope.launch { pagerState.scrollToPage(0) } },
-                    text = { Text("Remote") },
-                )
-                Tab(
-                    selected = pagerState.currentPage == 1,
-                    onClick = { coroutineScope.launch { pagerState.scrollToPage(1) } },
-                    text = { Text("Mouse") },
-                )
-                Tab(
-                    selected = pagerState.currentPage == 2,
-                    onClick = { coroutineScope.launch { pagerState.scrollToPage(2) } },
-                    text = { Text("Keyboard") },
-                )
-                Tab(
-                    selected = pagerState.currentPage == 3,
-                    onClick = { coroutineScope.launch { pagerState.scrollToPage(3) } },
-                    text = { Text("Commands") },
-                )
+            val tabTitles = listOf("Remote", "Mouse", "Keyboard", "Commands")
+
+            ResponsiveTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                edgePadding = 0.dp,
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    key(index) {
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick = { coroutineScope.launch { pagerState.scrollToPage(index) } },
+                            text = { Text(text = title, maxLines = 1) },
+                        )
+                    }
+                }
             }
+
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
