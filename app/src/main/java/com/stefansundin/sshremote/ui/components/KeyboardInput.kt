@@ -46,7 +46,7 @@ fun KeyboardInput(
 ) {
     val zeroWidthSpace = "\u200B"
     var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(zeroWidthSpace))
+        mutableStateOf(TextFieldValue(zeroWidthSpace, selection = TextRange(zeroWidthSpace.length)))
     }
     val focusRequester = remember { FocusRequester() }
 
