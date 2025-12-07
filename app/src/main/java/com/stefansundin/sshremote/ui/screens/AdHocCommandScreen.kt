@@ -62,15 +62,19 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
+import com.stefansundin.sshremote.data.host.RemoteUiState
+import com.stefansundin.sshremote.ui.components.CommandOutputDialog
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AdHocCommandScreen(
+    uiState: RemoteUiState,
     commands: List<AdHocCommand>,
     onExecuteCommand: (command: String, popUpToPrevious: Boolean) -> Unit,
     onDeleteCommand: (AdHocCommand) -> Unit,
     onClearHistory: () -> Unit,
     onNavigateUp: () -> Unit,
+    onClearCommandOutput: () -> Unit,
 ) {
     var commandText by rememberSaveable { mutableStateOf("") }
     var showMenu by rememberSaveable { mutableStateOf(false) }
@@ -78,6 +82,13 @@ fun AdHocCommandScreen(
 
     val executeAndStay: () -> Unit = { onExecuteCommand(commandText, false) }
     val executeAndGoBack: () -> Unit = { onExecuteCommand(commandText, true) }
+
+    uiState.commandOutput?.let { output ->
+        CommandOutputDialog(
+            output = output,
+            onDismiss = onClearCommandOutput,
+        )
+    }
 
     Scaffold(
         topBar = {

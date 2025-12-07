@@ -401,6 +401,7 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.AdHocCommand.route) {
                             val adHocCommands by adHocCommandViewModel.adHocCommands.collectAsState()
                             AdHocCommandScreen(
+                                uiState = uiState,
                                 commands = adHocCommands,
                                 onExecuteCommand = { command, popUpToPrevious ->
                                     adHocCommandViewModel.addAdHocCommand(command)
@@ -412,6 +413,7 @@ class MainActivity : ComponentActivity() {
                                 onDeleteCommand = { adHocCommandViewModel.deleteAdHocCommand(it) },
                                 onClearHistory = { adHocCommandViewModel.clearAdHocCommands() },
                                 onNavigateUp = { navController.popBackStack() },
+                                onClearCommandOutput = { hostViewModel.clearCommandOutput() },
                             )
                         }
 
