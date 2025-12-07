@@ -371,7 +371,7 @@ fun RemoteControlScreen(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Copy public key") },
+                            text = { Text("Push public key") },
                             onClick = {
                                 showMenu = false
                                 showSelectIdentityDialog = true

@@ -1,11 +1,13 @@
 package com.stefansundin.sshremote.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,17 +23,22 @@ fun SelectIdentityDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Identity to Copy") },
+        title = { Text("Select public key") },
         text = {
-            LazyColumn {
-                items(identities, key = { it.id }) { identity ->
-                    Text(
-                        text = identity.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onIdentitySelected(identity) }
-                            .padding(vertical = 16.dp),
-                    )
+            Column {
+                Text(
+                    text = "Key will be added to host's authorized_keys.",
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+                LazyColumn {
+                    items(identities, key = { it.id }) { identity ->
+                        ListItem(
+                            headlineContent = { Text(identity.name) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onIdentitySelected(identity) },
+                        )
+                    }
                 }
             }
         },
