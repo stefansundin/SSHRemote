@@ -29,11 +29,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -68,7 +72,9 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -233,6 +239,7 @@ fun RemoteControlScreen(
 
     passwordPrompt?.let { prompt ->
         var password by rememberSaveable { mutableStateOf("") }
+        var passwordVisible by rememberSaveable { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { sshRepository.onPasswordPromptComplete(null) },
             title = { Text(prompt.message) },
@@ -241,8 +248,17 @@ fun RemoteControlScreen(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { sshRepository.onPasswordPromptComplete(password) }),
+                    trailingIcon = {
+                        val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val description = if (passwordVisible) "Hide password" else "Show password"
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, contentDescription = description)
+                        }
+                    },
                 )
             },
             confirmButton = {
@@ -260,6 +276,7 @@ fun RemoteControlScreen(
 
     passphrasePrompt?.let { prompt ->
         var passphrase by rememberSaveable { mutableStateOf("") }
+        var passphraseVisible by rememberSaveable { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { sshRepository.onPassphrasePromptComplete(null) },
             title = { Text(prompt.message) },
@@ -268,8 +285,17 @@ fun RemoteControlScreen(
                     value = passphrase,
                     onValueChange = { passphrase = it },
                     label = { Text("Passphrase") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (passphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { sshRepository.onPassphrasePromptComplete(passphrase) }),
+                    trailingIcon = {
+                        val image = if (passphraseVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val description = if (passphraseVisible) "Hide passphrase" else "Show passphrase"
+                        IconButton(onClick = { passphraseVisible = !passphraseVisible }) {
+                            Icon(imageVector = image, contentDescription = description)
+                        }
+                    },
                 )
             },
             confirmButton = {
