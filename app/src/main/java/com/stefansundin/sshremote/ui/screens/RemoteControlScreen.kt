@@ -293,7 +293,7 @@ fun RemoteControlScreen(
                 coroutineScope.launch {
                     val publicKey = identityViewModel.getPublicKey(it)
                     val command =
-                        """exec sh -c 'cd; umask 077; echo "\n$publicKey" >> ~/.ssh/authorized_keys'"""
+                        "exec sh -c 'cd; umask 077; echo \"\n$publicKey\" >> ~/.ssh/authorized_keys'"
                     hostViewModel.runCommand(
                         command = command,
                         showOutput = false,
