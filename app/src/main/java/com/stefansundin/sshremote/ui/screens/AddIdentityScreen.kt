@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -80,7 +81,7 @@ val keyTypes = mapOf(KeyPair.ED25519 to "ED25519", KeyPair.RSA to "RSA")
 @Composable
 fun AddIdentityScreen(
     onKeySaved: (name: String, privateKey: String) -> Unit,
-    onKeyGenerated: (name: String, type: Int, comment: String) -> Unit,
+    onKeyGenerated: suspend (name: String, type: Int, comment: String) -> Unit,
     onNavigateUp: () -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf("") }
@@ -89,6 +90,8 @@ fun AddIdentityScreen(
     val tabTitles = listOf("Import File", "Generate", "Enter Manually")
     var isKeyContentValid by rememberSaveable { mutableStateOf(false) }
     var selectedKeyType by rememberSaveable { mutableStateOf<Int?>(null) }
+    var isGenerating by rememberSaveable { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -108,11 +111,16 @@ fun AddIdentityScreen(
         }
         when (selectedTabIndex) {
             0, 2 -> onKeySaved(finalName, privateKey)
-            1 -> onKeyGenerated(
-                finalName,
-                selectedKeyType ?: KeyPair.ED25519,
-                finalName,
-            )
+            1 -> {
+                coroutineScope.launch {
+                    isGenerating = true
+                    onKeyGenerated(
+                        finalName,
+                        selectedKeyType ?: KeyPair.ED25519,
+                        finalName,
+                    )
+                }
+            }
         }
     }
 
@@ -134,7 +142,25 @@ fun AddIdentityScreen(
         )
     }
 
-    BackHandler(enabled = hasUnsavedChanges && isFormValid) {
+    if (isGenerating) {
+        AlertDialog(
+            onDismissRequest = { /* cannot be dismissed */ },
+            title = { Text("Generating Key") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    CircularProgressIndicator()
+                    Text("Please wait, this can take a moment...")
+                }
+            },
+            confirmButton = {},
+        )
+    }
+
+    BackHandler(enabled = hasUnsavedChanges && isFormValid && !isGenerating) {
         showSaveDialog = true
     }
 
@@ -174,6 +200,7 @@ fun AddIdentityScreen(
                                 onNavigateUp()
                             }
                         },
+                        enabled = !isGenerating,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -184,7 +211,7 @@ fun AddIdentityScreen(
             )
         },
         floatingActionButton = {
-            if (isFormValid) {
+            if (isFormValid && !isGenerating) {
                 FloatingActionButton(
                     onClick = {
                         handleSave()
@@ -379,7 +406,7 @@ fun ManualEntryTab(
         placeholder = { Text("-----BEGIN OPENSSH PRIVATE KEY-----") },
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp),
+            .height(250.dp),
         isError = isError,
         supportingText = { if (isError) Text("Invalid key format") },
     )

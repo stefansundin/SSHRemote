@@ -79,11 +79,11 @@ class HostViewModel(
         }
     }
 
-    val allHosts: StateFlow<List<Host>> = repository.getAll()
+    val allHosts: StateFlow<List<Host>?> = repository.getAll()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList(),
+            initialValue = null,
         )
 
     suspend fun saveHost(host: Host, password: String?) {

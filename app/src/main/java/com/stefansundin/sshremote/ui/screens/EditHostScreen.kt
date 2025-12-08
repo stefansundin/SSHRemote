@@ -21,7 +21,6 @@ package com.stefansundin.sshremote.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,16 +75,15 @@ import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 private enum class PasswordState {
-    LOADING,
+    SET,
     LOST,
-    SET
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditHostScreen(
     host: Host?,
-    identities: List<Identity>,
+    identities: List<Identity>?,
     allUsers: List<String>,
     onSave: (Host, String?) -> Unit,
     onNavigateUp: () -> Unit,
@@ -96,17 +94,13 @@ fun EditHostScreen(
     var port by rememberSaveable(host) { mutableStateOf(host?.port?.toString() ?: "22") }
     var user by rememberSaveable(host) { mutableStateOf(host?.user ?: "") }
 
-    var passwordState by rememberSaveable { mutableStateOf(PasswordState.LOADING) }
+    var passwordState by rememberSaveable { mutableStateOf(PasswordState.SET) }
     LaunchedEffect(host?.passwordId) {
         val currentPasswordId = host?.passwordId
-        passwordState = if (currentPasswordId != null && hostViewModel != null) {
+        if (currentPasswordId != null && hostViewModel != null) {
             if (hostViewModel.isPasswordLost(currentPasswordId)) {
-                PasswordState.LOST
-            } else {
-                PasswordState.SET
+                passwordState = PasswordState.LOST
             }
-        } else {
-            PasswordState.SET
         }
     }
 
@@ -117,14 +111,21 @@ fun EditHostScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var selectedIdentityIds by rememberSaveable(host, identities) {
         val originalIds = host?.identityIds
-        val validIds = originalIds?.filter { id -> identities.any { it.id == id } }
-        val resultIds = if (originalIds != null && originalIds.isNotEmpty() && validIds?.isEmpty() == true) {
-            // Stale reference case: all selected keys are gone. Switch to "Use any key".
-            null
+        // If identities is null, we can't filter valid IDs yet, so keep original IDs
+        val validIds = if (identities != null) {
+            originalIds?.filter { id -> identities.any { it.id == id } }
         } else {
-            // Otherwise, use the valid ones (or the original null/empty list)
-            validIds ?: originalIds
+            originalIds
         }
+        val resultIds =
+            if (originalIds != null && originalIds.isNotEmpty() && validIds?.isEmpty() == true && identities != null) {
+                // Stale reference case: all selected keys are gone. Switch to "Use any key".
+                // Only do this if we are sure identities are loaded (not null)
+                null
+            } else {
+                // Otherwise, use the valid ones (or the original null/empty list)
+                validIds ?: originalIds
+            }
         mutableStateOf(resultIds)
     }
     var identityDropdownExpanded by rememberSaveable { mutableStateOf(false) }
@@ -363,55 +364,53 @@ fun EditHostScreen(
             }
 
             // PASSWORD FIELD
-            if (passwordState != PasswordState.LOADING) {
-                if (showPasswordField) {
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Password") },
-                        supportingText = {
-                            if (passwordState == PasswordState.LOST) {
-                                Text("Passwords are not backed up, please re-enter")
-                            } else if (isPasswordSet) {
-                                Text("Enter a new password, or leave empty to clear it")
-                            } else {
-                                Text("Optional, will be prompted for if not provided")
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done,
-                        ),
-                        trailingIcon = {
-                            val image =
-                                if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            val description = if (passwordVisible) "Hide password" else "Show password"
-                            IconToggleButton(
-                                checked = passwordVisible,
-                                onCheckedChange = { passwordVisible = it },
-                            ) {
-                                Icon(imageVector = image, contentDescription = description)
-                            }
-                        },
-                    )
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = if (passwordState == PasswordState.LOST) "Password lost" else "Password saved",
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
-                        TextButton(
-                            onClick = { userWantsToChangePassword = true },
-                        ) {
-                            Text(if (passwordState == PasswordState.LOST) "Re-enter" else "Change or Clear")
+            if (showPasswordField) {
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    supportingText = {
+                        if (passwordState == PasswordState.LOST) {
+                            Text("Passwords are not backed up, please re-enter")
+                        } else if (isPasswordSet) {
+                            Text("Enter a new password, or leave empty to clear it")
+                        } else {
+                            Text("Optional, will be prompted for if not provided")
                         }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done,
+                    ),
+                    trailingIcon = {
+                        val image =
+                            if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val description = if (passwordVisible) "Hide password" else "Show password"
+                        IconToggleButton(
+                            checked = passwordVisible,
+                            onCheckedChange = { passwordVisible = it },
+                        ) {
+                            Icon(imageVector = image, contentDescription = description)
+                        }
+                    },
+                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = if (passwordState == PasswordState.LOST) "Password lost" else "Password saved",
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                    TextButton(
+                        onClick = { userWantsToChangePassword = true },
+                    ) {
+                        Text(if (passwordState == PasswordState.LOST) "Re-enter" else "Change or Clear")
                     }
                 }
             }
@@ -419,11 +418,13 @@ fun EditHostScreen(
             // SSH KEY SELECTION DROPDOWN
             ExposedDropdownMenuBox(
                 expanded = identityDropdownExpanded,
-                onExpandedChange = { identityDropdownExpanded = !identityDropdownExpanded },
+                onExpandedChange = { if (identities != null) identityDropdownExpanded = !identityDropdownExpanded },
             ) {
                 OutlinedTextField(
                     readOnly = true,
-                    value = if (selectedIdentityIds == null) {
+                    value = if (identities == null) {
+                        "Loading..."
+                    } else if (selectedIdentityIds == null) {
                         "Use any key"
                     } else if (selectedIdentityIds!!.isEmpty()) {
                         "Do not use keys"
@@ -432,39 +433,43 @@ fun EditHostScreen(
                     onValueChange = { },
                     label = { Text("SSH Key") },
                     trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = identityDropdownExpanded)
+                        if (identities != null) {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = identityDropdownExpanded)
+                        }
                     },
                     modifier = Modifier
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                         .fillMaxWidth(),
                 )
-                ExposedDropdownMenu(
-                    expanded = identityDropdownExpanded,
-                    onDismissRequest = { identityDropdownExpanded = false },
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Use any key") },
-                        onClick = {
-                            selectedIdentityIds = null
-                            identityDropdownExpanded = false
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Do not use keys") },
-                        onClick = {
-                            selectedIdentityIds = listOf()
-                            identityDropdownExpanded = false
-                        },
-                    )
-                    identities.forEach { key ->
+                if (identities != null) {
+                    ExposedDropdownMenu(
+                        expanded = identityDropdownExpanded,
+                        onDismissRequest = { identityDropdownExpanded = false },
+                    ) {
                         DropdownMenuItem(
-                            text = { Text(key.name) },
+                            text = { Text("Use any key") },
                             onClick = {
-                                // Later this might support multiple key assignments
-                                selectedIdentityIds = listOf(key.id)
+                                selectedIdentityIds = null
                                 identityDropdownExpanded = false
                             },
                         )
+                        DropdownMenuItem(
+                            text = { Text("Do not use keys") },
+                            onClick = {
+                                selectedIdentityIds = listOf()
+                                identityDropdownExpanded = false
+                            },
+                        )
+                        identities.forEach { key ->
+                            DropdownMenuItem(
+                                text = { Text(key.name) },
+                                onClick = {
+                                    // Later this might support multiple key assignments
+                                    selectedIdentityIds = listOf(key.id)
+                                    identityDropdownExpanded = false
+                                },
+                            )
+                        }
                     }
                 }
             }

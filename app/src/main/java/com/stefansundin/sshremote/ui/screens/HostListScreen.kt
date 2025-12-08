@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,26 +61,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HostListScreen(
-    hosts: List<Host>,
+    hosts: List<Host>?,
     startupHostId: Int?,
     onConnectClicked: (Host) -> Unit,
-    onAddClicked: () -> Unit,
-    onEditClicked: (Host) -> Unit,
-    onCloneClicked: (Host) -> Unit,
-    onDeleteClicked: (Host) -> Unit,
-    onUndoDeleteClicked: () -> Unit,
-    onSettingsClicked: () -> Unit,
+    onAdd: () -> Unit,
+    onEdit: (Host) -> Unit,
+    onClone: (Host) -> Unit,
+    onDelete: (Host) -> Unit,
+    onUndoDelete: () -> Unit,
+    onSettings: () -> Unit,
     onSetStartupHost: (Host) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -101,21 +103,19 @@ fun HostListScreen(
                 actionLabel = "Undo",
             )
             if (result == SnackbarResult.ActionPerformed) {
-                onUndoDeleteClicked()
-            } else {
-                undoableDeletedHostId = null
-            }
-        }
-    }
+                onUndoDelete()
 
-    LaunchedEffect(hosts, undoableDeletedHostId) {
-        val id = undoableDeletedHostId
-        if (id != null) {
-            val index = hosts.indexOfFirst { it.id == id }
-            if (index != -1) {
-                listState.animateScrollToItem(index)
-                undoableDeletedHostId = null
+                // Suspend until the hosts list is updated with the restored item
+                snapshotFlow { hosts }.first { updatedHosts -> updatedHosts?.any { it.id == id } == true }
+
+                // Now that the list is updated, find the item and scroll to it
+                hosts?.indexOfFirst { it.id == id }?.let { index ->
+                    if (index != -1) {
+                        listState.animateScrollToItem(index)
+                    }
+                }
             }
+            undoableDeletedHostId = null
         }
     }
 
@@ -130,7 +130,7 @@ fun HostListScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 actions = {
-                    IconButton(onClick = onSettingsClicked) {
+                    IconButton(onClick = onSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
@@ -140,13 +140,20 @@ fun HostListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddClicked) {
+            FloatingActionButton(onClick = onAdd) {
                 Icon(Icons.Filled.Add, contentDescription = "Add SSH Host")
             }
         },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            if (hosts.isEmpty()) {
+            if (hosts == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (hosts.isEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -172,10 +179,10 @@ fun HostListScreen(
                             host = host,
                             isStartupHost = host.id == startupHostId,
                             onConnect = { onConnectClicked(host) },
-                            onEdit = { onEditClicked(host) },
-                            onClone = { onCloneClicked(host) },
+                            onEdit = { onEdit(host) },
+                            onClone = { onClone(host) },
                             onDelete = {
-                                onDeleteClicked(host)
+                                onDelete(host)
                                 undoableDeletedHostId = host.id
                             },
                             onSetStartupHost = { onSetStartupHost(host) },
@@ -305,12 +312,12 @@ fun HostListScreenPreview() {
             hosts = sampleHosts,
             startupHostId = 1,
             onConnectClicked = {},
-            onAddClicked = {},
-            onEditClicked = {},
-            onCloneClicked = {},
-            onDeleteClicked = {},
-            onUndoDeleteClicked = {},
-            onSettingsClicked = {},
+            onAdd = {},
+            onEdit = {},
+            onClone = {},
+            onDelete = {},
+            onUndoDelete = {},
+            onSettings = {},
             onSetStartupHost = {},
         )
     }

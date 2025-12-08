@@ -36,6 +36,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 
@@ -54,6 +58,7 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),
+                visualTransformation = NoSlashLineBreakVisualTransformation,
             )
         },
         confirmButton = {
@@ -71,13 +76,51 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
                 Icon(
                     Icons.Outlined.ContentCopy,
                     contentDescription = "Copy",
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                    modifier = Modifier.size(ButtonDefaults.IconSize),
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text("Copy")
             }
         },
     )
+}
+
+/**
+ * Cool visual transformer that prevents slash characters from causing a line break.
+ * Public SSH keys are full of slashes which make the dialog look funny.
+ */
+private object NoSlashLineBreakVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val original = text.text
+        if (!original.contains('/')) {
+            return TransformedText(text, OffsetMapping.Identity)
+        }
+
+        val transformed = original.replace("/", "/\u2060")
+
+        return TransformedText(
+            AnnotatedString(transformed),
+            object : OffsetMapping {
+                override fun originalToTransformed(offset: Int): Int {
+                    val limitedOffset = offset.coerceAtMost(original.length)
+                    var slashes = 0
+                    for (i in 0 until limitedOffset) {
+                        if (original[i] == '/') slashes++
+                    }
+                    return limitedOffset + slashes
+                }
+
+                override fun transformedToOriginal(offset: Int): Int {
+                    val limitedOffset = offset.coerceAtMost(transformed.length)
+                    var joiners = 0
+                    for (i in 0 until limitedOffset) {
+                        if (transformed[i] == '\u2060') joiners++
+                    }
+                    return limitedOffset - joiners
+                }
+            },
+        )
+    }
 }
 
 @Preview

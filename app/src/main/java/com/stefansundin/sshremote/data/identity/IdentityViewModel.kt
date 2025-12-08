@@ -46,16 +46,16 @@ class IdentityViewModel(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
-    private val _eventChannel = Channel<IdentityEvent>()
+    private val _eventChannel = Channel<IdentityEvent>(Channel.BUFFERED)
     val eventFlow = _eventChannel.receiveAsFlow()
 
     private var lastDeletedKey: Identity? = null
 
-    val identities: StateFlow<List<Identity>> = identityRepository.getAll()
+    val identities: StateFlow<List<Identity>?> = identityRepository.getAll()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList(),
+            initialValue = null,
         )
 
     fun insert(name: String, privateKey: String) {
@@ -68,14 +68,15 @@ class IdentityViewModel(
                         encryptedPrivateKey = encryptedPrivateKey,
                     ),
                 )
+                _eventChannel.send(IdentityEvent.KeyAdded)
             } catch (_: Exception) {
                 _eventChannel.send(IdentityEvent.Error("Failed to save the imported key."))
             }
         }
     }
 
-    fun generateAndInsert(name: String, type: Int, comment: String) {
-        viewModelScope.launch {
+    suspend fun generateAndInsert(name: String, type: Int, comment: String) {
+        withContext(ioDispatcher) {
             try {
                 val privateKey = generateKeyPair(type, comment)
                 val encryptedPrivateKey = cryptoManager.encrypt(privateKey.toByteArray())
@@ -85,6 +86,7 @@ class IdentityViewModel(
                         encryptedPrivateKey = encryptedPrivateKey,
                     ),
                 )
+                _eventChannel.send(IdentityEvent.KeyAdded)
             } catch (e: Exception) {
                 _eventChannel.send(IdentityEvent.Error("Failed to generate and save key pair: ${e.message}"))
             }
@@ -203,4 +205,5 @@ sealed class IdentityEvent {
     data class ExportPublicKey(val filename: String, val content: String) : IdentityEvent()
 
     data class Error(val message: String) : IdentityEvent()
+    data object KeyAdded : IdentityEvent()
 }

@@ -169,7 +169,6 @@ fun HapticFeedbackSettingDialog(
                             val duration = customDurationString.toLongOrNull() ?: 0L
                             onSelection(HapticFeedback.Custom(duration))
                         },
-
                         enabled = currentHapticFeedback is HapticFeedback.Custom,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier

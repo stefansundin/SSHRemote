@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.content.ClipData
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,8 +27,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,7 +39,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +53,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -59,11 +67,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
@@ -74,6 +86,8 @@ import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -96,6 +110,10 @@ fun IdentityListScreen(
     var publicKeyToShow by rememberSaveable { mutableStateOf("") }
     var fileToExport by rememberSaveable { mutableStateOf<Pair<String, String>?>(null) }
     var undoableDeletedIdentityId by rememberSaveable { mutableStateOf<String?>(null) }
+    var scrollToTopOnNextUpdate by rememberSaveable { mutableStateOf(false) }
+    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
     val fileSaverLauncher = rememberLauncherForActivityResult(
@@ -118,23 +136,30 @@ fun IdentityListScreen(
             val result = snackbarHostState.showSnackbar(
                 message = "SSH key deleted",
                 actionLabel = "Undo",
+                duration = SnackbarDuration.Indefinite,
             )
             if (result == SnackbarResult.ActionPerformed) {
                 onUndoDelete()
-            } else {
-                undoableDeletedIdentityId = null
+
+                // Suspend until the identities list is updated with the restored item
+                snapshotFlow { identities }
+                    .first { updatedIdentities -> updatedIdentities?.any { it.id == id } == true }
+
+                // Now that the list is updated, find the item and scroll to it
+                identities?.indexOfFirst { it.id == id }?.let { index ->
+                    if (index != -1) {
+                        listState.animateScrollToItem(index)
+                    }
+                }
             }
+            undoableDeletedIdentityId = null
         }
     }
 
-    LaunchedEffect(identities, undoableDeletedIdentityId) {
-        val id = undoableDeletedIdentityId
-        if (id != null) {
-            val index = identities.indexOfFirst { it.id == id }
-            if (index != -1) {
-                listState.animateScrollToItem(index)
-                undoableDeletedIdentityId = null
-            }
+    LaunchedEffect(identities) {
+        if (scrollToTopOnNextUpdate && identities != null) {
+            listState.animateScrollToItem(0)
+            scrollToTopOnNextUpdate = false
         }
     }
 
@@ -152,7 +177,11 @@ fun IdentityListScreen(
                 }
 
                 is IdentityEvent.Error -> {
-                    snackbarHostState.showSnackbar(event.message)
+                    errorMessage = event.message
+                }
+
+                is IdentityEvent.KeyAdded -> {
+                    scrollToTopOnNextUpdate = true
                 }
             }
         }
@@ -162,6 +191,35 @@ fun IdentityListScreen(
         PublicKeyDialog(
             publicKey = publicKeyToShow,
             onDismiss = { showPublicKeyDialog = false },
+        )
+    }
+
+    if (errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = { errorMessage = null },
+            title = { Text("Error") },
+            text = { Text(errorMessage!!) },
+            confirmButton = {
+                Button(onClick = { errorMessage = null }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        val clipData = ClipData.newPlainText("Command output", errorMessage)
+                        coroutineScope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
+                    },
+                ) {
+                    Icon(
+                        Icons.Outlined.ContentCopy,
+                        contentDescription = "Copy",
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                    )
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text("Copy")
+                }
+            },
         )
     }
 
@@ -191,7 +249,15 @@ fun IdentityListScreen(
                 .padding(innerPadding)
                 .fillMaxSize(),
         ) {
-            if (identities.isEmpty()) {
+            val identitiesList = identities
+            if (identitiesList == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (identitiesList.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -209,7 +275,7 @@ fun IdentityListScreen(
                     state = listState,
                     contentPadding = PaddingValues(bottom = 80.dp),
                 ) {
-                    items(identities, key = { it.id }) { identity ->
+                    items(identitiesList, key = { it.id }) { identity ->
                         IdentityItem(
                             identity = identity,
                             cryptoManager = cryptoManager,

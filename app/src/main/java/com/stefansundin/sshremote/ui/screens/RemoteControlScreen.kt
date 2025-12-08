@@ -22,8 +22,10 @@ import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -314,25 +316,42 @@ fun RemoteControlScreen(
 
     if (showSelectIdentityDialog) {
         val identities by identityViewModel.identities.collectAsState()
-        SelectIdentityDialog(
-            identities = identities,
-            onIdentitySelected = {
-                coroutineScope.launch {
-                    val publicKey = identityViewModel.getPublicKey(it)
-                    val command =
-                        "exec sh -c 'cd; umask 077; echo \"\n$publicKey\" >> ~/.ssh/authorized_keys'"
-                    hostViewModel.runCommand(
-                        command = command,
-                        showOutput = false,
-                        isRetry = false,
-                        reuseShell = false,
-                    )
-                    snackbarHostState.showSnackbar("Public key copied to host.")
-                }
-                showSelectIdentityDialog = false
-            },
-            onDismiss = { showSelectIdentityDialog = false },
-        )
+        if (identities == null) {
+            AlertDialog(
+                onDismissRequest = { showSelectIdentityDialog = false },
+                title = { Text("Select public key") },
+                text = {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showSelectIdentityDialog = false }) {
+                        Text("Cancel")
+                    }
+                },
+            )
+        } else {
+            SelectIdentityDialog(
+                identities = identities!!,
+                onIdentitySelected = {
+                    coroutineScope.launch {
+                        val publicKey = identityViewModel.getPublicKey(it)
+                        val command =
+                            "exec sh -c 'cd; umask 077; echo \"\n$publicKey\" >> ~/.ssh/authorized_keys'"
+                        hostViewModel.runCommand(
+                            command = command,
+                            showOutput = false,
+                            isRetry = false,
+                            reuseShell = false,
+                        )
+                        snackbarHostState.showSnackbar("Public key copied to host.")
+                    }
+                    showSelectIdentityDialog = false
+                },
+                onDismiss = { showSelectIdentityDialog = false },
+            )
+        }
     }
 
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }

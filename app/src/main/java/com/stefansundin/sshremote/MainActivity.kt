@@ -229,10 +229,10 @@ class MainActivity : ComponentActivity() {
                     }
 
                     LaunchedEffect(hosts, startupHostId) {
-                        if (!startupConnectAttempted && hosts.isNotEmpty()) {
+                        if (!startupConnectAttempted && !hosts.isNullOrEmpty()) {
                             startupConnectAttempted = true
                             if (startupHostId != null) {
-                                val hostToConnect = hosts.find { it.id == startupHostId }
+                                val hostToConnect = hosts?.find { it.id == startupHostId }
                                 if (hostToConnect != null) {
                                     onConnect(hostToConnect)
                                 }
@@ -266,25 +266,25 @@ class MainActivity : ComponentActivity() {
                         exitTransition = { ExitTransition.None },
                     ) {
                         composable(Screen.HostList.route) {
-                            val sortedHosts = hosts.sortedByDescending { it.id == startupHostId }
+                            val sortedHosts = hosts?.sortedByDescending { it.id == startupHostId }
                             HostListScreen(
                                 hosts = sortedHosts,
                                 startupHostId = startupHostId,
                                 onConnectClicked = onConnect,
-                                onAddClicked = {
+                                onAdd = {
                                     navController.navigate(Screen.HostEdit.createRoute(null))
                                 },
-                                onEditClicked = { host ->
+                                onEdit = { host ->
                                     navController.navigate(Screen.HostEdit.createRoute(host.id))
                                 },
-                                onCloneClicked = { host ->
+                                onClone = { host ->
                                     hostViewModel.cloneHost(host) { newHostId ->
                                         navController.navigate(Screen.HostEdit.createRoute(newHostId))
                                     }
                                 },
-                                onDeleteClicked = { host -> hostViewModel.delete(host) },
-                                onUndoDeleteClicked = { hostViewModel.undoDelete() },
-                                onSettingsClicked = {
+                                onDelete = { host -> hostViewModel.delete(host) },
+                                onUndoDelete = { hostViewModel.undoDelete() },
+                                onSettings = {
                                     navController.navigate(Screen.Settings.route)
                                 },
                                 onSetStartupHost = { host ->
@@ -298,12 +298,12 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("hostId") { type = NavType.StringType; nullable = true }),
                         ) { backStackEntry ->
                             val hostId = backStackEntry.arguments?.getString("hostId")?.toIntOrNull()
-                            val host = hosts.find { it.id == hostId }
+                            val host = hosts?.find { it.id == hostId }
                             val identities by identityViewModel.identities.collectAsState()
                             EditHostScreen(
                                 host = host,
                                 identities = identities,
-                                allUsers = hosts.map { it.user },
+                                allUsers = hosts?.map { it.user } ?: emptyList(),
                                 onSave = { newHost, password ->
                                     scope.launch {
                                         hostViewModel.saveHost(newHost, password)
@@ -326,7 +326,7 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val hostId = backStackEntry.arguments?.getInt("hostId")!!
                             val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
-                            val host = hosts.find { it.id == hostId }
+                            val host = hosts?.find { it.id == hostId }
                             LaunchedEffect(host) {
                                 if (host != null) {
                                     hostViewModel.setActiveHost(host)
@@ -538,7 +538,7 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
                         }
 
                         val allHosts = hostViewModel.allHosts.value
-                        val targetHost = allHosts.find { it.id == hostId }
+                        val targetHost = allHosts?.find { it.id == hostId }
 
                         if (targetHost != null) {
                             hostViewModel.runRemoteControlCommand(remoteControlKey)

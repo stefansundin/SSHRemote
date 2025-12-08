@@ -74,19 +74,6 @@ class NotificationService : Service() {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val remoteViews = RemoteViews(packageName, R.layout.notification_remote_control).apply {
-            setOnClickPendingIntent(R.id.button_up, createPendingIntent(host, RemoteControlKey.UP))
-            setOnClickPendingIntent(R.id.button_down, createPendingIntent(host, RemoteControlKey.DOWN))
-            setOnClickPendingIntent(R.id.button_left, createPendingIntent(host, RemoteControlKey.LEFT))
-            setOnClickPendingIntent(R.id.button_right, createPendingIntent(host, RemoteControlKey.RIGHT))
-            setOnClickPendingIntent(R.id.button_select, createPendingIntent(host, RemoteControlKey.SELECT))
-            setOnClickPendingIntent(R.id.button_back, createPendingIntent(host, RemoteControlKey.BACK))
-            setOnClickPendingIntent(R.id.button_home, createPendingIntent(host, RemoteControlKey.HOME))
-            setOnClickPendingIntent(R.id.button_play_pause, createPendingIntent(host, RemoteControlKey.PLAY_PAUSE))
-            setOnClickPendingIntent(R.id.button_volume_up, createPendingIntent(host, RemoteControlKey.VOLUME_UP))
-            setOnClickPendingIntent(R.id.button_volume_down, createPendingIntent(host, RemoteControlKey.VOLUME_DOWN))
-            setOnClickPendingIntent(R.id.button_mute, createPendingIntent(host, RemoteControlKey.MUTE))
-        }
         val closeIntent = Intent(this, NotificationBroadcastReceiver::class.java).apply {
             action = ACTION_STOP
         }
@@ -113,18 +100,36 @@ class NotificationService : Service() {
             }
         }
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
             .setSound(null)
             .setOngoing(false) // Allow swipe to dismiss
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomBigContentView(remoteViews)
             .addAction(NotificationCompat.Action.Builder(null, "Open", pendingIntent).build())
             .addAction(NotificationCompat.Action.Builder(null, "Close", closePendingIntent).build())
-            .build()
+
+        if (host.status == ConnectionStatus.CONNECTED) {
+            val remoteViews = RemoteViews(packageName, R.layout.notification_remote_control).apply {
+                setOnClickPendingIntent(R.id.button_up, createPendingIntent(host, RemoteControlKey.UP))
+                setOnClickPendingIntent(R.id.button_down, createPendingIntent(host, RemoteControlKey.DOWN))
+                setOnClickPendingIntent(R.id.button_left, createPendingIntent(host, RemoteControlKey.LEFT))
+                setOnClickPendingIntent(R.id.button_right, createPendingIntent(host, RemoteControlKey.RIGHT))
+                setOnClickPendingIntent(R.id.button_select, createPendingIntent(host, RemoteControlKey.SELECT))
+                setOnClickPendingIntent(R.id.button_back, createPendingIntent(host, RemoteControlKey.BACK))
+                setOnClickPendingIntent(R.id.button_home, createPendingIntent(host, RemoteControlKey.HOME))
+                setOnClickPendingIntent(R.id.button_play_pause, createPendingIntent(host, RemoteControlKey.PLAY_PAUSE))
+                setOnClickPendingIntent(R.id.button_volume_up, createPendingIntent(host, RemoteControlKey.VOLUME_UP))
+                setOnClickPendingIntent(R.id.button_volume_down, createPendingIntent(host, RemoteControlKey.VOLUME_DOWN))
+                setOnClickPendingIntent(R.id.button_mute, createPendingIntent(host, RemoteControlKey.MUTE))
+            }
+            builder
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomBigContentView(remoteViews)
+        }
+
+        return builder.build()
     }
 
     private fun createPendingIntent(host: NotificationHost, key: RemoteControlKey): PendingIntent {
