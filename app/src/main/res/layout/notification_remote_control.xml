@@ -6,69 +6,69 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="4dp"
-    android:paddingVertical="8dp">
+    android:paddingVertical="@dimen/notification_vertical_padding">
 
     <!-- Dpad -->
     <RelativeLayout
-        android:layout_width="192dp"
-        android:layout_height="192dp">
+        android:layout_width="@dimen/notification_dpad_container_size"
+        android:layout_height="@dimen/notification_dpad_container_size">
 
         <ImageButton
             android:id="@+id/button_up"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/notification_button_size"
+            android:layout_height="@dimen/notification_button_size"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:background="@drawable/button_outline"
             android:contentDescription="Up"
-            android:padding="12dp"
+            android:padding="@dimen/notification_dpad_button_padding"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_keyboard_arrow_up" />
 
         <ImageButton
             android:id="@+id/button_left"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/notification_button_size"
+            android:layout_height="@dimen/notification_button_size"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:background="@drawable/button_outline"
             android:contentDescription="Left"
-            android:padding="12dp"
+            android:padding="@dimen/notification_dpad_button_padding"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_keyboard_arrow_left" />
 
         <ImageButton
             android:id="@+id/button_select"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/notification_button_size"
+            android:layout_height="@dimen/notification_button_size"
             android:layout_centerInParent="true"
             android:background="@drawable/button_outline"
             android:contentDescription="Select"
-            android:padding="12dp"
+            android:padding="@dimen/notification_dpad_button_padding"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_radio_button_unchecked" />
 
         <ImageButton
             android:id="@+id/button_right"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/notification_button_size"
+            android:layout_height="@dimen/notification_button_size"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:background="@drawable/button_outline"
             android:contentDescription="Right"
-            android:padding="12dp"
+            android:padding="@dimen/notification_dpad_button_padding"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_keyboard_arrow_right" />
 
         <ImageButton
             android:id="@+id/button_down"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/notification_button_size"
+            android:layout_height="@dimen/notification_button_size"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:background="@drawable/button_outline"
             android:contentDescription="Down"
-            android:padding="12dp"
+            android:padding="@dimen/notification_dpad_button_padding"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_keyboard_arrow_down" />
 
@@ -84,7 +84,7 @@
         <ImageButton
             android:id="@+id/button_back"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="@dimen/notification_button_size"
             android:background="@drawable/button_outline"
             android:contentDescription="Back"
             android:src="@drawable/ic_arrow_back" />
@@ -92,7 +92,7 @@
         <ImageButton
             android:id="@+id/button_home"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="@dimen/notification_button_size"
             android:background="@drawable/button_outline"
             android:contentDescription="Home"
             android:src="@drawable/ic_home" />
@@ -100,7 +100,7 @@
         <ImageButton
             android:id="@+id/button_play_pause"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="@dimen/notification_button_size"
             android:background="@drawable/button_outline"
             android:contentDescription="Play/Pause"
             android:src="@drawable/ic_play_pause" />
@@ -114,7 +114,7 @@
         <ImageButton
             android:id="@+id/button_volume_up"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="@dimen/notification_button_size"
             android:background="@drawable/button_outline"
             android:contentDescription="Volume Up"
             android:src="@drawable/ic_volume_up" />
@@ -122,7 +122,7 @@
         <ImageButton
             android:id="@+id/button_mute"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="@dimen/notification_button_size"
             android:background="@drawable/button_outline"
             android:contentDescription="Mute"
             android:src="@drawable/ic_volume_off" />
@@ -130,7 +130,7 @@
         <ImageButton
             android:id="@+id/button_volume_down"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="@dimen/notification_button_size"
             android:background="@drawable/button_outline"
             android:contentDescription="Volume Down"
             android:src="@drawable/ic_volume_down" />

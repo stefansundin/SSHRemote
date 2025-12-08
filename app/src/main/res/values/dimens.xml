@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="notification_dpad_container_size">144dp</dimen>
+    <dimen name="notification_button_size">48dp</dimen>
+    <dimen name="notification_dpad_button_padding">8dp</dimen>
+    <dimen name="notification_vertical_padding">4dp</dimen>
+</resources>

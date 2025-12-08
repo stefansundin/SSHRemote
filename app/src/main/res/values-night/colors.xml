@@ -3,5 +3,6 @@
     <color name="background_color">#141218</color>
     <color name="ic_launcher_background">#121212</color>
     <color name="ic_launcher_foreground">#FFFFFF</color>
-    <color name="notification_icon_tint">#FFFFFF</color>
+    <color name="notification_button_tint">#FFFFFF</color>
+    <color name="notification_button_outline">#938F99</color>
 </resources>
