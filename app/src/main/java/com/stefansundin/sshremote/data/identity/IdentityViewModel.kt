@@ -58,14 +58,6 @@ class IdentityViewModel(
             initialValue = emptyList(),
         )
 
-    companion object {
-        init {
-            if (Security.getProvider(EdDSASecurityProvider.PROVIDER_NAME) == null) {
-                Security.addProvider(EdDSASecurityProvider())
-            }
-        }
-    }
-
     fun insert(name: String, privateKey: String) {
         viewModelScope.launch {
             try {
@@ -125,7 +117,8 @@ class IdentityViewModel(
     private fun generateEd25519KeyPair(comment: String): String {
         // JSch can't export ED25519 keys. https://github.com/mwiede/jsch/issues/118
         // Generate the key pair using the pre-registered security provider
-        val generator = KeyPairGenerator.getInstance("EdDSA")
+        val provider = Security.getProvider(EdDSASecurityProvider.PROVIDER_NAME) ?: EdDSASecurityProvider()
+        val generator = KeyPairGenerator.getInstance("EdDSA", provider)
         val keyPair = generator.generateKeyPair()
 
         // Format the private key to modern OpenSSH PEM format (PKCS8)

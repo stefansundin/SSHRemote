@@ -29,6 +29,7 @@ import com.stefansundin.sshremote.notification.NotificationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.i2p.crypto.eddsa.EdDSASecurityProvider
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
@@ -60,7 +61,12 @@ class SshRemoteApplication : Application() {
             database.openHelper.writableDatabase
         }
 
+        // Replace system providers with bundled versions to ensure full algorithm support
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME)
         Security.addProvider(BouncyCastleProvider())
+        Security.removeProvider(EdDSASecurityProvider.PROVIDER_NAME)
+        Security.addProvider(EdDSASecurityProvider())
+
         NotificationService.createNotificationChannel(this)
     }
 }

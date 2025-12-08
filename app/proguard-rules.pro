@@ -16,7 +16,8 @@
 
 # Keep the main library and its JCE crypto implementations.
 # JSch uses reflection to load crypto classes, so we must keep them explicitly.
--keep class com.jcraft.jsch.** { *; }
+# We only keep the class names and default constructors to allow R8 to shrink unused members.
+-keep class com.jcraft.jsch.** { <init>(); }
 
 # Suppress warnings for JSch's optional, non-Android dependencies.
 # JSch was designed for desktop Java and includes optional support for features
@@ -40,11 +41,23 @@
 #================================================================================
 
 # Keep the Bouncy Castle provider and its crypto implementations.
-# It is used as a security provider by JSch.
--keep class org.bouncycastle.** { *; }
+# It is used as a security provider by JSch and the app.
+# We only keep the class names and default constructors to allow R8 to shrink unused members.
+-keep class org.bouncycastle.** { <init>(); }
 
 # Keep the constructors of all security providers.
 -keepclassmembers class * extends java.security.Provider {
   public <init>();
   public <init>(java.lang.String);
 }
+
+#================================================================================
+# Library: EdDSA (net.i2p.crypto.eddsa)
+#================================================================================
+
+# Keep the EdDSA library classes as they are accessed via the security provider mechanism.
+# We only keep the class names and default constructors to allow R8 to shrink unused members.
+-keep class net.i2p.crypto.eddsa.** { <init>(); }
+
+# Suppress warnings for internal Java classes used by EdDSA.
+-dontwarn sun.security.x509.**

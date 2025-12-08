@@ -308,7 +308,7 @@ fun ImportFileTab(
 
 @Composable
 fun GenerateKeyTab(keyType: Int?, onKeyTypeSelected: (Int) -> Unit) {
-    val keyTypeOptions = listOf("ED25519" to KeyPair.ED25519, "RSA" to KeyPair.RSA)
+    val keyTypeOptions = listOf("Ed25519" to KeyPair.ED25519, "RSA" to KeyPair.RSA)
     val selectedKeyType = keyType ?: KeyPair.ED25519
 
     Column(

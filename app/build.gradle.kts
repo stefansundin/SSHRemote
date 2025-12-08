@@ -89,7 +89,7 @@ dependencies {
     // --- SSH ---
     implementation(libs.jsch)
     implementation(libs.bouncycastle.bcprov.jdk18on) // BouncyCastle is required for some SSH features on older Java versions
-    // Used for ED25519 key generation:
+    // Used for Ed25519 key generation:
     implementation(libs.bouncycastle.bcpkix.jdk18on)
     implementation(libs.eddsa)
 
