@@ -39,6 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +71,70 @@ import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+@Composable
+private fun SettingsGroup(title: String, content: @Composable () -> Unit) {
+    Text(
+        text = title.uppercase(),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 24.dp, bottom = 8.dp),
+    )
+    content()
+}
+
+@Composable
+private fun SettingsItem(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Text(
+            subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun SettingsSwitchItem(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -253,88 +318,39 @@ fun SettingsScreen(
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .verticalScroll(rememberScrollState()),
             ) {
-                Text("Appearance", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    modifier = Modifier
-                        .clickable {
+                SettingsGroup("Appearance") {
+                    SettingsItem(
+                        title = "Theme",
+                        subtitle = savedTheme.name.lowercase().replaceFirstChar { it.uppercase() },
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
                             previewTheme = savedTheme
                             showThemeDialog = true
                         }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "Theme",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        savedTheme.name.lowercase().replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
 
-                Text("Remote control", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    modifier = Modifier
-                        .clickable {
+                SettingsGroup("Remote control") {
+                    SettingsItem(
+                        title = "Haptic feedback",
+                        subtitle = savedHapticFeedback.label,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
                             previewHapticFeedback = savedHapticFeedback
                             showHapticFeedbackDialog = true
                         }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "Haptic feedback",
-                        style = MaterialTheme.typography.bodyLarge,
                     )
-                    Text(
-                        text = savedHapticFeedback.label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        "Keep screen on",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Switch(
+                    SettingsSwitchItem(
+                        title = "Keep screen on",
                         checked = keepScreenOn,
-                        onCheckedChange = {
-                            settingsViewModel.setKeepScreenOn(it)
-                        },
+                        onCheckedChange = { settingsViewModel.setKeepScreenOn(it) }
                     )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        "Show notification",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Switch(
+                    SettingsSwitchItem(
+                        title = "Show notification",
                         checked = notificationsEnabled,
                         onCheckedChange = {
                             if (it) {
@@ -346,203 +362,88 @@ fun SettingsScreen(
                             } else {
                                 settingsViewModel.setNotificationsEnabled(false)
                             }
-                        },
+                        }
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
 
-                Text("Security", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    modifier = Modifier
-                        .clickable { onNavigateToIdentityList() }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "SSH Keys",
-                        style = MaterialTheme.typography.bodyLarge,
+                SettingsGroup("Security") {
+                    SettingsItem(
+                        title = "SSH Keys",
+                        subtitle = "Manage SSH keys for authentication",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onNavigateToIdentityList
                     )
-                    Text(
-                        "Manage SSH keys for authentication",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        "Strict host key checking",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Switch(
+                    SettingsSwitchItem(
+                        title = "Strict host key checking",
                         checked = strictHostKeyChecking,
-                        onCheckedChange = {
-                            settingsViewModel.setStrictHostKeyChecking(it)
-                        },
+                        onCheckedChange = { settingsViewModel.setStrictHostKeyChecking(it) }
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
 
-                Text("Data", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    modifier = Modifier
-                        .clickable {
-                            val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
-                            val filename = "ssh-remote-settings-${dateFormat.format(Date())}.json"
+                SettingsGroup("Data") {
+                    SettingsItem(
+                        title = "Export settings",
+                        subtitle = "Export settings to a file.",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            val dateFormat =
+                                SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
+                            val filename =
+                                "ssh-remote-settings-${dateFormat.format(Date())}.json"
                             exportLauncher.launch(filename)
                         }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "Export settings",
-                        style = MaterialTheme.typography.bodyLarge,
                     )
-                    Text(
-                        "Export settings to a file.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        "SSH keys and passwords are not exported.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    SettingsItem(
+                        title = "Import settings",
+                        subtitle = "Import settings from a file.",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { importLauncher.launch(arrayOf("application/json")) }
                     )
                 }
 
-                Column(
-                    modifier = Modifier
-                        .clickable { importLauncher.launch(arrayOf("application/json")) }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "Import settings",
-                        style = MaterialTheme.typography.bodyLarge,
+                HorizontalDivider()
+
+                SettingsGroup("About SSH Remote") {
+                    SettingsItem(
+                        title = "App version",
+                        subtitle = BuildConfig.VERSION_NAME,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Text(
-                        "Import settings from a file.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    SettingsItem(
+                        title = "Author",
+                        subtitle = "Developed by Stefan Sundin",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    SettingsItem(
+                        title = "Donate",
+                        subtitle = "Support the developer",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { uriHandler.openUri("https://stefansundin.github.io/donate") }
+                    )
+                    SettingsItem(
+                        title = "License",
+                        subtitle = "GNU General Public License v3.0",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { uriHandler.openUri("https://www.gnu.org/licenses/gpl-3.0.html") }
+                    )
+                    SettingsItem(
+                        title = "Source code",
+                        subtitle = "View on GitHub",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { uriHandler.openUri("https://github.com/stefansundin/SSHRemote") }
+                    )
+                    SettingsItem(
+                        title = "SSH library",
+                        subtitle = "Using mwiede/jsch ${BuildConfig.JSCH_VERSION}",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { uriHandler.openUri("https://github.com/mwiede/jsch") }
                     )
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Text("About SSH Remote", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "App version",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        BuildConfig.VERSION_NAME,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "Author",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        "Developed by Stefan Sundin",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .clickable { uriHandler.openUri("https://stefansundin.github.io/donate") }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "Donate",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        "Support the developer",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .clickable { uriHandler.openUri("https://www.gnu.org/licenses/gpl-3.0.html") }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "License",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        "GNU General Public License v3.0",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .clickable { uriHandler.openUri("https://github.com/stefansundin/SSHRemote") }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "Source code",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        "View on GitHub",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .clickable { uriHandler.openUri("https://github.com/mwiede/jsch") }
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        "SSH library",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        "Using mwiede/jsch ${BuildConfig.JSCH_VERSION}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
         }
     }
