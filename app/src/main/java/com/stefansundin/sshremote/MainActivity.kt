@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -114,6 +115,12 @@ enum class Theme {
     SYSTEM,
     LIGHT,
     DARK
+}
+
+private fun NavController.safePopBackStack() {
+    if (previousBackStackEntry != null) {
+        popBackStack()
+    }
 }
 
 class MainActivity : ComponentActivity() {
@@ -307,11 +314,11 @@ class MainActivity : ComponentActivity() {
                                 onSave = { newHost, password ->
                                     scope.launch {
                                         hostViewModel.saveHost(newHost, password)
-                                        navController.popBackStack()
+                                        navController.safePopBackStack()
                                     }
                                 },
                                 onNavigateUp = {
-                                    navController.popBackStack()
+                                    navController.safePopBackStack()
                                 },
                                 hostViewModel = hostViewModel,
                             )
@@ -341,7 +348,7 @@ class MainActivity : ComponentActivity() {
                                 onMousePan = { dx, dy -> hostViewModel.onMousePan(dx, dy) },
                                 onDisconnect = {
                                     hostViewModel.disconnect()
-                                    navController.popBackStack()
+                                    navController.safePopBackStack()
                                 },
                                 onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
                                 onEditRemoteControlClicked = { page ->
@@ -379,12 +386,12 @@ class MainActivity : ComponentActivity() {
                                             hostViewModel.upsert(updatedHost)
                                             hostViewModel.updateActiveHostInUiState(updatedHost)
                                             if (navigateBack) {
-                                                navController.popBackStack()
+                                                navController.safePopBackStack()
                                             }
                                         }
                                     }
                                 },
-                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateBack = { navController.safePopBackStack() },
                                 onSetAsDefaultScreen = { startScreen ->
                                     scope.launch {
                                         uiState.host?.let { host ->
@@ -407,12 +414,12 @@ class MainActivity : ComponentActivity() {
                                     adHocCommandViewModel.addAdHocCommand(command)
                                     hostViewModel.runCommand(command, showOutput = true)
                                     if (popUpToPrevious) {
-                                        navController.popBackStack()
+                                        navController.safePopBackStack()
                                     }
                                 },
                                 onDeleteCommand = { adHocCommandViewModel.deleteAdHocCommand(it) },
                                 onClearHistory = { adHocCommandViewModel.clearAdHocCommands() },
-                                onNavigateUp = { navController.popBackStack() },
+                                onNavigateUp = { navController.safePopBackStack() },
                                 onClearCommandOutput = { hostViewModel.clearCommandOutput() },
                             )
                         }
@@ -422,7 +429,7 @@ class MainActivity : ComponentActivity() {
                                 settingsViewModel = settingsViewModel,
                                 onNavigateToIdentityList = { navController.navigate(Screen.IdentityList.route) },
                                 onNavigateUp = {
-                                    navController.popBackStack()
+                                    navController.safePopBackStack()
                                 },
                             )
                         }
@@ -433,7 +440,7 @@ class MainActivity : ComponentActivity() {
                                 identityViewModel = identityViewModel,
                                 onNavigateToAddIdentity = { navController.navigate(Screen.AddIdentity.route) },
                                 onNavigateUp = {
-                                    navController.popBackStack()
+                                    navController.safePopBackStack()
                                 },
                                 onDelete = { key -> identityViewModel.delete(key) },
                                 onRename = { key, newName -> identityViewModel.rename(key, newName) },
@@ -445,13 +452,13 @@ class MainActivity : ComponentActivity() {
                             AddIdentityScreen(
                                 onKeySaved = { name, privateKey ->
                                     identityViewModel.insert(name, privateKey)
-                                    navController.popBackStack()
+                                    navController.safePopBackStack()
                                 },
                                 onKeyGenerated = { name, type, comment ->
                                     identityViewModel.generateAndInsert(name, type, comment)
-                                    navController.popBackStack()
+                                    navController.safePopBackStack()
                                 },
-                                onNavigateUp = { navController.popBackStack() },
+                                onNavigateUp = { navController.safePopBackStack() },
                             )
                         }
                     }
