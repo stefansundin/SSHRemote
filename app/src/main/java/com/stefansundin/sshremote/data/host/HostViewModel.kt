@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -58,8 +57,6 @@ class HostViewModel(
 
     private val _uiState = MutableStateFlow(RemoteUiState())
     val uiState = _uiState.asStateFlow()
-
-    private var hostStateJob: Job? = null
 
     private var lastDeletedHost: Host? = null
 
@@ -153,19 +150,7 @@ class HostViewModel(
         }
     }
 
-    fun setActiveHost(host: Host) {
-        hostStateJob?.cancel()
-        hostStateJob = viewModelScope.launch {
-            repository.get(host.id).filterNotNull().collectLatest { updatedHost ->
-                _uiState.update {
-                    it.copy(host = updatedHost)
-                }
-            }
-        }
-    }
-
     fun connect(host: Host) {
-        setActiveHost(host)
         viewModelScope.launch {
             handleConnection(host)
         }
@@ -410,7 +395,6 @@ class HostViewModel(
     fun disconnect() {
         viewModelScope.launch {
             sshRepository.disconnect()
-            hostStateJob?.cancel()
             mouseMoveJob?.cancel()
             mousePanJob?.cancel()
 

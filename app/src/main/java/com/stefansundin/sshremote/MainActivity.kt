@@ -33,11 +33,13 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -325,34 +328,45 @@ class MainActivity : ComponentActivity() {
                             val hostId = backStackEntry.arguments?.getInt("hostId")!!
                             val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
                             val host = hosts?.find { it.id == hostId }
-                            LaunchedEffect(host) {
-                                if (host != null) {
-                                    hostViewModel.setActiveHost(host)
+                            if (host != null) {
+                                RemoteControlScreen(
+                                    host = host,
+                                    uiState = uiState,
+                                    identityViewModel = identityViewModel,
+                                    hostViewModel = hostViewModel,
+                                    sshRepository = sshRepository,
+                                    onMouseMove = { dx, dy, template -> hostViewModel.onMouseMove(dx, dy, template) },
+                                    onMousePan = { dx, dy -> hostViewModel.onMousePan(dx, dy) },
+                                    onDisconnect = {
+                                        hostViewModel.disconnect()
+                                        navController.safePopBackStack()
+                                    },
+                                    onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
+                                    onEditRemoteControlClicked = { page ->
+                                        navController.navigate(
+                                            Screen.EditRemoteControl.createRoute(
+                                                page,
+                                            ),
+                                        )
+                                    },
+                                    onClearError = { hostViewModel.clearError() },
+                                    initialPage = initialPage,
+                                    settingsViewModel = settingsViewModel,
+                                )
+                            } else {
+                                if (hosts == null) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                } else {
+                                    LaunchedEffect(Unit) {
+                                        navController.safePopBackStack()
+                                    }
                                 }
                             }
-                            RemoteControlScreen(
-                                uiState = uiState,
-                                identityViewModel = identityViewModel,
-                                hostViewModel = hostViewModel,
-                                sshRepository = sshRepository,
-                                onMouseMove = { dx, dy, template -> hostViewModel.onMouseMove(dx, dy, template) },
-                                onMousePan = { dx, dy -> hostViewModel.onMousePan(dx, dy) },
-                                onDisconnect = {
-                                    hostViewModel.disconnect()
-                                    navController.safePopBackStack()
-                                },
-                                onAdHocCommandClicked = { navController.navigate(Screen.AdHocCommand.route) },
-                                onEditRemoteControlClicked = { page ->
-                                    navController.navigate(
-                                        Screen.EditRemoteControl.createRoute(
-                                            page,
-                                        ),
-                                    )
-                                },
-                                onClearError = { hostViewModel.clearError() },
-                                initialPage = initialPage,
-                                settingsViewModel = settingsViewModel,
-                            )
                         }
 
                         composable(

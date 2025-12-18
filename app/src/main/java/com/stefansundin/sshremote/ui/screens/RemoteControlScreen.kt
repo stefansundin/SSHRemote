@@ -83,6 +83,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.stefansundin.sshremote.SshRepository
 import com.stefansundin.sshremote.data.host.ConnectionStatus
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
@@ -107,6 +108,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RemoteControlScreen(
+    host: Host,
     uiState: RemoteUiState,
     identityViewModel: IdentityViewModel,
     hostViewModel: HostViewModel,
@@ -174,9 +176,16 @@ fun RemoteControlScreen(
         }
     }
 
-    LaunchedEffect(uiState.host) {
-        if (uiState.host != null && uiState.connectionStatus == ConnectionStatus.DISCONNECTED) {
-            hostViewModel.connect(uiState.host)
+    LaunchedEffect(host) {
+        if (uiState.host?.id != host.id) {
+            hostViewModel.connect(host)
+        }
+    }
+
+    // Reconnect in case of disconnection
+    LaunchedEffect(host, uiState.connectionStatus, uiState.error, uiState.host) {
+        if (uiState.host?.id == host.id && uiState.connectionStatus == ConnectionStatus.DISCONNECTED && uiState.error == null) {
+            hostViewModel.connect(host)
         }
     }
 
@@ -493,6 +502,7 @@ fun RemoteControlScreen(
                                         performHapticFeedback(context, uiState.hapticFeedback)
                                         hostViewModel.runRemoteControlCommand(key)
                                     }
+
                                     is KeyEvent.LongPress -> {
                                         performHapticFeedback(context, uiState.hapticFeedback)
                                         command.longPressCommand?.let {
