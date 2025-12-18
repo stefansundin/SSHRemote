@@ -21,10 +21,11 @@ package com.stefansundin.sshremote.data.host
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-enum class StartScreen {
-    REMOTE,
-    MOUSE,
-    COMMANDS;
+enum class RemoteControlScreen(val tabIndex: Int) {
+    REMOTE(0),
+    MOUSE(1),
+    KEYBOARD(2),
+    COMMANDS(3);
 
     companion object {
         val Default = REMOTE
@@ -49,6 +50,6 @@ data class Host(
     val knownHosts: List<String> = emptyList(),
     val commands: List<Command> = listOf(Command("uptime", name = "Uptime", showOutput = true)),
     val remoteCommands: Map<RemoteControlKey, Command>? = null,
-    val startScreen: StartScreen = StartScreen.Default,
+    val startScreen: RemoteControlScreen = RemoteControlScreen.Default,
     val smartVolume: SmartVolumeSettings? = null,
 )

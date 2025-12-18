@@ -73,8 +73,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
-import com.stefansundin.sshremote.data.host.StartScreen
 import com.stefansundin.sshremote.data.host.cecClientPreset
 import com.stefansundin.sshremote.data.host.macosVlcPreset
 import com.stefansundin.sshremote.data.host.wtypePreset
@@ -96,7 +96,7 @@ fun EditRemoteControlScreen(
     commands: Map<RemoteControlKey, Command>,
     onSave: (Map<RemoteControlKey, Command>, List<Command>, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
-    onSetAsDefaultScreen: (StartScreen) -> Unit,
+    onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
     initialCommands: List<Command>,
     initialSmartVolumeSettings: SmartVolumeSettings?,
     initialPage: Int = 0,
@@ -270,11 +270,9 @@ fun EditRemoteControlScreen(
                             DropdownMenuItem(
                                 text = { Text("Set as default tab") },
                                 onClick = {
-                                    val startScreen = when (pagerState.currentPage) {
-                                        0 -> StartScreen.REMOTE
-                                        1 -> StartScreen.MOUSE
-                                        else -> StartScreen.COMMANDS
-                                    }
+                                    val startScreen =
+                                        RemoteControlScreen.entries.find { it.tabIndex == pagerState.currentPage }
+                                            ?: throw IllegalStateException("Could not find RemoteControlScreen for tab index ${pagerState.currentPage}")
                                     onSetAsDefaultScreen(startScreen)
                                     showMenu = false
                                 },

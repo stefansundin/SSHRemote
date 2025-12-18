@@ -70,7 +70,6 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
 import com.stefansundin.sshremote.data.host.RemoteControlKey
-import com.stefansundin.sshremote.data.host.StartScreen
 import com.stefansundin.sshremote.data.host.cecClientPreset
 import com.stefansundin.sshremote.data.host.macosVlcPreset
 import com.stefansundin.sshremote.data.host.wtypePreset
@@ -198,11 +197,7 @@ class MainActivity : ComponentActivity() {
                             hostForPresetSelection = host
                             showGettingStartedDialog = true
                         } else {
-                            val initialPage = when (host.startScreen) {
-                                StartScreen.REMOTE -> 0
-                                StartScreen.MOUSE -> 1
-                                StartScreen.COMMANDS -> 3
-                            }
+                            val initialPage = host.startScreen.tabIndex
                             navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
                         }
                     }
@@ -223,11 +218,7 @@ class MainActivity : ComponentActivity() {
                             onPresetSelected = { presetMap ->
                                 hostForPresetSelection?.let { host ->
                                     hostViewModel.updateRemoteCommands(host, presetMap)
-                                    val initialPage = when (host.startScreen) {
-                                        StartScreen.REMOTE -> 0
-                                        StartScreen.MOUSE -> 1
-                                        StartScreen.COMMANDS -> 3
-                                    }
+                                    val initialPage = host.startScreen.tabIndex
                                     navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
                                 }
                                 showSelectPresetDialog = false
