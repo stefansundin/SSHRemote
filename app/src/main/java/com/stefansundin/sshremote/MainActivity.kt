@@ -204,6 +204,7 @@ class MainActivity : ComponentActivity() {
                             hostForPresetSelection = host
                             showGettingStartedDialog = true
                         } else {
+                            hostViewModel.disconnect()
                             val initialPage = host.startScreen.tabIndex
                             navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
                         }
@@ -225,6 +226,7 @@ class MainActivity : ComponentActivity() {
                             onPresetSelected = { presetMap ->
                                 hostForPresetSelection?.let { host ->
                                     hostViewModel.updateRemoteCommands(host, presetMap)
+                                    hostViewModel.disconnect()
                                     val initialPage = host.startScreen.tabIndex
                                     navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
                                 }

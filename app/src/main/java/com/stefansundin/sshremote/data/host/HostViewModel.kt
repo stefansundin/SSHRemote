@@ -30,10 +30,12 @@ import com.stefansundin.sshremote.data.identity.IdentityRepository
 import com.stefansundin.sshremote.data.password.Password
 import com.stefansundin.sshremote.data.password.PasswordDao
 import com.stefansundin.sshremote.data.settings.SettingsRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +44,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.time.measureTimedValue
@@ -58,8 +61,8 @@ class HostViewModel(
     private val _uiState = MutableStateFlow(RemoteUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var connectionJob: Job? = null
     private var lastDeletedHost: Host? = null
-
     private var mouseMoveJob: Job? = null
     private var pendingDx = 0f
     private var pendingDy = 0f
@@ -151,17 +154,18 @@ class HostViewModel(
     }
 
     fun connect(host: Host) {
-        viewModelScope.launch {
+        connectionJob?.cancel()
+        connectionJob = viewModelScope.launch {
             handleConnection(host)
         }
     }
 
     private suspend fun handleConnection(host: Host) {
         _uiState.update {
-            it.copy(
+            RemoteUiState(
                 host = host,
                 connectionStatus = ConnectionStatus.CONNECTING,
-                error = null,
+                hapticFeedback = it.hapticFeedback,
             )
         }
         try {
@@ -195,11 +199,20 @@ class HostViewModel(
                 val updatedHost = host.copy(knownHosts = newKnownHosts)
                 repository.upsert(updatedHost)
             }
-            _uiState.update { it.copy(connectionStatus = ConnectionStatus.CONNECTED) }
+            _uiState.update {
+                it.copy(connectionStatus = ConnectionStatus.CONNECTED)
+            }
             readVolume()
             readMuted()
 
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                throw e
+            }
+            if (!currentCoroutineContext().isActive) {
+                Log.d("HostViewModel", "Connection cancelled, ignoring error: ${e.message}")
+                return
+            }
             Log.e("HostViewModel", "Error connecting to host", e)
             _uiState.update {
                 it.copy(
@@ -393,20 +406,21 @@ class HostViewModel(
     }
 
     fun disconnect() {
+        connectionJob?.cancel()
+        mouseMoveJob?.cancel()
+        mousePanJob?.cancel()
+        pendingDx = 0f
+        pendingDy = 0f
+        activeMouseMoveTemplate = null
+        pendingPanDx = 0f
+        pendingPanDy = 0f
+
+        _uiState.update {
+            RemoteUiState(hapticFeedback = it.hapticFeedback)
+        }
+
         viewModelScope.launch {
             sshRepository.disconnect()
-            mouseMoveJob?.cancel()
-            mousePanJob?.cancel()
-
-            pendingDx = 0f
-            pendingDy = 0f
-            activeMouseMoveTemplate = null
-            pendingPanDx = 0f
-            pendingPanDy = 0f
-
-            _uiState.update {
-                RemoteUiState(hapticFeedback = it.hapticFeedback)
-            }
         }
     }
 

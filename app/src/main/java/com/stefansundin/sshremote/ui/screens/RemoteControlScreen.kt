@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import android.app.Activity
 import android.view.WindowManager
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -130,6 +131,10 @@ fun RemoteControlScreen(
     val isInMultiWindowMode = (context as? Activity)?.isInMultiWindowMode == true
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
+
+    BackHandler {
+        onDisconnect()
+    }
 
     LaunchedEffect(isInMultiWindowMode, configuration) {
         if (isInMultiWindowMode) {
@@ -414,7 +419,7 @@ fun RemoteControlScreen(
             topBar = {
                 if (showTopBar) {
                     TopAppBar(
-                        title = { Text(uiState.host?.name ?: "Remote", maxLines = 1) },
+                        title = { Text(uiState.host?.name ?: "", maxLines = 1) },
                         navigationIcon = {
                             IconButton(onClick = onDisconnect) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")

@@ -97,9 +97,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
      */
     suspend fun connect(details: HostConnectionDetails): List<String> {
         return withContext(Dispatchers.IO) {
-            if (session?.isConnected == true) {
-                session?.disconnect()
-            }
+            session?.disconnect()
 
             JSch.setLogger(JschLogger())
 
@@ -114,9 +112,10 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 jsch.addIdentity(name, key.toByteArray(), null, null)
             }
 
-            session = jsch.getSession(details.user, details.hostname, details.port)
+            val newSession = jsch.getSession(details.user, details.hostname, details.port)
+            session = newSession
 
-            session?.userInfo = object : UserInfo {
+            newSession.userInfo = object : UserInfo {
                 var passwordPromptMessage: String? = null
                 var passphrasePromptMessage: String? = null
                 var userCancelledAuth = false
@@ -172,14 +171,14 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 }
             }
 
-            details.password?.let { session?.setPassword(it) }
+            details.password?.let { newSession.setPassword(it) }
 
             val config = Properties()
             val strictHostKeyChecking = if (useStrictHostKeyChecking) "ask" else "no"
             config["StrictHostKeyChecking"] = strictHostKeyChecking
-            session?.setConfig(config)
+            newSession.setConfig(config)
 
-            session?.connect(30000) // 30-second timeout
+            newSession.connect(30000) // 30-second timeout
 
             val hostKeyRepository = jsch.hostKeyRepository
             val newKnownHosts = hostKeyRepository.hostKey.joinToString("\n") { "${it.host} ${it.type} ${it.key}" }
