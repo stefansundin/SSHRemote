@@ -23,6 +23,7 @@ import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -372,66 +373,7 @@ fun RemoteControlScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text(uiState.host?.name ?: "Remote", maxLines = 1) },
-                navigationIcon = {
-                    IconButton(onClick = onDisconnect) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")
-                    }
-                },
-                actions = {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .size(24.dp),
-                        )
-                    }
-                    ConnectionStatusIndicator(
-                        connectionStatus = uiState.connectionStatus,
-                        modifier = Modifier.padding(end = 8.dp),
-                    )
-                    IconButton(onClick = { isFullscreen = !isFullscreen }) {
-                        Icon(
-                            if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                            contentDescription = if (isFullscreen) "Exit fullscreen" else "Fullscreen",
-                        )
-                    }
-                    IconButton(onClick = { showMenu = !showMenu }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More options")
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Ad-hoc command") },
-                            onClick = {
-                                showMenu = false
-                                onAdHocCommandClicked()
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Edit remote control") },
-                            onClick = {
-                                showMenu = false
-                                onEditRemoteControlClicked(pagerState.currentPage)
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Push public key") },
-                            onClick = {
-                                showMenu = false
-                                showSelectIdentityDialog = true
-                            },
-                        )
-                    }
-                },
-            )
-        },
+    BoxWithConstraints(
         modifier = modifier.onPreviewKeyEvent {
             val smartVolume = uiState.host?.smartVolume
             if (smartVolume?.controlVolumeWithHardwareButtons == true) {
@@ -453,135 +395,205 @@ fun RemoteControlScreen(
             }
             false
         },
-    ) { padding ->
-        val commands = uiState.host?.remoteCommands ?: emptyMap()
+    ) {
+        val showTopBar = maxHeight > 400.dp
+        val showTabs = maxHeight > 300.dp
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .focusRequester(focusRequester)
-                .focusable(),
-        ) {
-            val tabTitles = listOf("Remote", "Mouse", "Keyboard", "Commands")
-
-            ResponsiveTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                edgePadding = 0.dp,
-            ) {
-                tabTitles.forEachIndexed { index, title ->
-                    key(index) {
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = { coroutineScope.launch { pagerState.scrollToPage(index) } },
-                            text = { Text(text = title, maxLines = 1) },
-                        )
-                    }
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            topBar = {
+                if (showTopBar) {
+                    TopAppBar(
+                        title = { Text(uiState.host?.name ?: "Remote", maxLines = 1) },
+                        navigationIcon = {
+                            IconButton(onClick = onDisconnect) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")
+                            }
+                        },
+                        actions = {
+                            if (uiState.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .size(24.dp),
+                                )
+                            }
+                            ConnectionStatusIndicator(
+                                connectionStatus = uiState.connectionStatus,
+                                modifier = Modifier.padding(end = 8.dp),
+                            )
+                            IconButton(onClick = { isFullscreen = !isFullscreen }) {
+                                Icon(
+                                    if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                                    contentDescription = if (isFullscreen) "Exit fullscreen" else "Fullscreen",
+                                )
+                            }
+                            IconButton(onClick = { showMenu = !showMenu }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Ad-hoc command") },
+                                    onClick = {
+                                        showMenu = false
+                                        onAdHocCommandClicked()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Edit remote control") },
+                                    onClick = {
+                                        showMenu = false
+                                        onEditRemoteControlClicked(pagerState.currentPage)
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Push public key") },
+                                    onClick = {
+                                        showMenu = false
+                                        showSelectIdentityDialog = true
+                                    },
+                                )
+                            }
+                        },
+                    )
                 }
-            }
+            },
+            modifier = Modifier.fillMaxSize(),
+        ) { padding ->
+            val commands = uiState.host?.remoteCommands ?: emptyMap()
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.Top,
-                userScrollEnabled = false,
-            ) { page ->
-                when (page) {
-                    0 -> {
-                        RemoteControl(
-                            connectionStatus = uiState.connectionStatus,
-                            commands = commands,
-                            smartVolumeSettings = uiState.host?.smartVolume,
-                            volume = uiState.volume,
-                            muted = uiState.muted,
-                            onKeyEvent = { event: KeyEvent ->
-                                val key = event.key
-                                val command = commands[key] ?: return@RemoteControl
-                                when (event) {
-                                    is KeyEvent.Click -> {
-                                        performHapticFeedback(context, uiState.hapticFeedback)
-                                        hostViewModel.runRemoteControlCommand(key)
-                                    }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .focusRequester(focusRequester)
+                    .focusable(),
+            ) {
+                val tabTitles = listOf("Remote", "Mouse", "Keyboard", "Commands")
 
-                                    is KeyEvent.LongPress -> {
-                                        performHapticFeedback(context, uiState.hapticFeedback)
-                                        command.longPressCommand?.let {
-                                            hostViewModel.runCommand(it, command.showOutput)
-                                        }
-                                    }
-                                }
-                            },
-                        )
-                    }
-
-                    1 -> {
-                        MousePad(
-                            connectionStatus = uiState.connectionStatus,
-                            commands = commands,
-                            onMouseEvent = { event ->
-                                if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
-                                    performHapticFeedback(context, uiState.hapticFeedback)
-                                }
-                                when (event) {
-                                    is MouseEvent.Move -> {
-                                        commands[RemoteControlKey.MOUSE_MOVE]?.let { commandTemplate ->
-                                            onMouseMove(event.dx, event.dy, commandTemplate.command)
-                                        }
-                                    }
-
-                                    MouseEvent.LeftClick -> {
-                                        hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_LEFT_CLICK)
-                                    }
-
-                                    MouseEvent.RightClick -> {
-                                        hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_RIGHT_CLICK)
-                                    }
-
-                                    is MouseEvent.Pan -> {
-                                        onMousePan(event.dx, event.dy)
-                                    }
-                                }
-                            },
-                        )
-                    }
-
-                    2 -> {
-                        val onKey = { key: String ->
-                            commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.let { commandTemplate ->
-                                val command = commandTemplate.command.format(key)
-                                hostViewModel.runCommand(command, commandTemplate.showOutput)
+                if (showTabs) {
+                    ResponsiveTabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        edgePadding = 0.dp,
+                    ) {
+                        tabTitles.forEachIndexed { index, title ->
+                            key(index) {
+                                Tab(
+                                    selected = pagerState.currentPage == index,
+                                    onClick = { coroutineScope.launch { pagerState.scrollToPage(index) } },
+                                    text = { Text(text = title, maxLines = 1) },
+                                )
                             }
                         }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .imePadding(),
-                        ) {
-                            KeyboardInput(
-                                isCurrentlySelected = pagerState.currentPage == 2,
-                                onKey = { key -> onKey(key) },
-                                onType = { text ->
-                                    commands[RemoteControlKey.KEYBOARD_TYPE_INPUT]?.let { commandTemplate ->
-                                        val escapedText = text.replace("'", "'\\''")
-                                        val command = commandTemplate.command.format(escapedText)
-                                        hostViewModel.runCommand(command, commandTemplate.showOutput)
+                    }
+                }
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.Top,
+                    userScrollEnabled = false,
+                ) { page ->
+                    when (page) {
+                        0 -> {
+                            RemoteControl(
+                                connectionStatus = uiState.connectionStatus,
+                                commands = commands,
+                                smartVolumeSettings = uiState.host?.smartVolume,
+                                volume = uiState.volume,
+                                muted = uiState.muted,
+                                onKeyEvent = { event: KeyEvent ->
+                                    val key = event.key
+                                    val command = commands[key] ?: return@RemoteControl
+                                    when (event) {
+                                        is KeyEvent.Click -> {
+                                            performHapticFeedback(context, uiState.hapticFeedback)
+                                            hostViewModel.runRemoteControlCommand(key)
+                                        }
+
+                                        is KeyEvent.LongPress -> {
+                                            performHapticFeedback(context, uiState.hapticFeedback)
+                                            command.longPressCommand?.let {
+                                                hostViewModel.runCommand(it, command.showOutput)
+                                            }
+                                        }
                                     }
                                 },
-                                modifier = Modifier.weight(1f),
-                                commands = commands,
-                            )
-                            SpecialKeysRow(
-                                onKey = { key -> onKey(key) },
-                                commands = commands,
                             )
                         }
-                    }
 
-                    3 -> {
-                        CommandList(
-                            uiState = uiState,
-                            hostViewModel = hostViewModel,
-                        )
+                        1 -> {
+                            MousePad(
+                                connectionStatus = uiState.connectionStatus,
+                                commands = commands,
+                                onMouseEvent = { event ->
+                                    if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                    }
+                                    when (event) {
+                                        is MouseEvent.Move -> {
+                                            commands[RemoteControlKey.MOUSE_MOVE]?.let { commandTemplate ->
+                                                onMouseMove(event.dx, event.dy, commandTemplate.command)
+                                            }
+                                        }
+
+                                        MouseEvent.LeftClick -> {
+                                            hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_LEFT_CLICK)
+                                        }
+
+                                        MouseEvent.RightClick -> {
+                                            hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_RIGHT_CLICK)
+                                        }
+
+                                        is MouseEvent.Pan -> {
+                                            onMousePan(event.dx, event.dy)
+                                        }
+                                    }
+                                },
+                            )
+                        }
+
+                        2 -> {
+                            val onKey = { key: String ->
+                                commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.let { commandTemplate ->
+                                    val command = commandTemplate.command.format(key)
+                                    hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                }
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .imePadding(),
+                            ) {
+                                KeyboardInput(
+                                    isCurrentlySelected = pagerState.currentPage == 2,
+                                    onKey = { key -> onKey(key) },
+                                    onType = { text ->
+                                        commands[RemoteControlKey.KEYBOARD_TYPE_INPUT]?.let { commandTemplate ->
+                                            val escapedText = text.replace("'", "'\\''")
+                                            val command = commandTemplate.command.format(escapedText)
+                                            hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    commands = commands,
+                                )
+                                SpecialKeysRow(
+                                    onKey = { key -> onKey(key) },
+                                    commands = commands,
+                                )
+                            }
+                        }
+
+                        3 -> {
+                            CommandList(
+                                uiState = uiState,
+                                hostViewModel = hostViewModel,
+                            )
+                        }
                     }
                 }
             }

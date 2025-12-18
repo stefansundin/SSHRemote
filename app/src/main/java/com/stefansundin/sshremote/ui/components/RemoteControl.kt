@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -69,6 +70,8 @@ import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.ui.KeyEvent
+
+private val MinDimensionForActionButtons = 500.dp
 
 @Composable
 fun RemoteControl(
@@ -82,13 +85,33 @@ fun RemoteControl(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isLandscape = maxWidth > maxHeight
-        RemoteControlLayout(isLandscape, onKeyEvent, commands, connectionStatus, smartVolumeSettings, volume, muted)
+        val showActionButtons = if (isLandscape) {
+            maxWidth > MinDimensionForActionButtons
+        } else {
+            maxHeight > MinDimensionForActionButtons
+        }
+        val layoutMode = if (!showActionButtons) {
+            RemoteLayoutMode.Compact
+        } else if (isLandscape) {
+            RemoteLayoutMode.Landscape
+        } else {
+            RemoteLayoutMode.Portrait
+        }
+
+        RemoteControlLayout(layoutMode, onKeyEvent, commands, connectionStatus, smartVolumeSettings, volume, muted)
     }
+}
+
+private enum class RemoteLayoutMode {
+    /** Compact would normally happen when the app is in split screen mode with another app. */
+    Compact,
+    Landscape,
+    Portrait,
 }
 
 @Composable
 private fun RemoteControlLayout(
-    isLandscape: Boolean,
+    layoutMode: RemoteLayoutMode,
     onKeyEvent: (KeyEvent) -> Unit,
     commands: Map<RemoteControlKey, Command>? = null,
     connectionStatus: ConnectionStatus? = null,
@@ -98,34 +121,45 @@ private fun RemoteControlLayout(
 ) {
     val isConnected = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
 
-    if (isLandscape) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Dpad(onKeyEvent, commands, isConnected)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+    when (layoutMode) {
+        RemoteLayoutMode.Compact -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                VolumeStatus(smartVolumeSettings, volume, muted)
-                ActionButtons(onKeyEvent, commands, isConnected)
+                Dpad(onKeyEvent, commands, isConnected)
             }
         }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
-        ) {
-            VolumeStatus(smartVolumeSettings, volume, muted)
-            Dpad(onKeyEvent, commands, isConnected)
-            ActionButtons(onKeyEvent, commands, isConnected)
+        RemoteLayoutMode.Landscape -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Dpad(onKeyEvent, commands, isConnected)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                ) {
+                    VolumeStatus(smartVolumeSettings, volume, muted)
+                    ActionButtons(onKeyEvent, commands, isConnected)
+                }
+            }
+        }
+        RemoteLayoutMode.Portrait -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
+            ) {
+                VolumeStatus(smartVolumeSettings, volume, muted)
+                Dpad(onKeyEvent, commands, isConnected)
+                ActionButtons(onKeyEvent, commands, isConnected)
+            }
         }
     }
 }
@@ -366,4 +400,22 @@ private class ArcShape(private val startAngle: Float, private val sweepAngle: Fl
         }
         return Outline.Generic(path)
     }
+}
+
+@Preview(widthDp = 400, heightDp = 800)
+@Composable
+private fun PortraitPreview() {
+    RemoteControlLayout(RemoteLayoutMode.Portrait, {})
+}
+
+@Preview(widthDp = 800, heightDp = 400)
+@Composable
+private fun LandscapePreview() {
+    RemoteControlLayout(RemoteLayoutMode.Landscape, {})
+}
+
+@Preview(widthDp = 400, heightDp = 400)
+@Composable
+private fun CompactPreview() {
+    RemoteControlLayout(RemoteLayoutMode.Compact, {})
 }
