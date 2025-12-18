@@ -72,6 +72,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
@@ -125,8 +126,17 @@ fun RemoteControlScreen(
     initialPage: Int = 0,
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val isInMultiWindowMode = (context as? Activity)?.isInMultiWindowMode == true
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(isInMultiWindowMode, configuration) {
+        if (isInMultiWindowMode) {
+            isFullscreen = false
+        }
+    }
+
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var showSelectIdentityDialog by rememberSaveable { mutableStateOf(false) }
@@ -422,11 +432,13 @@ fun RemoteControlScreen(
                                 connectionStatus = uiState.connectionStatus,
                                 modifier = Modifier.padding(end = 8.dp),
                             )
-                            IconButton(onClick = { isFullscreen = !isFullscreen }) {
-                                Icon(
-                                    if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                                    contentDescription = if (isFullscreen) "Exit fullscreen" else "Fullscreen",
-                                )
+                            if (!isInMultiWindowMode) {
+                                IconButton(onClick = { isFullscreen = !isFullscreen }) {
+                                    Icon(
+                                        if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                                        contentDescription = if (isFullscreen) "Exit fullscreen" else "Fullscreen",
+                                    )
+                                }
                             }
                             IconButton(onClick = { showMenu = !showMenu }) {
                                 Icon(Icons.Default.MoreVert, contentDescription = "More options")
