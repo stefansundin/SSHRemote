@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,6 +48,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -94,6 +96,8 @@ private fun RemoteControlLayout(
     volume: String? = null,
     muted: Boolean? = null,
 ) {
+    val isConnected = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
+
     if (isLandscape) {
         Row(
             modifier = Modifier
@@ -102,13 +106,13 @@ private fun RemoteControlLayout(
             horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Dpad(onKeyEvent, commands, connectionStatus)
+            Dpad(onKeyEvent, commands, isConnected)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             ) {
                 VolumeStatus(smartVolumeSettings, volume, muted)
-                ActionButtons(onKeyEvent, commands, connectionStatus)
+                ActionButtons(onKeyEvent, commands, isConnected)
             }
         }
     } else {
@@ -120,8 +124,8 @@ private fun RemoteControlLayout(
             verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
         ) {
             VolumeStatus(smartVolumeSettings, volume, muted)
-            Dpad(onKeyEvent, commands, connectionStatus)
-            ActionButtons(onKeyEvent, commands, connectionStatus)
+            Dpad(onKeyEvent, commands, isConnected)
+            ActionButtons(onKeyEvent, commands, isConnected)
         }
     }
 }
@@ -142,10 +146,8 @@ private fun VolumeStatus(smartVolumeSettings: SmartVolumeSettings?, volume: Stri
 private fun ActionButtons(
     onKeyEvent: (KeyEvent) -> Unit,
     commands: Map<RemoteControlKey, Command>? = null,
-    connectionStatus: ConnectionStatus? = null,
+    isConnected: Boolean = true,
 ) {
-    val isEnabled = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
-
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -159,31 +161,13 @@ private fun ActionButtons(
             modifier = rowModifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.VOLUME_DOWN)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.VOLUME_DOWN)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.VOLUME_DOWN)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.VOLUME_DOWN]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.VOLUME_DOWN, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.AutoMirrored.Filled.VolumeDown, contentDescription = "Volume Down")
             }
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.MUTE)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.MUTE)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.MUTE)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.MUTE]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.MUTE, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.AutoMirrored.Filled.VolumeOff, contentDescription = "Mute")
             }
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.VOLUME_UP)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.VOLUME_UP)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.VOLUME_UP)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.VOLUME_UP]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.VOLUME_UP, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Volume Up")
             }
         }
@@ -191,31 +175,13 @@ private fun ActionButtons(
             modifier = rowModifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.BACK)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.BACK)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.BACK)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.BACK]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.BACK, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.HOME)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.HOME)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.HOME)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.HOME]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.HOME, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.Default.Home, contentDescription = "Home")
             }
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.MENU)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.MENU)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.MENU)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.MENU]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.MENU, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.Default.Menu, contentDescription = "Menu")
             }
         }
@@ -223,32 +189,14 @@ private fun ActionButtons(
             modifier = rowModifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.PREVIOUS)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.PREVIOUS)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.PREVIOUS)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.PREVIOUS]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.PREVIOUS, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.Default.SkipPrevious, contentDescription = "Previous")
             }
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.PLAY_PAUSE)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.PLAY_PAUSE)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.PLAY_PAUSE)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.PLAY_PAUSE]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.PLAY_PAUSE, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.Default.PlayArrow, contentDescription = "Play/Pause")
                 Icon(Icons.Default.Pause, contentDescription = "Play/Pause")
             }
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.NEXT)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.NEXT)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.NEXT)) },
-                modifier = buttonModifier,
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.NEXT]?.command.isNullOrEmpty()),
-            ) {
+            RemoteButton(RemoteControlKey.NEXT, onKeyEvent, buttonModifier, commands, isConnected) {
                 Icon(Icons.Default.SkipNext, contentDescription = "Next")
             }
         }
@@ -259,12 +207,11 @@ private fun ActionButtons(
 private fun Dpad(
     onKeyEvent: (KeyEvent) -> Unit,
     commands: Map<RemoteControlKey, Command>? = null,
-    connectionStatus: ConnectionStatus? = null,
+    isConnected: Boolean = true,
 ) {
     val dpadSize = 280.dp
     val iconOffset = dpadSize / 3f
     val iconSize = dpadSize / 3f
-    val isEnabled = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
 
     Box(
         modifier = Modifier.size(dpadSize),
@@ -273,14 +220,14 @@ private fun Dpad(
         val directionalButtonModifier = Modifier.fillMaxSize()
 
         // UP
-        RepeatingButton(
-            onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.UP)) },
-            onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.UP)) },
-            onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.UP)) },
-            shape = ArcShape(225f, 90f),
+        RemoteButton(
+            key = RemoteControlKey.UP,
+            onKeyEvent = onKeyEvent,
             modifier = directionalButtonModifier,
+            commands = commands,
+            isConnected = isConnected,
+            shape = ArcShape(225f, 90f),
             contentPadding = PaddingValues(0.dp),
-            enabled = isEnabled && (commands == null || !commands[RemoteControlKey.UP]?.command.isNullOrEmpty()),
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
@@ -292,14 +239,14 @@ private fun Dpad(
         }
 
         // RIGHT
-        RepeatingButton(
-            onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.RIGHT)) },
-            onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.RIGHT)) },
-            onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.RIGHT)) },
-            shape = ArcShape(315f, 90f),
+        RemoteButton(
+            key = RemoteControlKey.RIGHT,
+            onKeyEvent = onKeyEvent,
             modifier = directionalButtonModifier,
+            commands = commands,
+            isConnected = isConnected,
+            shape = ArcShape(315f, 90f),
             contentPadding = PaddingValues(0.dp),
-            enabled = isEnabled && (commands == null || !commands[RemoteControlKey.RIGHT]?.command.isNullOrEmpty()),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -311,14 +258,14 @@ private fun Dpad(
         }
 
         // DOWN
-        RepeatingButton(
-            onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.DOWN)) },
-            onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.DOWN)) },
-            onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.DOWN)) },
-            shape = ArcShape(45f, 90f),
+        RemoteButton(
+            key = RemoteControlKey.DOWN,
+            onKeyEvent = onKeyEvent,
             modifier = directionalButtonModifier,
+            commands = commands,
+            isConnected = isConnected,
+            shape = ArcShape(45f, 90f),
             contentPadding = PaddingValues(0.dp),
-            enabled = isEnabled && (commands == null || !commands[RemoteControlKey.DOWN]?.command.isNullOrEmpty()),
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
@@ -330,14 +277,14 @@ private fun Dpad(
         }
 
         // LEFT
-        RepeatingButton(
-            onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.LEFT)) },
-            onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.LEFT)) },
-            onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.LEFT)) },
-            shape = ArcShape(135f, 90f),
+        RemoteButton(
+            key = RemoteControlKey.LEFT,
+            onKeyEvent = onKeyEvent,
             modifier = directionalButtonModifier,
+            commands = commands,
+            isConnected = isConnected,
+            shape = ArcShape(135f, 90f),
             contentPadding = PaddingValues(0.dp),
-            enabled = isEnabled && (commands == null || !commands[RemoteControlKey.LEFT]?.command.isNullOrEmpty()),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
@@ -350,14 +297,14 @@ private fun Dpad(
 
         // CENTER
         if (commands == null || commands[RemoteControlKey.SELECT] == null || !commands[RemoteControlKey.SELECT]?.command?.isEmpty()!!) {
-            RepeatingButton(
-                onClick = { onKeyEvent(KeyEvent.Click(RemoteControlKey.SELECT)) },
-                onPress = { onKeyEvent(KeyEvent.Down(RemoteControlKey.SELECT)) },
-                onRelease = { onKeyEvent(KeyEvent.Up(RemoteControlKey.SELECT)) },
+            RemoteButton(
+                key = RemoteControlKey.SELECT,
+                onKeyEvent = onKeyEvent,
                 modifier = Modifier.size(dpadSize / 2.8f),
+                commands = commands,
+                isConnected = isConnected,
                 shape = CircleShape,
                 contentPadding = PaddingValues(0.dp),
-                enabled = isEnabled && (commands == null || !commands[RemoteControlKey.SELECT]?.command.isNullOrEmpty()),
                 colors = ButtonDefaults.buttonColors(
                     disabledContainerColor = Color.Transparent,
                 ),
@@ -370,6 +317,35 @@ private fun Dpad(
             }
         }
     }
+}
+
+@Composable
+private fun RemoteButton(
+    key: RemoteControlKey,
+    onKeyEvent: (KeyEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    commands: Map<RemoteControlKey, Command>? = null,
+    isConnected: Boolean = true,
+    shape: Shape = ButtonDefaults.shape,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    content: @Composable RowScope.() -> Unit,
+) {
+    val command = commands?.get(key)
+
+    RepeatingButton(
+        onClick = { onKeyEvent(KeyEvent.Click(key)) },
+        modifier = modifier,
+        repeating = command?.repeat == true,
+        onLongClick = if (command?.longPressCommand.isNullOrEmpty()) null else {
+            { onKeyEvent(KeyEvent.LongPress(key)) }
+        },
+        enabled = isConnected && (commands == null || !command?.command.isNullOrEmpty()),
+        shape = shape,
+        contentPadding = contentPadding,
+        colors = colors,
+        content = content,
+    )
 }
 
 private class ArcShape(private val startAngle: Float, private val sweepAngle: Float) : Shape {

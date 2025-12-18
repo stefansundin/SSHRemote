@@ -65,7 +65,7 @@ fun EditRemoteCommandDialog(
                     TextField(
                         value = newLongPressCommand,
                         onValueChange = { newLongPressCommand = it },
-                        label = { Text("Long press command (does not work yet)") },
+                        label = { Text("Long press command") },
                         enabled = !repeatCommand,
                     )
                     Row(

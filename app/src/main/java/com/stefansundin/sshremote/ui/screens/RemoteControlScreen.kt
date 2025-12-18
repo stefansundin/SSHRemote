@@ -102,9 +102,6 @@ import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
 import com.stefansundin.sshremote.ui.components.SpecialKeysRow
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -127,7 +124,6 @@ fun RemoteControlScreen(
     val context = LocalContext.current
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
-    var repeatJob by remember { mutableStateOf<Job?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var showSelectIdentityDialog by rememberSaveable { mutableStateOf(false) }
@@ -493,32 +489,14 @@ fun RemoteControlScreen(
                                 val key = event.key
                                 val command = commands[key] ?: return@RemoteControl
                                 when (event) {
-                                    is KeyEvent.Down -> {
-                                        if (command.repeat) {
-                                            repeatJob?.cancel()
-                                            repeatJob = coroutineScope.launch {
-                                                performHapticFeedback(context, uiState.hapticFeedback)
-                                                hostViewModel.runRemoteControlCommand(key) // Fire once immediately
-                                                delay(500) // Initial delay
-                                                while (isActive) {
-                                                    performHapticFeedback(context, uiState.hapticFeedback)
-                                                    hostViewModel.runRemoteControlCommand(key)
-                                                    delay(100) // Repeat rate
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    is KeyEvent.Up -> {
-                                        if (command.repeat) {
-                                            repeatJob?.cancel()
-                                        }
-                                    }
-
                                     is KeyEvent.Click -> {
-                                        if (!command.repeat) {
-                                            performHapticFeedback(context, uiState.hapticFeedback)
-                                            hostViewModel.runRemoteControlCommand(key)
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                        hostViewModel.runRemoteControlCommand(key)
+                                    }
+                                    is KeyEvent.LongPress -> {
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                        command.longPressCommand?.let {
+                                            hostViewModel.runCommand(it, command.showOutput)
                                         }
                                     }
                                 }

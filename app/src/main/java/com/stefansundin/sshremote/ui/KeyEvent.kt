@@ -23,7 +23,6 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 sealed class KeyEvent {
     abstract val key: RemoteControlKey
 
-    data class Down(override val key: RemoteControlKey) : KeyEvent()
-    data class Up(override val key: RemoteControlKey) : KeyEvent()
     data class Click(override val key: RemoteControlKey) : KeyEvent()
+    data class LongPress(override val key: RemoteControlKey) : KeyEvent()
 }
