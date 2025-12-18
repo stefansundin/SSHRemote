@@ -165,6 +165,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (BuildConfig.DEBUG && savedInstanceState != null) {
+            // Try to avoid activity recreation by adding to android:configChanges
+            Log.w("MainActivity", "Activity recreated!")
+        }
         enableEdgeToEdge()
 
         setContent {
