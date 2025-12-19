@@ -19,8 +19,12 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.ClipData
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
@@ -47,7 +51,13 @@ fun CommandOutputDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Command Output") },
-        text = { Text(output) },
+        text = {
+            SelectionContainer {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(output)
+                }
+            }
+        },
         confirmButton = {
             Button(onClick = onDismiss) {
                 Text("Close")
