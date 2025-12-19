@@ -66,15 +66,17 @@ fun MousePad(
     val isGestureNavigation = systemGestures.getLeft(density, layoutDirection) > 0 ||
             systemGestures.getRight(density, layoutDirection) > 0
 
-    BackHandler(enabled = isGestureNavigation) {
-        // Prevent back gesture while this component is active
-    }
-
     val isEnabled = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
+    val mouseMoveEnabled =
+        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_MOVE]?.command.isNullOrEmpty())
     val leftClickEnabled =
         isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty())
     val rightClickEnabled =
         isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty())
+
+    BackHandler(enabled = mouseMoveEnabled && isGestureNavigation) {
+        // Prevent back gesture while this component is active
+    }
 
     Column(
         modifier = modifier
