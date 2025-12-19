@@ -71,7 +71,7 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.ui.KeyEvent
 
-private val MinDimensionForActionButtons = 500.dp
+private val MinDimensionForActionButtons = 400.dp
 
 @Composable
 fun RemoteControl(
