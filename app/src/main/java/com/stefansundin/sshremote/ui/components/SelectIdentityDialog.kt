@@ -25,19 +25,23 @@ fun SelectIdentityDialog(
         onDismissRequest = onDismiss,
         title = { Text("Select public key") },
         text = {
-            Column {
-                Text(
-                    text = "Key will be added to host's authorized_keys.",
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-                LazyColumn {
-                    items(identities, key = { it.id }) { identity ->
-                        ListItem(
-                            headlineContent = { Text(identity.name) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onIdentitySelected(identity) },
-                        )
+            if (identities.isEmpty()) {
+                Text("No keys found. Create an SSH key in the app settings.")
+            } else {
+                Column {
+                    Text(
+                        text = "Key will be added to host's authorized_keys.",
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                    LazyColumn {
+                        items(identities, key = { it.id }) { identity ->
+                            ListItem(
+                                headlineContent = { Text(identity.name) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onIdentitySelected(identity) },
+                            )
+                        }
                     }
                 }
             }
