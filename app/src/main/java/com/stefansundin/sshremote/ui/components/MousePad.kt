@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
@@ -56,13 +60,21 @@ fun MousePad(
     commands: Map<RemoteControlKey, Command>? = null,
     connectionStatus: ConnectionStatus? = null,
 ) {
-    BackHandler(enabled = true) {
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val systemGestures = WindowInsets.systemGestures
+    val isGestureNavigation = systemGestures.getLeft(density, layoutDirection) > 0 ||
+            systemGestures.getRight(density, layoutDirection) > 0
+
+    BackHandler(enabled = isGestureNavigation) {
         // Prevent back gesture while this component is active
     }
 
     val isEnabled = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
-    val leftClickEnabled = isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty())
-    val rightClickEnabled = isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty())
+    val leftClickEnabled =
+        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty())
+    val rightClickEnabled =
+        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty())
 
     Column(
         modifier = modifier
@@ -211,7 +223,7 @@ private fun MousePadPreview() {
             onMouseEvent = { event ->
                 Log.d("MousePad", "Received event: $event")
             },
-            connectionStatus = ConnectionStatus.CONNECTED
+            connectionStatus = ConnectionStatus.CONNECTED,
         )
     }
 }
