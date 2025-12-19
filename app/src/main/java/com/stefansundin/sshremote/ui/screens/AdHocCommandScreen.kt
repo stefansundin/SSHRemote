@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,10 +62,12 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -187,6 +191,14 @@ fun AdHocCommandScreen(
                         },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = { executeAndStay() }),
+                    trailingIcon = {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        }
+                    },
                 )
                 Icon(
                     Icons.AutoMirrored.Filled.Send,
@@ -198,5 +210,25 @@ fun AdHocCommandScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(name = "Normal Font")
+@Preview(fontScale = 2.0f, name = "Large Font")
+@Composable
+private fun AdHocCommandScreenPreview() {
+    SSHRemoteTheme {
+        AdHocCommandScreen(
+            uiState = RemoteUiState(),
+            commands = listOf(
+                AdHocCommand("ls -la"),
+                AdHocCommand("uptime"),
+            ),
+            onExecuteCommand = { _, _ -> },
+            onDeleteCommand = {},
+            onClearHistory = {},
+            onNavigateUp = {},
+            onClearCommandOutput = {},
+        )
     }
 }
