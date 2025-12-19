@@ -21,6 +21,8 @@ package com.stefansundin.sshremote.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -32,6 +34,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
 
@@ -50,10 +54,33 @@ fun EditCommandDialog(
         title = { Text(if (command == null) "Add Command" else "Edit Command") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = name, onValueChange = { name = it }, label = { Text("Name (optional)") })
-                TextField(value = commandText, onValueChange = { commandText = it }, label = { Text("Command") })
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = showOutput, onCheckedChange = { showOutput = it })
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name (optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                TextField(
+                    value = commandText,
+                    onValueChange = { commandText = it },
+                    label = { Text("Command") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = showOutput,
+                            onValueChange = { showOutput = it },
+                            role = Role.Checkbox,
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = showOutput,
+                        onCheckedChange = { showOutput = it },
+                    )
                     Text("Show output")
                 }
             }

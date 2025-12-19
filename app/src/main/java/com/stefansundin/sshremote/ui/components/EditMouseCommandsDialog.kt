@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -70,6 +71,7 @@ fun EditMouseCommandsDialog(
                             }
                         },
                         label = { Text(key.title) },
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
