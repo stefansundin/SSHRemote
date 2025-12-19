@@ -62,6 +62,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:name=".notification.NotificationBroadcastReceiver"
             android:exported="false" />
 
+        <!-- Required to make the QR code scanner be able to use any screen orientation -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation" />
+
     </application>
 
 </manifest>

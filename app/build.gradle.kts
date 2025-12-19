@@ -96,6 +96,9 @@ dependencies {
     // --- JSON Serialization ---
     implementation(libs.gson)
 
+    // --- QR Code Scanning ---
+    implementation(libs.zxing)
+
     // --- Testing Dependencies ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

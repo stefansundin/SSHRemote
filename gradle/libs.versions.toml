@@ -18,6 +18,7 @@ bouncyCastle = "1.83"
 eddsa = "0.3.0"
 gson = "2.13.2"
 desugar = "2.1.5"
+zxing = "4.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +50,7 @@ bouncycastle-bcpkix-jdk18on = { group = "org.bouncycastle", name = "bcpkix-jdk18
 eddsa = { group = "net.i2p.crypto", name = "eddsa", version.ref = "eddsa" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
+zxing = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

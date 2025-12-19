@@ -68,6 +68,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -316,6 +318,14 @@ fun ImportFileTab(
         },
     )
 
+    val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            val content = result.contents
+            onKeyContentRead(content)
+            keyContentForParsing = content
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -325,6 +335,21 @@ fun ImportFileTab(
         Button(onClick = { filePickerLauncher.launch("*/*") }) {
             Text("Select File")
         }
+
+        Text("Or scan a QR code.")
+        Button(
+            onClick = {
+                val options = ScanOptions()
+                options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                options.setPrompt("Encode your private key file to a QR code")
+                options.setBeepEnabled(false)
+                options.setOrientationLocked(false)
+                qrScanLauncher.launch(options)
+            },
+        ) {
+            Text("Scan QR Code")
+        }
+
         if (error != null) {
             Text("Error: $error")
         } else if (keyType != null) {
