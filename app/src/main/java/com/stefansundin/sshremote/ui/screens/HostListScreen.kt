@@ -37,7 +37,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -74,26 +73,19 @@ import kotlinx.coroutines.flow.first
 @Composable
 fun HostListScreen(
     hosts: List<Host>?,
-    startupHostId: Int?,
     onConnectClicked: (Host) -> Unit,
     onAdd: () -> Unit,
     onEdit: (Host) -> Unit,
     onClone: (Host) -> Unit,
+    onCreateShortcut: (Host) -> Unit,
     onDelete: (Host) -> Unit,
     onUndoDelete: () -> Unit,
     onSettings: () -> Unit,
-    onSetStartupHost: (Host) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var undoableDeletedHostId by rememberSaveable { mutableStateOf<Int?>(null) }
-
-    LaunchedEffect(startupHostId) {
-        if (startupHostId != null) {
-            listState.animateScrollToItem(0)
-        }
-    }
 
     LaunchedEffect(undoableDeletedHostId) {
         val id = undoableDeletedHostId
@@ -177,15 +169,14 @@ fun HostListScreen(
                     items(items = hosts, key = { host -> host.id }) { host ->
                         HostItem(
                             host = host,
-                            isStartupHost = host.id == startupHostId,
                             onConnect = { onConnectClicked(host) },
                             onEdit = { onEdit(host) },
                             onClone = { onClone(host) },
+                            onCreateShortcut = { onCreateShortcut(host) },
                             onDelete = {
                                 onDelete(host)
                                 undoableDeletedHostId = host.id
                             },
-                            onSetStartupHost = { onSetStartupHost(host) },
                         )
                     }
                 }
@@ -198,12 +189,11 @@ fun HostListScreen(
 @Composable
 fun HostItem(
     host: Host,
-    isStartupHost: Boolean,
     onConnect: () -> Unit,
     onEdit: () -> Unit,
     onClone: () -> Unit,
+    onCreateShortcut: () -> Unit,
     onDelete: () -> Unit,
-    onSetStartupHost: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
@@ -227,14 +217,6 @@ fun HostItem(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (isStartupHost) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Startup host",
-                            modifier = Modifier.padding(end = 8.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
                     Text(
                         text = host.name,
                         style = MaterialTheme.typography.bodyLarge,
@@ -278,12 +260,9 @@ fun HostItem(
                         },
                     )
                     DropdownMenuItem(
-                        text = {
-                            val text = if (isStartupHost) "Don't connect on startup" else "Connect on startup"
-                            Text(text)
-                        },
+                        text = { Text("Add to Home Screen") },
                         onClick = {
-                            onSetStartupHost()
+                            onCreateShortcut()
                             isContextMenuVisible = false
                         },
                     )
@@ -310,15 +289,14 @@ fun HostListScreenPreview() {
         )
         HostListScreen(
             hosts = sampleHosts,
-            startupHostId = 1,
             onConnectClicked = {},
             onAdd = {},
             onEdit = {},
             onClone = {},
+            onCreateShortcut = {},
             onDelete = {},
             onUndoDelete = {},
             onSettings = {},
-            onSetStartupHost = {},
         )
     }
 }

@@ -59,6 +59,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -163,6 +166,8 @@ class MainActivity : ComponentActivity() {
         AdHocCommandViewModelFactory(app.adHocCommandRepository)
     }
 
+    private var shortcutHostId = mutableStateOf<Int?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (BuildConfig.DEBUG && savedInstanceState != null) {
@@ -170,6 +175,10 @@ class MainActivity : ComponentActivity() {
             Log.w("MainActivity", "Activity recreated!")
         }
         enableEdgeToEdge()
+
+        if (intent?.hasExtra("HOST_ID") == true) {
+            shortcutHostId.value = intent.getIntExtra("HOST_ID", -1)
+        }
 
         setContent {
             val theme by settingsViewModel.theme.collectAsState()
@@ -191,7 +200,6 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val app = LocalContext.current.applicationContext as SshRemoteApplication
                     var showBackupRestoredDialog by rememberSaveable { mutableStateOf(app.isRestoredFromBackup) }
-                    val startupHostId by settingsViewModel.startupHostId.collectAsState()
                     val hosts by hostViewModel.allHosts.collectAsState()
                     var startupConnectAttempted by rememberSaveable { mutableStateOf(false) }
 
@@ -235,13 +243,16 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    LaunchedEffect(hosts, startupHostId) {
+                    LaunchedEffect(hosts, shortcutHostId.value) {
                         if (!startupConnectAttempted && !hosts.isNullOrEmpty()) {
                             startupConnectAttempted = true
-                            if (startupHostId != null) {
-                                val hostToConnect = hosts?.find { it.id == startupHostId }
+
+                            val shortcutId = shortcutHostId.value
+                            if (shortcutId != null) {
+                                val hostToConnect = hosts?.find { it.id == shortcutId }
                                 if (hostToConnect != null) {
                                     onConnect(hostToConnect)
+                                    shortcutHostId.value = null
                                 }
                             }
                         }
@@ -273,10 +284,8 @@ class MainActivity : ComponentActivity() {
                         exitTransition = { ExitTransition.None },
                     ) {
                         composable(Screen.HostList.route) {
-                            val sortedHosts = hosts?.sortedByDescending { it.id == startupHostId }
                             HostListScreen(
-                                hosts = sortedHosts,
-                                startupHostId = startupHostId,
+                                hosts = hosts,
                                 onConnectClicked = onConnect,
                                 onAdd = {
                                     navController.navigate(Screen.HostEdit.createRoute(null))
@@ -289,13 +298,13 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(Screen.HostEdit.createRoute(newHostId))
                                     }
                                 },
+                                onCreateShortcut = { host ->
+                                    createShortcut(this@MainActivity, host)
+                                },
                                 onDelete = { host -> hostViewModel.delete(host) },
                                 onUndoDelete = { hostViewModel.undoDelete() },
                                 onSettings = {
                                     navController.navigate(Screen.Settings.route)
-                                },
-                                onSetStartupHost = { host ->
-                                    settingsViewModel.setStartupHostId(if (host.id == startupHostId) null else host.id)
                                 },
                             )
                         }
@@ -476,6 +485,23 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun createShortcut(context: Context, host: Host) {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            putExtra("HOST_ID", host.id)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+
+        val shortcutInfo = ShortcutInfoCompat.Builder(context, "host_${host.id}")
+            .setShortLabel(host.name)
+            .setLongLabel(host.name)
+            .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
+            .setIntent(intent)
+            .build()
+
+        ShortcutManagerCompat.requestPinShortcut(context, shortcutInfo, null)
     }
 }
 

@@ -82,7 +82,6 @@ class SettingsImporter(
             }
 
             if (!merge) {
-                settingsRepository.setStartupHostId(null)
                 hostRepository.deleteAll()
                 adHocCommandRepository.clear()
             }
@@ -115,14 +114,7 @@ class SettingsImporter(
                     },
                     startScreen = exportedHost.startScreen ?: RemoteControlScreen.Default,
                 )
-                val newHostId = hostRepository.upsert(host)
-
-                if (exportedHost.connectOnStartup == true) {
-                    val currentStartupHost = settingsRepository.startupHostId.first()
-                    if (currentStartupHost == null) {
-                        settingsRepository.setStartupHostId(newHostId.toInt())
-                    }
-                }
+                hostRepository.upsert(host)
             }
 
             settings.adHocCommands?.forEach { exportedAdHocCommand ->

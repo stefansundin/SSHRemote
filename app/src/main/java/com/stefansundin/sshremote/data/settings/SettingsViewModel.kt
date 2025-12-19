@@ -109,19 +109,6 @@ class SettingsViewModel(
         }
     }
 
-    val startupHostId: StateFlow<Int?> = settingsRepository.startupHostId
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null,
-        )
-
-    fun setStartupHostId(hostId: Int?) {
-        viewModelScope.launch {
-            settingsRepository.setStartupHostId(hostId)
-        }
-    }
-
     val hasHosts: StateFlow<Boolean> = hostRepository.getAll().map { it.isNotEmpty() }
         .stateIn(
             scope = viewModelScope,

@@ -54,7 +54,6 @@ class SettingsExporter(
         val keepScreenOn = settingsRepository.keepScreenOn.first()
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
-        val startupHostId = settingsRepository.startupHostId.first()
         val hosts = hostRepository.getAll().first().map { host ->
             ExportedHost(
                 name = host.name,
@@ -80,7 +79,6 @@ class SettingsExporter(
                     )
                 },
                 startScreen = host.startScreen,
-                connectOnStartup = if (host.id == startupHostId) true else null,
             )
         }
         val adHocCommands = adHocCommandRepository.getAdHocCommands().first().map { command ->
