@@ -607,10 +607,12 @@ fun RemoteControlScreen(
                                     },
                                     modifier = Modifier.weight(1f),
                                     commands = commands,
+                                    connectionStatus = uiState.connectionStatus,
                                 )
                                 SpecialKeysRow(
                                     onKey = { key -> onKey(key) },
                                     commands = commands,
+                                    connectionStatus = uiState.connectionStatus,
                                 )
                             }
                         }

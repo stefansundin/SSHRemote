@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -37,7 +38,10 @@ fun SpecialKeysRow(
     onKey: (String) -> Unit,
     modifier: Modifier = Modifier,
     commands: Map<RemoteControlKey, Command>? = null,
+    connectionStatus: ConnectionStatus? = null,
 ) {
+    val isEnabled = (connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED)
+            && (commands == null || !commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty())
     val specialKeys = listOf(
         "Esc" to "Escape",
         "Tab" to "Tab",
@@ -57,7 +61,7 @@ fun SpecialKeysRow(
         specialKeys.forEach { (label, key) ->
             Button(
                 onClick = { onKey(key) },
-                enabled = commands == null || !commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty(),
+                enabled = isEnabled,
             ) {
                 Text(label)
             }
