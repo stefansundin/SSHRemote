@@ -74,6 +74,7 @@ import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
@@ -211,7 +212,6 @@ class MainActivity : ComponentActivity() {
                     val app = LocalContext.current.applicationContext as SshRemoteApplication
                     var showBackupRestoredDialog by rememberSaveable { mutableStateOf(app.isRestoredFromBackup) }
                     val hosts by hostViewModel.allHosts.collectAsState()
-                    var startupConnectAttempted by rememberSaveable { mutableStateOf(false) }
 
                     var hostForPresetSelection by remember { mutableStateOf<Host?>(null) }
                     var showGettingStartedDialog by rememberSaveable { mutableStateOf(false) }
@@ -224,7 +224,9 @@ class MainActivity : ComponentActivity() {
                         } else {
                             hostViewModel.disconnect()
                             val initialPage = host.startScreen.tabIndex
-                            navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
+                            navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage)) {
+                                popUpTo(Screen.HostList.route)
+                            }
                         }
                     }
 
@@ -254,9 +256,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     LaunchedEffect(hosts, shortcutHostId.value) {
-                        if (!startupConnectAttempted && !hosts.isNullOrEmpty()) {
-                            startupConnectAttempted = true
-
+                        if (!hosts.isNullOrEmpty()) {
                             val shortcutId = shortcutHostId.value
                             if (shortcutId != null) {
                                 val hostToConnect = hosts?.find { it.id == shortcutId }
@@ -497,11 +497,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.hasExtra("HOST_ID")) {
+            val hostId = intent.getIntExtra("HOST_ID", -1)
+            val uiState = hostViewModel.uiState.value
+            if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.host?.id == hostId) {
+                return
+            }
+            shortcutHostId.value = hostId
+        }
+    }
+
     private fun createShortcut(context: Context, host: Host) {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_MAIN
             putExtra("HOST_ID", host.id)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 
         val shortcutInfo = ShortcutInfoCompat.Builder(context, "host_${host.id}")
