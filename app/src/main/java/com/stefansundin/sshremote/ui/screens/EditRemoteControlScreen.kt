@@ -97,6 +97,7 @@ fun EditRemoteControlScreen(
     onSave: (Map<RemoteControlKey, Command>, List<Command>, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
+    onTestSmartVolumeSettings: () -> Unit,
     initialCommands: List<Command>,
     initialSmartVolumeSettings: SmartVolumeSettings?,
     initialPage: Int = 0,
@@ -497,6 +498,7 @@ fun EditRemoteControlScreen(
                 editedSmartVolumeSettings = it
                 showSmartVolumeSettingsDialog = false
             },
+            onTest = onTestSmartVolumeSettings,
         )
     }
 

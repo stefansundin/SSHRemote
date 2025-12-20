@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,6 +48,7 @@ fun SmartVolumeSettingsDialog(
     settings: SmartVolumeSettings?,
     onDismiss: () -> Unit,
     onSave: (SmartVolumeSettings) -> Unit,
+    onTest: () -> Unit,
 ) {
     var readCurrentVolume by rememberSaveable { mutableStateOf(settings?.readCurrentVolume ?: false) }
     var controlVolumeWithHardwareButtons by rememberSaveable {
@@ -99,6 +101,15 @@ fun SmartVolumeSettingsDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Control volume with hardware buttons")
+                }
+
+                Button(
+                    onClick = onTest,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(top = 8.dp),
+                ) {
+                    Text("Test pactl")
                 }
             }
         },

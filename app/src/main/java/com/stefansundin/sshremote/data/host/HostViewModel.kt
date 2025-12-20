@@ -317,7 +317,7 @@ class HostViewModel(
         }
     }
 
-    private suspend fun readVolume() {
+    suspend fun readVolume(): String? {
         val host = _uiState.value.host
         if (host?.smartVolume?.readCurrentVolume == true) {
             val result = sshRepository.executeCommandReuseShell("pactl get-sink-volume @DEFAULT_SINK@")
@@ -327,11 +327,13 @@ class HostViewModel(
                 // Volume: front-left: 37345 /  57% / -14.65 dB,   front-right: 37345 /  57% / -14.65 dB
                 val volume = Regex("""\d+\s*%""").find(result.output)?.value
                 _uiState.update { it.copy(volume = volume) }
+                return volume
             }
         }
+        return null
     }
 
-    private suspend fun readMuted() {
+    suspend fun readMuted(): Boolean? {
         val host = _uiState.value.host
         if (host?.smartVolume?.readCurrentVolume == true) {
             val result = sshRepository.executeCommandReuseShell("pactl get-sink-mute @DEFAULT_SINK@")
@@ -340,8 +342,10 @@ class HostViewModel(
                 // TODO: Is this output localized?
                 val muted = (result.output.trim() == "Mute: yes")
                 _uiState.update { it.copy(muted = muted) }
+                return muted
             }
         }
+        return null
     }
 
     fun onMouseMove(dx: Float, dy: Float, template: String) {

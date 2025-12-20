@@ -26,6 +26,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -432,6 +433,17 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 initialPage = initialPage,
+                                onTestSmartVolumeSettings = {
+                                    scope.launch {
+                                        val volume = hostViewModel.readVolume()
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            if (volume == null) "Error reading volume. Please install pactl." else "Volume: $volume",
+                                            Toast.LENGTH_SHORT,
+                                        )
+                                            .show()
+                                    }
+                                },
                             )
                         }
 
@@ -518,7 +530,7 @@ class MainActivity : ComponentActivity() {
 
         val shortcutInfo = ShortcutInfoCompat.Builder(context, "host_${host.id}")
             .setShortLabel(host.name)
-            .setLongLabel(host.name)
+            .setLongLabel("Connect to ${host.name}")
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(intent)
             .build()
