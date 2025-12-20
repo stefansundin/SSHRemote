@@ -131,6 +131,7 @@ fun RemoteControlScreen(
     val isInMultiWindowMode = (context as? Activity)?.isInMultiWindowMode == true
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
+    var wasConnected by rememberSaveable { mutableStateOf(false) }
 
     BackHandler {
         onDisconnect()
@@ -192,15 +193,22 @@ fun RemoteControlScreen(
         }
     }
 
+    LaunchedEffect(uiState.connectionStatus) {
+        if (uiState.connectionStatus == ConnectionStatus.CONNECTED) {
+            wasConnected = true
+        }
+    }
+
     LaunchedEffect(host) {
         if (uiState.host?.id != host.id) {
+            wasConnected = false
             hostViewModel.connect(host)
         }
     }
 
     // Reconnect in case of disconnection
     LaunchedEffect(host, uiState.connectionStatus, uiState.error, uiState.host) {
-        if (uiState.host?.id == host.id && uiState.connectionStatus == ConnectionStatus.DISCONNECTED && uiState.error == null) {
+        if (uiState.host?.id == host.id && uiState.connectionStatus == ConnectionStatus.DISCONNECTED && uiState.error == null && wasConnected) {
             hostViewModel.connect(host)
         }
     }
