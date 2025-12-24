@@ -52,4 +52,9 @@ data class Host(
     val remoteCommands: Map<RemoteControlKey, Command>? = null,
     val startScreen: RemoteControlScreen = RemoteControlScreen.Default,
     val smartVolume: SmartVolumeSettings? = null,
-)
+    val sshConfig: String? = null,
+) {
+    companion object {
+        const val DEFAULT_SSH_CONFIG = "ServerAliveInterval 60\n"
+    }
+}

@@ -192,6 +192,7 @@ class HostViewModel(
                 password = password,
                 privateKeys = privateKeys,
                 knownHosts = host.knownHosts,
+                sshConfig = host.sshConfig ?: Host.DEFAULT_SSH_CONFIG,
             )
 
             val newKnownHosts = sshRepository.connect(connectionDetails)

@@ -33,11 +33,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -62,12 +64,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
@@ -93,6 +98,7 @@ fun EditHostScreen(
     var hostname by rememberSaveable(host) { mutableStateOf(host?.hostname ?: "") }
     var port by rememberSaveable(host) { mutableStateOf(host?.port?.toString() ?: "22") }
     var user by rememberSaveable(host) { mutableStateOf(host?.user ?: "") }
+    var sshConfig by rememberSaveable(host) { mutableStateOf(host?.sshConfig) }
 
     var passwordState by rememberSaveable { mutableStateOf(PasswordState.SET) }
     LaunchedEffect(host?.passwordId) {
@@ -155,7 +161,8 @@ fun EditHostScreen(
             (user != (host?.user ?: "")) ||
             passwordChanged ||
             (selectedIdentityIds != host?.identityIds) ||
-            (knownHosts != (host?.knownHosts ?: emptyList<String>()))
+            (knownHosts != (host?.knownHosts ?: emptyList<String>())) ||
+            (sshConfig != host?.sshConfig)
 
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -169,6 +176,7 @@ fun EditHostScreen(
                 user = user,
                 identityIds = selectedIdentityIds,
                 knownHosts = knownHosts,
+                sshConfig = sshConfig,
             )
                 ?: Host(
                     name = name,
@@ -177,6 +185,7 @@ fun EditHostScreen(
                     user = user,
                     identityIds = selectedIdentityIds,
                     knownHosts = knownHosts,
+                    sshConfig = sshConfig,
                 )
             onSave(hostToSave, if (showPasswordField) password else null)
         }
@@ -212,6 +221,95 @@ fun EditHostScreen(
         )
     }
 
+    var showSshConfigWarning by rememberSaveable { mutableStateOf(false) }
+    var showSshConfigDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (showSshConfigWarning) {
+        AlertDialog(
+            onDismissRequest = { showSshConfigWarning = false },
+            title = { Text("Advanced Users Only") },
+            text = { Text("Changing SSH configuration values is intended for advanced users. Incorrect settings may prevent connection.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSshConfigWarning = false
+                        showSshConfigDialog = true
+                    },
+                ) {
+                    Text("I know what I am doing")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showSshConfigWarning = false },
+                ) {
+                    Text("Go back")
+                }
+            },
+        )
+    }
+
+    if (showSshConfigDialog) {
+        val uriHandler = LocalUriHandler.current
+        var currentConfig by rememberSaveable { mutableStateOf(sshConfig ?: Host.DEFAULT_SSH_CONFIG) }
+
+        AlertDialog(
+            onDismissRequest = { showSshConfigDialog = false },
+            title = { Text("SSH Configuration") },
+            text = {
+                Column {
+                    Text("JSch configuration is mostly like OpenSSH, but not exactly. Please do your research (click the Help button below).")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = currentConfig,
+                        onValueChange = { currentConfig = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        textStyle = androidx.compose.ui.text.TextStyle(fontFamily = FontFamily.Monospace),
+                    )
+                }
+            },
+            confirmButton = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    TextButton(
+                        onClick = {
+                            sshConfig = currentConfig
+                            showSshConfigDialog = false
+                        },
+                    ) {
+                        Text("Save")
+                    }
+                }
+            },
+            dismissButton = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    TextButton(
+                        onClick = {
+                            uriHandler.openUri("https://deepwiki.com/mwiede/jsch/7-configuration")
+                        },
+                    ) {
+                        Text("Help")
+                    }
+                    TextButton(
+                        onClick = {
+                            sshConfig = null
+                            showSshConfigDialog = false
+                        },
+                    ) {
+                        Text("Reset to defaults")
+                    }
+                }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+
     BackHandler(enabled = hasUnsavedChanges) {
         showSaveDialog = true
     }
@@ -236,6 +334,31 @@ fun EditHostScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Cancel",
+                        )
+                    }
+                },
+                actions = {
+                    var menuExpanded by rememberSaveable { mutableStateOf(false) }
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Advanced SSH Config") },
+                            onClick = {
+                                menuExpanded = false
+                                if (sshConfig == null) {
+                                    showSshConfigWarning = true
+                                } else {
+                                    showSshConfigDialog = true
+                                }
+                            },
                         )
                     }
                 },

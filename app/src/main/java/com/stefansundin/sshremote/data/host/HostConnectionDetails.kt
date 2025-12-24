@@ -28,4 +28,5 @@ data class HostConnectionDetails(
     val password: String?,
     val privateKeys: List<Pair<String, String>>?,
     val knownHosts: List<String>,
+    val sshConfig: String,
 )

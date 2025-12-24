@@ -32,7 +32,6 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
-import kotlinx.coroutines.flow.first
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
 
@@ -113,6 +112,7 @@ class SettingsImporter(
                         )
                     },
                     startScreen = exportedHost.startScreen ?: RemoteControlScreen.Default,
+                    sshConfig = exportedHost.sshConfig,
                 )
                 hostRepository.upsert(host)
             }

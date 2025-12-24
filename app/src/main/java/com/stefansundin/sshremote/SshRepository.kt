@@ -22,6 +22,7 @@ import android.util.Log
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.ChannelShell
 import com.jcraft.jsch.JSch
+import com.jcraft.jsch.OpenSSHConfig
 import com.jcraft.jsch.Session
 import com.jcraft.jsch.UserInfo
 import com.stefansundin.sshremote.data.host.HostConnectionDetails
@@ -31,12 +32,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.Properties
 import java.util.UUID
 
 sealed class Result {
@@ -102,6 +103,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
             JSch.setLogger(JschLogger())
 
             val jsch = JSch()
+            jsch.configRepository = OpenSSHConfig.parse(details.sshConfig)
 
             val useStrictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
             if (useStrictHostKeyChecking) {
@@ -115,6 +117,9 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
             val newSession = jsch.getSession(details.user, details.hostname, details.port)
             session = newSession
 
+            val strictHostKeyChecking = if (useStrictHostKeyChecking) "ask" else "no"
+            newSession.setConfig("StrictHostKeyChecking", strictHostKeyChecking)
+
             newSession.userInfo = object : UserInfo {
                 var passwordPromptMessage: String? = null
                 var passphrasePromptMessage: String? = null
@@ -123,7 +128,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 override fun promptYesNo(message: String): Boolean {
                     val deferred = CompletableDeferred<Boolean>()
                     _hostKeyVerification.value = HostKeyVerification(message, deferred)
-                    val result = kotlinx.coroutines.runBlocking { deferred.await() }
+                    val result = runBlocking { deferred.await() }
                     _hostKeyVerification.value = null
                     return result
                 }
@@ -131,7 +136,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 override fun showMessage(message: String) {
                     val deferred = CompletableDeferred<Unit>()
                     _message.value = Message(message, deferred)
-                    kotlinx.coroutines.runBlocking { deferred.await() }
+                    runBlocking { deferred.await() }
                     _message.value = null
                 }
 
@@ -144,7 +149,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                 override fun getPassword(): String? {
                     val deferred = CompletableDeferred<String?>()
                     _passwordPrompt.value = PasswordPrompt(passwordPromptMessage ?: "Enter password", deferred)
-                    val result = kotlinx.coroutines.runBlocking { deferred.await() }
+                    val result = runBlocking { deferred.await() }
                     _passwordPrompt.value = null
                     if (result == null) {
                         userCancelledAuth = true
@@ -156,7 +161,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
                     val deferred = CompletableDeferred<String?>()
                     _passphrasePrompt.value =
                         PassphrasePrompt(passphrasePromptMessage ?: "Enter passphrase for private key", deferred)
-                    val result = kotlinx.coroutines.runBlocking { deferred.await() }
+                    val result = runBlocking { deferred.await() }
                     _passphrasePrompt.value = null
                     if (result == null) {
                         userCancelledAuth = true
@@ -173,11 +178,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
 
             details.password?.let { newSession.setPassword(it) }
 
-            val config = Properties()
-            val strictHostKeyChecking = if (useStrictHostKeyChecking) "ask" else "no"
-            config["StrictHostKeyChecking"] = strictHostKeyChecking
-            newSession.setConfig(config)
-
+            Log.d("SshRepository", "Connecting to ${details.hostname}")
             newSession.connect(30000) // 30-second timeout
 
             val hostKeyRepository = jsch.hostKeyRepository

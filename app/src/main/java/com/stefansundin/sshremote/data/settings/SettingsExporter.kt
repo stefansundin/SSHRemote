@@ -79,6 +79,7 @@ class SettingsExporter(
                     )
                 },
                 startScreen = host.startScreen,
+                sshConfig = host.sshConfig,
             )
         }
         val adHocCommands = adHocCommandRepository.getAdHocCommands().first().map { command ->
