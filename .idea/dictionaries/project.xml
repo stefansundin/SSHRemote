@@ -1,6 +1,8 @@
 <component name="ProjectDictionaryState">
   <dictionary name="project">
     <words>
+      <w>keyevent</w>
+      <w>longpress</w>
       <w>mousemove</w>
       <w>pactl</w>
       <w>snackbar</w>

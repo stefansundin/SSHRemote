@@ -18,10 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -37,9 +34,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,52 +65,14 @@ fun HelpScreen(
             )
         },
     ) { innerPadding ->
-        Column(
+        MarkdownText(
+            markdown = stringResource(R.string.help_content),
+            isTextSelectable = true,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-        ) {
-            HelpSection(
-                title = "About SSH Remote",
-                content = "SSH Remote allows you to control your computer remotely using SSH. You can define custom commands or use presets for common tasks.",
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            HelpSection(
-                title = "Getting Started",
-                content = "1. Add a new host by tapping the + button.\n" +
-                        "2. Enter your SSH connection details.\n" +
-                        "3. Select a preset (e.g., xdotool for Linux X11, wtype for Linux Wayland) to auto-configure remote control buttons.",
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            HelpSection(
-                title = "Remote Control",
-                content = "Once connected, you can use the remote control interface to send commands. You can customize the layout and commands by editing the remote control settings.",
-            )
-        }
-    }
-}
-
-@Composable
-fun HelpSection(
-    title: String,
-    content: String,
-) {
-    Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = content,
-            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }

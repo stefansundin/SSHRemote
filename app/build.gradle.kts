@@ -99,6 +99,9 @@ dependencies {
     // --- QR Code Scanning ---
     implementation(libs.zxing)
 
+    // --- Markdown ---
+    implementation(libs.composeMarkdown)
+
     // --- Testing Dependencies ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

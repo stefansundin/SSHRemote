@@ -3,4 +3,5 @@
     <string name="no_ssh_hosts_added_yet">No SSH hosts added yet.</string>
     <string name="empty_list_add_prompt">Tap the + button to add one.</string>
     <string name="tap_the_help_button_for_help">Tap the ? button for help.</string>
+    <string name="help_content">## About SSH Remote\nSSH Remote allows you to control your computer remotely using SSH. You can define custom commands or use presets for common tasks.\n\n## Getting Started\n1. Add a new host by tapping the + button.\n2. Enter your SSH connection details.\n3. Select a preset (e.g., xdotool for Linux X11, wtype for Linux Wayland) to auto-configure remote control buttons.\n\n## Remote Control\nOnce connected, you can use the remote control interface to send commands. You can customize the layout and commands by editing the remote control settings.\n</string>
 </resources>
