@@ -80,10 +80,7 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
 import com.stefansundin.sshremote.data.host.RemoteControlKey
-import com.stefansundin.sshremote.data.host.cecClientPreset
-import com.stefansundin.sshremote.data.host.macosVlcPreset
-import com.stefansundin.sshremote.data.host.wtypePreset
-import com.stefansundin.sshremote.data.host.xdotoolPreset
+import com.stefansundin.sshremote.data.host.presets
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
@@ -554,26 +551,19 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 
 @Composable
 private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>) -> Unit) {
-    val presets = listOf("wtype", "xdotool", "cec-client", "macOS VLC", "No preset")
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Select preset") },
         text = {
             Column {
-                presets.forEach { preset ->
+                (presets.keys + "No preset").forEach { presetKey ->
                     Text(
-                        text = preset,
+                        text = presetKey,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                val presetMap = when (preset) {
-                                    "wtype" -> wtypePreset
-                                    "xdotool" -> xdotoolPreset
-                                    "cec-client" -> cecClientPreset
-                                    "macOS VLC" -> macosVlcPreset
-                                    else -> emptyMap()
-                                }
-                                onPresetSelected(presetMap)
+                                val preset = presets[presetKey] ?: emptyMap()
+                                onPresetSelected(preset)
                             }
                             .padding(vertical = 12.dp),
                     )

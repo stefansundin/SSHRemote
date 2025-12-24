@@ -149,3 +149,37 @@ val macosVlcPreset = mapOf(
     RemoteControlKey.PLAY_PAUSE to Command("osascript -e 'tell application \"VLC\" to play'"),
     RemoteControlKey.NEXT to Command("osascript -e 'tell application \"VLC\" to next'"),
 )
+
+/**
+ * Android "input" command.
+ * https://developer.android.com/reference/android/view/KeyEvent
+ */
+val androidPreset = mapOf(
+    RemoteControlKey.UP to Command("input keyevent KEYCODE_DPAD_UP"),
+    RemoteControlKey.RIGHT to Command("input keyevent KEYCODE_DPAD_RIGHT"),
+    RemoteControlKey.DOWN to Command("input keyevent KEYCODE_DPAD_DOWN"),
+    RemoteControlKey.LEFT to Command("input keyevent KEYCODE_DPAD_LEFT"),
+    RemoteControlKey.SELECT to Command(
+        "input keyevent KEYCODE_DPAD_CENTER",
+        "input keyevent --longpress KEYCODE_DPAD_CENTER",
+    ),
+    RemoteControlKey.VOLUME_DOWN to Command("input keyevent KEYCODE_VOLUME_DOWN"),
+    RemoteControlKey.MUTE to Command("input keyevent KEYCODE_VOLUME_MUTE"),
+    RemoteControlKey.VOLUME_UP to Command("input keyevent KEYCODE_VOLUME_UP"),
+    RemoteControlKey.BACK to Command("input keyevent KEYCODE_BACK"),
+    RemoteControlKey.HOME to Command("input keyevent KEYCODE_HOME"),
+    RemoteControlKey.MENU to Command("input keyevent KEYCODE_MENU"),
+    RemoteControlKey.PREVIOUS to Command("input keyevent KEYCODE_MEDIA_PREVIOUS"),
+    RemoteControlKey.PLAY_PAUSE to Command("input keyevent KEYCODE_MEDIA_PLAY_PAUSE"),
+    RemoteControlKey.NEXT to Command("input keyevent KEYCODE_MEDIA_NEXT"),
+    RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("input text '%s'"),
+    RemoteControlKey.KEYBOARD_KEY_INPUT to Command("input keyevent %s"),
+)
+
+val presets = mapOf(
+    "wtype" to wtypePreset,
+    "xdotool" to xdotoolPreset,
+    "cec-client" to cecClientPreset,
+    "macOS VLC" to macosVlcPreset,
+    "Android" to androidPreset,
+)

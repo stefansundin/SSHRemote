@@ -75,10 +75,7 @@ import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
-import com.stefansundin.sshremote.data.host.cecClientPreset
-import com.stefansundin.sshremote.data.host.macosVlcPreset
-import com.stefansundin.sshremote.data.host.wtypePreset
-import com.stefansundin.sshremote.data.host.xdotoolPreset
+import com.stefansundin.sshremote.data.host.presets
 import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.components.EditCommandDialog
 import com.stefansundin.sshremote.ui.components.EditKeyboardCommandDialog
@@ -116,7 +113,7 @@ fun EditRemoteControlScreen(
         editedRemoteCommands != commands || editedCommands != initialCommands || editedSmartVolumeSettings != initialSmartVolumeSettings
     var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
     var showMenu by rememberSaveable { mutableStateOf(false) }
-    var resetToPreset by rememberSaveable { mutableStateOf("") }
+    var resetToPresetKey by rememberSaveable { mutableStateOf("") }
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -185,16 +182,12 @@ fun EditRemoteControlScreen(
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
             title = { Text("Reset commands?") },
-            text = { Text("This will reset all remote control commands to their default $resetToPreset values.") },
+            text = { Text("This will reset all remote control commands to their default $resetToPresetKey values.") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        editedRemoteCommands = when (resetToPreset) {
-                            "wtype" -> wtypePreset
-                            "cec-client" -> cecClientPreset
-                            "macOS VLC" -> macosVlcPreset
-                            else -> xdotoolPreset
-                        }
+                        editedRemoteCommands =
+                            presets[resetToPresetKey] ?: throw IllegalStateException("Preset '$resetToPresetKey' not found")
                         showResetDialog = false
                     },
                 ) {
@@ -210,19 +203,18 @@ fun EditRemoteControlScreen(
     }
 
     if (showSelectPresetDialog) {
-        val presets = listOf("wtype", "xdotool", "cec-client", "macOS VLC")
         AlertDialog(
             onDismissRequest = { showSelectPresetDialog = false },
             title = { Text("Reset to preset") },
             text = {
                 Column {
-                    presets.forEach { preset ->
+                    presets.keys.forEach { presetKey ->
                         Text(
-                            text = preset,
+                            text = presetKey,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    resetToPreset = preset
+                                    resetToPresetKey = presetKey
                                     showSelectPresetDialog = false
                                     showResetDialog = true
                                 }
