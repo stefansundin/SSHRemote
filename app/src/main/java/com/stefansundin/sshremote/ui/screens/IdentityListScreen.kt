@@ -77,15 +77,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.KeyPair
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
+import com.stefansundin.sshremote.ui.components.TextWithInlineIcon
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -265,10 +268,13 @@ fun IdentityListScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text("No SSH keys added yet.", style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        "Tap the + button to add one.",
+
+                    TextWithInlineIcon(
+                        stringResource(R.string.empty_list_add_prompt),
+                        "+",
+                        Icons.Default.Add,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(top = 16.dp),
                     )
                 }
             } else {

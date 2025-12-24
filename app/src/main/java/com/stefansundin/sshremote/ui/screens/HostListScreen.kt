@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
@@ -63,9 +64,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Host
+import com.stefansundin.sshremote.ui.components.TextWithInlineIcon
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.flow.first
 
@@ -81,7 +85,11 @@ fun HostListScreen(
     onDelete: (Host) -> Unit,
     onUndoDelete: () -> Unit,
     onSettings: () -> Unit,
+    onHelp: () -> Unit,
     modifier: Modifier = Modifier,
+    emptyViewText: String = stringResource(R.string.no_ssh_hosts_added_yet),
+    emptyViewAddHostPrompt: String = stringResource(R.string.empty_list_add_prompt),
+    emptyViewHelpPrompt: String = stringResource(R.string.tap_the_help_button_for_help),
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
@@ -122,6 +130,12 @@ fun HostListScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 actions = {
+                    IconButton(onClick = onHelp) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Help,
+                            contentDescription = "Help",
+                        )
+                    }
                     IconButton(onClick = onSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -148,15 +162,30 @@ fun HostListScreen(
             } else if (hosts.isEmpty()) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .padding(32.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text("No SSH hosts added yet.", style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        "Tap the + button to add one.",
+                        emptyViewText,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+
+                    TextWithInlineIcon(
+                        emptyViewAddHostPrompt,
+                        "+",
+                        Icons.Default.Add,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(top = 16.dp),
+                    )
+
+                    TextWithInlineIcon(
+                        emptyViewHelpPrompt,
+                        "?",
+                        Icons.AutoMirrored.Filled.Help,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 16.dp),
                     )
                 }
             } else {
@@ -297,6 +326,32 @@ fun HostListScreenPreview() {
             onDelete = {},
             onUndoDelete = {},
             onSettings = {},
+            onHelp = {},
+            emptyViewText = "",
+            emptyViewAddHostPrompt = "",
+            emptyViewHelpPrompt = "",
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HostListScreenEmptyPreview() {
+    SSHRemoteTheme {
+        HostListScreen(
+            hosts = emptyList(),
+            onConnectClicked = {},
+            onAdd = {},
+            onEdit = {},
+            onClone = {},
+            onCreateShortcut = {},
+            onDelete = {},
+            onUndoDelete = {},
+            onSettings = {},
+            onHelp = {},
+            emptyViewText = "No SSH hosts added yet",
+            emptyViewAddHostPrompt = "Tap the + button to add a host",
+            emptyViewHelpPrompt = "Tap the ? button for help",
         )
     }
 }

@@ -90,6 +90,7 @@ import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
 import com.stefansundin.sshremote.ui.screens.AddIdentityScreen
 import com.stefansundin.sshremote.ui.screens.EditHostScreen
 import com.stefansundin.sshremote.ui.screens.EditRemoteControlScreen
+import com.stefansundin.sshremote.ui.screens.HelpScreen
 import com.stefansundin.sshremote.ui.screens.HostListScreen
 import com.stefansundin.sshremote.ui.screens.IdentityListScreen
 import com.stefansundin.sshremote.ui.screens.RemoteControlScreen
@@ -115,6 +116,7 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object IdentityList : Screen("identity_list")
     data object AddIdentity : Screen("add_identity")
+    data object Help : Screen("help")
 }
 
 enum class Theme {
@@ -235,6 +237,10 @@ class MainActivity : ComponentActivity() {
                                 showGettingStartedDialog = false
                                 showSelectPresetDialog = true
                             },
+                            onHelp = {
+                                showGettingStartedDialog = false
+                                navController.navigate(Screen.Help.route)
+                            },
                         )
                     }
 
@@ -312,6 +318,9 @@ class MainActivity : ComponentActivity() {
                                 onUndoDelete = { hostViewModel.undoDelete() },
                                 onSettings = {
                                     navController.navigate(Screen.Settings.route)
+                                },
+                                onHelp = {
+                                    navController.navigate(Screen.Help.route)
                                 },
                             )
                         }
@@ -499,6 +508,12 @@ class MainActivity : ComponentActivity() {
                                 onNavigateUp = { navController.safePopBackStack() },
                             )
                         }
+
+                        composable(Screen.Help.route) {
+                            HelpScreen(
+                                onNavigateUp = { navController.safePopBackStack() },
+                            )
+                        }
                     }
                 }
             }
@@ -536,14 +551,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, onHelp: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Getting started") },
-        text = { Text("The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.") },
+        text = { Text("The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.\n\nPlease read the Help page if this is the first time you are using this app.") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("Select preset")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onHelp) {
+                Text("Help")
             }
         },
     )
