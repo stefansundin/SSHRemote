@@ -34,12 +34,32 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.boswelja.markdown.material3.MarkdownDocument
+import com.boswelja.markdown.style.TextStyleModifiers
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import dev.jeziellago.compose.markdowntext.MarkdownText
+
+@Composable
+fun textStyleModifiers(
+    linkColor: Color = Color.Blue, // linkColor does not seem to be working
+    codeColor: Color = MaterialTheme.colorScheme.primary,
+): TextStyleModifiers {
+    return TextStyleModifiers(
+        bold = { it.copy(fontWeight = FontWeight.Bold) },
+        italics = { it.copy(fontStyle = FontStyle.Italic) },
+        strikethrough = { it.copy(textDecoration = TextDecoration.LineThrough) },
+        link = { it.copy(color = linkColor, textDecoration = TextDecoration.Underline) },
+        code = { it.copy(color = codeColor, fontFamily = FontFamily.Monospace) },
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,9 +85,9 @@ fun HelpScreen(
             )
         },
     ) { innerPadding ->
-        MarkdownText(
-            markdown = stringResource(R.string.help_content),
-            isTextSelectable = true,
+        MarkdownDocument(
+            stringResource(R.string.help_content),
+            textStyleModifiers = textStyleModifiers(),
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()

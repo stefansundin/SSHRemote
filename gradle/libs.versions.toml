@@ -8,7 +8,7 @@ espressoCore = "3.7.0"
 activityCompose = "1.12.2"
 navigationCompose = "2.9.6"
 composeBom = "2025.12.01"
-composeMarkdown = "0.5.8"
+composeMarkdown = "1.1.5"
 materialIconsExtendedAndroid = "1.7.8"
 datastorePreferences = "1.2.0"
 room = "2.8.4"
@@ -52,7 +52,8 @@ eddsa = { group = "net.i2p.crypto", name = "eddsa", version.ref = "eddsa" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 zxing = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxing" }
-composeMarkdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
+boswelja-compose-core = { group = "io.github.boswelja.markdown", name = "core", version.ref = "composeMarkdown" }
+boswelja-compose-markdown = { group = "io.github.boswelja.markdown", name = "material3", version.ref = "composeMarkdown" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
