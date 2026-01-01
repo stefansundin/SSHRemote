@@ -75,10 +75,10 @@ class IdentityViewModel(
         }
     }
 
-    suspend fun generateAndInsert(name: String, type: Int, comment: String) {
+    suspend fun generateAndInsert(name: String, type: Int, size: Int?, comment: String) {
         withContext(ioDispatcher) {
             try {
-                val privateKey = generateKeyPair(type, comment)
+                val privateKey = generateKeyPair(type, size, comment)
                 val encryptedPrivateKey = cryptoManager.encrypt(privateKey.toByteArray())
                 identityRepository.insert(
                     Identity(
@@ -93,18 +93,18 @@ class IdentityViewModel(
         }
     }
 
-    private suspend fun generateKeyPair(type: Int, comment: String): String =
-        withContext(ioDispatcher) { // Use the injected dispatcher
+    private suspend fun generateKeyPair(type: Int, size: Int?, comment: String): String =
+        withContext(ioDispatcher) {
             if (type == KeyPair.ED25519) {
                 generateEd25519KeyPair(comment)
             } else {
-                generateJschKeyPair(type, comment)
+                generateJschKeyPair(type, size!!, comment)
             }
         }
 
-    private fun generateJschKeyPair(type: Int, comment: String): String {
+    private fun generateJschKeyPair(type: Int, size: Int, comment: String): String {
         val jsch = JSch()
-        val keyPair = KeyPair.genKeyPair(jsch, type, 2048)
+        val keyPair = KeyPair.genKeyPair(jsch, type, size)
         keyPair.setPublicKeyComment(comment)
 
         val privateKeyPem = ByteArrayOutputStream().use {
@@ -190,12 +190,12 @@ class IdentityViewModel(
 
     suspend fun getPublicKey(identity: Identity): String = withContext(ioDispatcher) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
-        val keypair = KeyPair.load(JSch(), privateKey, null)
+        val keyPair = KeyPair.load(JSch(), privateKey, null)
         val outputStream = ByteArrayOutputStream()
-        val comment = identity.name.ifEmpty { keypair.publicKeyComment }
-        keypair.writePublicKey(outputStream, comment)
+        val comment = identity.name.ifEmpty { keyPair.publicKeyComment }
+        keyPair.writePublicKey(outputStream, comment)
         val publicKeyString = outputStream.toString(Charsets.UTF_8.name())
-        keypair.dispose()
+        keyPair.dispose()
         publicKeyString.trim()
     }
 }

@@ -503,8 +503,8 @@ class MainActivity : ComponentActivity() {
                                     identityViewModel.insert(name, privateKey)
                                     navController.safePopBackStack()
                                 },
-                                onKeyGenerated = { name, type, comment ->
-                                    identityViewModel.generateAndInsert(name, type, comment)
+                                onKeyGenerated = { name, type, size, comment ->
+                                    identityViewModel.generateAndInsert(name, type, size, comment)
                                     navController.safePopBackStack()
                                 },
                                 onNavigateUp = { navController.safePopBackStack() },

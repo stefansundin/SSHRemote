@@ -319,11 +319,15 @@ fun IdentityItem(
     val (keyInfo, isEncrypted) = remember(identity, cryptoManager) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
         try {
-            val keypair = KeyPair.load(JSch(), privateKey, null)
+            val keyPair = KeyPair.load(JSch(), privateKey, null)
             val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-            val info = "${keypair.keyTypeString} - ${identity.createdAt.format(formatter)}"
-            val encrypted = keypair.isEncrypted
-            keypair.dispose()
+            var info = keyPair.keyTypeString
+            if (keyPair.keyType == KeyPair.RSA) {
+                info += " ${keyPair.keySize}-bit"
+            }
+            info += " - ${identity.createdAt.format(formatter)}"
+            val encrypted = keyPair.isEncrypted
+            keyPair.dispose()
             Pair(info, encrypted)
         } catch (e: JSchException) {
             Log.e("IdentityItem", "Invalid key", e)

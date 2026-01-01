@@ -89,7 +89,7 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
  * Cool visual transformer that prevents slash characters from causing a line break.
  * Public SSH keys are full of slashes which make the dialog look funny.
  */
-private object NoSlashLineBreakVisualTransformation : VisualTransformation {
+object NoSlashLineBreakVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val original = text.text
         if (!original.contains('/')) {

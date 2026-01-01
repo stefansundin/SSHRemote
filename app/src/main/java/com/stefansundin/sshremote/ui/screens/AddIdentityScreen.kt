@@ -71,6 +71,7 @@ import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.stefansundin.sshremote.ui.components.NoSlashLineBreakVisualTransformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -78,13 +79,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-val keyTypes = mapOf(KeyPair.ED25519 to "ED25519", KeyPair.RSA to "RSA")
+val keyTypes = mapOf(KeyPair.ED25519 to "Ed25519", KeyPair.RSA to "RSA")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIdentityScreen(
     onKeySaved: (name: String, privateKey: String) -> Unit,
-    onKeyGenerated: suspend (name: String, type: Int, comment: String) -> Unit,
+    onKeyGenerated: suspend (name: String, type: Int, size: Int?, comment: String) -> Unit,
     onNavigateUp: () -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf("") }
@@ -92,7 +93,8 @@ fun AddIdentityScreen(
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabTitles = listOf("Import File", "Generate", "Enter Manually")
     var isKeyContentValid by rememberSaveable { mutableStateOf(false) }
-    var selectedKeyType by rememberSaveable { mutableStateOf<Int?>(null) }
+    var importKeyTypeDescription by rememberSaveable { mutableStateOf<String?>(null) }
+    var generateKeyType by rememberSaveable { mutableStateOf<Pair<Int, Int?>>(Pair(KeyPair.ED25519, null)) }
     var isGenerating by rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -105,23 +107,15 @@ fun AddIdentityScreen(
 
     fun handleSave() {
         val finalName = name.ifBlank {
-            "Key ${
-                SimpleDateFormat(
-                    "yyyy-MM-dd HH:mm",
-                    Locale.getDefault(),
-                ).format(Date())
-            }"
+            val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+            "Key $dateAndTime"
         }
         when (selectedTabIndex) {
             0, 2 -> onKeySaved(finalName, privateKey)
             1 -> {
                 coroutineScope.launch {
                     isGenerating = true
-                    onKeyGenerated(
-                        finalName,
-                        selectedKeyType ?: KeyPair.ED25519,
-                        finalName,
-                    )
+                    onKeyGenerated(finalName, generateKeyType.first, generateKeyType.second, finalName)
                 }
             }
         }
@@ -177,7 +171,12 @@ fun AddIdentityScreen(
                     val jsch = JSch()
                     val keyPair = KeyPair.load(jsch, privateKey.toByteArray(), null)
                     if (keyTypes.containsKey(keyPair.keyType)) {
-                        selectedKeyType = keyPair.keyType
+                        importKeyTypeDescription = keyTypes[keyPair.keyType]
+                        if (keyPair.keyType == KeyPair.RSA) {
+                            importKeyTypeDescription += " (${keyPair.keySize}-bit)"
+                        }
+                    } else {
+                        importKeyTypeDescription = keyPair.keyTypeString
                     }
                     keyPair.dispose()
                     true
@@ -254,14 +253,14 @@ fun AddIdentityScreen(
             Column(modifier = Modifier.padding(16.dp)) {
                 when (selectedTabIndex) {
                     0 -> ImportFileTab(
-                        keyType = selectedKeyType,
+                        keyTypeDescription = importKeyTypeDescription,
                         onKeyContentRead = { content -> privateKey = content },
                         onNameSuggestion = { suggestedName -> name = suggestedName },
                     )
 
                     1 -> GenerateKeyTab(
-                        keyType = selectedKeyType,
-                        onKeyTypeSelected = { selectedKeyType = it },
+                        selectedKeyType = generateKeyType,
+                        onKeyTypeSelected = { generateKeyType = it },
                     )
 
                     2 -> ManualEntryTab(
@@ -278,7 +277,7 @@ fun AddIdentityScreen(
 
 @Composable
 fun ImportFileTab(
-    keyType: Int?,
+    keyTypeDescription: String?,
     onKeyContentRead: (String) -> Unit,
     onNameSuggestion: (String) -> Unit,
 ) {
@@ -290,14 +289,14 @@ fun ImportFileTab(
         keyContentForParsing?.let { content ->
             withContext(Dispatchers.IO) {
                 try {
-                    val keypair = KeyPair.load(JSch(), content.toByteArray(), null)
-                    val comment = keypair.publicKeyComment
+                    val keyPair = KeyPair.load(JSch(), content.toByteArray(), null)
+                    val comment = keyPair.publicKeyComment
                     if (comment.isNotBlank()) {
                         withContext(Dispatchers.Main) {
                             onNameSuggestion(comment)
                         }
                     }
-                    keypair.dispose()
+                    keyPair.dispose()
                     error = null
                 } catch (e: Exception) {
                     error = e.message
@@ -354,23 +353,26 @@ fun ImportFileTab(
 
         if (error != null) {
             Text("Error: $error")
-        } else if (keyType != null) {
-            Text("Key Type: ${keyTypes[keyType]}")
+        } else if (keyTypeDescription != null) {
+            Text("Key Type: $keyTypeDescription")
         }
     }
 }
 
 @Composable
-fun GenerateKeyTab(keyType: Int?, onKeyTypeSelected: (Int) -> Unit) {
-    val keyTypeOptions = listOf("Ed25519" to KeyPair.ED25519, "RSA" to KeyPair.RSA)
-    val selectedKeyType = keyType ?: KeyPair.ED25519
+fun GenerateKeyTab(selectedKeyType: Pair<Int, Int?>, onKeyTypeSelected: (Pair<Int, Int?>) -> Unit) {
+    val keyTypeOptions = listOf(
+        "Ed25519" to Pair(KeyPair.ED25519, null),
+        "RSA (2048-bit)" to Pair(KeyPair.RSA, 2048),
+        "RSA (4096-bit)" to Pair(KeyPair.RSA, 4096),
+    )
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text("Select the type of key to generate:")
-        keyTypeOptions.forEach { (name, type) ->
+        keyTypeOptions.forEach { (label, type) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -382,7 +384,7 @@ fun GenerateKeyTab(keyType: Int?, onKeyTypeSelected: (Int) -> Unit) {
                     selected = (selectedKeyType == type),
                     onClick = { onKeyTypeSelected(type) },
                 )
-                Text(text = name, modifier = Modifier.padding(start = 8.dp))
+                Text(label, modifier = Modifier.padding(start = 8.dp))
             }
         }
     }
@@ -414,12 +416,12 @@ fun ManualEntryTab(
     LaunchedEffect(privateKey) {
         withContext(Dispatchers.IO) {
             try {
-                val keypair = KeyPair.load(JSch(), privateKey.toByteArray(), null)
-                val comment = keypair.publicKeyComment
+                val keyPair = KeyPair.load(JSch(), privateKey.toByteArray(), null)
+                val comment = keyPair.publicKeyComment
                 if (comment.isNotBlank()) {
                     onNameSuggestion(comment)
                 }
-                keypair.dispose()
+                keyPair.dispose()
             } catch (e: Exception) {
                 Log.e("AddIdentityScreen", "Error parsing key", e)
             }
@@ -431,11 +433,12 @@ fun ManualEntryTab(
         onValueChange = onPrivateKeyChange,
         label = { Text("Private Key") },
         placeholder = { Text("-----BEGIN OPENSSH PRIVATE KEY-----") },
+        supportingText = { if (isError) Text("Invalid key format") },
+        isError = isError,
+        visualTransformation = NoSlashLineBreakVisualTransformation,
         modifier = Modifier
             .fillMaxWidth()
             .height(250.dp),
-        isError = isError,
-        supportingText = { if (isError) Text("Invalid key format") },
     )
     Spacer(modifier = Modifier.height(8.dp))
     TextButton(
@@ -460,14 +463,22 @@ fun ManualEntryTab(
 @Preview(showBackground = true)
 @Composable
 fun AddIdentityScreenPreview_ImportTab() {
-    AddIdentityScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _ -> }, onNavigateUp = {})
+    AddIdentityScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _, _ -> }, onNavigateUp = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ImportFileTabPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        ImportFileTab(keyTypeDescription = "RSA 4096-bit", onKeyContentRead = {}, onNameSuggestion = {})
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GenerateKeyTabPreview() {
     Column(modifier = Modifier.padding(16.dp)) {
-        GenerateKeyTab(keyType = KeyPair.ED25519, onKeyTypeSelected = {})
+        GenerateKeyTab(selectedKeyType = Pair(KeyPair.ED25519, null), onKeyTypeSelected = {})
     }
 }
 
@@ -494,13 +505,5 @@ fun ManualEntryTabWithErrorPreview() {
             onNameSuggestion = {},
             isError = true,
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ImportFileTabPreview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        ImportFileTab(keyType = null, onKeyContentRead = {}, onNameSuggestion = {})
     }
 }
