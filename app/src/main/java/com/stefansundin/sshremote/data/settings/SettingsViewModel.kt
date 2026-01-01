@@ -122,12 +122,35 @@ class SettingsViewModel(
         }
     }
 
+    suspend fun exportSettingsToString(context: Context): String {
+        return SettingsExporter(context, settingsRepository, hostRepository, adHocCommandRepository).exportToString()
+    }
+
     fun importSettings(context: Context, uri: Uri, merge: Boolean) {
         viewModelScope.launch {
             try {
                 val (count, requestNotificationPermission, theme) =
                     SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
                         .import(uri, merge)
+                if (theme != null) {
+                    setTheme(theme)
+                }
+                _eventFlow.emit(SettingsEvent.ImportSuccess(count))
+                if (requestNotificationPermission) {
+                    _eventFlow.emit(SettingsEvent.RequestPostNotificationsPermission)
+                }
+            } catch (e: ImportException) {
+                _eventFlow.emit(SettingsEvent.ImportError(e.message ?: "Unknown error"))
+            }
+        }
+    }
+
+    fun importSettings(context: Context, json: String, merge: Boolean) {
+        viewModelScope.launch {
+            try {
+                val (count, requestNotificationPermission, theme) =
+                    SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
+                        .import(json, merge)
                 if (theme != null) {
                     setTheme(theme)
                 }

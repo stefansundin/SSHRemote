@@ -24,15 +24,19 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -53,14 +57,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.BuildConfig
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.SettingsEvent
@@ -69,6 +82,7 @@ import com.stefansundin.sshremote.ui.components.HapticFeedbackSettingDialog
 import com.stefansundin.sshremote.ui.components.ThemeSettingDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -145,6 +159,7 @@ fun SettingsScreen(
     onNavigateToIdentityList: () -> Unit,
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val savedTheme by settingsViewModel.theme.collectAsState()
     var previewTheme by rememberSaveable { mutableStateOf(savedTheme) }
     var showThemeDialog by rememberSaveable { mutableStateOf(false) }
@@ -152,6 +167,8 @@ fun SettingsScreen(
     var previewHapticFeedback by rememberSaveable { mutableStateOf(savedHapticFeedback) }
     var showHapticFeedbackDialog by rememberSaveable { mutableStateOf(false) }
     var importUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var importJson by rememberSaveable { mutableStateOf<String?>(null) }
+    var exportJson by rememberSaveable { mutableStateOf<String?>(null) }
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
 
@@ -188,6 +205,12 @@ fun SettingsScreen(
             uri?.let { importUri = it }
         },
     )
+
+    val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            importJson = result.contents
+        }
+    }
 
     val uriHandler = LocalUriHandler.current
 
@@ -258,6 +281,53 @@ fun SettingsScreen(
                 importUri = null
             }
         }
+    }
+
+    importJson?.let { json ->
+        if (hasHosts) {
+            AlertDialog(
+                title = { Text("Import settings") },
+                text = { Text("Do you want to merge with existing hosts or overwrite them?") },
+                properties = DialogProperties(dismissOnClickOutside = false),
+                onDismissRequest = { importJson = null },
+                confirmButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(
+                            onClick = {
+                                settingsViewModel.importSettings(context, json, false)
+                                importJson = null
+                            },
+                        ) {
+                            Text("Overwrite")
+                        }
+                        TextButton(
+                            onClick = {
+                                settingsViewModel.importSettings(context, json, true)
+                                importJson = null
+                            },
+                        ) {
+                            Text("Merge")
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { importJson = null },
+                    ) {
+                        Text("Cancel")
+                    }
+                },
+            )
+        } else {
+            LaunchedEffect(Unit) {
+                settingsViewModel.importSettings(context, json, false)
+                importJson = null
+            }
+        }
+    }
+
+    exportJson?.let { json ->
+        QrCodeDialog(json = json, onDismissRequest = { exportJson = null })
     }
 
     SSHRemoteTheme(darkTheme = useDarkTheme) {
@@ -388,7 +458,7 @@ fun SettingsScreen(
 
                 SettingsGroup("Data") {
                     SettingsItem(
-                        title = "Export settings",
+                        title = "Export to file",
                         subtitle = "Export settings to a file.",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
@@ -400,10 +470,33 @@ fun SettingsScreen(
                         },
                     )
                     SettingsItem(
-                        title = "Import settings",
+                        title = "Import from file",
                         subtitle = "Import settings from a file.",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { importLauncher.launch(arrayOf("application/json")) },
+                    )
+                    SettingsItem(
+                        title = "Export to QR code",
+                        subtitle = "Export settings to a QR code.",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            coroutineScope.launch {
+                                exportJson = settingsViewModel.exportSettingsToString(context)
+                            }
+                        },
+                    )
+                    SettingsItem(
+                        title = "Import from QR code",
+                        subtitle = "Import settings from a QR code.",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            val options = ScanOptions()
+                            options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                            options.setPrompt("Scan a QR code to import settings")
+                            options.setBeepEnabled(false)
+                            options.setOrientationLocked(false)
+                            qrScanLauncher.launch(options)
+                        },
                     )
                 }
 
@@ -447,6 +540,42 @@ fun SettingsScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun QrCodeDialog(json: String, onDismissRequest: () -> Unit) {
+    val qrCodeBitmap = remember(json) {
+        val size = 512
+        val hints = mapOf(EncodeHintType.CHARACTER_SET to "UTF-8")
+        val writer = QRCodeWriter()
+        val bitMatrix = writer.encode(json, BarcodeFormat.QR_CODE, size, size, hints)
+        val width = bitMatrix.width
+        val height = bitMatrix.height
+        val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.RGB_565)
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                bitmap.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+            }
+        }
+        bitmap
+    }
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Box(
+            modifier = Modifier
+                .size(320.dp)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                bitmap = qrCodeBitmap.asImageBitmap(),
+                contentDescription = "QR Code",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+            )
         }
     }
 }

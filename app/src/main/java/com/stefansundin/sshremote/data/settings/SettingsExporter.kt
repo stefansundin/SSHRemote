@@ -40,12 +40,20 @@ class SettingsExporter(
 ) {
 
     suspend fun export(uri: Uri) {
-        val settings = getSettingsToExport()
-        val json = GsonBuilder().setPrettyPrinting().create().toJson(settings)
-
+        val json = exportToString(prettyPrint = true)
         context.contentResolver.openOutputStream(uri)?.use { outputStream ->
             outputStream.write(json.toByteArray())
         }
+    }
+
+    suspend fun exportToString(prettyPrint: Boolean = false): String {
+        val settings = getSettingsToExport()
+        val gson = if (prettyPrint) {
+            GsonBuilder().setPrettyPrinting().create()
+        } else {
+            GsonBuilder().create()
+        }
+        return gson.toJson(settings)
     }
 
     private suspend fun getSettingsToExport(): ExportedSettings {

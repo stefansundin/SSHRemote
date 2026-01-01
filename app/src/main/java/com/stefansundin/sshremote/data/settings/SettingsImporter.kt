@@ -48,7 +48,10 @@ class SettingsImporter(
         val json = context.contentResolver.openInputStream(uri)?.use { inputStream ->
             inputStream.bufferedReader().use { it.readText() }
         } ?: throw ImportException("Could not read file")
+        return import(json, merge)
+    }
 
+    suspend fun import(json: String, merge: Boolean): Triple<Int, Boolean, Theme?> {
         var requestNotificationPermission = false
         var importedTheme: Theme? = null
 
