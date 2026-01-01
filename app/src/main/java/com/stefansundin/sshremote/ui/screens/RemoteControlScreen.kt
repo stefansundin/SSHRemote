@@ -27,11 +27,13 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
@@ -76,7 +78,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -139,6 +143,21 @@ fun RemoteControlScreen(
     } else {
         false
     }
+    val systemBarsInsets = WindowInsets.systemBars
+    val layoutDirection = LocalLayoutDirection.current
+    val density = LocalDensity.current
+    val hasSystemBars = remember {
+        // Android TV does not have system bars. This check prevents the fullscreen button from appearing there.
+        // Calculate hasSystemBars only once based on the initial state of the insets.
+        // This prevents the fullscreen button from flickering when exiting fullscreen, which happens because the system bar insets briefly report as 0 during the transition.
+        with(density) {
+            systemBarsInsets.getTop(this) > 0 ||
+                    systemBarsInsets.getBottom(this) > 0 ||
+                    systemBarsInsets.getLeft(this, layoutDirection) > 0 ||
+                    systemBarsInsets.getRight(this, layoutDirection) > 0
+        }
+    }
+    val canToggleFullscreen = !isInMultiWindowMode && (hasSystemBars || isFullscreen)
 
     BackHandler {
         onDisconnect()
@@ -459,7 +478,7 @@ fun RemoteControlScreen(
                                 connectionStatus = uiState.connectionStatus,
                                 modifier = Modifier.padding(end = 8.dp),
                             )
-                            if (!isInMultiWindowMode) {
+                            if (canToggleFullscreen) {
                                 IconButton(onClick = { isFullscreen = !isFullscreen }) {
                                     Icon(
                                         if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
