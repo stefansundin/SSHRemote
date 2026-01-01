@@ -100,7 +100,9 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
         return withContext(Dispatchers.IO) {
             session?.disconnect()
 
-            JSch.setLogger(JschLogger())
+            if (BuildConfig.DEBUG) {
+                JSch.setLogger(JschLogger())
+            }
 
             val jsch = JSch()
             jsch.configRepository = OpenSSHConfig.parse(details.sshConfig)
