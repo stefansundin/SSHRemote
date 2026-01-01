@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.screens
 
 import android.app.Activity
+import android.os.Build
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -129,10 +130,15 @@ fun RemoteControlScreen(
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
-    val isInMultiWindowMode = (context as? Activity)?.isInMultiWindowMode == true
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var wasConnected by rememberSaveable { mutableStateOf(false) }
+
+    val isInMultiWindowMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        (context as? Activity)?.isInMultiWindowMode == true
+    } else {
+        false
+    }
 
     BackHandler {
         onDisconnect()
