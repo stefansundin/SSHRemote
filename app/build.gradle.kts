@@ -54,6 +54,11 @@ android {
     }
 }
 
+// Fix for "Unsupported class file major version 68" issue after upgrading to kotlin 2.3.0
+composeCompiler {
+    includeComposeMappingFile.set(false)
+}
+
 dependencies {
     // Core and Lifecycle
     implementation(libs.androidx.core.ktx)
