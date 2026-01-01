@@ -22,7 +22,6 @@ fun SelectIdentityDialog(
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Select public key") },
         text = {
             if (identities.isEmpty()) {
@@ -46,6 +45,7 @@ fun SelectIdentityDialog(
                 }
             }
         },
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel")

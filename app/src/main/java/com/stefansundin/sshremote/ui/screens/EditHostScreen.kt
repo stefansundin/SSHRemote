@@ -193,9 +193,10 @@ fun EditHostScreen(
 
     if (showSaveDialog) {
         AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
             title = { Text("Unsaved changes") },
             text = { Text("Do you want to save the host before leaving?") },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { showSaveDialog = false },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -226,9 +227,9 @@ fun EditHostScreen(
 
     if (showSshConfigWarning) {
         AlertDialog(
-            onDismissRequest = { showSshConfigWarning = false },
             title = { Text("Advanced Users Only") },
             text = { Text("Changing SSH configuration values is intended for advanced users. Incorrect settings may prevent connection.") },
+            onDismissRequest = { showSshConfigWarning = false },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -254,7 +255,6 @@ fun EditHostScreen(
         var currentConfig by rememberSaveable { mutableStateOf(sshConfig ?: Host.DEFAULT_SSH_CONFIG) }
 
         AlertDialog(
-            onDismissRequest = { showSshConfigDialog = false },
             title = { Text("SSH Configuration") },
             text = {
                 Column {
@@ -270,6 +270,11 @@ fun EditHostScreen(
                     )
                 }
             },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnClickOutside = false,
+            ),
+            onDismissRequest = { showSshConfigDialog = false },
             confirmButton = {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -305,7 +310,6 @@ fun EditHostScreen(
                     }
                 }
             },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
             modifier = Modifier.padding(16.dp),
         )
     }

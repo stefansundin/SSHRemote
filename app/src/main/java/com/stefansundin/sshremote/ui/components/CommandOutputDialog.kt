@@ -49,7 +49,6 @@ fun CommandOutputDialog(
     val scope = rememberCoroutineScope()
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Command Output") },
         text = {
             SelectionContainer {
@@ -58,6 +57,7 @@ fun CommandOutputDialog(
                 }
             }
         },
+        onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = onDismiss) {
                 Text("Close")
@@ -68,12 +68,12 @@ fun CommandOutputDialog(
                 onClick = {
                     val clipData = ClipData.newPlainText("Command output", output)
                     scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
-                }
+                },
             ) {
                 Icon(
                     Icons.Outlined.ContentCopy,
                     contentDescription = "Copy",
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                    modifier = Modifier.size(ButtonDefaults.IconSize),
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text("Copy")

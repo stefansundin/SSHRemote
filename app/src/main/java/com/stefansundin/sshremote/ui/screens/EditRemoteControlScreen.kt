@@ -71,6 +71,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
@@ -158,9 +159,10 @@ fun EditRemoteControlScreen(
 
     if (showUnsavedBackDialog) {
         AlertDialog(
-            onDismissRequest = { showUnsavedBackDialog = false },
             title = { Text("Unsaved changes") },
             text = { Text("Do you want to save your changes before leaving?") },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { showUnsavedBackDialog = false },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -180,14 +182,15 @@ fun EditRemoteControlScreen(
 
     if (showResetDialog) {
         AlertDialog(
-            onDismissRequest = { showResetDialog = false },
             title = { Text("Reset commands?") },
             text = { Text("This will reset all remote control commands to their default $resetToPresetKey values.") },
+            onDismissRequest = { showResetDialog = false },
             confirmButton = {
                 TextButton(
                     onClick = {
                         editedRemoteCommands =
-                            presets[resetToPresetKey] ?: throw IllegalStateException("Preset '$resetToPresetKey' not found")
+                            presets[resetToPresetKey]
+                                ?: throw IllegalStateException("Preset '$resetToPresetKey' not found")
                         showResetDialog = false
                     },
                 ) {
@@ -204,7 +207,6 @@ fun EditRemoteControlScreen(
 
     if (showSelectPresetDialog) {
         AlertDialog(
-            onDismissRequest = { showSelectPresetDialog = false },
             title = { Text("Reset to preset") },
             text = {
                 Column {
@@ -223,6 +225,7 @@ fun EditRemoteControlScreen(
                     }
                 }
             },
+            onDismissRequest = { showSelectPresetDialog = false },
             confirmButton = {
                 TextButton(
                     onClick = { showSelectPresetDialog = false },

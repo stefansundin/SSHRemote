@@ -45,7 +45,6 @@ fun ThemeSettingDialog(
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Choose theme") },
         text = {
             Column {
@@ -75,6 +74,7 @@ fun ThemeSettingDialog(
                 }
             }
         },
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("OK")

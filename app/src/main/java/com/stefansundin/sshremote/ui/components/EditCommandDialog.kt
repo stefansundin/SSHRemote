@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 
 @Composable
@@ -50,7 +51,6 @@ fun EditCommandDialog(
     var showOutput by rememberSaveable { mutableStateOf(command?.showOutput ?: true) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text(if (command == null) "Add Command" else "Edit Command") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -85,6 +85,8 @@ fun EditCommandDialog(
                 }
             }
         },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
         confirmButton = {
             Button(
                 onClick = {

@@ -58,7 +58,6 @@ fun SmartVolumeSettingsDialog(
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Smart volume settings") },
         text = {
             Column {
@@ -113,6 +112,7 @@ fun SmartVolumeSettingsDialog(
                 }
             }
         },
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
                 onClick = {

@@ -49,7 +49,6 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Public Key") },
         text = {
             // A scrollable text field is good for long keys
@@ -61,6 +60,7 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
                 visualTransformation = NoSlashLineBreakVisualTransformation,
             )
         },
+        onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = onDismiss) {
                 Text("Close")

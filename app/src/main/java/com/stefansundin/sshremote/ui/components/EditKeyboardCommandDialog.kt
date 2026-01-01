@@ -34,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
@@ -48,7 +49,6 @@ fun EditKeyboardCommandDialog(
     var newKeyCommand by rememberSaveable { mutableStateOf(keyCommand) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Edit Keyboard Commands") },
         text = {
             Column(
@@ -73,6 +73,8 @@ fun EditKeyboardCommandDialog(
                 )
             }
         },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onSave(newTypeCommand, newKeyCommand) }) {
                 Text("Save")

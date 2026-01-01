@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
@@ -53,7 +54,6 @@ fun EditRemoteCommandDialog(
     var repeatCommand by rememberSaveable { mutableStateOf(initialCommand.repeat) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Edit Command") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -92,6 +92,8 @@ fun EditRemoteCommandDialog(
                 }
             }
         },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
                 onClick = {

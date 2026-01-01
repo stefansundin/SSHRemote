@@ -66,6 +66,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
 import com.journeyapps.barcodescanner.ScanContract
@@ -128,9 +129,10 @@ fun AddIdentityScreen(
 
     if (showSaveDialog) {
         AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
             title = { Text("Unsaved changes") },
             text = { Text("Do you want to save the key before leaving?") },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { showSaveDialog = false },
             confirmButton = {
                 TextButton(onClick = { handleSave() }) {
                     Text("Save and leave")
@@ -146,7 +148,6 @@ fun AddIdentityScreen(
 
     if (isGenerating) {
         AlertDialog(
-            onDismissRequest = { /* cannot be dismissed */ },
             title = { Text("Generating Key") },
             text = {
                 Column(
@@ -158,6 +159,7 @@ fun AddIdentityScreen(
                     Text("Please wait, this can take a moment...")
                 }
             },
+            onDismissRequest = { /* cannot be dismissed */ },
             confirmButton = {},
         )
     }

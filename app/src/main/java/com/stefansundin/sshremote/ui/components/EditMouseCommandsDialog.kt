@@ -34,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
@@ -46,7 +47,6 @@ fun EditMouseCommandsDialog(
     var newCommands by rememberSaveable { mutableStateOf(commands) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Edit Mouse Commands") },
         text = {
             Column(
@@ -76,6 +76,8 @@ fun EditMouseCommandsDialog(
                 }
             }
         },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onSave(newCommands) }) {
                 Text("Save")

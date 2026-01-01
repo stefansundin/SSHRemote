@@ -61,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -273,11 +274,12 @@ class MainActivity : ComponentActivity() {
 
                     if (showBackupRestoredDialog) {
                         AlertDialog(
+                            title = { Text("Restored from backup") },
+                            text = { Text("The application data was restored from a backup. For security reasons, encrypted data such as SSH keys and passwords are not included in backups.\n\nPlease configure these again.") },
+                            properties = DialogProperties(dismissOnClickOutside = false),
                             onDismissRequest = {
                                 showBackupRestoredDialog = false
                             },
-                            title = { Text("Restored from backup") },
-                            text = { Text("The application data was restored from a backup. For security reasons, encrypted data such as SSH keys and passwords are not included in backups.\n\nPlease configure these again.") },
                             confirmButton = {
                                 TextButton(
                                     onClick = {
@@ -553,9 +555,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, onHelp: () -> Unit) {
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Getting started") },
         text = { Text("The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.\n\nPlease read the Help page if this is the first time you are using this app.") },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("Select preset")
@@ -572,7 +575,6 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, o
 @Composable
 private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>) -> Unit) {
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Select preset") },
         text = {
             Column {
@@ -590,6 +592,8 @@ private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<Rem
                 }
             }
         },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
         confirmButton = {},
     )
 }

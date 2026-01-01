@@ -79,6 +79,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.KeyPair
@@ -200,9 +201,10 @@ fun IdentityListScreen(
 
     if (errorMessage != null) {
         AlertDialog(
-            onDismissRequest = { errorMessage = null },
             title = { Text("Error") },
             text = { Text(errorMessage!!) },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { errorMessage = null },
             confirmButton = {
                 Button(onClick = { errorMessage = null }) {
                     Text("OK")
@@ -390,7 +392,6 @@ fun IdentityItem(
 
     if (isRenameDialogVisible) {
         AlertDialog(
-            onDismissRequest = { isRenameDialogVisible = false },
             title = { Text("Rename SSH Key") },
             text = {
                 TextField(
@@ -401,6 +402,7 @@ fun IdentityItem(
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
+            onDismissRequest = { isRenameDialogVisible = false },
             confirmButton = {
                 TextButton(
                     onClick = {

@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.getVibrator
 
@@ -100,7 +101,6 @@ fun HapticFeedbackSettingDialog(
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text("Haptic feedback") },
         text = {
             Column(
@@ -180,6 +180,8 @@ fun HapticFeedbackSettingDialog(
                 }
             }
         },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("OK")

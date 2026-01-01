@@ -60,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.BuildConfig
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.SettingsEvent
@@ -91,7 +92,7 @@ private fun SettingsItem(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -115,7 +116,7 @@ private fun SettingsSwitchItem(
     title: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
@@ -219,9 +220,10 @@ fun SettingsScreen(
     importUri?.let { uri ->
         if (hasHosts) {
             AlertDialog(
-                onDismissRequest = { importUri = null },
                 title = { Text("Import settings") },
                 text = { Text("Do you want to merge with existing hosts or overwrite them?") },
+                properties = DialogProperties(dismissOnClickOutside = false),
+                onDismissRequest = { importUri = null },
                 confirmButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(
@@ -328,7 +330,7 @@ fun SettingsScreen(
                         onClick = {
                             previewTheme = savedTheme
                             showThemeDialog = true
-                        }
+                        },
                     )
                 }
 
@@ -342,12 +344,12 @@ fun SettingsScreen(
                         onClick = {
                             previewHapticFeedback = savedHapticFeedback
                             showHapticFeedbackDialog = true
-                        }
+                        },
                     )
                     SettingsSwitchItem(
                         title = "Keep screen on",
                         checked = keepScreenOn,
-                        onCheckedChange = { settingsViewModel.setKeepScreenOn(it) }
+                        onCheckedChange = { settingsViewModel.setKeepScreenOn(it) },
                     )
                     SettingsSwitchItem(
                         title = "Show notification",
@@ -362,7 +364,7 @@ fun SettingsScreen(
                             } else {
                                 settingsViewModel.setNotificationsEnabled(false)
                             }
-                        }
+                        },
                     )
                 }
 
@@ -373,12 +375,12 @@ fun SettingsScreen(
                         title = "SSH Keys",
                         subtitle = "Manage SSH keys for authentication",
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = onNavigateToIdentityList
+                        onClick = onNavigateToIdentityList,
                     )
                     SettingsSwitchItem(
                         title = "Strict host key checking",
                         checked = strictHostKeyChecking,
-                        onCheckedChange = { settingsViewModel.setStrictHostKeyChecking(it) }
+                        onCheckedChange = { settingsViewModel.setStrictHostKeyChecking(it) },
                     )
                 }
 
@@ -395,13 +397,13 @@ fun SettingsScreen(
                             val filename =
                                 "ssh-remote-settings-${dateFormat.format(Date())}.json"
                             exportLauncher.launch(filename)
-                        }
+                        },
                     )
                     SettingsItem(
                         title = "Import settings",
                         subtitle = "Import settings from a file.",
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { importLauncher.launch(arrayOf("application/json")) }
+                        onClick = { importLauncher.launch(arrayOf("application/json")) },
                     )
                 }
 
@@ -411,36 +413,36 @@ fun SettingsScreen(
                     SettingsItem(
                         title = "App version",
                         subtitle = BuildConfig.VERSION_NAME,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                     SettingsItem(
                         title = "Author",
                         subtitle = "Developed by Stefan Sundin",
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                     SettingsItem(
                         title = "Donate",
                         subtitle = "Support the developer",
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { uriHandler.openUri("https://stefansundin.github.io/donate") }
+                        onClick = { uriHandler.openUri("https://stefansundin.github.io/donate") },
                     )
                     SettingsItem(
                         title = "License",
                         subtitle = "GNU General Public License v3.0",
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { uriHandler.openUri("https://www.gnu.org/licenses/gpl-3.0.html") }
+                        onClick = { uriHandler.openUri("https://www.gnu.org/licenses/gpl-3.0.html") },
                     )
                     SettingsItem(
                         title = "Source code",
                         subtitle = "View on GitHub",
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { uriHandler.openUri("https://github.com/stefansundin/SSHRemote") }
+                        onClick = { uriHandler.openUri("https://github.com/stefansundin/SSHRemote") },
                     )
                     SettingsItem(
                         title = "SSH library",
                         subtitle = "Using mwiede/jsch ${BuildConfig.JSCH_VERSION}",
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { uriHandler.openUri("https://github.com/mwiede/jsch") }
+                        onClick = { uriHandler.openUri("https://github.com/mwiede/jsch") },
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))

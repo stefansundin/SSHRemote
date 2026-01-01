@@ -81,6 +81,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -227,9 +228,10 @@ fun RemoteControlScreen(
 
     if (uiState.error != null) {
         AlertDialog(
-            onDismissRequest = onClearError,
             title = { Text("Connection Error") },
             text = { Text(uiState.error) },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = onClearError,
             confirmButton = {
                 TextButton(onClick = onClearError) {
                     Text("OK")
@@ -240,9 +242,10 @@ fun RemoteControlScreen(
 
     hostKeyVerification?.let { verification ->
         AlertDialog(
-            onDismissRequest = { sshRepository.onHostKeyVerificationComplete(false) },
             title = { Text("Host Key Verification") },
             text = { Text(verification.message) },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { sshRepository.onHostKeyVerificationComplete(false) },
             confirmButton = {
                 TextButton(onClick = { sshRepository.onHostKeyVerificationComplete(true) }) {
                     Text("Accept")
@@ -258,9 +261,10 @@ fun RemoteControlScreen(
 
     message?.let { message ->
         AlertDialog(
-            onDismissRequest = { sshRepository.onMessageDismissed() },
             title = { Text("Message") },
             text = { Text(message.message) },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { sshRepository.onMessageDismissed() },
             confirmButton = {
                 TextButton(onClick = { sshRepository.onMessageDismissed() }) {
                     Text("OK")
@@ -273,7 +277,6 @@ fun RemoteControlScreen(
         var password by rememberSaveable { mutableStateOf("") }
         var passwordVisible by rememberSaveable { mutableStateOf(false) }
         AlertDialog(
-            onDismissRequest = { sshRepository.onPasswordPromptComplete(null) },
             title = { Text(prompt.message) },
             text = {
                 TextField(
@@ -294,6 +297,8 @@ fun RemoteControlScreen(
                     },
                 )
             },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { sshRepository.onPasswordPromptComplete(null) },
             confirmButton = {
                 TextButton(onClick = { sshRepository.onPasswordPromptComplete(password) }) {
                     Text("OK")
@@ -311,7 +316,6 @@ fun RemoteControlScreen(
         var passphrase by rememberSaveable { mutableStateOf("") }
         var passphraseVisible by rememberSaveable { mutableStateOf(false) }
         AlertDialog(
-            onDismissRequest = { sshRepository.onPassphrasePromptComplete(null) },
             title = { Text(prompt.message) },
             text = {
                 TextField(
@@ -332,6 +336,8 @@ fun RemoteControlScreen(
                     },
                 )
             },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = { sshRepository.onPassphrasePromptComplete(null) },
             confirmButton = {
                 TextButton(onClick = { sshRepository.onPassphrasePromptComplete(passphrase) }) {
                     Text("OK")
@@ -349,13 +355,13 @@ fun RemoteControlScreen(
         val identities by identityViewModel.identities.collectAsState()
         if (identities == null) {
             AlertDialog(
-                onDismissRequest = { showSelectIdentityDialog = false },
                 title = { Text("Select public key") },
                 text = {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 },
+                onDismissRequest = { showSelectIdentityDialog = false },
                 confirmButton = {
                     TextButton(onClick = { showSelectIdentityDialog = false }) {
                         Text("Cancel")
