@@ -75,9 +75,13 @@ import com.stefansundin.sshremote.ui.components.NoSlashLineBreakVisualTransforma
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
+import java.util.Base64
 import java.util.Date
 import java.util.Locale
+import java.util.zip.GZIPInputStream
 
 val keyTypes = mapOf(KeyPair.ED25519 to "Ed25519", KeyPair.RSA to "RSA")
 
@@ -288,8 +292,19 @@ fun ImportFileTab(
     LaunchedEffect(keyContentForParsing) {
         keyContentForParsing?.let { content ->
             withContext(Dispatchers.IO) {
+                error = null
                 try {
-                    val keyPair = KeyPair.load(JSch(), content.toByteArray(), null)
+                    var finalKey = content
+                    if (!finalKey.startsWith("-----")) {
+                        val decoded = Base64.getMimeDecoder().decode(finalKey)
+                        val inputStream = GZIPInputStream(ByteArrayInputStream(decoded))
+                        val decompressed = inputStream.bufferedReader(StandardCharsets.UTF_8).readText()
+                        finalKey = decompressed
+                    }
+                    val keyPair = KeyPair.load(JSch(), finalKey.toByteArray(), null)
+                    withContext(Dispatchers.Main) {
+                        onKeyContentRead(finalKey)
+                    }
                     val comment = keyPair.publicKeyComment
                     if (comment.isNotBlank()) {
                         withContext(Dispatchers.Main) {
@@ -297,9 +312,11 @@ fun ImportFileTab(
                         }
                     }
                     keyPair.dispose()
-                    error = null
                 } catch (e: Exception) {
-                    error = e.message
+                    withContext(Dispatchers.Main) {
+                        onKeyContentRead(content)
+                        error = e.message ?: "Invalid key format"
+                    }
                     Log.e("AddIdentityScreen", "Error parsing key", e)
                 }
             }
@@ -311,9 +328,7 @@ fun ImportFileTab(
         onResult = { uri: Uri? ->
             uri?.let {
                 context.contentResolver.openInputStream(it)?.use { inputStream ->
-                    val keyContent = inputStream.reader().readText()
-                    onKeyContentRead(keyContent)
-                    keyContentForParsing = keyContent
+                    keyContentForParsing = inputStream.reader().readText()
                 }
             }
         },
@@ -321,9 +336,7 @@ fun ImportFileTab(
 
     val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            val content = result.contents
-            onKeyContentRead(content)
-            keyContentForParsing = content
+            keyContentForParsing = result.contents
         }
     }
 
