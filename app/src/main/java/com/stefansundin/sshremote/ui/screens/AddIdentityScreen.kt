@@ -72,6 +72,7 @@ import com.jcraft.jsch.KeyPair
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.ui.components.NoWrapOnSpecialCharactersVisualTransformation
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -476,47 +477,57 @@ fun ManualEntryTab(
 @Preview(showBackground = true)
 @Composable
 fun AddIdentityScreenPreview_ImportTab() {
-    AddIdentityScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _, _ -> }, onNavigateUp = {})
+    SSHRemoteTheme {
+        AddIdentityScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _, _ -> }, onNavigateUp = {})
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ImportFileTabPreview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        ImportFileTab(keyTypeDescription = "RSA 4096-bit", onKeyContentRead = {}, onNameSuggestion = {})
+    SSHRemoteTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ImportFileTab(keyTypeDescription = "RSA 4096-bit", onKeyContentRead = {}, onNameSuggestion = {})
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GenerateKeyTabPreview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        GenerateKeyTab(selectedKeyType = Pair(KeyPair.ED25519, null), onKeyTypeSelected = {})
+    SSHRemoteTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            GenerateKeyTab(selectedKeyType = Pair(KeyPair.ED25519, null), onKeyTypeSelected = {})
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ManualEntryTabPreview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        ManualEntryTab(
-            privateKey = "",
-            onPrivateKeyChange = {},
-            onNameSuggestion = {},
-            isError = false,
-        )
+    SSHRemoteTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ManualEntryTab(
+                privateKey = "",
+                onPrivateKeyChange = {},
+                onNameSuggestion = {},
+                isError = false,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ManualEntryTabWithErrorPreview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        ManualEntryTab(
-            privateKey = "invalid key data",
-            onPrivateKeyChange = {},
-            onNameSuggestion = {},
-            isError = true,
-        )
+    SSHRemoteTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ManualEntryTab(
+                privateKey = "invalid key data",
+                onPrivateKeyChange = {},
+                onNameSuggestion = {},
+                isError = true,
+            )
+        }
     }
 }

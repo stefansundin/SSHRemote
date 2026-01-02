@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -127,11 +128,13 @@ object NoWrapOnSpecialCharactersVisualTransformation : VisualTransformation {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun PublicKeyDialogPreview() {
-    PublicKeyDialog(
-        publicKey = "ssh-ed25519 AAAA... Comment",
-        onDismiss = {},
-    )
+    SSHRemoteTheme {
+        PublicKeyDialog(
+            publicKey = "ssh-ed25519 AAAA... Comment",
+            onDismiss = {},
+        )
+    }
 }

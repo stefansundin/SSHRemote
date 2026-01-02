@@ -213,8 +213,8 @@ fun AdHocCommandScreen(
     }
 }
 
-@Preview(name = "Normal Font")
-@Preview(fontScale = 2.0f, name = "Large Font")
+@Preview(showBackground = true, name = "Normal Font")
+@Preview(showBackground = true, name = "Large Font", fontScale = 2.0f)
 @Composable
 private fun AdHocCommandScreenPreview() {
     SSHRemoteTheme {

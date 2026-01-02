@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
 fun ThemeSettingDialog(
@@ -88,13 +89,15 @@ fun ThemeSettingDialog(
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun ThemeSettingDialogPreview() {
-    ThemeSettingDialog(
-        currentTheme = Theme.SYSTEM,
-        onThemeSelected = {},
-        onConfirm = {},
-        onDismiss = {},
-    )
+    SSHRemoteTheme {
+        ThemeSettingDialog(
+            currentTheme = Theme.SYSTEM,
+            onThemeSelected = {},
+            onConfirm = {},
+            onDismiss = {},
+        )
+    }
 }
