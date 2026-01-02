@@ -250,7 +250,9 @@ class MainActivity : ComponentActivity() {
                             onDismiss = { showSelectPresetDialog = false },
                             onPresetSelected = { presetMap ->
                                 hostForPresetSelection?.let { host ->
-                                    hostViewModel.updateRemoteCommands(host, presetMap)
+                                    if (presetMap != null) {
+                                        hostViewModel.updateRemoteCommands(host, presetMap)
+                                    }
                                     val initialPage = host.startScreen.tabIndex
                                     navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
                                 }
@@ -418,7 +420,7 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
                             EditRemoteControlScreen(
-                                commands = uiState.host?.remoteCommands ?: emptyMap(),
+                                initialRemoteCommands = uiState.host?.remoteCommands ?: emptyMap(),
                                 initialCommands = uiState.host?.commands ?: emptyList(),
                                 initialSmartVolumeSettings = uiState.host?.smartVolume,
                                 onSave = { remoteCommands, commands, smartVolume, navigateBack ->
@@ -581,7 +583,7 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, o
 }
 
 @Composable
-private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>) -> Unit) {
+private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>?) -> Unit) {
     AlertDialog(
         title = { Text("Select preset") },
         text = {
@@ -592,8 +594,7 @@ private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<Rem
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                val preset = presets[presetKey] ?: emptyMap()
-                                onPresetSelected(preset)
+                                onPresetSelected(presets[presetKey])
                             }
                             .padding(vertical = 12.dp),
                     )

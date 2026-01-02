@@ -40,11 +40,11 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 @Composable
 fun EditMouseCommandsDialog(
-    commands: Map<RemoteControlKey, Command>,
+    initialRemoteCommands: Map<RemoteControlKey, Command>,
     onDismiss: () -> Unit,
     onSave: (Map<RemoteControlKey, Command>) -> Unit,
 ) {
-    var newCommands by rememberSaveable { mutableStateOf(commands) }
+    var editedRemoteCommands by rememberSaveable { mutableStateOf(initialRemoteCommands) }
 
     AlertDialog(
         title = { Text("Edit Mouse Commands") },
@@ -64,13 +64,13 @@ fun EditMouseCommandsDialog(
                 )
                 mouseKeys.forEach { key ->
                     TextField(
-                        value = newCommands[key]?.command ?: "",
+                        label = { Text(key.title) },
+                        value = editedRemoteCommands[key]?.command ?: "",
                         onValueChange = { value ->
-                            newCommands = newCommands.toMutableMap().apply {
+                            editedRemoteCommands = editedRemoteCommands.toMutableMap().apply {
                                 this[key] = (this[key] ?: Command("", name = key.title)).copy(command = value)
                             }
                         },
-                        label = { Text(key.title) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -79,7 +79,7 @@ fun EditMouseCommandsDialog(
         properties = DialogProperties(dismissOnClickOutside = false),
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { onSave(newCommands) }) {
+            TextButton(onClick = { onSave(editedRemoteCommands) }) {
                 Text("Save")
             }
         },

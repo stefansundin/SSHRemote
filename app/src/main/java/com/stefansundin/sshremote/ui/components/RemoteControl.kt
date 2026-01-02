@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -61,15 +62,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.ui.KeyEvent
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import com.stefansundin.sshremote.ui.tooling.PreviewData
 
 private val MinDimensionForActionButtons = 400.dp
 
@@ -77,9 +82,9 @@ private val MinDimensionForActionButtons = 400.dp
 fun RemoteControl(
     onKeyEvent: (KeyEvent) -> Unit,
     modifier: Modifier = Modifier,
-    commands: Map<RemoteControlKey, Command>? = null,
+    editing: Boolean = false,
+    host: Host?,
     connectionStatus: ConnectionStatus? = null,
-    smartVolumeSettings: SmartVolumeSettings? = null,
     volume: String? = null,
     muted: Boolean? = null,
 ) {
@@ -98,7 +103,7 @@ fun RemoteControl(
             RemoteLayoutMode.Portrait
         }
 
-        RemoteControlLayout(layoutMode, onKeyEvent, commands, connectionStatus, smartVolumeSettings, volume, muted)
+        RemoteControlLayout(layoutMode, onKeyEvent, host, editing, connectionStatus, volume, muted)
     }
 }
 
@@ -113,23 +118,29 @@ private enum class RemoteLayoutMode {
 private fun RemoteControlLayout(
     layoutMode: RemoteLayoutMode,
     onKeyEvent: (KeyEvent) -> Unit,
-    commands: Map<RemoteControlKey, Command>? = null,
+    host: Host? = null,
+    editing: Boolean = false,
     connectionStatus: ConnectionStatus? = null,
-    smartVolumeSettings: SmartVolumeSettings? = null,
     volume: String? = null,
     muted: Boolean? = null,
 ) {
-    val isConnected = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
+    val context = LocalContext.current
+    val isConnected = editing || connectionStatus == ConnectionStatus.CONNECTED
+
+    if (editing) {
+        Toast.makeText(context, "Tap a button to edit its command", Toast.LENGTH_SHORT).show()
+    }
 
     when (layoutMode) {
         RemoteLayoutMode.Compact -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
-                Dpad(onKeyEvent, commands, isConnected)
+                Dpad(onKeyEvent, host, editing, isConnected)
             }
         }
+
         RemoteLayoutMode.Landscape -> {
             Row(
                 modifier = Modifier
@@ -138,16 +149,17 @@ private fun RemoteControlLayout(
                 horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Dpad(onKeyEvent, commands, isConnected)
+                Dpad(onKeyEvent, host, editing, isConnected)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
                 ) {
-                    VolumeStatus(smartVolumeSettings, volume, muted)
-                    ActionButtons(onKeyEvent, commands, isConnected)
+                    StatusText(host, editing, volume, muted)
+                    ActionButtons(onKeyEvent, host, editing, isConnected)
                 }
             }
         }
+
         RemoteLayoutMode.Portrait -> {
             Column(
                 modifier = Modifier
@@ -156,10 +168,30 @@ private fun RemoteControlLayout(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
             ) {
-                VolumeStatus(smartVolumeSettings, volume, muted)
-                Dpad(onKeyEvent, commands, isConnected)
-                ActionButtons(onKeyEvent, commands, isConnected)
+                StatusText(host, editing, volume, muted)
+                Dpad(onKeyEvent, host, editing, isConnected)
+                ActionButtons(onKeyEvent, host, editing, isConnected)
             }
+        }
+    }
+}
+
+@Composable
+private fun StatusText(
+    host: Host?,
+    editing: Boolean,
+    volume: String?,
+    muted: Boolean?,
+) {
+    if (!editing && host != null) {
+        if (host.smartVolume != null) {
+            VolumeStatus(host.smartVolume, volume, muted)
+        } else if (host.remoteCommands == null) {
+            // This text is only displayed when the user picks "No preset" upon first connection
+            Text(
+                "Please configure the remote control commands by entering edit mode via the menu.",
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
@@ -179,8 +211,9 @@ private fun VolumeStatus(smartVolumeSettings: SmartVolumeSettings?, volume: Stri
 @Composable
 private fun ActionButtons(
     onKeyEvent: (KeyEvent) -> Unit,
-    commands: Map<RemoteControlKey, Command>? = null,
-    isConnected: Boolean = true,
+    host: Host?,
+    editing: Boolean,
+    isConnected: Boolean,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
@@ -195,13 +228,13 @@ private fun ActionButtons(
             modifier = rowModifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            RemoteButton(RemoteControlKey.VOLUME_DOWN, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.VOLUME_DOWN, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.AutoMirrored.Filled.VolumeDown, contentDescription = "Volume Down")
             }
-            RemoteButton(RemoteControlKey.MUTE, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.MUTE, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.AutoMirrored.Filled.VolumeOff, contentDescription = "Mute")
             }
-            RemoteButton(RemoteControlKey.VOLUME_UP, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.VOLUME_UP, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Volume Up")
             }
         }
@@ -209,13 +242,13 @@ private fun ActionButtons(
             modifier = rowModifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            RemoteButton(RemoteControlKey.BACK, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.BACK, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-            RemoteButton(RemoteControlKey.HOME, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.HOME, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.Default.Home, contentDescription = "Home")
             }
-            RemoteButton(RemoteControlKey.MENU, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.MENU, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.Default.Menu, contentDescription = "Menu")
             }
         }
@@ -223,14 +256,14 @@ private fun ActionButtons(
             modifier = rowModifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            RemoteButton(RemoteControlKey.PREVIOUS, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.PREVIOUS, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.Default.SkipPrevious, contentDescription = "Previous")
             }
-            RemoteButton(RemoteControlKey.PLAY_PAUSE, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.PLAY_PAUSE, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.Default.PlayArrow, contentDescription = "Play/Pause")
                 Icon(Icons.Default.Pause, contentDescription = "Play/Pause")
             }
-            RemoteButton(RemoteControlKey.NEXT, onKeyEvent, buttonModifier, commands, isConnected) {
+            RemoteButton(RemoteControlKey.NEXT, onKeyEvent, host, editing, isConnected, buttonModifier) {
                 Icon(Icons.Default.SkipNext, contentDescription = "Next")
             }
         }
@@ -240,8 +273,9 @@ private fun ActionButtons(
 @Composable
 private fun Dpad(
     onKeyEvent: (KeyEvent) -> Unit,
-    commands: Map<RemoteControlKey, Command>? = null,
-    isConnected: Boolean = true,
+    host: Host?,
+    editing: Boolean,
+    isConnected: Boolean,
 ) {
     val dpadSize = 280.dp
     val iconOffset = dpadSize / 3f
@@ -255,13 +289,14 @@ private fun Dpad(
 
         // UP
         RemoteButton(
-            key = RemoteControlKey.UP,
-            onKeyEvent = onKeyEvent,
-            modifier = directionalButtonModifier,
-            commands = commands,
-            isConnected = isConnected,
-            shape = ArcShape(225f, 90f),
-            contentPadding = PaddingValues(0.dp),
+            RemoteControlKey.UP,
+            onKeyEvent,
+            host,
+            editing,
+            isConnected,
+            directionalButtonModifier,
+            ArcShape(225f, 90f),
+            PaddingValues(0.dp),
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
@@ -274,13 +309,14 @@ private fun Dpad(
 
         // RIGHT
         RemoteButton(
-            key = RemoteControlKey.RIGHT,
-            onKeyEvent = onKeyEvent,
-            modifier = directionalButtonModifier,
-            commands = commands,
-            isConnected = isConnected,
-            shape = ArcShape(315f, 90f),
-            contentPadding = PaddingValues(0.dp),
+            RemoteControlKey.RIGHT,
+            onKeyEvent,
+            host,
+            editing,
+            isConnected,
+            directionalButtonModifier,
+            ArcShape(315f, 90f),
+            PaddingValues(0.dp),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -293,13 +329,14 @@ private fun Dpad(
 
         // DOWN
         RemoteButton(
-            key = RemoteControlKey.DOWN,
-            onKeyEvent = onKeyEvent,
-            modifier = directionalButtonModifier,
-            commands = commands,
-            isConnected = isConnected,
-            shape = ArcShape(45f, 90f),
-            contentPadding = PaddingValues(0.dp),
+            RemoteControlKey.DOWN,
+            onKeyEvent,
+            host,
+            editing,
+            isConnected,
+            directionalButtonModifier,
+            ArcShape(45f, 90f),
+            PaddingValues(0.dp),
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
@@ -312,13 +349,14 @@ private fun Dpad(
 
         // LEFT
         RemoteButton(
-            key = RemoteControlKey.LEFT,
-            onKeyEvent = onKeyEvent,
-            modifier = directionalButtonModifier,
-            commands = commands,
-            isConnected = isConnected,
-            shape = ArcShape(135f, 90f),
-            contentPadding = PaddingValues(0.dp),
+            RemoteControlKey.LEFT,
+            onKeyEvent,
+            host,
+            editing,
+            isConnected,
+            directionalButtonModifier,
+            ArcShape(135f, 90f),
+            PaddingValues(0.dp),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
@@ -330,16 +368,17 @@ private fun Dpad(
         }
 
         // CENTER
-        if (commands == null || commands[RemoteControlKey.SELECT] == null || !commands[RemoteControlKey.SELECT]?.command?.isEmpty()!!) {
+        if (host == null || host.remoteCommands == null || host.remoteCommands[RemoteControlKey.SELECT]?.command?.isEmpty() == false) {
             RemoteButton(
-                key = RemoteControlKey.SELECT,
-                onKeyEvent = onKeyEvent,
-                modifier = Modifier.size(dpadSize / 2.8f),
-                commands = commands,
-                isConnected = isConnected,
-                shape = CircleShape,
-                contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(
+                RemoteControlKey.SELECT,
+                onKeyEvent,
+                host,
+                editing,
+                isConnected,
+                Modifier.size(dpadSize / 2.8f),
+                CircleShape,
+                PaddingValues(0.dp),
+                ButtonDefaults.buttonColors(
                     disabledContainerColor = Color.Transparent,
                 ),
             ) {
@@ -357,15 +396,16 @@ private fun Dpad(
 private fun RemoteButton(
     key: RemoteControlKey,
     onKeyEvent: (KeyEvent) -> Unit,
+    host: Host?,
+    editing: Boolean,
+    isConnected: Boolean,
     modifier: Modifier = Modifier,
-    commands: Map<RemoteControlKey, Command>? = null,
-    isConnected: Boolean = true,
     shape: Shape = ButtonDefaults.shape,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     content: @Composable RowScope.() -> Unit,
 ) {
-    val command = commands?.get(key)
+    val command = host?.remoteCommands?.get(key)
 
     RepeatingButton(
         onClick = { onKeyEvent(KeyEvent.Click(key)) },
@@ -374,7 +414,7 @@ private fun RemoteButton(
         onLongClick = if (command?.longPressCommand.isNullOrEmpty()) null else {
             { onKeyEvent(KeyEvent.LongPress(key)) }
         },
-        enabled = isConnected && (commands == null || !command?.command.isNullOrEmpty()),
+        enabled = editing || (isConnected && command?.command?.isNotEmpty() == true),
         shape = shape,
         contentPadding = contentPadding,
         colors = colors,
@@ -402,20 +442,48 @@ private class ArcShape(private val startAngle: Float, private val sweepAngle: Fl
     }
 }
 
-@Preview(widthDp = 400, heightDp = 800)
+@Preview(showBackground = true, widthDp = 400, heightDp = 800)
 @Composable
 private fun PortraitPreview() {
-    RemoteControlLayout(RemoteLayoutMode.Portrait, {})
+    SSHRemoteTheme {
+        RemoteControlLayout(
+            RemoteLayoutMode.Portrait,
+            {},
+            host = PreviewData.sampleHostWithSmartVolume,
+            volume = "42%",
+            muted = true,
+        )
+    }
 }
 
-@Preview(widthDp = 800, heightDp = 400)
+@Preview(showBackground = true, widthDp = 400, heightDp = 800)
+@Composable
+private fun PortraitPreview_VLC() {
+    SSHRemoteTheme {
+        RemoteControlLayout(RemoteLayoutMode.Portrait, {}, host = PreviewData.sampleHostVlc)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 800, heightDp = 400)
 @Composable
 private fun LandscapePreview() {
-    RemoteControlLayout(RemoteLayoutMode.Landscape, {})
+    SSHRemoteTheme {
+        RemoteControlLayout(RemoteLayoutMode.Landscape, {}, host = PreviewData.sampleHost)
+    }
 }
 
-@Preview(widthDp = 400, heightDp = 400)
+@Preview(showBackground = true, widthDp = 400, heightDp = 400)
 @Composable
 private fun CompactPreview() {
-    RemoteControlLayout(RemoteLayoutMode.Compact, {})
+    SSHRemoteTheme {
+        RemoteControlLayout(RemoteLayoutMode.Compact, {}, host = PreviewData.sampleHost)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 400)
+@Composable
+private fun CompactPreview_WithoutSelect() {
+    SSHRemoteTheme {
+        RemoteControlLayout(RemoteLayoutMode.Compact, {}, host = PreviewData.sampleHostWithoutSelect)
+    }
 }

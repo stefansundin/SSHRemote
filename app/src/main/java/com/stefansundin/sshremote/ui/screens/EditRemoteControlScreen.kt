@@ -91,17 +91,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun EditRemoteControlScreen(
-    commands: Map<RemoteControlKey, Command>,
     onSave: (Map<RemoteControlKey, Command>, List<Command>, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
     onTestSmartVolumeSettings: () -> Unit,
+    initialRemoteCommands: Map<RemoteControlKey, Command>,
     initialCommands: List<Command>,
     initialSmartVolumeSettings: SmartVolumeSettings?,
     initialPage: Int = 0,
 ) {
     var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
-    var editedRemoteCommands by rememberSaveable { mutableStateOf(commands) }
+    var editedRemoteCommands by rememberSaveable { mutableStateOf(initialRemoteCommands) }
     var editedCommands by rememberSaveable { mutableStateOf(initialCommands) }
     var editedSmartVolumeSettings by rememberSaveable { mutableStateOf(initialSmartVolumeSettings) }
     var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
@@ -111,7 +111,7 @@ fun EditRemoteControlScreen(
     var showSmartVolumeSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
     val hasUnsavedChanges =
-        editedRemoteCommands != commands || editedCommands != initialCommands || editedSmartVolumeSettings != initialSmartVolumeSettings
+        editedRemoteCommands != initialRemoteCommands || editedCommands != initialCommands || editedSmartVolumeSettings != initialSmartVolumeSettings
     var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var resetToPresetKey by rememberSaveable { mutableStateOf("") }
@@ -361,6 +361,8 @@ fun EditRemoteControlScreen(
                                         editingCommand = event.key to command
                                     }
                                 },
+                                editing = true,
+                                host = null,
                             )
                         }
                     }
@@ -370,6 +372,7 @@ fun EditRemoteControlScreen(
                             onMouseEvent = {
                                 showEditMouseCommandsDialog = true
                             },
+                            editing = true,
                         )
                     }
 
@@ -383,7 +386,7 @@ fun EditRemoteControlScreen(
                                     showEditKeyboardCommandDialog = true
                                 },
                             ) {
-                                Text("Edit keyboard command")
+                                Text("Edit keyboard commands")
                             }
                         }
                     }
@@ -455,7 +458,7 @@ fun EditRemoteControlScreen(
 
     if (showEditMouseCommandsDialog) {
         EditMouseCommandsDialog(
-            commands = editedRemoteCommands,
+            initialRemoteCommands = editedRemoteCommands,
             onDismiss = { showEditMouseCommandsDialog = false },
             onSave = {
                 editedRemoteCommands = it

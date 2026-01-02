@@ -33,8 +33,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 @Composable
@@ -43,11 +43,14 @@ fun KeyboardInput(
     onKey: (String) -> Unit,
     onType: (String) -> Unit,
     modifier: Modifier = Modifier,
-    commands: Map<RemoteControlKey, Command>? = null,
+    host: Host? = null,
     connectionStatus: ConnectionStatus? = null,
 ) {
-    val isEnabled = (connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED)
-            && (commands == null || (!commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty() && !commands[RemoteControlKey.KEYBOARD_TYPE_INPUT]?.command.isNullOrEmpty()))
+    val keyboardConfigured = host == null ||
+            (host.remoteCommands != null &&
+                    (!host.remoteCommands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty() ||
+                            !host.remoteCommands[RemoteControlKey.KEYBOARD_TYPE_INPUT]?.command.isNullOrEmpty()))
+    val isEnabled = connectionStatus == ConnectionStatus.CONNECTED && keyboardConfigured
     val zeroWidthSpace = "\u200B"
     var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(zeroWidthSpace, selection = TextRange(zeroWidthSpace.length)))
@@ -55,10 +58,11 @@ fun KeyboardInput(
     val focusRequester = remember { FocusRequester() }
 
     // This TextField is used to bring up the keyboard and capture the input.
-    // The text field itself is not the primary way of handling input,
-    // the onKeyEvent modifier is.
+    // The text field itself is not the primary way of handling input, the onKeyEvent modifier is.
     TextField(
-        value = text,
+        value = if (keyboardConfigured) text else TextFieldValue("Keyboard commands not configured"),
+        enabled = isEnabled,
+        keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
         onValueChange = {
             val previousText = text.text
             val newText = it.text
@@ -100,16 +104,14 @@ fun KeyboardInput(
                 it.copy(selection = TextRange(it.text.length))
             }
         },
-        keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester),
-        enabled = isEnabled,
     )
 
     // Bring up the virtual keyboard when the Keyboard tab is focused:
-    LaunchedEffect(isCurrentlySelected) {
-        if (isCurrentlySelected) {
+    LaunchedEffect(isCurrentlySelected, isEnabled) {
+        if (isCurrentlySelected && isEnabled) {
             focusRequester.requestFocus()
         }
     }

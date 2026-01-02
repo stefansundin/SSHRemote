@@ -57,7 +57,7 @@ fun EditRemoteCommandDialog(
         title = { Text("Edit Command") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(key.title, style = MaterialTheme.typography.titleLarge)
+                Text("Key: ${key.title}", style = MaterialTheme.typography.titleLarge)
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextField(
                         value = newCommand,

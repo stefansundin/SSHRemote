@@ -45,10 +45,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.MouseEvent
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import com.stefansundin.sshremote.ui.tooling.PreviewData
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,7 +59,8 @@ import kotlinx.coroutines.launch
 fun MousePad(
     onMouseEvent: (MouseEvent) -> Unit,
     modifier: Modifier = Modifier,
-    commands: Map<RemoteControlKey, Command>? = null,
+    editing: Boolean = false,
+    host: Host? = null,
     connectionStatus: ConnectionStatus? = null,
 ) {
     val density = LocalDensity.current
@@ -66,15 +69,22 @@ fun MousePad(
     val isGestureNavigation = systemGestures.getLeft(density, layoutDirection) > 0 ||
             systemGestures.getRight(density, layoutDirection) > 0
 
-    val isEnabled = connectionStatus == null || connectionStatus == ConnectionStatus.CONNECTED
-    val mouseMoveEnabled =
-        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_MOVE]?.command.isNullOrEmpty())
-    val leftClickEnabled =
-        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_LEFT_CLICK]?.command.isNullOrEmpty())
-    val rightClickEnabled =
-        isEnabled && (commands == null || !commands[RemoteControlKey.MOUSE_RIGHT_CLICK]?.command.isNullOrEmpty())
+    val isEnabled = editing || connectionStatus == ConnectionStatus.CONNECTED
+    val mouseMoveConfigured = host == null ||
+            !host.remoteCommands?.get(RemoteControlKey.MOUSE_MOVE)?.command.isNullOrEmpty()
+    val leftClickConfigured =
+        host == null || !host.remoteCommands?.get(RemoteControlKey.MOUSE_LEFT_CLICK)?.command.isNullOrEmpty()
+    val rightClickConfigured =
+        host == null || !host.remoteCommands?.get(RemoteControlKey.MOUSE_RIGHT_CLICK)?.command.isNullOrEmpty()
+    val scrollingConfigured =
+        host == null ||
+                (host.remoteCommands != null &&
+                        (!host.remoteCommands[RemoteControlKey.MOUSE_PAN_UP]?.command.isNullOrEmpty() ||
+                                !host.remoteCommands[RemoteControlKey.MOUSE_PAN_RIGHT]?.command.isNullOrEmpty() ||
+                                !host.remoteCommands[RemoteControlKey.MOUSE_PAN_DOWN]?.command.isNullOrEmpty() ||
+                                !host.remoteCommands[RemoteControlKey.MOUSE_PAN_LEFT]?.command.isNullOrEmpty()))
 
-    BackHandler(enabled = mouseMoveEnabled && isGestureNavigation) {
+    BackHandler(enabled = mouseMoveConfigured && isGestureNavigation) {
         // Prevent back gesture while this component is active
     }
 
@@ -86,13 +96,16 @@ fun MousePad(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         TouchPad(
-            onMove = { dx, dy -> onMouseEvent(MouseEvent.Move(dx, dy)) },
-            onPan = { dx, dy -> onMouseEvent(MouseEvent.Pan(dx, dy)) },
-            onLeftClick = { onMouseEvent(MouseEvent.LeftClick) },
-            onRightClick = { onMouseEvent(MouseEvent.RightClick) },
-            leftClickEnabled = leftClickEnabled,
-            rightClickEnabled = rightClickEnabled,
-            modifier = Modifier.weight(1f),
+            { dx, dy -> onMouseEvent(MouseEvent.Move(dx, dy)) },
+            { dx, dy -> onMouseEvent(MouseEvent.Pan(dx, dy)) },
+            { onMouseEvent(MouseEvent.LeftClick) },
+            { onMouseEvent(MouseEvent.RightClick) },
+            editing,
+            mouseMoveConfigured,
+            leftClickConfigured,
+            rightClickConfigured,
+            scrollingConfigured,
+            Modifier.weight(1f),
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -100,13 +113,13 @@ fun MousePad(
         ) {
             Button(
                 onClick = { onMouseEvent(MouseEvent.LeftClick) },
-                enabled = leftClickEnabled,
+                enabled = isEnabled && leftClickConfigured,
             ) {
                 Text("Left Click")
             }
             Button(
                 onClick = { onMouseEvent(MouseEvent.RightClick) },
-                enabled = rightClickEnabled,
+                enabled = isEnabled && rightClickConfigured,
             ) {
                 Text("Right Click")
             }
@@ -127,21 +140,24 @@ private fun TouchPad(
     onPan: (dx: Float, dy: Float) -> Unit,
     onLeftClick: () -> Unit,
     onRightClick: () -> Unit,
-    leftClickEnabled: Boolean,
-    rightClickEnabled: Boolean,
+    editing: Boolean,
+    mouseMoveConfigured: Boolean,
+    leftClickConfigured: Boolean,
+    rightClickConfigured: Boolean,
+    scrollingConfigured: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .pointerInput(leftClickEnabled, rightClickEnabled) {
+            .pointerInput(leftClickConfigured, rightClickConfigured) {
                 coroutineScope {
                     awaitEachGesture {
                         var state = GestureState.Undecided
                         val down = awaitFirstDown(requireUnconsumed = false)
 
                         val longPressJob = launch {
-                            if (!rightClickEnabled) return@launch
+                            if (!rightClickConfigured) return@launch
                             delay(viewConfiguration.longPressTimeoutMillis)
                             state = GestureState.LongPress
                             onRightClick()
@@ -193,7 +209,7 @@ private fun TouchPad(
                         longPressJob.cancel()
 
                         if (state == GestureState.Undecided) {
-                            if (leftClickEnabled) {
+                            if (leftClickConfigured) {
                                 onLeftClick()
                             }
                         }
@@ -208,24 +224,55 @@ private fun TouchPad(
             contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Mouse Pad")
-                Text("Tap for left click")
-                Text("Long press for right click")
-                Text("Scroll using two fingers")
+                if (editing) {
+                    Text("Mouse Pad")
+                    Text("Tap to edit mouse commands")
+                } else {
+                    if (mouseMoveConfigured || leftClickConfigured || rightClickConfigured || scrollingConfigured) {
+                        Text("Mouse Pad")
+                        if (leftClickConfigured) {
+                            Text("Tap for left click")
+                        }
+                        if (rightClickConfigured) {
+                            Text("Long press for right click")
+                        }
+                        if (scrollingConfigured) {
+                            Text("Scroll using two fingers")
+                        }
+                    } else {
+                        Text("Mouse Pad Disabled")
+                        Text("No mouse commands configured")
+                    }
+                }
             }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun MousePadPreview() {
-    MaterialTheme {
+    SSHRemoteTheme {
         MousePad(
             onMouseEvent = { event ->
                 Log.d("MousePad", "Received event: $event")
             },
             connectionStatus = ConnectionStatus.CONNECTED,
+            host = PreviewData.sampleHost,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MousePadPreview_Editing() {
+    SSHRemoteTheme {
+        MousePad(
+            onMouseEvent = { event ->
+                Log.d("MousePad", "Received event: $event")
+            },
+            editing = true,
+            host = PreviewData.sampleHost,
         )
     }
 }

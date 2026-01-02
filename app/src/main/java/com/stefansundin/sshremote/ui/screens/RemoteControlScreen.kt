@@ -521,8 +521,6 @@ fun RemoteControlScreen(
             },
             modifier = Modifier.fillMaxSize(),
         ) { padding ->
-            val commands = uiState.host?.remoteCommands ?: emptyMap()
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -558,14 +556,9 @@ fun RemoteControlScreen(
                     when (page) {
                         0 -> {
                             RemoteControl(
-                                connectionStatus = uiState.connectionStatus,
-                                commands = commands,
-                                smartVolumeSettings = uiState.host?.smartVolume,
-                                volume = uiState.volume,
-                                muted = uiState.muted,
                                 onKeyEvent = { event: KeyEvent ->
                                     val key = event.key
-                                    val command = commands[key] ?: return@RemoteControl
+                                    val command = uiState.host?.remoteCommands?.get(key) ?: return@RemoteControl
                                     when (event) {
                                         is KeyEvent.Click -> {
                                             performHapticFeedback(context, uiState.hapticFeedback)
@@ -580,22 +573,27 @@ fun RemoteControlScreen(
                                         }
                                     }
                                 },
+                                host = uiState.host,
+                                connectionStatus = uiState.connectionStatus,
+                                volume = uiState.volume,
+                                muted = uiState.muted,
                             )
                         }
 
                         1 -> {
                             MousePad(
+                                host = uiState.host,
                                 connectionStatus = uiState.connectionStatus,
-                                commands = commands,
                                 onMouseEvent = { event ->
                                     if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
                                         performHapticFeedback(context, uiState.hapticFeedback)
                                     }
                                     when (event) {
                                         is MouseEvent.Move -> {
-                                            commands[RemoteControlKey.MOUSE_MOVE]?.let { commandTemplate ->
-                                                onMouseMove(event.dx, event.dy, commandTemplate.command)
-                                            }
+                                            uiState.host?.remoteCommands?.get(RemoteControlKey.MOUSE_MOVE)
+                                                ?.let { commandTemplate ->
+                                                    onMouseMove(event.dx, event.dy, commandTemplate.command)
+                                                }
                                         }
 
                                         MouseEvent.LeftClick -> {
@@ -616,10 +614,11 @@ fun RemoteControlScreen(
 
                         2 -> {
                             val onKey = { key: String ->
-                                commands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.let { commandTemplate ->
-                                    val command = commandTemplate.command.format(key)
-                                    hostViewModel.runCommand(command, commandTemplate.showOutput)
-                                }
+                                uiState.host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_KEY_INPUT)
+                                    ?.let { commandTemplate ->
+                                        val command = commandTemplate.command.format(key)
+                                        hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                    }
                             }
                             Column(
                                 modifier = Modifier
@@ -630,19 +629,20 @@ fun RemoteControlScreen(
                                     isCurrentlySelected = pagerState.currentPage == 2,
                                     onKey = { key -> onKey(key) },
                                     onType = { text ->
-                                        commands[RemoteControlKey.KEYBOARD_TYPE_INPUT]?.let { commandTemplate ->
-                                            val escapedText = text.replace("'", "'\\''")
-                                            val command = commandTemplate.command.format(escapedText)
-                                            hostViewModel.runCommand(command, commandTemplate.showOutput)
-                                        }
+                                        uiState.host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
+                                            ?.let { commandTemplate ->
+                                                val escapedText = text.replace("'", "'\\''")
+                                                val command = commandTemplate.command.format(escapedText)
+                                                hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                            }
                                     },
-                                    modifier = Modifier.weight(1f),
-                                    commands = commands,
+                                    host = uiState.host,
                                     connectionStatus = uiState.connectionStatus,
+                                    modifier = Modifier.weight(1f),
                                 )
                                 SpecialKeysRow(
                                     onKey = { key -> onKey(key) },
-                                    commands = commands,
+                                    host = uiState.host,
                                     connectionStatus = uiState.connectionStatus,
                                 )
                             }
