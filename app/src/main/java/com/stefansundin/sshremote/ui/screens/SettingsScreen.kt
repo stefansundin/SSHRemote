@@ -346,7 +346,7 @@ fun SettingsScreen(
     }
 
     exportJson?.let { json ->
-        QrCodeDialog(
+        ExportSettingsQrCodeDialog(
             json = json,
             onDismissRequest = { exportJson = null },
             onError = {
@@ -573,7 +573,7 @@ fun SettingsScreen(
 }
 
 @Composable
-fun QrCodeDialog(
+private fun ExportSettingsQrCodeDialog(
     json: String,
     onDismissRequest: () -> Unit,
     onError: (Exception) -> Unit,

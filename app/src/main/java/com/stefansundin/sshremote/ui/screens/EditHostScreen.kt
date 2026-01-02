@@ -18,11 +18,19 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.app.Activity
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +47,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,12 +58,15 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -64,20 +76,42 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
+import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.WriterException
+import com.google.zxing.qrcode.QRCodeWriter
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.URLEncoder
 
 private enum class PasswordState {
     SET,
@@ -314,6 +348,40 @@ fun EditHostScreen(
         )
     }
 
+    var qrCodeString by remember { mutableStateOf<String?>(null) }
+
+    qrCodeString?.let {
+        ExportHostQrCodeDialog(
+            qrCodeString = it,
+            onDismissRequest = { qrCodeString = null },
+            onError = { qrCodeString = null },
+        )
+    }
+
+    val scanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            try {
+                val uri = result.contents.toUri()
+                if (uri.scheme == "ssh") {
+                    uri.userInfo?.let { user = it }
+                    uri.host?.let { hostname = it }
+                    if (uri.port != -1) {
+                        port = uri.port.toString()
+                    }
+                    uri.getQueryParameter("name")?.let {
+                        name = it
+                    }
+                    val hostKeys = uri.getQueryParameters("hostKey[]")
+                    if (hostKeys.isNotEmpty()) {
+                        knownHosts = hostKeys
+                    }
+                }
+            } catch (_: Exception) {
+                // Ignore malformed URIs
+            }
+        }
+    }
+
     BackHandler(enabled = hasUnsavedChanges) {
         showSaveDialog = true
     }
@@ -364,6 +432,34 @@ fun EditHostScreen(
                                 }
                             },
                         )
+                        if (host != null) {
+                            DropdownMenuItem(
+                                text = { Text("Export to QR code") },
+                                onClick = {
+                                    menuExpanded = false
+                                    val encodedName = URLEncoder.encode(name, "UTF-8")
+                                    var url = "ssh://$user@$hostname:$port?name=$encodedName"
+                                    if (knownHosts.isNotEmpty()) {
+                                        val hostKeysQuery =
+                                            knownHosts.joinToString("&") {
+                                                val key = URLEncoder.encode("hostKey[]", "UTF-8")
+                                                val value = URLEncoder.encode(it, "UTF-8")
+                                                "$key=$value"
+                                            }
+                                        url += "&$hostKeysQuery"
+                                    }
+                                    qrCodeString = url
+                                },
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text("Scan QR code") },
+                                onClick = {
+                                    menuExpanded = false
+                                    scanLauncher.launch(ScanOptions())
+                                },
+                            )
+                        }
                     }
                 },
             )
@@ -602,7 +698,7 @@ fun EditHostScreen(
             }
 
             // KNOWN HOSTS MANAGEMENT
-            if (host != null) {
+            if (host != null || knownHosts.isNotEmpty()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -623,6 +719,131 @@ fun EditHostScreen(
             }
 
             Spacer(Modifier.height(80.dp))
+        }
+    }
+}
+
+@Composable
+private fun ExportHostQrCodeDialog(
+    qrCodeString: String,
+    onDismissRequest: () -> Unit,
+    onError: (Exception) -> Unit,
+) {
+    var imageSize by remember { mutableStateOf(IntSize.Zero) }
+    var qrCodeBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val configuration = LocalConfiguration.current
+    val view = LocalView.current
+
+    if (!view.isInEditMode) {
+        val window = (view.context as? Activity)?.window
+        if (window != null) {
+            DisposableEffect(configuration.orientation) {
+                val windowInsetsController = WindowCompat.getInsetsController(window, view)
+                val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                if (isLandscape) {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                    windowInsetsController.systemBarsBehavior =
+                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                }
+                onDispose {
+                    if (isLandscape) {
+                        windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(qrCodeString, imageSize) {
+        if (imageSize.width > 0) {
+            withContext(Dispatchers.Default) {
+                val generatedBitmap = try {
+                    val size = imageSize.width
+                    val hints = mapOf(
+                        EncodeHintType.CHARACTER_SET to "UTF-8",
+                        EncodeHintType.MARGIN to 1,
+                    )
+                    val writer = QRCodeWriter()
+                    val bitMatrix = writer.encode(qrCodeString, BarcodeFormat.QR_CODE, size, size, hints)
+                    val width = bitMatrix.width
+                    val height = bitMatrix.height
+                    val bitmap = createBitmap(width, height, Bitmap.Config.RGB_565)
+                    for (x in 0 until width) {
+                        for (y in 0 until height) {
+                            bitmap[x, y] = if (bitMatrix[x, y]) Color.BLACK else Color.WHITE
+                        }
+                    }
+                    bitmap
+                } catch (e: WriterException) {
+                    withContext(Dispatchers.Main) {
+                        onError(e)
+                    }
+                    null
+                }
+                qrCodeBitmap = generatedBitmap
+            }
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        Text(
+                            "Scan the QR code to import host connection details",
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 24.dp),
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .aspectRatio(1f)
+                            .onSizeChanged {
+                                if (it.width > 0 && it != imageSize) {
+                                    imageSize = it
+                                }
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (qrCodeBitmap != null) {
+                            Image(
+                                bitmap = qrCodeBitmap!!.asImageBitmap(),
+                                contentDescription = "QR Code",
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = androidx.compose.ui.graphics.Color.White,
+                            ) {
+                                CircularProgressIndicator(strokeWidth = 16.dp, modifier = Modifier.padding(128.dp))
+                            }
+                        }
+                    }
+
+                    if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        TextButton(
+                            onClick = onDismissRequest,
+                            modifier = Modifier.padding(top = 24.dp),
+                        ) {
+                            Text("Close")
+                        }
+                    }
+                }
+            }
         }
     }
 }
