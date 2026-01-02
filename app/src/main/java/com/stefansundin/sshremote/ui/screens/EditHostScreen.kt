@@ -150,6 +150,7 @@ fun EditHostScreen(
     var sshConfig by rememberSaveable(host) { mutableStateOf(host?.sshConfig) }
 
     // Only used for QR code import:
+    var scanQrCode by rememberSaveable { mutableStateOf(scanQrCodeOnStart) }
     var commands by rememberSaveable(host) { mutableStateOf(host?.commands) }
     var remoteCommands by rememberSaveable(host) { mutableStateOf(host?.remoteCommands) }
     var startScreen by rememberSaveable(host) { mutableStateOf(host?.startScreen ?: RemoteControlScreen.Default) }
@@ -430,9 +431,14 @@ fun EditHostScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        if (scanQrCodeOnStart) {
-            scanLauncher.launch(ScanOptions())
+    LaunchedEffect(scanQrCode) {
+        if (scanQrCode) {
+            val options = ScanOptions()
+            options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            options.setPrompt("Scan a QR code to import host")
+            options.setBeepEnabled(false)
+            options.setOrientationLocked(false)
+            scanLauncher.launch(options)
         }
     }
 
@@ -550,7 +556,7 @@ fun EditHostScreen(
                                 text = { Text("Scan QR code") },
                                 onClick = {
                                     menuExpanded = false
-                                    scanLauncher.launch(ScanOptions())
+                                    scanQrCode = true
                                 },
                             )
                         }
