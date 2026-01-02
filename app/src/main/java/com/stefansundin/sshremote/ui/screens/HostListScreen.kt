@@ -19,6 +19,8 @@
 package com.stefansundin.sshremote.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,6 +74,8 @@ import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.ui.components.TextWithInlineIcon
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,6 +84,7 @@ fun HostListScreen(
     hosts: List<Host>?,
     onConnectClicked: (Host) -> Unit,
     onAdd: () -> Unit,
+    onAddFromQrCode: () -> Unit,
     onEdit: (Host) -> Unit,
     onClone: (Host) -> Unit,
     onCreateShortcut: (Host) -> Unit,
@@ -94,6 +100,36 @@ fun HostListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var undoableDeletedHostId by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    // Long pressing the FAB will launch directly into the QR code scanner
+    // It's a secret feature that is not documented
+    val interactionSource = remember { MutableInteractionSource() }
+    val viewConfiguration = LocalViewConfiguration.current
+
+    LaunchedEffect(interactionSource) {
+        var isLongClick = false
+
+        interactionSource.interactions.collectLatest { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> {
+                    isLongClick = false
+                    delay(viewConfiguration.longPressTimeoutMillis)
+                    isLongClick = true
+                    onAddFromQrCode()
+                }
+
+                is PressInteraction.Release -> {
+                    if (isLongClick.not()) {
+                        onAdd()
+                    }
+                }
+
+                is PressInteraction.Cancel -> {
+                    isLongClick = false
+                }
+            }
+        }
+    }
 
     LaunchedEffect(undoableDeletedHostId) {
         val id = undoableDeletedHostId
@@ -146,7 +182,10 @@ fun HostListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAdd) {
+            FloatingActionButton(
+                onClick = {},
+                interactionSource = interactionSource,
+            ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add SSH Host")
             }
         },
@@ -320,6 +359,7 @@ fun HostListScreenPreview() {
             hosts = sampleHosts,
             onConnectClicked = {},
             onAdd = {},
+            onAddFromQrCode = {},
             onEdit = {},
             onClone = {},
             onCreateShortcut = {},
@@ -342,6 +382,7 @@ fun HostListScreenEmptyPreview() {
             hosts = emptyList(),
             onConnectClicked = {},
             onAdd = {},
+            onAddFromQrCode = {},
             onEdit = {},
             onClone = {},
             onCreateShortcut = {},

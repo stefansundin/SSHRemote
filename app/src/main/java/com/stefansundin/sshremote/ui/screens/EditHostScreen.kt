@@ -141,6 +141,7 @@ fun EditHostScreen(
     onSave: (Host, String?) -> Unit,
     onNavigateUp: () -> Unit,
     hostViewModel: HostViewModel?, // null allowed for preview
+    scanQrCodeOnStart: Boolean = false,
 ) {
     var name by rememberSaveable(host) { mutableStateOf(host?.name ?: "") }
     var hostname by rememberSaveable(host) { mutableStateOf(host?.hostname ?: "") }
@@ -426,6 +427,12 @@ fun EditHostScreen(
             } catch (e: Exception) {
                 Log.e("SSHRemote", "Error parsing QR code", e)
             }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (scanQrCodeOnStart) {
+            scanLauncher.launch(ScanOptions())
         }
     }
 

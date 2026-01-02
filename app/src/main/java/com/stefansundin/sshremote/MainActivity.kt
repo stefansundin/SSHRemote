@@ -101,8 +101,8 @@ import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
     data object HostList : Screen("host_list")
-    data object HostEdit : Screen("host_edit/{hostId}") {
-        fun createRoute(hostId: Int?) = "host_edit/$hostId"
+    data object HostEdit : Screen("host_edit/{hostId}?scan={scan}") {
+        fun createRoute(hostId: Int?, scan: Boolean = false) = "host_edit/$hostId?scan=$scan"
     }
 
     data object RemoteControl : Screen("remote_control/{hostId}/{initialPage}") {
@@ -305,6 +305,9 @@ class MainActivity : ComponentActivity() {
                                 onAdd = {
                                     navController.navigate(Screen.HostEdit.createRoute(null))
                                 },
+                                onAddFromQrCode = {
+                                    navController.navigate(Screen.HostEdit.createRoute(null, scan = true))
+                                },
                                 onEdit = { host ->
                                     navController.navigate(Screen.HostEdit.createRoute(host.id))
                                 },
@@ -329,9 +332,13 @@ class MainActivity : ComponentActivity() {
 
                         composable(
                             Screen.HostEdit.route,
-                            arguments = listOf(navArgument("hostId") { type = NavType.StringType; nullable = true }),
+                            arguments = listOf(
+                                navArgument("hostId") { type = NavType.StringType; nullable = true },
+                                navArgument("scan") { type = NavType.BoolType; defaultValue = false },
+                            ),
                         ) { backStackEntry ->
                             val hostId = backStackEntry.arguments?.getString("hostId")?.toIntOrNull()
+                            val scan = backStackEntry.arguments?.getBoolean("scan") ?: false
                             val host = hosts?.find { it.id == hostId }
                             val identities by identityViewModel.identities.collectAsState()
                             EditHostScreen(
@@ -348,6 +355,7 @@ class MainActivity : ComponentActivity() {
                                     navController.safePopBackStack()
                                 },
                                 hostViewModel = hostViewModel,
+                                scanQrCodeOnStart = scan,
                             )
                         }
 
