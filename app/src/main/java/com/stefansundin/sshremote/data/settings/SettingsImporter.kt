@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.data.settings
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import com.google.gson.JsonSyntaxException
 import com.stefansundin.sshremote.HapticFeedback
@@ -32,8 +33,12 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
+import java.util.zip.GZIPInputStream
+import java.util.zip.ZipException
 
 class ImportException(message: String) : Exception(message)
 
@@ -51,12 +56,37 @@ class SettingsImporter(
         return import(json, merge)
     }
 
+    private fun decompress(data: String): String {
+        return try {
+            val compressed = Base64.decode(data, Base64.DEFAULT)
+            val bis = ByteArrayInputStream(compressed)
+            val gis = GZIPInputStream(bis)
+            val buffer = ByteArray(1024)
+            val out = ByteArrayOutputStream()
+            var len: Int
+            while (gis.read(buffer).also { len = it } != -1) {
+                out.write(buffer, 0, len)
+            }
+            out.toString("UTF-8")
+        } catch (e: Exception) {
+            when (e) {
+                is ZipException, is IllegalArgumentException -> {
+                    // Not compressed or not Base64, assume it's the raw JSON
+                    data
+                }
+
+                else -> throw e
+            }
+        }
+    }
+
     suspend fun import(json: String, merge: Boolean): Triple<Int, Boolean, Theme?> {
         var requestNotificationPermission = false
         var importedTheme: Theme? = null
 
         try {
-            val settings: ExportedSettings = gson.fromJson(json, ExportedSettings::class.java)
+            val decompressedJson = decompress(json)
+            val settings: ExportedSettings = gson.fromJson(decompressedJson, ExportedSettings::class.java)
                 ?: throw ImportException("Not a valid JSON file")
 
             if (settings.hosts == null) {

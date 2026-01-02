@@ -20,10 +20,13 @@ package com.stefansundin.sshremote.data.settings
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import com.google.gson.GsonBuilder
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
 import kotlinx.coroutines.flow.first
+import java.io.ByteArrayOutputStream
+import java.util.zip.GZIPOutputStream
 
 data class ExportedCommand(
     val name: String?,
@@ -40,20 +43,26 @@ class SettingsExporter(
 ) {
 
     suspend fun export(uri: Uri) {
-        val json = exportToString(prettyPrint = true)
+        val settings = getSettingsToExport()
+        val json = GsonBuilder().setPrettyPrinting().create().toJson(settings)
         context.contentResolver.openOutputStream(uri)?.use { outputStream ->
             outputStream.write(json.toByteArray())
         }
     }
 
-    suspend fun exportToString(prettyPrint: Boolean = false): String {
+    private fun compress(data: String): ByteArray {
+        val bos = ByteArrayOutputStream(data.length)
+        val gzip = GZIPOutputStream(bos)
+        gzip.write(data.toByteArray())
+        gzip.close()
+        return bos.toByteArray()
+    }
+
+    suspend fun exportToString(): String {
         val settings = getSettingsToExport()
-        val gson = if (prettyPrint) {
-            GsonBuilder().setPrettyPrinting().create()
-        } else {
-            GsonBuilder().create()
-        }
-        return gson.toJson(settings)
+        val json = GsonBuilder().create().toJson(settings)
+        val compressed = compress(json)
+        return Base64.encodeToString(compressed, Base64.DEFAULT)
     }
 
     private suspend fun getSettingsToExport(): ExportedSettings {
