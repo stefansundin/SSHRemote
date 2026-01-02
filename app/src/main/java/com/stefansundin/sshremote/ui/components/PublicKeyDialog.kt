@@ -57,7 +57,7 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = NoSlashLineBreakVisualTransformation,
+                visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
             )
         },
         onDismissRequest = onDismiss,
@@ -86,35 +86,39 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
 }
 
 /**
- * Cool visual transformer that prevents slash characters from causing a line break.
- * Public SSH keys are full of slashes which make the dialog look funny.
+ * Cool visual transformer that prevents certain characters from causing a line break.
+ * Public SSH keys are full of slashes and pluses which can make the dialog look funny.
  */
-object NoSlashLineBreakVisualTransformation : VisualTransformation {
+object NoWrapOnSpecialCharactersVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val original = text.text
-        if (!original.contains('/')) {
+        if (!original.contains('/') && !original.contains('+')) {
             return TransformedText(text, OffsetMapping.Identity)
         }
 
-        val transformed = original.replace("/", "/\u2060")
+        val transformed = original.replace("/", "/\u2060").replace("+", "+\u2060")
 
         return TransformedText(
             AnnotatedString(transformed),
             object : OffsetMapping {
                 override fun originalToTransformed(offset: Int): Int {
                     val limitedOffset = offset.coerceAtMost(original.length)
-                    var slashes = 0
+                    var specialChars = 0
                     for (i in 0 until limitedOffset) {
-                        if (original[i] == '/') slashes++
+                        if (original[i] == '/' || original[i] == '+') {
+                            specialChars++
+                        }
                     }
-                    return limitedOffset + slashes
+                    return limitedOffset + specialChars
                 }
 
                 override fun transformedToOriginal(offset: Int): Int {
                     val limitedOffset = offset.coerceAtMost(transformed.length)
                     var joiners = 0
                     for (i in 0 until limitedOffset) {
-                        if (transformed[i] == '\u2060') joiners++
+                        if (transformed[i] == '\u2060') {
+                            joiners++
+                        }
                     }
                     return limitedOffset - joiners
                 }

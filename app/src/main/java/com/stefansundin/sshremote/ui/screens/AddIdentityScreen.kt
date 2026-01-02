@@ -71,7 +71,7 @@ import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import com.stefansundin.sshremote.ui.components.NoSlashLineBreakVisualTransformation
+import com.stefansundin.sshremote.ui.components.NoWrapOnSpecialCharactersVisualTransformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -448,7 +448,7 @@ fun ManualEntryTab(
         placeholder = { Text("-----BEGIN OPENSSH PRIVATE KEY-----") },
         supportingText = { if (isError) Text("Invalid key format") },
         isError = isError,
-        visualTransformation = NoSlashLineBreakVisualTransformation,
+        visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
         modifier = Modifier
             .fillMaxWidth()
             .height(250.dp),
