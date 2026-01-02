@@ -28,7 +28,6 @@ import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.gson
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.host.RemoteControlKey
@@ -118,32 +117,19 @@ class SettingsImporter(
                 adHocCommandRepository.clear()
             }
 
-            @Suppress("UNCHECKED_CAST")
             settings.hosts.forEach { exportedHost ->
+                @Suppress("UNCHECKED_CAST")
                 val host = Host(
-                    name = exportedHost.name,
-                    hostname = exportedHost.hostname,
-                    port = exportedHost.port,
-                    user = exportedHost.user,
+                    name = exportedHost.name!!,
+                    hostname = exportedHost.hostname!!,
+                    port = exportedHost.port ?: 22,
+                    user = exportedHost.user!!,
                     passwordId = null,
-                    identityIds = if (exportedHost.allowIdentities) null else emptyList(),
-                    knownHosts = exportedHost.knownHosts,
-                    commands = exportedHost.commands.map {
-                        Command(
-                            command = it.command,
-                            name = it.name,
-                            showOutput = it.showOutput,
-                            repeat = it.repeat,
-                        )
-                    },
-                    remoteCommands = (exportedHost.remoteCommands?.filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>?)?.mapValues {
-                        Command(
-                            command = it.value.command,
-                            name = it.value.name,
-                            showOutput = it.value.showOutput,
-                            repeat = it.value.repeat,
-                        )
-                    },
+                    identityIds = if (exportedHost.allowIdentities == true) null else emptyList(),
+                    knownHosts = exportedHost.knownHosts ?: emptyList(),
+                    commands = exportedHost.commands?.map { it.toCommand() } ?: emptyList(),
+                    remoteCommands = (exportedHost.remoteCommands?.filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>?)?.mapValues { it.value.toCommand() }
+                        ?: emptyMap(),
                     startScreen = exportedHost.startScreen ?: RemoteControlScreen.Default,
                     sshConfig = exportedHost.sshConfig,
                 )

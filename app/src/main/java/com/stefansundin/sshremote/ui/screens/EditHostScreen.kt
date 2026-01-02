@@ -22,6 +22,8 @@ import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.util.Base64
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
@@ -72,6 +74,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -98,6 +101,7 @@ import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.google.gson.Gson
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.WriterException
@@ -107,11 +111,21 @@ import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
+import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.identity.Identity
+import com.stefansundin.sshremote.data.settings.ExportedCommand
+import com.stefansundin.sshremote.data.settings.ExportedHost
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStreamReader
 import java.net.URLEncoder
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 private enum class PasswordState {
     SET,
@@ -133,6 +147,11 @@ fun EditHostScreen(
     var port by rememberSaveable(host) { mutableStateOf(host?.port?.toString() ?: "22") }
     var user by rememberSaveable(host) { mutableStateOf(host?.user ?: "") }
     var sshConfig by rememberSaveable(host) { mutableStateOf(host?.sshConfig) }
+
+    // Only used for QR code import:
+    var commands by rememberSaveable(host) { mutableStateOf(host?.commands) }
+    var remoteCommands by rememberSaveable(host) { mutableStateOf(host?.remoteCommands) }
+    var startScreen by rememberSaveable(host) { mutableStateOf(host?.startScreen ?: RemoteControlScreen.Default) }
 
     var passwordState by rememberSaveable { mutableStateOf(PasswordState.SET) }
     LaunchedEffect(host?.passwordId) {
@@ -220,6 +239,9 @@ fun EditHostScreen(
                     identityIds = selectedIdentityIds,
                     knownHosts = knownHosts,
                     sshConfig = sshConfig,
+                    commands = commands ?: Host.DEFAULT_COMMANDS,
+                    remoteCommands = remoteCommands,
+                    startScreen = startScreen,
                 )
             onSave(hostToSave, if (showPasswordField) password else null)
         }
@@ -360,9 +382,10 @@ fun EditHostScreen(
 
     val scanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
+            val contents = result.contents
             try {
-                val uri = result.contents.toUri()
-                if (uri.scheme == "ssh") {
+                if (contents.startsWith("ssh://")) {
+                    val uri = contents.toUri()
                     uri.userInfo?.let { user = it }
                     uri.host?.let { hostname = it }
                     if (uri.port != -1) {
@@ -375,12 +398,87 @@ fun EditHostScreen(
                     if (hostKeys.isNotEmpty()) {
                         knownHosts = hostKeys
                     }
+                } else {
+                    val reader = if (contents.startsWith("{")) {
+                        contents.byteInputStream().reader()
+                    } else {
+                        val compressed = Base64.decode(contents, Base64.DEFAULT)
+                        val bis = ByteArrayInputStream(compressed)
+                        val gis = GZIPInputStream(bis)
+                        InputStreamReader(gis, "UTF-8")
+                    }
+                    val hostData = Gson().fromJson(reader, ExportedHost::class.java)
+                    hostData.name?.let { name = it }
+                    hostData.hostname?.let { hostname = it }
+                    hostData.port?.let { port = it.toString() }
+                    hostData.user?.let { user = it }
+                    hostData.knownHosts?.let { knownHosts = it }
+                    hostData.sshConfig?.let { sshConfig = it }
+                    hostData.allowIdentities?.let { selectedIdentityIds = if (it) null else emptyList() }
+                    hostData.commands?.let { it -> commands = it.map { it.toCommand() } }
+                    @Suppress("UNCHECKED_CAST")
+                    hostData.remoteCommands?.let { it ->
+                        remoteCommands =
+                            (it.filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>).mapValues { it.value.toCommand() }
+                    }
+                    hostData.startScreen?.let { startScreen = it }
                 }
-            } catch (_: Exception) {
-                // Ignore malformed URIs
+            } catch (e: Exception) {
+                Log.e("SSHRemote", "Error parsing QR code", e)
             }
         }
     }
+
+    var showExportDialog by rememberSaveable { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    if (showExportDialog) {
+        AlertDialog(
+            title = { Text("Export Host") },
+            text = { Text("Choose what to include in the QR code.") },
+            onDismissRequest = { showExportDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExportDialog = false
+                        coroutineScope.launch {
+                            val data = host!!.toExportedHost().exportToString()
+                            val bos = ByteArrayOutputStream(data.length)
+                            val gzip = GZIPOutputStream(bos)
+                            gzip.write(data.toByteArray())
+                            gzip.close()
+                            val compressed = bos.toByteArray()
+                            qrCodeString = Base64.encodeToString(compressed, Base64.DEFAULT)
+                        }
+                    },
+                ) {
+                    Text("Full configuration")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showExportDialog = false
+                        val encodedName = URLEncoder.encode(name, "UTF-8")
+                        var url = "ssh://$user@$hostname:$port?name=$encodedName"
+                        if (knownHosts.isNotEmpty()) {
+                            val key = URLEncoder.encode("hostKey[]", "UTF-8")
+                            val hostKeysQuery =
+                                knownHosts.joinToString("&") {
+                                    val value = URLEncoder.encode(it, "UTF-8")
+                                    "$key=$value"
+                                }
+                            url += "&$hostKeysQuery"
+                        }
+                        qrCodeString = url
+                    },
+                ) {
+                    Text("Connection details only")
+                }
+            },
+        )
+    }
+
 
     BackHandler(enabled = hasUnsavedChanges) {
         showSaveDialog = true
@@ -437,18 +535,7 @@ fun EditHostScreen(
                                 text = { Text("Export to QR code") },
                                 onClick = {
                                     menuExpanded = false
-                                    val encodedName = URLEncoder.encode(name, "UTF-8")
-                                    var url = "ssh://$user@$hostname:$port?name=$encodedName"
-                                    if (knownHosts.isNotEmpty()) {
-                                        val hostKeysQuery =
-                                            knownHosts.joinToString("&") {
-                                                val key = URLEncoder.encode("hostKey[]", "UTF-8")
-                                                val value = URLEncoder.encode(it, "UTF-8")
-                                                "$key=$value"
-                                            }
-                                        url += "&$hostKeysQuery"
-                                    }
-                                    qrCodeString = url
+                                    showExportDialog = true
                                 },
                             )
                         } else {
@@ -651,8 +738,10 @@ fun EditHostScreen(
                         "Use any key"
                     } else if (selectedIdentityIds!!.isEmpty()) {
                         "Do not use keys"
-                    } else identities.filter { selectedIdentityIds!!.contains(it.id) }
-                        .joinToString(", ") { it.name },
+                    } else {
+                        identities.filter { selectedIdentityIds!!.contains(it.id) }
+                            .joinToString(", ") { it.name }
+                    },
                     onValueChange = { },
                     label = { Text("SSH Key") },
                     trailingIcon = {
@@ -800,7 +889,7 @@ private fun ExportHostQrCodeDialog(
                 ) {
                     if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                         Text(
-                            "Scan the QR code to import host connection details",
+                            "Scan the QR code to import host",
                             style = MaterialTheme.typography.titleLarge,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),

@@ -21,19 +21,31 @@ package com.stefansundin.sshremote.data.settings
 import android.content.Context
 import android.net.Uri
 import android.util.Base64
+import androidx.annotation.Keep
 import com.google.gson.GsonBuilder
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
+import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.HostRepository
 import kotlinx.coroutines.flow.first
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
 
+@Keep
 data class ExportedCommand(
     val name: String?,
     val command: String,
     val showOutput: Boolean,
     val repeat: Boolean,
-)
+) {
+    fun toCommand(): Command {
+        return Command(
+            name = name,
+            command = command,
+            showOutput = showOutput,
+            repeat = repeat,
+        )
+    }
+}
 
 class SettingsExporter(
     private val context: Context,
@@ -71,34 +83,7 @@ class SettingsExporter(
         val keepScreenOn = settingsRepository.keepScreenOn.first()
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
-        val hosts = hostRepository.getAll().first().map { host ->
-            ExportedHost(
-                name = host.name,
-                hostname = host.hostname,
-                port = host.port,
-                user = host.user,
-                allowIdentities = host.identityIds?.isNotEmpty() ?: true,
-                knownHosts = host.knownHosts,
-                commands = host.commands.map {
-                    ExportedCommand(
-                        name = it.name,
-                        command = it.command,
-                        showOutput = it.showOutput,
-                        repeat = it.repeat,
-                    )
-                },
-                remoteCommands = host.remoteCommands?.mapValues {
-                    ExportedCommand(
-                        name = it.value.name,
-                        command = it.value.command,
-                        showOutput = it.value.showOutput,
-                        repeat = it.value.repeat,
-                    )
-                },
-                startScreen = host.startScreen,
-                sshConfig = host.sshConfig,
-            )
-        }
+        val hosts = hostRepository.getAll().first().map { it.toExportedHost() }
         val adHocCommands = adHocCommandRepository.getAdHocCommands().first().map { command ->
             ExportedAdHocCommand(
                 command = command.command,

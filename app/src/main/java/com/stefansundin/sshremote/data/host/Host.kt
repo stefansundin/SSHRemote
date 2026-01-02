@@ -20,6 +20,8 @@ package com.stefansundin.sshremote.data.host
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.stefansundin.sshremote.data.settings.ExportedCommand
+import com.stefansundin.sshremote.data.settings.ExportedHost
 
 enum class RemoteControlScreen(val tabIndex: Int) {
     REMOTE(0),
@@ -48,13 +50,44 @@ data class Host(
     val passwordId: String? = null,
     val identityIds: List<String>? = null,
     val knownHosts: List<String> = emptyList(),
-    val commands: List<Command> = listOf(Command("uptime", name = "Uptime", showOutput = true)),
+    val commands: List<Command> = DEFAULT_COMMANDS,
     val remoteCommands: Map<RemoteControlKey, Command>? = null,
     val startScreen: RemoteControlScreen = RemoteControlScreen.Default,
     val smartVolume: SmartVolumeSettings? = null,
     val sshConfig: String? = null,
 ) {
     companion object {
+        val DEFAULT_COMMANDS = listOf(Command("uptime", name = "Uptime", showOutput = true))
         const val DEFAULT_SSH_CONFIG = "ServerAliveInterval 60\n"
+    }
+
+    fun toExportedHost(): ExportedHost {
+        return ExportedHost(
+            name = name,
+            hostname = hostname,
+            port = port,
+            user = user,
+            allowIdentities = identityIds?.isNotEmpty() ?: true,
+            knownHosts = knownHosts,
+            commands = commands.map {
+                ExportedCommand(
+                    name = it.name,
+                    command = it.command,
+                    showOutput = it.showOutput,
+                    repeat = it.repeat
+                )
+            },
+            remoteCommands = remoteCommands?.mapValues {
+                ExportedCommand(
+                    name = it.value.name,
+                    command = it.value.command,
+                    showOutput = it.value.showOutput,
+                    repeat = it.value.repeat
+                )
+            },
+            startScreen = startScreen,
+            smartVolume = smartVolume,
+            sshConfig = sshConfig,
+        )
     }
 }

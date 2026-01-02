@@ -19,23 +19,30 @@
 package com.stefansundin.sshremote.data.settings
 
 import androidx.annotation.Keep
+import com.google.gson.GsonBuilder
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
+import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 
 @Keep
 data class ExportedHost(
-    val name: String,
-    val hostname: String,
-    val port: Int,
-    val user: String,
-    val allowIdentities: Boolean,
-    val knownHosts: List<String>,
-    val commands: List<ExportedCommand>,
+    val name: String?,
+    val hostname: String?,
+    val port: Int?,
+    val user: String?,
+    val allowIdentities: Boolean?,
+    val knownHosts: List<String>?,
+    val commands: List<ExportedCommand>?,
     val remoteCommands: Map<RemoteControlKey?, ExportedCommand>?,
     val startScreen: RemoteControlScreen?,
+    val smartVolume: SmartVolumeSettings?,
     val sshConfig: String?,
-)
+) {
+    fun exportToString(): String {
+        return GsonBuilder().create().toJson(this)
+    }
+}
 
 @Keep
 data class ExportedAdHocCommand(
