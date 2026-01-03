@@ -22,6 +22,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import com.google.gson.JsonSyntaxException
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.Theme
@@ -39,6 +40,7 @@ import java.time.format.DateTimeParseException
 import java.util.UUID
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipException
+import android.graphics.Color as AndroidColor
 
 enum class ImportStrategy {
     Upsert,
@@ -86,6 +88,15 @@ class SettingsImporter(
         }
     }
 
+    private fun parseColor(hex: String?): Color? {
+        if (hex == null) return null
+        return try {
+            Color(AndroidColor.parseColor(hex))
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+
     suspend fun import(json: String, importStrategy: ImportStrategy): Triple<Int, Boolean, Theme?> {
         var requestNotificationPermission = false
         var importedTheme: Theme? = null
@@ -103,6 +114,13 @@ class SettingsImporter(
                 settingsRepository.setTheme(settings.theme)
                 importedTheme = settings.theme
             }
+            if (settings.useDynamicColors != null) {
+                settingsRepository.setUseDynamicColors(settings.useDynamicColors)
+            }
+            settingsRepository.setBackgroundColor(parseColor(settings.backgroundColor))
+            settingsRepository.setPrimaryColor(parseColor(settings.primaryColor))
+            settingsRepository.setOnPrimaryColor(parseColor(settings.onPrimaryColor))
+
             if (settings.hapticFeedbackDuration != null) {
                 settingsRepository.setHapticFeedback(HapticFeedback.fromDuration(settings.hapticFeedbackDuration))
             }
@@ -126,7 +144,8 @@ class SettingsImporter(
 
             settings.hosts.forEach { exportedHost ->
                 val id =
-                    if (importStrategy == ImportStrategy.Duplicate || exportedHost.id == null) UUID.randomUUID().toString()
+                    if (importStrategy == ImportStrategy.Duplicate || exportedHost.id == null) UUID.randomUUID()
+                        .toString()
                     else exportedHost.id
 
                 @Suppress("UNCHECKED_CAST")

@@ -19,10 +19,13 @@
 package com.stefansundin.sshremote.data.settings
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -39,6 +42,10 @@ class SettingsRepository(context: Context) {
 
     private object PreferencesKeys {
         val THEME = stringPreferencesKey("theme")
+        val USE_DYNAMIC_COLORS = booleanPreferencesKey("use_dynamic_colors")
+        val BACKGROUND_COLOR = intPreferencesKey("background_color")
+        val PRIMARY_COLOR = intPreferencesKey("primary_color")
+        val ON_PRIMARY_COLOR = intPreferencesKey("on_primary_color")
         val HAPTIC_FEEDBACK_DURATION = longPreferencesKey("haptic_feedback_duration")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
@@ -58,6 +65,62 @@ class SettingsRepository(context: Context) {
     suspend fun setTheme(theme: Theme) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.THEME] = theme.name
+        }
+    }
+
+    val useDynamicColors: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.USE_DYNAMIC_COLORS] ?: true
+        }
+
+    suspend fun setUseDynamicColors(useDynamicColors: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USE_DYNAMIC_COLORS] = useDynamicColors
+        }
+    }
+
+    val backgroundColor: Flow<Color?> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.BACKGROUND_COLOR]?.let { Color(it) }
+        }
+
+    suspend fun setBackgroundColor(color: Color?) {
+        dataStore.edit { preferences ->
+            if (color == null) {
+                preferences.remove(PreferencesKeys.BACKGROUND_COLOR)
+            } else {
+                preferences[PreferencesKeys.BACKGROUND_COLOR] = color.toArgb()
+            }
+        }
+    }
+
+    val primaryColor: Flow<Color?> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.PRIMARY_COLOR]?.let { Color(it) }
+        }
+
+    suspend fun setPrimaryColor(color: Color?) {
+        dataStore.edit { preferences ->
+            if (color == null) {
+                preferences.remove(PreferencesKeys.PRIMARY_COLOR)
+            } else {
+                preferences[PreferencesKeys.PRIMARY_COLOR] = color.toArgb()
+            }
+        }
+    }
+
+    val onPrimaryColor: Flow<Color?> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ON_PRIMARY_COLOR]?.let { Color(it) }
+        }
+
+    suspend fun setOnPrimaryColor(color: Color?) {
+        dataStore.edit { preferences ->
+            if (color == null) {
+                preferences.remove(PreferencesKeys.ON_PRIMARY_COLOR)
+            } else {
+                preferences[PreferencesKeys.ON_PRIMARY_COLOR] = color.toArgb()
+            }
         }
     }
 

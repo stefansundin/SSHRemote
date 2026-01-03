@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -48,7 +50,9 @@ fun ThemeSettingDialog(
     AlertDialog(
         title = { Text("Choose theme") },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
                 Theme.entries.forEach { theme ->
                     Row(
                         modifier = Modifier
@@ -58,8 +62,7 @@ fun ThemeSettingDialog(
                                 selected = (theme == currentTheme),
                                 onClick = { onThemeSelected(theme) },
                                 role = Role.RadioButton,
-                            )
-                            .padding(horizontal = 16.dp),
+                            ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(

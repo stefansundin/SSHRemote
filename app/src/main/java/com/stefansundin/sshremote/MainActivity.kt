@@ -186,6 +186,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val theme by settingsViewModel.theme.collectAsState()
+            val useDynamicColors by settingsViewModel.useDynamicColors.collectAsState()
+            val backgroundColor by settingsViewModel.backgroundColor.collectAsState()
+            val primaryColor by settingsViewModel.primaryColor.collectAsState()
+            val onPrimaryColor by settingsViewModel.onPrimaryColor.collectAsState()
             val useDarkTheme = when (theme) {
                 Theme.SYSTEM -> isSystemInDarkTheme()
                 Theme.LIGHT -> false
@@ -202,7 +206,26 @@ class MainActivity : ComponentActivity() {
 
             CommandBroadcastReceiver(hostViewModel)
 
-            SSHRemoteTheme(darkTheme = useDarkTheme) {
+            SSHRemoteTheme(
+                theme,
+                useDynamicColors,
+                {
+                    var scheme = this
+                    if (backgroundColor != null) {
+                        scheme = scheme.copy(
+                            background = backgroundColor!!,
+                            surface = backgroundColor!!,
+                        )
+                    }
+                    if (primaryColor != null) {
+                        scheme = scheme.copy(primary = primaryColor!!)
+                    }
+                    if (onPrimaryColor != null) {
+                        scheme = scheme.copy(onPrimary = onPrimaryColor!!)
+                    }
+                    scheme
+                },
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

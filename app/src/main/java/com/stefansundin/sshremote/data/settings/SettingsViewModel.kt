@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.data.settings
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -54,6 +55,58 @@ class SettingsViewModel(
     fun setTheme(theme: Theme) {
         viewModelScope.launch {
             settingsRepository.setTheme(theme)
+        }
+    }
+
+    val useDynamicColors: StateFlow<Boolean> = settingsRepository.useDynamicColors
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = true,
+        )
+
+    fun setUseDynamicColors(useDynamicColors: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setUseDynamicColors(useDynamicColors)
+        }
+    }
+
+    val backgroundColor: StateFlow<Color?> = settingsRepository.backgroundColor
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
+
+    fun setBackgroundColor(color: Color?) {
+        viewModelScope.launch {
+            settingsRepository.setBackgroundColor(color)
+        }
+    }
+
+    val primaryColor: StateFlow<Color?> = settingsRepository.primaryColor
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
+
+    fun setPrimaryColor(color: Color?) {
+        viewModelScope.launch {
+            settingsRepository.setPrimaryColor(color)
+        }
+    }
+
+    val onPrimaryColor: StateFlow<Color?> = settingsRepository.onPrimaryColor
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
+
+    fun setOnPrimaryColor(color: Color?) {
+        viewModelScope.launch {
+            settingsRepository.setOnPrimaryColor(color)
         }
     }
 

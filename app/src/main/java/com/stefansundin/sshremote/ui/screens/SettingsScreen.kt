@@ -22,7 +22,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
@@ -30,7 +29,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,11 +64,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -92,10 +93,10 @@ import com.google.zxing.qrcode.QRCodeWriter
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.BuildConfig
-import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.ImportStrategy
 import com.stefansundin.sshremote.data.settings.SettingsEvent
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
+import com.stefansundin.sshremote.ui.components.ColorSettingDialog
 import com.stefansundin.sshremote.ui.components.HapticFeedbackSettingDialog
 import com.stefansundin.sshremote.ui.components.ThemeSettingDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -106,6 +107,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.graphics.Color as AndroidColor
 
 @Composable
 private fun SettingsGroup(title: String, content: @Composable () -> Unit) {
@@ -202,6 +204,11 @@ private fun ImportSettingsDialog(
     )
 }
 
+val ColorSaver = Saver<Color?, Int>(
+    save = { it?.toArgb() ?: 0 },
+    restore = { if (it != 0) Color(it) else null },
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -211,9 +218,20 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
     val savedTheme by settingsViewModel.theme.collectAsState()
     var previewTheme by rememberSaveable { mutableStateOf(savedTheme) }
+    val useDynamicColors by settingsViewModel.useDynamicColors.collectAsState()
+    var previewUseDynamicColors by rememberSaveable { mutableStateOf(useDynamicColors) }
+    val backgroundColor by settingsViewModel.backgroundColor.collectAsState()
+    var previewBackgroundColor by rememberSaveable(stateSaver = ColorSaver) { mutableStateOf(backgroundColor) }
+    val primaryColor by settingsViewModel.primaryColor.collectAsState()
+    var previewPrimaryColor by rememberSaveable(stateSaver = ColorSaver) { mutableStateOf(primaryColor) }
+    val onPrimaryColor by settingsViewModel.onPrimaryColor.collectAsState()
+    var previewOnPrimaryColor by rememberSaveable(stateSaver = ColorSaver) { mutableStateOf(onPrimaryColor) }
+
     var showThemeDialog by rememberSaveable { mutableStateOf(false) }
+    var showColorDialog by rememberSaveable { mutableStateOf(false) }
     val savedHapticFeedback by settingsViewModel.hapticFeedback.collectAsState()
     var previewHapticFeedback by rememberSaveable { mutableStateOf(savedHapticFeedback) }
     var showHapticFeedbackDialog by rememberSaveable { mutableStateOf(false) }
@@ -222,12 +240,6 @@ fun SettingsScreen(
     var exportJson by rememberSaveable { mutableStateOf<String?>(null) }
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
-
-    val useDarkTheme = when (previewTheme) {
-        Theme.SYSTEM -> isSystemInDarkTheme()
-        Theme.LIGHT -> false
-        Theme.DARK -> true
-    }
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
     val hasHosts by settingsViewModel.hasHosts.collectAsState()
 
@@ -266,8 +278,12 @@ fun SettingsScreen(
     val uriHandler = LocalUriHandler.current
 
     // Required to react to theme changes when importing settings
-    LaunchedEffect(savedTheme) {
+    LaunchedEffect(savedTheme, useDynamicColors, backgroundColor, primaryColor, onPrimaryColor) {
         previewTheme = savedTheme
+        previewUseDynamicColors = useDynamicColors
+        previewBackgroundColor = backgroundColor
+        previewPrimaryColor = primaryColor
+        previewOnPrimaryColor = onPrimaryColor
     }
 
     LaunchedEffect(Unit) {
@@ -340,7 +356,26 @@ fun SettingsScreen(
         )
     }
 
-    SSHRemoteTheme(darkTheme = useDarkTheme) {
+    SSHRemoteTheme(
+        previewTheme,
+        previewUseDynamicColors,
+        {
+            var scheme = this
+            if (previewBackgroundColor != null) {
+                scheme = scheme.copy(
+                    background = previewBackgroundColor!!,
+                    surface = previewBackgroundColor!!,
+                )
+            }
+            if (previewPrimaryColor != null) {
+                scheme = scheme.copy(primary = previewPrimaryColor!!)
+            }
+            if (previewOnPrimaryColor != null) {
+                scheme = scheme.copy(onPrimary = previewOnPrimaryColor!!)
+            }
+            scheme
+        },
+    ) {
         if (showThemeDialog) {
             ThemeSettingDialog(
                 currentTheme = previewTheme,
@@ -354,6 +389,33 @@ fun SettingsScreen(
                 onDismiss = {
                     previewTheme = savedTheme
                     showThemeDialog = false
+                },
+            )
+        }
+
+        if (showColorDialog) {
+            ColorSettingDialog(
+                useDynamicColors = previewUseDynamicColors,
+                onUseDynamicColorsChange = { previewUseDynamicColors = it },
+                backgroundColor = previewBackgroundColor,
+                onBackgroundColorChange = { previewBackgroundColor = it },
+                primaryColor = previewPrimaryColor,
+                onPrimaryColorChange = { previewPrimaryColor = it },
+                onPrimaryColorColor = previewOnPrimaryColor,
+                onOnPrimaryColorChange = { previewOnPrimaryColor = it },
+                onConfirm = {
+                    settingsViewModel.setUseDynamicColors(previewUseDynamicColors)
+                    settingsViewModel.setBackgroundColor(previewBackgroundColor)
+                    settingsViewModel.setPrimaryColor(previewPrimaryColor)
+                    settingsViewModel.setOnPrimaryColor(previewOnPrimaryColor)
+                    showColorDialog = false
+                },
+                onDismiss = {
+                    previewUseDynamicColors = useDynamicColors
+                    previewBackgroundColor = backgroundColor
+                    previewPrimaryColor = primaryColor
+                    previewOnPrimaryColor = onPrimaryColor
+                    showColorDialog = false
                 },
             )
         }
@@ -410,6 +472,18 @@ fun SettingsScreen(
                         onClick = {
                             previewTheme = savedTheme
                             showThemeDialog = true
+                        },
+                    )
+                    SettingsItem(
+                        title = "Colors",
+                        subtitle = "Customize the application colors",
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            previewUseDynamicColors = useDynamicColors
+                            previewBackgroundColor = backgroundColor
+                            previewPrimaryColor = primaryColor
+                            previewOnPrimaryColor = onPrimaryColor
+                            showColorDialog = true
                         },
                     )
                 }
@@ -599,7 +673,7 @@ private fun ExportSettingsQrCodeDialog(
                     val bitmap = createBitmap(width, height, Bitmap.Config.RGB_565)
                     for (x in 0 until width) {
                         for (y in 0 until height) {
-                            bitmap[x, y] = if (bitMatrix[x, y]) Color.BLACK else Color.WHITE
+                            bitmap[x, y] = if (bitMatrix[x, y]) AndroidColor.BLACK else AndroidColor.WHITE
                         }
                     }
                     bitmap
@@ -655,7 +729,7 @@ private fun ExportSettingsQrCodeDialog(
                         } else {
                             Surface(
                                 modifier = Modifier.fillMaxSize(),
-                                color = androidx.compose.ui.graphics.Color.White,
+                                color = Color.White,
                             ) {
                                 CircularProgressIndicator(strokeWidth = 16.dp, modifier = Modifier.padding(128.dp))
                             }

@@ -54,6 +54,10 @@ data class ExportedAdHocCommand(
 @Keep
 data class ExportedSettings(
     val theme: Theme?,
+    val useDynamicColors: Boolean?,
+    val primaryColor: String?,
+    val onPrimaryColor: String?,
+    val backgroundColor: String?,
     val hapticFeedbackDuration: Long?,
     val keepScreenOn: Boolean?,
     val notificationsEnabled: Boolean?,

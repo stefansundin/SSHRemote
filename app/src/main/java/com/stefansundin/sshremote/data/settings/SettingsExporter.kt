@@ -22,6 +22,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Base64
 import androidx.annotation.Keep
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.google.gson.GsonBuilder
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.Command
@@ -77,8 +79,18 @@ class SettingsExporter(
         return Base64.encodeToString(compressed, Base64.DEFAULT)
     }
 
+    private fun Color.toHex(): String {
+        // This includes the alpha channel which you can't set in the app, but it is possible to edit it in the JSON file and import it back, and it does work.
+        // How useful this is however, I don't know, but it's a nice little secret feature.
+        return String.format("#%08X", this.toArgb())
+    }
+
     private suspend fun getSettingsToExport(): ExportedSettings {
         val theme = settingsRepository.theme.first()
+        val useDynamicColors = settingsRepository.useDynamicColors.first()
+        val primaryColor = settingsRepository.primaryColor.first()
+        val onPrimaryColor = settingsRepository.onPrimaryColor.first()
+        val backgroundColor = settingsRepository.backgroundColor.first()
         val hapticFeedback = settingsRepository.hapticFeedback.first()
         val keepScreenOn = settingsRepository.keepScreenOn.first()
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
@@ -92,6 +104,10 @@ class SettingsExporter(
         }
         return ExportedSettings(
             theme,
+            useDynamicColors,
+            primaryColor?.toHex(),
+            onPrimaryColor?.toHex(),
+            backgroundColor?.toHex(),
             hapticFeedback.duration,
             keepScreenOn,
             notificationsEnabled,
