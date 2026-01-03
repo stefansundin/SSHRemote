@@ -353,7 +353,7 @@ fun EditHostScreen(
                 ) {
                     TextButton(
                         onClick = {
-                            uriHandler.openUri("https://deepwiki.com/mwiede/jsch/7-configuration")
+                            uriHandler.openUri("https://github.com/stefansundin/SSHRemote/discussions/2")
                         },
                     ) {
                         Text("Help")
