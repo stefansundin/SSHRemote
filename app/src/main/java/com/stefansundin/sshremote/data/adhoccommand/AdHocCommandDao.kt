@@ -27,15 +27,15 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AdHocCommandDao {
+    @Query("SELECT * FROM ad_hoc_commands ORDER BY lastUsed DESC")
+    fun getAll(): Flow<List<AdHocCommand>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(adHocCommand: AdHocCommand)
-
-    @Query("SELECT * FROM ad_hoc_commands ORDER BY lastUsed DESC")
-    fun getAdHocCommands(): Flow<List<AdHocCommand>>
 
     @Delete
     suspend fun delete(adHocCommand: AdHocCommand)
 
     @Query("DELETE FROM ad_hoc_commands")
-    suspend fun clear()
+    suspend fun deleteAll()
 }

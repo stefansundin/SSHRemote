@@ -18,10 +18,12 @@
 
 package com.stefansundin.sshremote.data.host
 
+import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.stefansundin.sshremote.data.settings.ExportedCommand
 import com.stefansundin.sshremote.data.settings.ExportedHost
+import java.util.UUID
 
 enum class RemoteControlScreen(val tabIndex: Int) {
     REMOTE(0),
@@ -41,8 +43,8 @@ enum class RemoteControlScreen(val tabIndex: Int) {
  */
 @Entity(tableName = "hosts")
 data class Host(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
+    val id: String = UUID.randomUUID().toString(),
     val name: String,
     val hostname: String,
     val port: Int,
@@ -63,6 +65,7 @@ data class Host(
 
     fun toExportedHost(): ExportedHost {
         return ExportedHost(
+            id = id,
             name = name,
             hostname = hostname,
             port = port,

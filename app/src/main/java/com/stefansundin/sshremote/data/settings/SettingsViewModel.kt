@@ -126,12 +126,12 @@ class SettingsViewModel(
         return SettingsExporter(context, settingsRepository, hostRepository, adHocCommandRepository).exportToString()
     }
 
-    fun importSettings(context: Context, uri: Uri, merge: Boolean) {
+    fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy = ImportStrategy.Replace) {
         viewModelScope.launch {
             try {
                 val (count, requestNotificationPermission, theme) =
                     SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
-                        .import(uri, merge)
+                        .import(uri, importStrategy)
                 if (theme != null) {
                     setTheme(theme)
                 }
@@ -145,12 +145,12 @@ class SettingsViewModel(
         }
     }
 
-    fun importSettings(context: Context, json: String, merge: Boolean) {
+    fun importSettings(context: Context, json: String, importStrategy: ImportStrategy = ImportStrategy.Replace) {
         viewModelScope.launch {
             try {
                 val (count, requestNotificationPermission, theme) =
                     SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
-                        .import(json, merge)
+                        .import(json, importStrategy)
                 if (theme != null) {
                     setTheme(theme)
                 }

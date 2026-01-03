@@ -93,6 +93,7 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.BuildConfig
 import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.data.settings.ImportStrategy
 import com.stefansundin.sshremote.data.settings.SettingsEvent
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.ui.components.HapticFeedbackSettingDialog
@@ -168,6 +169,37 @@ private fun SettingsSwitchItem(
             onCheckedChange = onCheckedChange,
         )
     }
+}
+
+@Composable
+private fun ImportSettingsDialog(
+    onDismissRequest: () -> Unit,
+    onImport: (ImportStrategy) -> Unit,
+) {
+    AlertDialog(
+        title = { Text("Import settings") },
+        text = { Text("In case of conflicts with existing hosts, do you want to update or duplicate?\n\nYou can also choose Replace which will delete all existing hosts.") },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = { onImport(ImportStrategy.Upsert) }) {
+                    Text("Update")
+                }
+                TextButton(onClick = { onImport(ImportStrategy.Duplicate) }) {
+                    Text("Duplicate")
+                }
+                TextButton(onClick = { onImport(ImportStrategy.Replace) }) {
+                    Text("Replace")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -261,42 +293,16 @@ fun SettingsScreen(
 
     importUri?.let { uri ->
         if (hasHosts) {
-            AlertDialog(
-                title = { Text("Import settings") },
-                text = { Text("Do you want to merge with existing hosts or overwrite them?") },
-                properties = DialogProperties(dismissOnClickOutside = false),
+            ImportSettingsDialog(
                 onDismissRequest = { importUri = null },
-                confirmButton = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(
-                            onClick = {
-                                settingsViewModel.importSettings(context, uri, false)
-                                importUri = null
-                            },
-                        ) {
-                            Text("Overwrite")
-                        }
-                        TextButton(
-                            onClick = {
-                                settingsViewModel.importSettings(context, uri, true)
-                                importUri = null
-                            },
-                        ) {
-                            Text("Merge")
-                        }
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { importUri = null },
-                    ) {
-                        Text("Cancel")
-                    }
+                onImport = { strategy ->
+                    settingsViewModel.importSettings(context, uri, strategy)
+                    importUri = null
                 },
             )
         } else {
             LaunchedEffect(Unit) {
-                settingsViewModel.importSettings(context, uri, false)
+                settingsViewModel.importSettings(context, uri)
                 importUri = null
             }
         }
@@ -304,42 +310,16 @@ fun SettingsScreen(
 
     importJson?.let { json ->
         if (hasHosts) {
-            AlertDialog(
-                title = { Text("Import settings") },
-                text = { Text("Do you want to merge with existing hosts or overwrite them?") },
-                properties = DialogProperties(dismissOnClickOutside = false),
+            ImportSettingsDialog(
                 onDismissRequest = { importJson = null },
-                confirmButton = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(
-                            onClick = {
-                                settingsViewModel.importSettings(context, json, false)
-                                importJson = null
-                            },
-                        ) {
-                            Text("Overwrite")
-                        }
-                        TextButton(
-                            onClick = {
-                                settingsViewModel.importSettings(context, json, true)
-                                importJson = null
-                            },
-                        ) {
-                            Text("Merge")
-                        }
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { importJson = null },
-                    ) {
-                        Text("Cancel")
-                    }
+                onImport = { strategy ->
+                    settingsViewModel.importSettings(context, json, strategy)
+                    importJson = null
                 },
             )
         } else {
             LaunchedEffect(Unit) {
-                settingsViewModel.importSettings(context, json, false)
+                settingsViewModel.importSettings(context, json)
                 importJson = null
             }
         }
@@ -489,7 +469,7 @@ fun SettingsScreen(
                 SettingsGroup("Data") {
                     SettingsItem(
                         title = "Export to file",
-                        subtitle = "Export settings to a file.",
+                        subtitle = "Export settings and hosts to a file.",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
@@ -499,13 +479,13 @@ fun SettingsScreen(
                     )
                     SettingsItem(
                         title = "Import from file",
-                        subtitle = "Import settings from a file.",
+                        subtitle = "Import settings and hosts from a file.",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { importLauncher.launch(arrayOf("application/json")) },
                     )
                     SettingsItem(
                         title = "Export to QR code",
-                        subtitle = "Export settings to a QR code.",
+                        subtitle = "Export settings and hosts to a QR code.",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             coroutineScope.launch {
@@ -515,7 +495,7 @@ fun SettingsScreen(
                     )
                     SettingsItem(
                         title = "Import from QR code",
-                        subtitle = "Import settings from a QR code.",
+                        subtitle = "Import settings and hosts from a QR code.",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             val options = ScanOptions()

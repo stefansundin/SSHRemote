@@ -84,7 +84,7 @@ class SettingsExporter(
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
         val hosts = hostRepository.getAll().first().map { it.toExportedHost() }
-        val adHocCommands = adHocCommandRepository.getAdHocCommands().first().map { command ->
+        val adHocCommands = adHocCommandRepository.getAll().first().map { command ->
             ExportedAdHocCommand(
                 command = command.command,
                 lastUsed = command.lastUsed.toString(),

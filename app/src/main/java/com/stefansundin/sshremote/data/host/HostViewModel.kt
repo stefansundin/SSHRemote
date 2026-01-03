@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.time.measureTimedValue
 
@@ -110,7 +111,7 @@ class HostViewModel(
         repository.upsert(hostToSave)
     }
 
-    fun cloneHost(host: Host, onHostCloned: (Int) -> Unit) {
+    fun cloneHost(host: Host, onHostCloned: (String) -> Unit) {
         viewModelScope.launch {
             val newPasswordId = host.passwordId?.let { passwordId ->
                 passwordDao.getPassword(passwordId)?.let { password ->
@@ -120,12 +121,12 @@ class HostViewModel(
                 }
             }
             val clonedHost = host.copy(
-                id = 0,
+                id = UUID.randomUUID().toString(),
                 name = "Copy of ${host.name}",
                 passwordId = newPasswordId,
             )
-            val newHostId = repository.insert(clonedHost)
-            onHostCloned(newHostId.toInt())
+            repository.insert(clonedHost)
+            onHostCloned(clonedHost.id)
         }
     }
 

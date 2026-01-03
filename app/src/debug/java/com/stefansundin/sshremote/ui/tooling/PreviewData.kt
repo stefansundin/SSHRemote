@@ -29,7 +29,7 @@ object PreviewData {
     val dummyCommand = Command("uptime")
 
     val sampleHost = Host(
-        id = 1,
+        id = "1",
         name = "Raspberry Pi",
         hostname = "192.168.1.10",
         port = 22,

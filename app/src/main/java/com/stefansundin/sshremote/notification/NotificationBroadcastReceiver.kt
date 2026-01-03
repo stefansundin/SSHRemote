@@ -33,7 +33,7 @@ class NotificationBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             NotificationService.ACTION_EXECUTE_COMMAND -> {
-                val hostId = intent.getIntExtra(NotificationService.EXTRA_HOST_ID, -1)
+                val hostId = intent.getStringExtra(NotificationService.EXTRA_HOST_ID)
 
                 val remoteControlKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getSerializableExtra(
@@ -45,10 +45,10 @@ class NotificationBroadcastReceiver : BroadcastReceiver() {
                     intent.getSerializableExtra(NotificationService.EXTRA_REMOTE_CONTROL_KEY) as? RemoteControlKey
                 }
 
-                if (hostId != -1 && remoteControlKey != null) {
+                if (hostId != null && remoteControlKey != null) {
                     // Send the intent to MainActivity
                     val executeIntent = Intent(NotificationService.ACTION_EXECUTE_COMMAND).apply {
-                        putExtra(NotificationService.EXTRA_HOST_ID, hostId.toString())
+                        putExtra(NotificationService.EXTRA_HOST_ID, hostId)
                         putExtra(NotificationService.EXTRA_REMOTE_CONTROL_KEY, remoteControlKey.name)
                         setPackage(context.packageName)
                     }

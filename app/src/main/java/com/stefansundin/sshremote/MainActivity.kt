@@ -102,11 +102,11 @@ import kotlinx.coroutines.launch
 sealed class Screen(val route: String) {
     data object HostList : Screen("host_list")
     data object HostEdit : Screen("host_edit/{hostId}?scan={scan}") {
-        fun createRoute(hostId: Int?, scan: Boolean = false) = "host_edit/$hostId?scan=$scan"
+        fun createRoute(hostId: String?, scan: Boolean = false) = "host_edit/$hostId?scan=$scan"
     }
 
     data object RemoteControl : Screen("remote_control/{hostId}/{initialPage}") {
-        fun createRoute(hostId: Int, initialPage: Int = 0) = "remote_control/$hostId/$initialPage"
+        fun createRoute(hostId: String, initialPage: Int = 0) = "remote_control/$hostId/$initialPage"
     }
 
     data object EditRemoteControl : Screen("edit_remote_control/{initialPage}") {
@@ -170,7 +170,7 @@ class MainActivity : ComponentActivity() {
         AdHocCommandViewModelFactory(app.adHocCommandRepository)
     }
 
-    private var shortcutHostId = mutableStateOf<Int?>(null)
+    private var shortcutHostId = mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -181,7 +181,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         if (intent?.hasExtra("HOST_ID") == true) {
-            shortcutHostId.value = intent.getIntExtra("HOST_ID", -1)
+            shortcutHostId.value = intent.getStringExtra("HOST_ID")
         }
 
         setContent {
@@ -265,10 +265,10 @@ class MainActivity : ComponentActivity() {
                         if (!hosts.isNullOrEmpty()) {
                             val shortcutId = shortcutHostId.value
                             if (shortcutId != null) {
+                                shortcutHostId.value = null
                                 val hostToConnect = hosts?.find { it.id == shortcutId }
                                 if (hostToConnect != null) {
                                     onConnect(hostToConnect)
-                                    shortcutHostId.value = null
                                 }
                             }
                         }
@@ -339,7 +339,7 @@ class MainActivity : ComponentActivity() {
                                 navArgument("scan") { type = NavType.BoolType; defaultValue = false },
                             ),
                         ) { backStackEntry ->
-                            val hostId = backStackEntry.arguments?.getString("hostId")?.toIntOrNull()
+                            val hostId = backStackEntry.arguments?.getString("hostId")
                             val scan = backStackEntry.arguments?.getBoolean("scan") ?: false
                             val host = hosts?.find { it.id == hostId }
                             val identities by identityViewModel.identities.collectAsState()
@@ -364,11 +364,11 @@ class MainActivity : ComponentActivity() {
                         composable(
                             Screen.RemoteControl.route,
                             arguments = listOf(
-                                navArgument("hostId") { type = NavType.IntType },
+                                navArgument("hostId") { type = NavType.StringType },
                                 navArgument("initialPage") { type = NavType.IntType },
                             ),
                         ) { backStackEntry ->
-                            val hostId = backStackEntry.arguments?.getInt("hostId")!!
+                            val hostId = backStackEntry.arguments?.getString("hostId")
                             val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
                             val host = hosts?.find { it.id == hostId }
                             if (host != null) {
@@ -535,7 +535,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.hasExtra("HOST_ID")) {
-            val hostId = intent.getIntExtra("HOST_ID", -1)
+            val hostId = intent.getStringExtra("HOST_ID")
             val uiState = hostViewModel.uiState.value
             if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.host?.id == hostId) {
                 return
@@ -615,16 +615,10 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == NotificationService.ACTION_EXECUTE_COMMAND) {
-                    val hostIdString = intent.getStringExtra(NotificationService.EXTRA_HOST_ID)
+                    val hostId = intent.getStringExtra(NotificationService.EXTRA_HOST_ID)
                     val remoteControlKeyString = intent.getStringExtra(NotificationService.EXTRA_REMOTE_CONTROL_KEY)
 
-                    if (remoteControlKeyString != null && hostIdString != null) {
-                        val hostId = hostIdString.toIntOrNull()
-                        if (hostId == null) {
-                            Log.e("CommandBroadcastReceiver", "Invalid host ID received: $hostIdString")
-                            return
-                        }
-
+                    if (remoteControlKeyString != null && hostId != null) {
                         val remoteControlKey: RemoteControlKey
                         try {
                             remoteControlKey = RemoteControlKey.valueOf(remoteControlKeyString)

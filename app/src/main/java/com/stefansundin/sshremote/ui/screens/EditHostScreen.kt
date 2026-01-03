@@ -969,23 +969,7 @@ fun AddHostScreenPreview() {
 @Composable
 fun EditHostScreenPreview() {
     SSHRemoteTheme {
-        val sampleHost = Host(1, "Raspberry Pi", "192.168.1.10", 22, "pi", "passwordId", emptyList())
-        EditHostScreen(
-            host = sampleHost,
-            onSave = { _, _ -> },
-            onNavigateUp = {},
-            identities = emptyList(),
-            allUsers = emptyList(),
-            hostViewModel = null,
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Clone Host Preview")
-@Composable
-fun CloneHostScreenPreview() {
-    SSHRemoteTheme {
-        val sampleHost = Host(0, "Copy of Raspberry Pi", "192.168.1.10", 22, "pi", null, emptyList())
+        val sampleHost = Host("1", "Raspberry Pi", "192.168.1.10", 22, "pi", "passwordId", emptyList(), listOf(""))
         EditHostScreen(
             host = sampleHost,
             onSave = { _, _ -> },

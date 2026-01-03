@@ -34,25 +34,25 @@ class HostRepository(private val hostDao: HostDao) {
     /**
      * Retrieves a flow of a single host by its ID.
      */
-    fun get(id: Int): Flow<Host?> = hostDao.get(id)
+    fun get(id: String): Flow<Host?> = hostDao.get(id)
 
     /**
      * Retrieves a single host by its ID, once.
      */
-    suspend fun getOnce(id: Int): Host? = hostDao.getOnce(id)
+    suspend fun getOnce(id: String): Host? = hostDao.getOnce(id)
 
     /**
      * Inserts a host in the database.
      */
-    suspend fun insert(host: Host): Long {
-        return hostDao.insert(host)
+    suspend fun insert(host: Host) {
+        hostDao.insert(host)
     }
 
     /**
      * Inserts or updates a host in the database.
      */
-    suspend fun upsert(host: Host): Long {
-        return hostDao.upsert(host)
+    suspend fun upsert(host: Host) {
+        hostDao.upsert(host)
     }
 
     /**

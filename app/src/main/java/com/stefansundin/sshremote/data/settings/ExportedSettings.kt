@@ -27,6 +27,7 @@ import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 
 @Keep
 data class ExportedHost(
+    val id: String?,
     val name: String?,
     val hostname: String?,
     val port: Int?,

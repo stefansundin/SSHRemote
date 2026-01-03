@@ -99,7 +99,7 @@ fun HostListScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
-    var undoableDeletedHostId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var undoableDeletedHostId by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Long pressing the FAB will launch directly into the QR code scanner
     // It's a secret feature that is not documented
@@ -352,8 +352,8 @@ fun HostItem(
 fun HostListScreenPreview() {
     SSHRemoteTheme {
         val sampleHosts = listOf(
-            Host(1, "Raspberry Pi", "192.168.1.10", 22, "pi", null),
-            Host(2, "Example Host", "example.com", 2222, "admin", null),
+            Host("1", "Raspberry Pi", "192.168.1.10", 22, "pi", null),
+            Host("2", "Example Host", "example.com", 2222, "admin", null),
         )
         HostListScreen(
             hosts = sampleHosts,

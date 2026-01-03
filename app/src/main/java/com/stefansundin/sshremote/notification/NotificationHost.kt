@@ -25,7 +25,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class NotificationHost(
-    val id: Int,
+    val id: String,
     val name: String,
     val status: ConnectionStatus,
 ) : Parcelable

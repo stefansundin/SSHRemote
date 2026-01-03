@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 
 class AdHocCommandViewModel(private val adHocCommandRepository: AdHocCommandRepository) : ViewModel() {
     val adHocCommands: StateFlow<List<AdHocCommand>> =
-        adHocCommandRepository.getAdHocCommands()
+        adHocCommandRepository.getAll()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     fun addAdHocCommand(command: String) {
@@ -44,7 +44,7 @@ class AdHocCommandViewModel(private val adHocCommandRepository: AdHocCommandRepo
 
     fun clearAdHocCommands() {
         viewModelScope.launch {
-            adHocCommandRepository.clear()
+            adHocCommandRepository.deleteAll()
         }
     }
 }

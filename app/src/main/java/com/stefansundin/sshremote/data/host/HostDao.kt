@@ -27,27 +27,26 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HostDao {
+    @Query("SELECT * FROM hosts ORDER BY name ASC")
+    fun getAll(): Flow<List<Host>>
+
+    @Query("SELECT * FROM hosts WHERE id = :id")
+    fun get(id: String): Flow<Host?>
+
+    @Query("SELECT * FROM hosts WHERE id = :id")
+    suspend fun getOnce(id: String): Host?
 
     @Insert
-    suspend fun insert(host: Host): Long
+    suspend fun insert(host: Host)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(host: Host): Long
+    suspend fun upsert(host: Host)
 
     @Delete
     suspend fun delete(host: Host)
 
     @Query("DELETE FROM hosts")
     suspend fun deleteAll()
-
-    @Query("SELECT * FROM hosts ORDER BY name ASC")
-    fun getAll(): Flow<List<Host>>
-
-    @Query("SELECT * FROM hosts WHERE id = :id")
-    fun get(id: Int): Flow<Host?>
-
-    @Query("SELECT * FROM hosts WHERE id = :id")
-    suspend fun getOnce(id: Int): Host?
 
     @Query("SELECT COUNT(*) FROM hosts")
     suspend fun count(): Int

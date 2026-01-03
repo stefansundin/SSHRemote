@@ -36,8 +36,15 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
+import java.util.UUID
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipException
+
+enum class ImportStrategy {
+    Upsert,
+    Duplicate,
+    Replace,
+}
 
 class ImportException(message: String) : Exception(message)
 
@@ -48,11 +55,11 @@ class SettingsImporter(
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
 
-    suspend fun import(uri: Uri, merge: Boolean): Triple<Int, Boolean, Theme?> {
+    suspend fun import(uri: Uri, importStrategy: ImportStrategy): Triple<Int, Boolean, Theme?> {
         val json = context.contentResolver.openInputStream(uri)?.use { inputStream ->
             inputStream.bufferedReader().use { it.readText() }
         } ?: throw ImportException("Could not read file")
-        return import(json, merge)
+        return import(json, importStrategy)
     }
 
     private fun decompress(data: String): String {
@@ -79,7 +86,7 @@ class SettingsImporter(
         }
     }
 
-    suspend fun import(json: String, merge: Boolean): Triple<Int, Boolean, Theme?> {
+    suspend fun import(json: String, importStrategy: ImportStrategy): Triple<Int, Boolean, Theme?> {
         var requestNotificationPermission = false
         var importedTheme: Theme? = null
 
@@ -112,14 +119,19 @@ class SettingsImporter(
                 settingsRepository.setStrictHostKeyChecking(settings.strictHostKeyChecking)
             }
 
-            if (!merge) {
+            if (importStrategy == ImportStrategy.Replace) {
                 hostRepository.deleteAll()
-                adHocCommandRepository.clear()
+                adHocCommandRepository.deleteAll()
             }
 
             settings.hosts.forEach { exportedHost ->
+                val id =
+                    if (importStrategy == ImportStrategy.Duplicate || exportedHost.id == null) UUID.randomUUID().toString()
+                    else exportedHost.id
+
                 @Suppress("UNCHECKED_CAST")
                 val host = Host(
+                    id = id,
                     name = exportedHost.name!!,
                     hostname = exportedHost.hostname!!,
                     port = exportedHost.port ?: 22,

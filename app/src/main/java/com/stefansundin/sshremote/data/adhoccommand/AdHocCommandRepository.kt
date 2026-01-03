@@ -21,8 +21,8 @@ package com.stefansundin.sshremote.data.adhoccommand
 import kotlinx.coroutines.flow.Flow
 
 class AdHocCommandRepository(private val adHocCommandDao: AdHocCommandDao) {
-    fun getAdHocCommands(): Flow<List<AdHocCommand>> {
-        return adHocCommandDao.getAdHocCommands()
+    fun getAll(): Flow<List<AdHocCommand>> {
+        return adHocCommandDao.getAll()
     }
 
     suspend fun insert(adHocCommand: AdHocCommand) {
@@ -33,7 +33,7 @@ class AdHocCommandRepository(private val adHocCommandDao: AdHocCommandDao) {
         adHocCommandDao.delete(adHocCommand)
     }
 
-    suspend fun clear() {
-        adHocCommandDao.clear()
+    suspend fun deleteAll() {
+        adHocCommandDao.deleteAll()
     }
 }
