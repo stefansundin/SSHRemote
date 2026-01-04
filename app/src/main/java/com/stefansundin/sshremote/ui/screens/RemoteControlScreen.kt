@@ -22,7 +22,6 @@ import android.app.Activity
 import android.os.Build
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -114,7 +113,7 @@ import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
 import com.stefansundin.sshremote.ui.components.SpecialKeysRow
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemoteControlScreen(
     host: Host,

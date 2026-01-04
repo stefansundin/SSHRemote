@@ -18,7 +18,6 @@
 
 package com.stefansundin.sshremote.ui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,7 +68,7 @@ import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdHocCommandScreen(
     uiState: RemoteUiState,
