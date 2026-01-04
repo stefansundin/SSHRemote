@@ -96,9 +96,6 @@ fun HostListScreen(
     onSettings: () -> Unit,
     onHelp: () -> Unit,
     modifier: Modifier = Modifier,
-    emptyViewText: String = stringResource(R.string.no_ssh_hosts_added_yet),
-    emptyViewAddHostPrompt: String = stringResource(R.string.empty_list_add_prompt),
-    emptyViewHelpPrompt: String = stringResource(R.string.tap_the_help_button_for_help),
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
@@ -224,12 +221,12 @@ fun HostListScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        emptyViewText,
+                        stringResource(R.string.no_ssh_hosts_added_yet),
                         style = MaterialTheme.typography.bodyLarge,
                     )
 
                     TextWithInlineIcon(
-                        emptyViewAddHostPrompt,
+                        stringResource(R.string.empty_list_add_prompt),
                         "+",
                         Icons.Default.Add,
                         style = MaterialTheme.typography.bodyMedium,
@@ -237,7 +234,7 @@ fun HostListScreen(
                     )
 
                     TextWithInlineIcon(
-                        emptyViewHelpPrompt,
+                        stringResource(R.string.tap_the_help_button_for_help),
                         "?",
                         Icons.AutoMirrored.Filled.Help,
                         style = MaterialTheme.typography.bodyMedium,
@@ -422,9 +419,6 @@ fun HostListScreenEmptyPreview() {
             onUndoDelete = {},
             onSettings = {},
             onHelp = {},
-            emptyViewText = "No SSH hosts added yet",
-            emptyViewAddHostPrompt = "Tap the + button to add a host",
-            emptyViewHelpPrompt = "Tap the ? button for help",
         )
     }
 }
