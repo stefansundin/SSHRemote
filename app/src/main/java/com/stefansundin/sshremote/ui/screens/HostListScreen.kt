@@ -18,7 +18,9 @@
 
 package com.stefansundin.sshremote.ui.screens
 
-import androidx.compose.foundation.clickable
+import android.view.HapticFeedbackConstants
+import android.view.SoundEffectConstants
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -66,6 +68,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -253,7 +256,6 @@ fun HostListScreen(
     }
 }
 
-
 @Composable
 fun HostItem(
     host: Host,
@@ -265,12 +267,22 @@ fun HostItem(
     modifier: Modifier = Modifier,
 ) {
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
+    val view = LocalView.current
 
     Card(
         modifier = modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth()
-            .clickable(onClick = onConnect),
+            .combinedClickable(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onConnect()
+                },
+                onLongClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    isContextMenuVisible = true
+                },
+            ),
     ) {
         Row(
             modifier = Modifier
@@ -367,9 +379,6 @@ fun HostListScreenPreview() {
             onUndoDelete = {},
             onSettings = {},
             onHelp = {},
-            emptyViewText = "",
-            emptyViewAddHostPrompt = "",
-            emptyViewHelpPrompt = "",
         )
     }
 }
