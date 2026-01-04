@@ -19,8 +19,8 @@
 package com.stefansundin.sshremote.ui.components
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.PrimaryScrollableTabRow
-import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -45,14 +45,14 @@ fun ResponsiveTabRow(
 
         val tabRowMeasurable = subcompose(if (useScrollable) "scrollable" else "fixed") {
             if (useScrollable) {
-                PrimaryScrollableTabRow(
+                SecondaryScrollableTabRow(
                     selectedTabIndex = selectedTabIndex,
                     edgePadding = edgePadding,
                 ) {
                     tabs()
                 }
             } else {
-                PrimaryTabRow(
+                SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
                 ) {
                     tabs()
