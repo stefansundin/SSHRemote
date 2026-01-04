@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,7 +34,7 @@ fun SelectIdentityDialog(
             } else {
                 Column {
                     Text(
-                        text = "Key will be added to host's authorized_keys.",
+                        text = "Key will be added to host's ~/.ssh/authorized_keys file.",
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                     LazyColumn {
@@ -47,6 +48,7 @@ fun SelectIdentityDialog(
                                         onIdentitySelected(identity)
                                     },
                             )
+                            HorizontalDivider()
                         }
                     }
                 }
