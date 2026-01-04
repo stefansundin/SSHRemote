@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -49,6 +51,7 @@ fun EditCommandDialog(
     var name by rememberSaveable { mutableStateOf(command?.name ?: "") }
     var commandText by rememberSaveable { mutableStateOf(command?.command ?: "") }
     var showOutput by rememberSaveable { mutableStateOf(command?.showOutput ?: true) }
+    val view = LocalView.current
 
     AlertDialog(
         title = { Text(if (command == null) "Add Command" else "Edit Command") },
@@ -71,7 +74,10 @@ fun EditCommandDialog(
                         .fillMaxWidth()
                         .toggleable(
                             value = showOutput,
-                            onValueChange = { showOutput = it },
+                            onValueChange = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                showOutput = it
+                            },
                             role = Role.Checkbox,
                         ),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -79,7 +85,10 @@ fun EditCommandDialog(
                 ) {
                     Checkbox(
                         checked = showOutput,
-                        onCheckedChange = { showOutput = it },
+                        onCheckedChange = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            showOutput = it
+                        },
                     )
                     Text("Show output")
                 }
@@ -90,6 +99,7 @@ fun EditCommandDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
                     onSave(
                         Command(
                             command = commandText,
@@ -104,7 +114,12 @@ fun EditCommandDialog(
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            Button(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

@@ -24,6 +24,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Base64
 import android.util.Log
+import android.view.SoundEffectConstants
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
@@ -220,6 +221,7 @@ fun EditHostScreen(
             (sshConfig != host?.sshConfig)
 
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
+    val view = LocalView.current
 
     fun handleSave() {
         onSubmit()
@@ -258,6 +260,7 @@ fun EditHostScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         if (isFormValid) {
                             handleSave()
                         } else {
@@ -273,7 +276,12 @@ fun EditHostScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = onNavigateUp) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onNavigateUp()
+                    },
+                ) {
                     Text("Discard and leave")
                 }
             },
@@ -291,6 +299,7 @@ fun EditHostScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         showSshConfigWarning = false
                         showSshConfigDialog = true
                     },
@@ -300,7 +309,10 @@ fun EditHostScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showSshConfigWarning = false },
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        showSshConfigWarning = false
+                    },
                 ) {
                     Text("Go back")
                 }
@@ -339,6 +351,7 @@ fun EditHostScreen(
                 ) {
                     TextButton(
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             sshConfig = currentConfig
                             showSshConfigDialog = false
                         },
@@ -353,6 +366,7 @@ fun EditHostScreen(
                 ) {
                     TextButton(
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             uriHandler.openUri("https://github.com/stefansundin/SSHRemote/discussions/2")
                         },
                     ) {
@@ -360,6 +374,7 @@ fun EditHostScreen(
                     }
                     TextButton(
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             sshConfig = null
                             showSshConfigDialog = false
                         },
@@ -454,6 +469,7 @@ fun EditHostScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         showExportDialog = false
                         coroutineScope.launch {
                             val data = host!!.toExportedHost().exportToString()
@@ -472,6 +488,7 @@ fun EditHostScreen(
             dismissButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         showExportDialog = false
                         val encodedName = URLEncoder.encode(name, "UTF-8")
                         var url = "ssh://$user@$hostname:$port?name=$encodedName"
@@ -508,6 +525,7 @@ fun EditHostScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             if (hasUnsavedChanges) {
                                 showSaveDialog = true
                             } else {
@@ -523,7 +541,12 @@ fun EditHostScreen(
                 },
                 actions = {
                     var menuExpanded by rememberSaveable { mutableStateOf(false) }
-                    IconButton(onClick = { menuExpanded = true }) {
+                    IconButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            menuExpanded = true
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "More options",
@@ -536,6 +559,7 @@ fun EditHostScreen(
                         DropdownMenuItem(
                             text = { Text("Advanced SSH Config") },
                             onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 menuExpanded = false
                                 if (sshConfig == null) {
                                     showSshConfigWarning = true
@@ -548,6 +572,7 @@ fun EditHostScreen(
                             DropdownMenuItem(
                                 text = { Text("Export to QR code") },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     menuExpanded = false
                                     showExportDialog = true
                                 },
@@ -556,6 +581,7 @@ fun EditHostScreen(
                             DropdownMenuItem(
                                 text = { Text("Scan QR code") },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     menuExpanded = false
                                     scanQrCode = true
                                 },
@@ -678,6 +704,7 @@ fun EditHostScreen(
                             DropdownMenuItem(
                                 text = { Text(suggestedUser) },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     user = suggestedUser
                                     userDropdownExpanded = false
                                 },
@@ -715,7 +742,10 @@ fun EditHostScreen(
                         val description = if (passwordVisible) "Hide password" else "Show password"
                         IconToggleButton(
                             checked = passwordVisible,
-                            onCheckedChange = { passwordVisible = it },
+                            onCheckedChange = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                passwordVisible = it
+                            },
                         ) {
                             Icon(imageVector = image, contentDescription = description)
                         }
@@ -732,7 +762,10 @@ fun EditHostScreen(
                         modifier = Modifier.padding(start = 8.dp),
                     )
                     TextButton(
-                        onClick = { userWantsToChangePassword = true },
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            userWantsToChangePassword = true
+                        },
                     ) {
                         Text(if (passwordState == PasswordState.LOST) "Re-enter" else "Change or Clear")
                     }
@@ -775,6 +808,7 @@ fun EditHostScreen(
                         DropdownMenuItem(
                             text = { Text("Use any key") },
                             onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 selectedIdentityIds = null
                                 identityDropdownExpanded = false
                             },
@@ -782,6 +816,7 @@ fun EditHostScreen(
                         DropdownMenuItem(
                             text = { Text("Do not use keys") },
                             onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 selectedIdentityIds = listOf()
                                 identityDropdownExpanded = false
                             },
@@ -790,6 +825,7 @@ fun EditHostScreen(
                             DropdownMenuItem(
                                 text = { Text(key.name) },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     // Later this might support multiple key assignments
                                     selectedIdentityIds = listOf(key.id)
                                     identityDropdownExpanded = false
@@ -814,7 +850,10 @@ fun EditHostScreen(
                     )
                     Button(
                         enabled = keyCount > 0,
-                        onClick = { knownHosts = emptyList() },
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            knownHosts = emptyList()
+                        },
                     ) {
                         Text("Clear")
                     }
@@ -939,7 +978,10 @@ private fun ExportHostQrCodeDialog(
 
                     if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                         TextButton(
-                            onClick = onDismissRequest,
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                onDismissRequest()
+                            },
                             modifier = Modifier.padding(top = 24.dp),
                         ) {
                             Text("Close")

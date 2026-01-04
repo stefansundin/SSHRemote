@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.ClipData
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -37,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
 import kotlinx.coroutines.launch
 
@@ -46,6 +48,7 @@ fun CommandOutputDialog(
     onDismiss: () -> Unit,
 ) {
     val clipboard = LocalClipboard.current
+    val view = LocalView.current
     val scope = rememberCoroutineScope()
 
     AlertDialog(
@@ -59,13 +62,19 @@ fun CommandOutputDialog(
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = onDismiss) {
+            Button(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Close")
             }
         },
         dismissButton = {
             TextButton(
                 onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
                     val clipData = ClipData.newPlainText("Command output", output)
                     scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
                 },

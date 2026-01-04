@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.components
 
 import android.os.Build
 import android.os.VibrationEffect
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -61,6 +63,7 @@ fun HapticFeedbackSettingDialog(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val view = LocalView.current
     val vibrator = remember { getVibrator(context) }
 
     DisposableEffect(Unit) {
@@ -118,7 +121,10 @@ fun HapticFeedbackSettingDialog(
                             .height(56.dp)
                             .selectable(
                                 selected = (hapticFeedback == currentHapticFeedback),
-                                onClick = { onSelection(hapticFeedback) },
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    onSelection(hapticFeedback)
+                                },
                             )
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -141,6 +147,7 @@ fun HapticFeedbackSettingDialog(
                         .selectable(
                             selected = currentHapticFeedback is HapticFeedback.Custom,
                             onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 val duration = customDurationString.toLongOrNull() ?: 0L
                                 onSelection(HapticFeedback.Custom(duration))
                             },
@@ -183,12 +190,22 @@ fun HapticFeedbackSettingDialog(
         properties = DialogProperties(dismissOnClickOutside = false),
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onConfirm()
+                },
+            ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

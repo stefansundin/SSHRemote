@@ -18,6 +18,8 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.view.HapticFeedbackConstants
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,6 +62,7 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -82,9 +85,16 @@ fun AdHocCommandScreen(
     var commandText by rememberSaveable { mutableStateOf("") }
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var showContextMenuFor by rememberSaveable { mutableStateOf<AdHocCommand?>(null) }
+    val view = LocalView.current
 
-    val executeAndStay: () -> Unit = { onExecuteCommand(commandText, false) }
-    val executeAndGoBack: () -> Unit = { onExecuteCommand(commandText, true) }
+    val executeAndStay: () -> Unit = {
+        view.playSoundEffect(SoundEffectConstants.CLICK)
+        onExecuteCommand(commandText, false)
+    }
+    val executeAndGoBack: () -> Unit = {
+        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        onExecuteCommand(commandText, true)
+    }
 
     uiState.commandOutput?.let { output ->
         CommandOutputDialog(
@@ -98,13 +108,23 @@ fun AdHocCommandScreen(
             TopAppBar(
                 title = { Text("Ad-Hoc Command") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
+                    IconButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onNavigateUp()
+                        },
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
                     Box {
-                        IconButton(onClick = { showMenu = true }) {
+                        IconButton(
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                showMenu = true
+                            },
+                        ) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More")
                         }
                         DropdownMenu(
@@ -114,6 +134,7 @@ fun AdHocCommandScreen(
                             DropdownMenuItem(
                                 text = { Text("Clear history", color = MaterialTheme.colorScheme.error) },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     onClearHistory()
                                     showMenu = false
                                 },
@@ -138,6 +159,7 @@ fun AdHocCommandScreen(
                                 .fillMaxWidth()
                                 .combinedClickable(
                                     onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         if (commandText == command.command) {
                                             executeAndStay()
                                         } else {
@@ -145,6 +167,7 @@ fun AdHocCommandScreen(
                                         }
                                     },
                                     onLongClick = {
+                                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                                         showContextMenuFor = command
                                     },
                                 )
@@ -157,6 +180,7 @@ fun AdHocCommandScreen(
                             DropdownMenuItem(
                                 text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     onDeleteCommand(command)
                                     showContextMenuFor = null
                                 },

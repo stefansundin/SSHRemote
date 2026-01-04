@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -62,6 +64,7 @@ fun RepeatingButton(
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongClick by rememberUpdatedState(onLongClick)
+    val view = LocalView.current
     val scope = rememberCoroutineScope()
 
     val gestureModifier = if (enabled) {
@@ -74,9 +77,11 @@ fun RepeatingButton(
                         val downPress = PressInteraction.Press(down.position)
                         val heldButtonJob = scope.launch {
                             interactionSource.emit(downPress)
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             currentOnClick()
                             delay(500)
                             while (enabled && down.pressed) {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 currentOnClick()
                                 delay(100)
                             }
@@ -94,6 +99,7 @@ fun RepeatingButton(
                 } else if (currentOnLongClick == null) {
                     detectTapGestures(
                         onPress = { offset ->
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             currentOnClick()
                             val press = PressInteraction.Press(offset)
                             interactionSource.emit(press)
@@ -117,8 +123,16 @@ fun RepeatingButton(
                                 interactionSource.emit(PressInteraction.Cancel(press))
                             }
                         },
-                        onTap = { currentOnClick() },
-                        onLongPress = currentOnLongClick?.let { { it() } },
+                        onTap = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            currentOnClick()
+                        },
+                        onLongPress = currentOnLongClick?.let {
+                            {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                it()
+                            }
+                        },
                     )
                 }
             }

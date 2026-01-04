@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.os.Build
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,6 +71,7 @@ fun ColorSettingDialog(
     var showPrimaryColorPicker by remember { mutableStateOf(false) }
     var showOnPrimaryColorPicker by remember { mutableStateOf(false) }
     var originalColor by remember { mutableStateOf<Color?>(null) }
+    val view = LocalView.current
 
     if (showBackgroundColorPicker) {
         ColorPickerDialog(
@@ -128,7 +131,10 @@ fun ColorSettingDialog(
                             .height(56.dp)
                             .toggleable(
                                 value = useDynamicColors,
-                                onValueChange = onUseDynamicColorsChange,
+                                onValueChange = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    onUseDynamicColorsChange(it)
+                                },
                                 role = Role.Switch,
                             ),
                         verticalAlignment = Alignment.CenterVertically,
@@ -155,6 +161,7 @@ fun ColorSettingDialog(
                         .fillMaxWidth()
                         .height(56.dp)
                         .clickable {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             originalColor = backgroundColor
                             showBackgroundColorPicker = true
                         },
@@ -174,7 +181,10 @@ fun ColorSettingDialog(
                         )
                     }
                     TextButton(
-                        onClick = { onBackgroundColorChange(null) },
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onBackgroundColorChange(null)
+                        },
                         enabled = backgroundColor != null,
                     ) {
                         Text("Clear")
@@ -185,6 +195,7 @@ fun ColorSettingDialog(
                         .fillMaxWidth()
                         .height(56.dp)
                         .clickable {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             originalColor = primaryColor
                             showPrimaryColorPicker = true
                         },
@@ -204,7 +215,10 @@ fun ColorSettingDialog(
                         )
                     }
                     TextButton(
-                        onClick = { onPrimaryColorChange(null) },
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onPrimaryColorChange(null)
+                        },
                         enabled = primaryColor != null,
                     ) {
                         Text("Clear")
@@ -215,6 +229,7 @@ fun ColorSettingDialog(
                         .fillMaxWidth()
                         .height(56.dp)
                         .clickable {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             originalColor = onPrimaryColorColor
                             showOnPrimaryColorPicker = true
                         },
@@ -234,7 +249,10 @@ fun ColorSettingDialog(
                         )
                     }
                     TextButton(
-                        onClick = { onOnPrimaryColorChange(null) },
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onOnPrimaryColorChange(null)
+                        },
                         enabled = onPrimaryColorColor != null,
                     ) {
                         Text("Clear")
@@ -244,12 +262,22 @@ fun ColorSettingDialog(
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onConfirm()
+                },
+            ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

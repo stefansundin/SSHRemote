@@ -24,6 +24,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.view.SoundEffectConstants
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -130,9 +131,16 @@ private fun SettingsItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
+    val view = LocalView.current
+
     Column(
         modifier = modifier
-            .clickable(onClick = onClick)
+            .clickable(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onClick()
+                },
+            )
             .padding(vertical = 12.dp, horizontal = 16.dp),
     ) {
         Text(
@@ -154,10 +162,15 @@ private fun SettingsSwitchItem(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
+            .clickable {
+                view.playSoundEffect(SoundEffectConstants.CLICK)
+                onCheckedChange(!checked)
+            }
             .padding(vertical = 12.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -178,6 +191,8 @@ private fun ImportSettingsDialog(
     onDismissRequest: () -> Unit,
     onImport: (ImportStrategy) -> Unit,
 ) {
+    val view = LocalView.current
+
     AlertDialog(
         title = { Text("Import settings") },
         text = { Text("In case of conflicts with existing hosts, do you want to update or duplicate?\n\nYou can also choose Replace which will delete all existing hosts.") },
@@ -185,19 +200,39 @@ private fun ImportSettingsDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = { onImport(ImportStrategy.Upsert) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onImport(ImportStrategy.Upsert)
+                    },
+                ) {
                     Text("Update")
                 }
-                TextButton(onClick = { onImport(ImportStrategy.Duplicate) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onImport(ImportStrategy.Duplicate)
+                    },
+                ) {
                     Text("Duplicate")
                 }
-                TextButton(onClick = { onImport(ImportStrategy.Replace) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onImport(ImportStrategy.Replace)
+                    },
+                ) {
                     Text("Replace")
                 }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismissRequest()
+                },
+            ) {
                 Text("Cancel")
             }
         },
@@ -217,6 +252,7 @@ fun SettingsScreen(
     onNavigateToIdentityList: () -> Unit,
 ) {
     val context = LocalContext.current
+    val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
 
     val savedTheme by settingsViewModel.theme.collectAsState()
@@ -444,6 +480,7 @@ fun SettingsScreen(
                     navigationIcon = {
                         IconButton(
                             onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 if (previewTheme != savedTheme) {
                                     settingsViewModel.setTheme(savedTheme)
                                 }
@@ -738,7 +775,10 @@ private fun ExportSettingsQrCodeDialog(
 
                     if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                         TextButton(
-                            onClick = onDismissRequest,
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                onDismissRequest()
+                            },
                             modifier = Modifier.padding(top = 24.dp),
                         ) {
                             Text("Close")

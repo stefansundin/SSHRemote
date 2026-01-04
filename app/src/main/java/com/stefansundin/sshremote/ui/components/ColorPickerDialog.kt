@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
@@ -90,6 +92,7 @@ fun ColorPickerDialog(
     } else {
         Color(red, green, blue)
     }
+    val view = LocalView.current
 
     LaunchedEffect(selectedColor) {
         onColorChanged(selectedColor)
@@ -145,6 +148,7 @@ fun ColorPickerDialog(
                         selected = isHslMode,
                         onClick = {
                             if (!isHslMode) {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 updateHslFromColor(selectedColor)
                                 isHslMode = true
                             }
@@ -155,6 +159,7 @@ fun ColorPickerDialog(
                         selected = !isHslMode,
                         onClick = {
                             if (isHslMode) {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 updateRgbFromColor(selectedColor)
                                 isHslMode = false
                             }
@@ -207,12 +212,22 @@ fun ColorPickerDialog(
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onConfirm()
+                },
+            ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

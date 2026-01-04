@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
@@ -56,6 +58,7 @@ fun SmartVolumeSettingsDialog(
             settings?.controlVolumeWithHardwareButtons ?: false,
         )
     }
+    val view = LocalView.current
 
     AlertDialog(
         title = { Text("Smart volume settings") },
@@ -71,7 +74,10 @@ fun SmartVolumeSettingsDialog(
                         .fillMaxWidth()
                         .toggleable(
                             value = readCurrentVolume,
-                            onValueChange = { readCurrentVolume = it },
+                            onValueChange = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                readCurrentVolume = it
+                            },
                             role = Role.Checkbox,
                         ),
                     verticalAlignment = Alignment.CenterVertically,
@@ -89,7 +95,10 @@ fun SmartVolumeSettingsDialog(
                         .fillMaxWidth()
                         .toggleable(
                             value = controlVolumeWithHardwareButtons,
-                            onValueChange = { controlVolumeWithHardwareButtons = it },
+                            onValueChange = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                controlVolumeWithHardwareButtons = it
+                            },
                             role = Role.Checkbox,
                         ),
                     verticalAlignment = Alignment.CenterVertically,
@@ -103,7 +112,10 @@ fun SmartVolumeSettingsDialog(
                 }
 
                 Button(
-                    onClick = onTest,
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onTest()
+                    },
                     modifier = Modifier
                         .align(Alignment.End)
                         .padding(top = 8.dp),
@@ -116,6 +128,7 @@ fun SmartVolumeSettingsDialog(
         confirmButton = {
             TextButton(
                 onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
                     onSave(
                         SmartVolumeSettings(
                             readCurrentVolume = readCurrentVolume,
@@ -128,7 +141,12 @@ fun SmartVolumeSettingsDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

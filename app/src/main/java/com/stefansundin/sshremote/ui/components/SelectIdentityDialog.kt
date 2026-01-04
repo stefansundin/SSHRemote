@@ -1,5 +1,6 @@
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.identity.Identity
 
@@ -21,6 +23,8 @@ fun SelectIdentityDialog(
     onIdentitySelected: (Identity) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val view = LocalView.current
+
     AlertDialog(
         title = { Text("Select public key") },
         text = {
@@ -38,7 +42,10 @@ fun SelectIdentityDialog(
                                 headlineContent = { Text(identity.name) },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { onIdentitySelected(identity) },
+                                    .clickable {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                                        onIdentitySelected(identity)
+                                    },
                             )
                         }
                     }
@@ -47,7 +54,12 @@ fun SelectIdentityDialog(
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

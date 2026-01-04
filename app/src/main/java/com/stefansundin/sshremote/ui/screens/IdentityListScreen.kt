@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import android.content.ClipData
 import android.util.Log
+import android.view.SoundEffectConstants
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -76,6 +77,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -117,10 +119,12 @@ fun IdentityListScreen(
     var undoableDeletedIdentityId by rememberSaveable { mutableStateOf<String?>(null) }
     var scrollToTopOnNextUpdate by rememberSaveable { mutableStateOf(false) }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
-    val clipboard = LocalClipboard.current
-    val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
+    val clipboard = LocalClipboard.current
+    val view = LocalView.current
+    val coroutineScope = rememberCoroutineScope()
+
     val fileSaverLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("attachment/plain"),
         onResult = { uri ->
@@ -144,6 +148,7 @@ fun IdentityListScreen(
                 duration = SnackbarDuration.Indefinite,
             )
             if (result == SnackbarResult.ActionPerformed) {
+                view.playSoundEffect(SoundEffectConstants.CLICK)
                 onUndoDelete()
 
                 // Suspend until the identities list is updated with the restored item
@@ -206,13 +211,19 @@ fun IdentityListScreen(
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { errorMessage = null },
             confirmButton = {
-                Button(onClick = { errorMessage = null }) {
+                Button(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        errorMessage = null
+                    },
+                ) {
                     Text("OK")
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         val clipData = ClipData.newPlainText("Command output", errorMessage)
                         coroutineScope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
                     },
@@ -235,7 +246,12 @@ fun IdentityListScreen(
             TopAppBar(
                 title = { Text("SSH Keys") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
+                    IconButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onNavigateUp()
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Navigate back",
@@ -245,7 +261,12 @@ fun IdentityListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToAddIdentity) {
+            FloatingActionButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onNavigateToAddIdentity()
+                },
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Add SSH Key")
             }
         },
@@ -315,6 +336,7 @@ fun IdentityItem(
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
     var isRenameDialogVisible by rememberSaveable { mutableStateOf(false) }
     var newName by rememberSaveable { mutableStateOf(identity.name) }
+    val view = LocalView.current
 
     val (keyInfo, isEncrypted) = remember(identity, cryptoManager) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
@@ -354,7 +376,12 @@ fun IdentityItem(
         },
         trailingContent = {
             Box {
-                IconButton(onClick = { isContextMenuVisible = true }) {
+                IconButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        isContextMenuVisible = true
+                    },
+                ) {
                     Icon(Icons.Default.MoreVert, contentDescription = "More options")
                 }
                 DropdownMenu(
@@ -364,6 +391,7 @@ fun IdentityItem(
                     DropdownMenuItem(
                         text = { Text("Rename") },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             isRenameDialogVisible = true
                             isContextMenuVisible = false
                         },
@@ -371,6 +399,7 @@ fun IdentityItem(
                     DropdownMenuItem(
                         text = { Text("View public key") },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             onShowPublicKey()
                             isContextMenuVisible = false
                         },
@@ -378,6 +407,7 @@ fun IdentityItem(
                     DropdownMenuItem(
                         text = { Text("Export public key") },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             onExportPublicKey()
                             isContextMenuVisible = false
                         },
@@ -385,6 +415,7 @@ fun IdentityItem(
                     DropdownMenuItem(
                         text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             onDelete()
                             isContextMenuVisible = false
                         },
@@ -410,6 +441,7 @@ fun IdentityItem(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         onRename(newName)
                         isRenameDialogVisible = false
                     },
@@ -419,7 +451,12 @@ fun IdentityItem(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { isRenameDialogVisible = false }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        isRenameDialogVisible = false
+                    },
+                ) {
                     Text("Cancel")
                 }
             },

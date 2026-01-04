@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.HostViewModel
@@ -43,6 +45,7 @@ fun CommandList(
     modifier: Modifier = Modifier,
 ) {
     val commands = uiState.host?.commands ?: emptyList()
+    val view = LocalView.current
 
     if (commands.isEmpty()) {
         Column(
@@ -68,7 +71,10 @@ fun CommandList(
         ) {
             commands.forEach { command ->
                 Button(
-                    onClick = { hostViewModel.runCommand(command.command, command.showOutput) },
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        hostViewModel.runCommand(command.command, command.showOutput)
+                    },
                     enabled = uiState.connectionStatus == ConnectionStatus.CONNECTED,
                     modifier = Modifier.fillMaxWidth(),
                 ) {

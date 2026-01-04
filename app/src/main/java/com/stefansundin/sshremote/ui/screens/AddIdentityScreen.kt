@@ -21,6 +21,7 @@ package com.stefansundin.sshremote.ui.screens
 import android.content.ClipData
 import android.net.Uri
 import android.util.Log
+import android.view.SoundEffectConstants
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -64,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -102,6 +104,7 @@ fun AddIdentityScreen(
     var generateKeyType by rememberSaveable { mutableStateOf<Pair<Int, Int?>>(Pair(KeyPair.ED25519, null)) }
     var isGenerating by rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val view = LocalView.current
 
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -133,12 +136,22 @@ fun AddIdentityScreen(
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { showSaveDialog = false },
             confirmButton = {
-                TextButton(onClick = { handleSave() }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        handleSave()
+                    },
+                ) {
                     Text("Save and leave")
                 }
             },
             dismissButton = {
-                TextButton(onClick = onNavigateUp) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onNavigateUp()
+                    },
+                ) {
                     Text("Discard and leave")
                 }
             },
@@ -202,6 +215,7 @@ fun AddIdentityScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             if (hasUnsavedChanges && isFormValid) {
                                 showSaveDialog = true
                             } else {
@@ -249,7 +263,10 @@ fun AddIdentityScreen(
                 tabTitles.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            selectedTabIndex = index
+                        },
                         text = { Text(title) },
                     )
                 }
@@ -286,9 +303,11 @@ fun ImportFileTab(
     onKeyContentRead: (String) -> Unit,
     onNameSuggestion: (String) -> Unit,
 ) {
-    val context = LocalContext.current
     var keyContentForParsing by rememberSaveable { mutableStateOf<String?>(null) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+    val view = LocalView.current
 
     LaunchedEffect(keyContentForParsing) {
         keyContentForParsing?.let { content ->
@@ -347,13 +366,19 @@ fun ImportFileTab(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Select a private key file from your device.")
-        Button(onClick = { filePickerLauncher.launch("*/*") }) {
+        Button(
+            onClick = {
+                view.playSoundEffect(SoundEffectConstants.CLICK)
+                filePickerLauncher.launch("*/*")
+            },
+        ) {
             Text("Select File")
         }
 
         Text("Or scan a QR code.")
         Button(
             onClick = {
+                view.playSoundEffect(SoundEffectConstants.CLICK)
                 val options = ScanOptions()
                 options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
                 options.setPrompt("Encode your private key file to a QR code")
@@ -380,6 +405,7 @@ fun GenerateKeyTab(selectedKeyType: Pair<Int, Int?>, onKeyTypeSelected: (Pair<In
         "RSA (2048-bit)" to Pair(KeyPair.RSA, 2048),
         "RSA (4096-bit)" to Pair(KeyPair.RSA, 4096),
     )
+    val view = LocalView.current
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -391,12 +417,18 @@ fun GenerateKeyTab(selectedKeyType: Pair<Int, Int?>, onKeyTypeSelected: (Pair<In
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onKeyTypeSelected(type) }
+                    .clickable {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onKeyTypeSelected(type)
+                    }
                     .padding(vertical = 4.dp),
             ) {
                 RadioButton(
                     selected = (selectedKeyType == type),
-                    onClick = { onKeyTypeSelected(type) },
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onKeyTypeSelected(type)
+                    },
                 )
                 Text(label, modifier = Modifier.padding(start = 8.dp))
             }
@@ -425,6 +457,7 @@ fun ManualEntryTab(
     isError: Boolean,
 ) {
     val clipboard = LocalClipboard.current
+    val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(privateKey) {
@@ -457,6 +490,7 @@ fun ManualEntryTab(
     Spacer(modifier = Modifier.height(8.dp))
     TextButton(
         onClick = {
+            view.playSoundEffect(SoundEffectConstants.CLICK)
             coroutineScope.launch {
                 val clipEntry = clipboard.getClipEntry() ?: return@launch
                 val clipboardText = getClipEntryText(clipEntry.clipData) ?: return@launch

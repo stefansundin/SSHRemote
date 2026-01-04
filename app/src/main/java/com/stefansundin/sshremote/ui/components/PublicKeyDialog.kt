@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.ClipData
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
@@ -47,6 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
     val clipboard = LocalClipboard.current
+    val view = LocalView.current
     val scope = rememberCoroutineScope()
 
     AlertDialog(
@@ -63,13 +66,19 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = onDismiss) {
+            Button(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Close")
             }
         },
         dismissButton = {
             TextButton(
                 onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
                     val clipData = ClipData.newPlainText("Public SSH key", publicKey)
                     scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
                 },

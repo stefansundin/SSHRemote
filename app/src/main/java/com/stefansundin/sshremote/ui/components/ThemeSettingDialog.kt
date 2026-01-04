@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,11 +49,13 @@ fun ThemeSettingDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val view = LocalView.current
+
     AlertDialog(
         title = { Text("Choose theme") },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+                modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 Theme.entries.forEach { theme ->
                     Row(
@@ -60,7 +64,10 @@ fun ThemeSettingDialog(
                             .height(56.dp)
                             .selectable(
                                 selected = (theme == currentTheme),
-                                onClick = { onThemeSelected(theme) },
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    onThemeSelected(theme)
+                                },
                                 role = Role.RadioButton,
                             ),
                         verticalAlignment = Alignment.CenterVertically,
@@ -80,12 +87,22 @@ fun ThemeSettingDialog(
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onConfirm()
+                },
+            ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
@@ -50,6 +52,7 @@ fun SpecialKeysRow(
         "Super" to "Super_L",
         "Alt" to "Alt_L",
     )
+    val view = LocalView.current
 
     FlowRow(
         modifier = modifier
@@ -60,7 +63,10 @@ fun SpecialKeysRow(
         specialKeys.forEach { (label, key) ->
             Button(
                 enabled = isEnabled,
-                onClick = { onKey(key) },
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onKey(key)
+                },
             ) {
                 Text(label)
             }

@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.view.SoundEffectConstants
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,6 +70,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
@@ -122,6 +124,7 @@ fun EditRemoteControlScreen(
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
     val commandsListState = rememberLazyListState()
     var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
+    val view = LocalView.current
 
     LaunchedEffect(undoableDeletedCommand) {
         val deletedCommand = undoableDeletedCommand
@@ -132,6 +135,7 @@ fun EditRemoteControlScreen(
                 actionLabel = "Undo",
             )
             if (result == SnackbarResult.ActionPerformed) {
+                view.playSoundEffect(SoundEffectConstants.CLICK)
                 val currentCommands = editedCommands.toMutableList()
                 currentCommands.add(index, command)
                 editedCommands = currentCommands
@@ -165,6 +169,7 @@ fun EditRemoteControlScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
                     },
                 ) {
@@ -172,7 +177,12 @@ fun EditRemoteControlScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = onNavigateBack) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onNavigateBack()
+                    },
+                ) {
                     Text("Discard and leave")
                 }
             },
@@ -187,6 +197,7 @@ fun EditRemoteControlScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         editedRemoteCommands =
                             presets[resetToPresetKey]
                                 ?: throw IllegalStateException("Preset '$resetToPresetKey' not found")
@@ -197,7 +208,12 @@ fun EditRemoteControlScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        showResetDialog = false
+                    },
+                ) {
                     Text("Cancel")
                 }
             },
@@ -215,6 +231,7 @@ fun EditRemoteControlScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     resetToPresetKey = presetKey
                                     showSelectPresetDialog = false
                                     showResetDialog = true
@@ -227,7 +244,10 @@ fun EditRemoteControlScreen(
             onDismissRequest = { showSelectPresetDialog = false },
             confirmButton = {
                 TextButton(
-                    onClick = { showSelectPresetDialog = false },
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        showSelectPresetDialog = false
+                    },
                 ) {
                     Text("Cancel")
                 }
@@ -243,6 +263,7 @@ fun EditRemoteControlScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             if (hasUnsavedChanges) {
                                 showUnsavedBackDialog = true
                             } else {
@@ -255,7 +276,12 @@ fun EditRemoteControlScreen(
                 },
                 actions = {
                     Box {
-                        IconButton(onClick = { showMenu = true }) {
+                        IconButton(
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                showMenu = true
+                            },
+                        ) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More options")
                         }
                         DropdownMenu(
@@ -265,6 +291,7 @@ fun EditRemoteControlScreen(
                             DropdownMenuItem(
                                 text = { Text("Set as default tab") },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     val startScreen =
                                         RemoteControlScreen.entries.find { it.tabIndex == pagerState.currentPage }
                                             ?: throw IllegalStateException("Could not find RemoteControlScreen for tab index ${pagerState.currentPage}")
@@ -275,6 +302,7 @@ fun EditRemoteControlScreen(
                             DropdownMenuItem(
                                 text = { Text("Smart volume settings") },
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     showMenu = false
                                     showSmartVolumeSettingsDialog = true
                                 },
@@ -283,6 +311,7 @@ fun EditRemoteControlScreen(
                                 DropdownMenuItem(
                                     text = { Text("Reset to preset") },
                                     onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
                                         showSelectPresetDialog = true
                                     },
@@ -301,6 +330,7 @@ fun EditRemoteControlScreen(
                 if (pagerState.currentPage == 3) {
                     FloatingActionButton(
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             editingCommandInList = null
                             showEditCommandDialog = true
                         },
@@ -312,6 +342,7 @@ fun EditRemoteControlScreen(
                     text = { Text("Save") },
                     icon = { Icon(Icons.Default.Save, contentDescription = "Save") },
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
                     },
                 )
@@ -333,7 +364,10 @@ fun EditRemoteControlScreen(
                     key(index) {
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = { coroutineScope.launch { pagerState.scrollToPage(index) } },
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                coroutineScope.launch { pagerState.scrollToPage(index) }
+                            },
                             text = { Text(text = title, maxLines = 1) },
                         )
                     }
@@ -355,6 +389,7 @@ fun EditRemoteControlScreen(
                             RemoteControl(
                                 onKeyEvent = { event ->
                                     if (event is KeyEvent.Click) {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         val command =
                                             editedRemoteCommands[event.key] ?: Command("", name = event.key.title)
                                         editingCommand = event.key to command
@@ -369,6 +404,7 @@ fun EditRemoteControlScreen(
                     1 -> {
                         MousePad(
                             onMouseEvent = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 showEditMouseCommandsDialog = true
                             },
                             editing = true,
@@ -382,6 +418,7 @@ fun EditRemoteControlScreen(
                         ) {
                             Button(
                                 onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
                                     showEditKeyboardCommandDialog = true
                                 },
                             ) {
@@ -408,6 +445,7 @@ fun EditRemoteControlScreen(
                                     Text(text = command.name ?: command.command, modifier = Modifier.weight(1f))
                                     IconButton(
                                         onClick = {
+                                            view.playSoundEffect(SoundEffectConstants.CLICK)
                                             editingCommandInList = command
                                             showEditCommandDialog = true
                                         },
@@ -416,6 +454,7 @@ fun EditRemoteControlScreen(
                                     }
                                     IconButton(
                                         onClick = {
+                                            view.playSoundEffect(SoundEffectConstants.CLICK)
                                             val deletedCommandIndex = editedCommands.indexOf(command)
                                             editedCommands = editedCommands.filter { it != command }
                                             undoableDeletedCommand = deletedCommandIndex to command

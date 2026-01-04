@@ -103,6 +103,7 @@ fun HostListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var undoableDeletedHostId by rememberSaveable { mutableStateOf<String?>(null) }
+    val view = LocalView.current
 
     // Long pressing the FAB will launch directly into the QR code scanner
     // It's a secret feature that is not documented
@@ -118,11 +119,13 @@ fun HostListScreen(
                     isLongClick = false
                     delay(viewConfiguration.longPressTimeoutMillis)
                     isLongClick = true
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     onAddFromQrCode()
                 }
 
                 is PressInteraction.Release -> {
                     if (isLongClick.not()) {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         onAdd()
                     }
                 }
@@ -142,6 +145,7 @@ fun HostListScreen(
                 actionLabel = "Undo",
             )
             if (result == SnackbarResult.ActionPerformed) {
+                view.playSoundEffect(SoundEffectConstants.CLICK)
                 onUndoDelete()
 
                 // Suspend until the hosts list is updated with the restored item
@@ -169,13 +173,23 @@ fun HostListScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 actions = {
-                    IconButton(onClick = onHelp) {
+                    IconButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onHelp()
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Help,
                             contentDescription = "Help",
                         )
                     }
-                    IconButton(onClick = onSettings) {
+                    IconButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onSettings()
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
@@ -314,7 +328,12 @@ fun HostItem(
             }
 
             Box {
-                IconButton(onClick = { isContextMenuVisible = true }) {
+                IconButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        isContextMenuVisible = true
+                    },
+                ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "More options",
@@ -328,6 +347,7 @@ fun HostItem(
                     DropdownMenuItem(
                         text = { Text("Edit") },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             onEdit()
                             isContextMenuVisible = false
                         },
@@ -335,6 +355,7 @@ fun HostItem(
                     DropdownMenuItem(
                         text = { Text("Clone") },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             onClone()
                             isContextMenuVisible = false
                         },
@@ -342,6 +363,7 @@ fun HostItem(
                     DropdownMenuItem(
                         text = { Text("Add to Home Screen") },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             onCreateShortcut()
                             isContextMenuVisible = false
                         },
@@ -349,6 +371,7 @@ fun HostItem(
                     DropdownMenuItem(
                         text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                         onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
                             onDelete()
                             isContextMenuVisible = false
                         },

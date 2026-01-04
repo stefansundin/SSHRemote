@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
@@ -47,6 +49,7 @@ fun EditKeyboardCommandDialog(
 ) {
     var newTypeCommand by rememberSaveable { mutableStateOf(typeCommand) }
     var newKeyCommand by rememberSaveable { mutableStateOf(keyCommand) }
+    val view = LocalView.current
 
     AlertDialog(
         title = { Text("Edit Keyboard Commands") },
@@ -76,12 +79,22 @@ fun EditKeyboardCommandDialog(
         properties = DialogProperties(dismissOnClickOutside = false),
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { onSave(newTypeCommand, newKeyCommand) }) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onSave(newTypeCommand, newKeyCommand)
+                },
+            ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

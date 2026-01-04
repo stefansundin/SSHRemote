@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
@@ -45,6 +47,7 @@ fun EditMouseCommandsDialog(
     onSave: (Map<RemoteControlKey, Command>) -> Unit,
 ) {
     var editedRemoteCommands by rememberSaveable { mutableStateOf(initialRemoteCommands) }
+    val view = LocalView.current
 
     AlertDialog(
         title = { Text("Edit Mouse Commands") },
@@ -79,12 +82,22 @@ fun EditMouseCommandsDialog(
         properties = DialogProperties(dismissOnClickOutside = false),
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { onSave(editedRemoteCommands) }) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onSave(editedRemoteCommands)
+                },
+            ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },

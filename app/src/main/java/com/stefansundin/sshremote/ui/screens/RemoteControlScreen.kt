@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import android.app.Activity
 import android.os.Build
+import android.view.SoundEffectConstants
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusable
@@ -257,7 +258,12 @@ fun RemoteControlScreen(
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = onClearError,
             confirmButton = {
-                TextButton(onClick = onClearError) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onClearError()
+                    },
+                ) {
                     Text("OK")
                 }
             },
@@ -271,12 +277,22 @@ fun RemoteControlScreen(
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { sshRepository.onHostKeyVerificationComplete(false) },
             confirmButton = {
-                TextButton(onClick = { sshRepository.onHostKeyVerificationComplete(true) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        sshRepository.onHostKeyVerificationComplete(true)
+                    },
+                ) {
                     Text("Accept")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { sshRepository.onHostKeyVerificationComplete(false) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        sshRepository.onHostKeyVerificationComplete(false)
+                    },
+                ) {
                     Text("Reject")
                 }
             },
@@ -290,7 +306,12 @@ fun RemoteControlScreen(
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { sshRepository.onMessageDismissed() },
             confirmButton = {
-                TextButton(onClick = { sshRepository.onMessageDismissed() }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        sshRepository.onMessageDismissed()
+                    },
+                ) {
                     Text("OK")
                 }
             },
@@ -315,7 +336,12 @@ fun RemoteControlScreen(
                     trailingIcon = {
                         val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                         val description = if (passwordVisible) "Hide password" else "Show password"
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        IconButton(
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                passwordVisible = !passwordVisible
+                            },
+                        ) {
                             Icon(imageVector = image, contentDescription = description)
                         }
                     },
@@ -324,12 +350,22 @@ fun RemoteControlScreen(
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { sshRepository.onPasswordPromptComplete(null) },
             confirmButton = {
-                TextButton(onClick = { sshRepository.onPasswordPromptComplete(password) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        sshRepository.onPasswordPromptComplete(password)
+                    },
+                ) {
                     Text("OK")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { sshRepository.onPasswordPromptComplete(null) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        sshRepository.onPasswordPromptComplete(null)
+                    },
+                ) {
                     Text("Cancel")
                 }
             },
@@ -354,7 +390,12 @@ fun RemoteControlScreen(
                     trailingIcon = {
                         val image = if (passphraseVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                         val description = if (passphraseVisible) "Hide passphrase" else "Show passphrase"
-                        IconButton(onClick = { passphraseVisible = !passphraseVisible }) {
+                        IconButton(
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                passphraseVisible = !passphraseVisible
+                            },
+                        ) {
                             Icon(imageVector = image, contentDescription = description)
                         }
                     },
@@ -363,12 +404,22 @@ fun RemoteControlScreen(
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { sshRepository.onPassphrasePromptComplete(null) },
             confirmButton = {
-                TextButton(onClick = { sshRepository.onPassphrasePromptComplete(passphrase) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        sshRepository.onPassphrasePromptComplete(passphrase)
+                    },
+                ) {
                     Text("OK")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { sshRepository.onPassphrasePromptComplete(null) }) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        sshRepository.onPassphrasePromptComplete(null)
+                    },
+                ) {
                     Text("Cancel")
                 }
             },
@@ -387,7 +438,12 @@ fun RemoteControlScreen(
                 },
                 onDismissRequest = { showSelectIdentityDialog = false },
                 confirmButton = {
-                    TextButton(onClick = { showSelectIdentityDialog = false }) {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            showSelectIdentityDialog = false
+                        },
+                    ) {
                         Text("Cancel")
                     }
                 },
@@ -461,7 +517,12 @@ fun RemoteControlScreen(
                     TopAppBar(
                         title = { Text(uiState.host?.name ?: "", maxLines = 1) },
                         navigationIcon = {
-                            IconButton(onClick = onDisconnect) {
+                            IconButton(
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    onDisconnect()
+                                },
+                            ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")
                             }
                         },
@@ -478,14 +539,24 @@ fun RemoteControlScreen(
                                 modifier = Modifier.padding(end = 8.dp),
                             )
                             if (canToggleFullscreen) {
-                                IconButton(onClick = { isFullscreen = !isFullscreen }) {
+                                IconButton(
+                                    onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                                        isFullscreen = !isFullscreen
+                                    },
+                                ) {
                                     Icon(
                                         if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
                                         contentDescription = if (isFullscreen) "Exit fullscreen" else "Fullscreen",
                                     )
                                 }
                             }
-                            IconButton(onClick = { showMenu = !showMenu }) {
+                            IconButton(
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    showMenu = !showMenu
+                                },
+                            ) {
                                 Icon(Icons.Default.MoreVert, contentDescription = "More options")
                             }
                             DropdownMenu(
@@ -495,6 +566,7 @@ fun RemoteControlScreen(
                                 DropdownMenuItem(
                                     text = { Text("Ad-hoc command") },
                                     onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
                                         onAdHocCommandClicked()
                                     },
@@ -502,6 +574,7 @@ fun RemoteControlScreen(
                                 DropdownMenuItem(
                                     text = { Text("Edit remote control") },
                                     onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
                                         onEditRemoteControlClicked(pagerState.currentPage)
                                     },
@@ -509,6 +582,7 @@ fun RemoteControlScreen(
                                 DropdownMenuItem(
                                     text = { Text("Push public key") },
                                     onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
                                         showSelectIdentityDialog = true
                                     },
@@ -538,7 +612,10 @@ fun RemoteControlScreen(
                             key(index) {
                                 Tab(
                                     selected = pagerState.currentPage == index,
-                                    onClick = { coroutineScope.launch { pagerState.scrollToPage(index) } },
+                                    onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                                        coroutineScope.launch { pagerState.scrollToPage(index) }
+                                    },
                                     text = { Text(text = title, maxLines = 1) },
                                 )
                             }
@@ -585,6 +662,7 @@ fun RemoteControlScreen(
                                 connectionStatus = uiState.connectionStatus,
                                 onMouseEvent = { event ->
                                     if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         performHapticFeedback(context, uiState.hapticFeedback)
                                     }
                                     when (event) {
@@ -613,6 +691,7 @@ fun RemoteControlScreen(
 
                         2 -> {
                             val onKey = { key: String ->
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 uiState.host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_KEY_INPUT)
                                     ?.let { commandTemplate ->
                                         val command = commandTemplate.command.format(key)

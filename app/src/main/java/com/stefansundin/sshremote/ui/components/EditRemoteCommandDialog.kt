@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -52,6 +54,7 @@ fun EditRemoteCommandDialog(
     var newCommand by rememberSaveable { mutableStateOf(initialCommand.command) }
     var newLongPressCommand by rememberSaveable { mutableStateOf(initialCommand.longPressCommand ?: "") }
     var repeatCommand by rememberSaveable { mutableStateOf(initialCommand.repeat) }
+    val view = LocalView.current
 
     AlertDialog(
         title = { Text("Edit Command") },
@@ -77,7 +80,10 @@ fun EditRemoteCommandDialog(
                             .fillMaxWidth()
                             .toggleable(
                                 value = repeatCommand,
-                                onValueChange = { repeatCommand = it },
+                                onValueChange = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    repeatCommand = it
+                                },
                                 role = Role.Checkbox,
                             ),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -85,7 +91,10 @@ fun EditRemoteCommandDialog(
                     ) {
                         Checkbox(
                             checked = repeatCommand,
-                            onCheckedChange = { repeatCommand = it },
+                            onCheckedChange = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                repeatCommand = it
+                            },
                         )
                         Text("Repeat command while button is pressed")
                     }
@@ -97,6 +106,7 @@ fun EditRemoteCommandDialog(
         confirmButton = {
             TextButton(
                 onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
                     onSave(
                         key,
                         initialCommand.copy(
@@ -111,7 +121,12 @@ fun EditRemoteCommandDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },
