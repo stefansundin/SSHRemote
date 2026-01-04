@@ -433,6 +433,7 @@ fun EditHostScreen(
 
     LaunchedEffect(scanQrCode) {
         if (scanQrCode) {
+            scanQrCode = false
             val options = ScanOptions()
             options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
             options.setPrompt("Scan a QR code to import host")
