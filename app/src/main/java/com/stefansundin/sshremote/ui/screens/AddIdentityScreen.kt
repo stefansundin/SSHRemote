@@ -98,19 +98,23 @@ fun AddIdentityScreen(
     onKeySaved: (name: String, privateKey: String) -> Unit,
     onKeyGenerated: suspend (name: String, type: Int, size: Int?, comment: String) -> Unit,
     onNavigateUp: () -> Unit,
+    scanQrCodeOnStart: Boolean = false,
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var privateKey by rememberSaveable { mutableStateOf("") }
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-    val tabTitles = listOf("Import File", "Generate", "Enter Manually")
+    val tabTitles = listOf("Import", "Generate", "Enter Manually")
     var isKeyContentValid by rememberSaveable { mutableStateOf(false) }
     var importKeyTypeDescription by rememberSaveable { mutableStateOf<String?>(null) }
     var generateKeyType by rememberSaveable { mutableStateOf<Pair<Int, Int?>>(Pair(KeyPair.ED25519, null)) }
     var isGenerating by rememberSaveable { mutableStateOf(false) }
+    var scanQrCode by rememberSaveable { mutableStateOf(scanQrCodeOnStart) }
     val coroutineScope = rememberCoroutineScope()
     val view = LocalView.current
+    val context = LocalContext.current
 
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
+    var importError by rememberSaveable { mutableStateOf<String?>(null) }
 
     val hasUnsavedChanges = privateKey.isNotBlank()
     val isFormValid = (selectedTabIndex == 0 && isKeyContentValid) ||
@@ -130,6 +134,67 @@ fun AddIdentityScreen(
                     onKeyGenerated(finalName, generateKeyType.first, generateKeyType.second, finalName)
                 }
             }
+        }
+    }
+
+    fun parseAndSetKey(content: String) {
+        coroutineScope.launch(Dispatchers.IO) {
+            importError = null
+            try {
+                var finalKey = content
+                if (!finalKey.startsWith("-----")) {
+                    val decoded = Base64.getMimeDecoder().decode(finalKey)
+                    val inputStream = GZIPInputStream(ByteArrayInputStream(decoded))
+                    val decompressed = inputStream.bufferedReader(StandardCharsets.UTF_8).readText()
+                    finalKey = decompressed
+                }
+                val keyPair = KeyPair.load(JSch(), finalKey.toByteArray(), null)
+                val comment = keyPair.publicKeyComment
+                keyPair.dispose()
+
+                withContext(Dispatchers.Main) {
+                    privateKey = finalKey
+                    if (comment.isNotBlank()) {
+                        name = comment
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    privateKey = content
+                    importError = e.message ?: "Invalid key format"
+                }
+                Log.e("AddIdentityScreen", "Error parsing key", e)
+            }
+        }
+    }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                context.contentResolver.openInputStream(it)?.use { inputStream ->
+                    val content = inputStream.reader().readText()
+                    parseAndSetKey(content)
+                }
+            }
+        },
+    )
+
+    val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            parseAndSetKey(result.contents)
+        }
+    }
+
+    LaunchedEffect(scanQrCode) {
+        if (scanQrCode) {
+            scanQrCode = false
+            val options = ScanOptions()
+            options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            options.setPrompt("Encode your private key file to a QR code")
+            options.setBeepEnabled(false)
+            options.setOrientationLocked(false)
+            qrScanLauncher.launch(options)
         }
     }
 
@@ -283,11 +348,18 @@ fun AddIdentityScreen(
 
             Column(modifier = Modifier.padding(16.dp)) {
                 when (selectedTabIndex) {
-                    0 -> ImportFileTab(
-                        keyTypeDescription = importKeyTypeDescription,
-                        onKeyContentRead = { content -> privateKey = content },
-                        onNameSuggestion = { suggestedName -> name = suggestedName },
-                    )
+                    0 -> {
+                        ImportTab(
+                            keyTypeDescription = importKeyTypeDescription,
+                            error = importError,
+                            onPickFile = {
+                                filePickerLauncher.launch("*/*")
+                            },
+                            onScanQr = {
+                                scanQrCode = true
+                            },
+                        )
+                    }
 
                     1 -> GenerateKeyTab(
                         selectedKeyType = generateKeyType,
@@ -307,67 +379,13 @@ fun AddIdentityScreen(
 }
 
 @Composable
-fun ImportFileTab(
+fun ImportTab(
     keyTypeDescription: String?,
-    onKeyContentRead: (String) -> Unit,
-    onNameSuggestion: (String) -> Unit,
+    error: String?,
+    onPickFile: () -> Unit,
+    onScanQr: () -> Unit,
 ) {
-    var keyContentForParsing by rememberSaveable { mutableStateOf<String?>(null) }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
-
-    val context = LocalContext.current
     val view = LocalView.current
-
-    LaunchedEffect(keyContentForParsing) {
-        keyContentForParsing?.let { content ->
-            withContext(Dispatchers.IO) {
-                error = null
-                try {
-                    var finalKey = content
-                    if (!finalKey.startsWith("-----")) {
-                        val decoded = Base64.getMimeDecoder().decode(finalKey)
-                        val inputStream = GZIPInputStream(ByteArrayInputStream(decoded))
-                        val decompressed = inputStream.bufferedReader(StandardCharsets.UTF_8).readText()
-                        finalKey = decompressed
-                    }
-                    val keyPair = KeyPair.load(JSch(), finalKey.toByteArray(), null)
-                    withContext(Dispatchers.Main) {
-                        onKeyContentRead(finalKey)
-                    }
-                    val comment = keyPair.publicKeyComment
-                    if (comment.isNotBlank()) {
-                        withContext(Dispatchers.Main) {
-                            onNameSuggestion(comment)
-                        }
-                    }
-                    keyPair.dispose()
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        onKeyContentRead(content)
-                        error = e.message ?: "Invalid key format"
-                    }
-                    Log.e("AddIdentityScreen", "Error parsing key", e)
-                }
-            }
-        }
-    }
-
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            uri?.let {
-                context.contentResolver.openInputStream(it)?.use { inputStream ->
-                    keyContentForParsing = inputStream.reader().readText()
-                }
-            }
-        },
-    )
-
-    val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
-        if (result.contents != null) {
-            keyContentForParsing = result.contents
-        }
-    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -378,7 +396,7 @@ fun ImportFileTab(
         Button(
             onClick = {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
-                filePickerLauncher.launch("*/*")
+                onPickFile()
             },
         ) {
             Text("Select File")
@@ -388,12 +406,7 @@ fun ImportFileTab(
         Button(
             onClick = {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
-                val options = ScanOptions()
-                options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                options.setPrompt("Encode your private key file to a QR code")
-                options.setBeepEnabled(false)
-                options.setOrientationLocked(false)
-                qrScanLauncher.launch(options)
+                onScanQr()
             },
         ) {
             Text("Scan QR Code")
@@ -529,11 +542,11 @@ private fun AddIdentityScreenPreview_ImportTab() {
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-private fun ImportFileTabPreview() {
+private fun ImportTabPreview() {
     SSHRemoteTheme {
         Surface {
             Column(modifier = Modifier.padding(16.dp)) {
-                ImportFileTab(keyTypeDescription = "RSA 4096-bit", onKeyContentRead = {}, onNameSuggestion = {})
+                ImportTab(keyTypeDescription = "RSA 4096-bit", error = null, onPickFile = {}, onScanQr = {})
             }
         }
     }

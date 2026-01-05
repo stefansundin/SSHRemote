@@ -88,8 +88,7 @@ import kotlinx.coroutines.flow.first
 fun HostListScreen(
     hosts: List<Host>?,
     onConnectClicked: (Host) -> Unit,
-    onAdd: () -> Unit,
-    onAddFromQrCode: () -> Unit,
+    onAdd: (Boolean) -> Unit,
     onEdit: (Host) -> Unit,
     onClone: (Host) -> Unit,
     onCreateShortcut: (Host) -> Unit,
@@ -119,13 +118,13 @@ fun HostListScreen(
                     delay(viewConfiguration.longPressTimeoutMillis)
                     isLongClick = true
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                    onAddFromQrCode()
+                    onAdd(true)
                 }
 
                 is PressInteraction.Release -> {
-                    if (isLongClick.not()) {
+                    if (!isLongClick) {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onAdd()
+                        onAdd(false)
                     }
                 }
 
@@ -398,7 +397,6 @@ private fun HostListScreenPreview() {
             hosts = sampleHosts,
             onConnectClicked = {},
             onAdd = {},
-            onAddFromQrCode = {},
             onEdit = {},
             onClone = {},
             onCreateShortcut = {},
@@ -419,7 +417,6 @@ private fun HostListScreenPreview_Empty() {
             hosts = emptyList(),
             onConnectClicked = {},
             onAdd = {},
-            onAddFromQrCode = {},
             onEdit = {},
             onClone = {},
             onCreateShortcut = {},

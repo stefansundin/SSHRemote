@@ -21,9 +21,12 @@ package com.stefansundin.sshremote.ui.screens
 import android.content.ClipData
 import android.content.res.Configuration
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.SoundEffectConstants
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,6 +82,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -96,6 +100,7 @@ import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.components.TextWithInlineIcon
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -110,7 +115,7 @@ import java.time.format.FormatStyle
 fun IdentityListScreen(
     identityViewModel: IIdentityListViewModel,
     cryptoManager: ICryptoManager,
-    onNavigateToAddIdentity: () -> Unit,
+    onNavigateToAddIdentity: (Boolean) -> Unit,
     onNavigateUp: () -> Unit,
     onDelete: (Identity) -> Unit,
     onRename: (Identity, String) -> Unit,
@@ -131,6 +136,38 @@ fun IdentityListScreen(
     val clipboard = LocalClipboard.current
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
+
+    // Long pressing the FAB will launch directly into the QR code scanner
+    // It's a secret feature that is not documented
+    val interactionSource = remember { MutableInteractionSource() }
+    val viewConfiguration = LocalViewConfiguration.current
+
+    LaunchedEffect(interactionSource) {
+        var isLongClick = false
+
+        interactionSource.interactions.collectLatest { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> {
+                    isLongClick = false
+                    delay(viewConfiguration.longPressTimeoutMillis)
+                    isLongClick = true
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    onNavigateToAddIdentity(true)
+                }
+
+                is PressInteraction.Release -> {
+                    if (!isLongClick) {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onNavigateToAddIdentity(false)
+                    }
+                }
+
+                is PressInteraction.Cancel -> {
+                    isLongClick = false
+                }
+            }
+        }
+    }
 
     val fileSaverLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("attachment/plain"),
@@ -269,10 +306,8 @@ fun IdentityListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onNavigateToAddIdentity()
-                },
+                onClick = {},
+                interactionSource = interactionSource,
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add SSH Key")
             }

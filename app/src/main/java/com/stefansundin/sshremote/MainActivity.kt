@@ -122,7 +122,10 @@ sealed class Screen(val route: String) {
     data object AdHocCommand : Screen("ad_hoc_command")
     data object Settings : Screen("settings")
     data object IdentityList : Screen("identity_list")
-    data object AddIdentity : Screen("add_identity")
+    data object AddIdentity : Screen("add_identity?scan={scan}") {
+        fun createRoute(scan: Boolean = false) = "add_identity?scan=$scan"
+    }
+
     data object Help : Screen("help")
 }
 
@@ -335,11 +338,8 @@ class MainActivity : ComponentActivity() {
                             HostListScreen(
                                 hosts = hosts,
                                 onConnectClicked = onConnect,
-                                onAdd = {
-                                    navController.navigate(Screen.HostEdit.createRoute(null))
-                                },
-                                onAddFromQrCode = {
-                                    navController.navigate(Screen.HostEdit.createRoute(null, scan = true))
+                                onAdd = { openQrScanner ->
+                                    navController.navigate(Screen.HostEdit.createRoute(null, scan = openQrScanner))
                                 },
                                 onEdit = { host ->
                                     navController.navigate(Screen.HostEdit.createRoute(host.id))
@@ -530,7 +530,9 @@ class MainActivity : ComponentActivity() {
                             IdentityListScreen(
                                 cryptoManager = cryptoManager,
                                 identityViewModel = identityViewModel,
-                                onNavigateToAddIdentity = { navController.navigate(Screen.AddIdentity.route) },
+                                onNavigateToAddIdentity = { openQrScanner ->
+                                    navController.navigate(Screen.AddIdentity.createRoute(openQrScanner))
+                                },
                                 onNavigateUp = {
                                     navController.safePopBackStack()
                                 },
@@ -540,7 +542,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable(Screen.AddIdentity.route) {
+                        composable(
+                            Screen.AddIdentity.route,
+                            arguments = listOf(
+                                navArgument("scan") { type = NavType.BoolType; defaultValue = false },
+                            ),
+                        ) { backStackEntry ->
+                            val scan = backStackEntry.arguments?.getBoolean("scan") ?: false
                             AddIdentityScreen(
                                 onKeySaved = { name, privateKey ->
                                     identityViewModel.insert(name, privateKey)
@@ -551,6 +559,7 @@ class MainActivity : ComponentActivity() {
                                     navController.safePopBackStack()
                                 },
                                 onNavigateUp = { navController.safePopBackStack() },
+                                scanQrCodeOnStart = scan,
                             )
                         }
 

@@ -396,7 +396,7 @@ fun EditHostScreen(
         )
     }
 
-    val scanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+    val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             val contents = result.contents
             try {
@@ -453,7 +453,7 @@ fun EditHostScreen(
             options.setPrompt("Scan a QR code to import host")
             options.setBeepEnabled(false)
             options.setOrientationLocked(false)
-            scanLauncher.launch(options)
+            qrScanLauncher.launch(options)
         }
     }
 
