@@ -46,6 +46,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,6 +76,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -138,29 +140,49 @@ private fun SettingsItem(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+    icon: ImageVector? = null,
+    onClick: (() -> Unit)? = null,
 ) {
     val view = LocalView.current
 
-    Column(
+    Row(
         modifier = modifier
-            .clickable(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onClick()
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onClick()
+                        },
+                    )
+                } else {
+                    Modifier
                 },
             )
             .padding(vertical = 12.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            title,
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        Text(
-            subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp),
+            )
+        }
     }
 }
 
@@ -655,24 +677,28 @@ fun SettingsScreen(
                         title = "Donate",
                         subtitle = "Support the developer",
                         modifier = Modifier.fillMaxWidth(),
+                        icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://stefansundin.github.io/donate") },
                     )
                     SettingsItem(
                         title = "License",
                         subtitle = "GNU General Public License v3.0",
                         modifier = Modifier.fillMaxWidth(),
+                        icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://www.gnu.org/licenses/gpl-3.0.html") },
                     )
                     SettingsItem(
                         title = "Source code",
                         subtitle = "View on GitHub",
                         modifier = Modifier.fillMaxWidth(),
+                        icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://github.com/stefansundin/SSHRemote") },
                     )
                     SettingsItem(
                         title = "SSH library",
                         subtitle = "Using mwiede/jsch ${BuildConfig.JSCH_VERSION}",
                         modifier = Modifier.fillMaxWidth(),
+                        icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://github.com/mwiede/jsch") },
                     )
                 }
