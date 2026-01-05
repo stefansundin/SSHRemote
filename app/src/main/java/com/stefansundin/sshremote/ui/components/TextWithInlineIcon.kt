@@ -18,21 +18,28 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -42,18 +49,22 @@ fun TextWithInlineIcon(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     style: TextStyle = LocalTextStyle.current,
+    textAlign: TextAlign? = null,
     iconContentDescription: String? = null,
 ) {
     val parts = text.split(placeholder)
     if (parts.size <= 1) {
-        Text(text = text, style = style, modifier = modifier)
+        Text(text = text, style = style, textAlign = textAlign, modifier = modifier)
         return
     }
     val annotatedString = buildAnnotatedString {
         parts.forEachIndexed { index, part ->
             append(part)
             if (index < parts.size - 1) {
-                appendInlineContent("icon", placeholder)
+                // Remove letter spacing for the inline content to avoid extra gaps
+                withStyle(SpanStyle(letterSpacing = 0.sp)) {
+                    appendInlineContent("icon", placeholder)
+                }
             }
         }
     }
@@ -65,26 +76,34 @@ fun TextWithInlineIcon(
                 placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
             ),
         ) {
-            Icon(icon, contentDescription = iconContentDescription, modifier = Modifier)
+            Icon(
+                imageVector = icon,
+                contentDescription = iconContentDescription,
+                modifier = Modifier.fillMaxSize(),
+            )
         },
     )
     Text(
         text = annotatedString,
         inlineContent = inlineContent,
         style = style,
+        textAlign = textAlign,
         modifier = modifier,
     )
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun TextWithInlineIconPreview() {
     SSHRemoteTheme {
-        TextWithInlineIcon(
-            "Tap the ? button for help.",
-            "?",
-            Icons.AutoMirrored.Filled.Help,
-            iconContentDescription = "Help",
-        )
+        Surface {
+            TextWithInlineIcon(
+                "Tap the ? button for help.",
+                "?",
+                Icons.AutoMirrored.Filled.Help,
+                iconContentDescription = "Help",
+            )
+        }
     }
 }

@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -43,14 +44,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.MouseEvent
+import com.stefansundin.sshremote.ui.screens.sampleHost
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import com.stefansundin.sshremote.ui.tooling.PreviewData
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -225,23 +227,23 @@ private fun TouchPad(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 if (editing) {
-                    Text("Mouse Pad")
-                    Text("Tap to edit mouse commands")
+                    Text("Mouse Pad", textAlign = TextAlign.Center)
+                    Text("Tap to edit mouse commands", textAlign = TextAlign.Center)
                 } else {
                     if (mouseMoveConfigured || leftClickConfigured || rightClickConfigured || scrollingConfigured) {
-                        Text("Mouse Pad")
+                        Text("Mouse Pad", textAlign = TextAlign.Center)
                         if (leftClickConfigured) {
-                            Text("Tap for left click")
+                            Text("Tap for left click", textAlign = TextAlign.Center)
                         }
                         if (rightClickConfigured) {
-                            Text("Long press for right click")
+                            Text("Long press for right click", textAlign = TextAlign.Center)
                         }
                         if (scrollingConfigured) {
-                            Text("Scroll using two fingers")
+                            Text("Scroll using two fingers", textAlign = TextAlign.Center)
                         }
                     } else {
-                        Text("Mouse Pad Disabled")
-                        Text("No mouse commands configured")
+                        Text("Mouse Pad Disabled", textAlign = TextAlign.Center)
+                        Text("Mouse commands not configured", textAlign = TextAlign.Center)
                     }
                 }
             }
@@ -250,29 +252,34 @@ private fun TouchPad(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun MousePadPreview() {
     SSHRemoteTheme {
-        MousePad(
-            onMouseEvent = { event ->
-                Log.d("MousePad", "Received event: $event")
-            },
-            connectionStatus = ConnectionStatus.CONNECTED,
-            host = PreviewData.sampleHost,
-        )
+        Surface {
+            MousePad(
+                onMouseEvent = { event ->
+                    Log.d("MousePad", "Received event: $event")
+                },
+                connectionStatus = ConnectionStatus.CONNECTED,
+                host = sampleHost,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun MousePadPreview_Editing() {
     SSHRemoteTheme {
-        MousePad(
-            onMouseEvent = { event ->
-                Log.d("MousePad", "Received event: $event")
-            },
-            editing = true,
-            host = PreviewData.sampleHost,
-        )
+        Surface {
+            MousePad(
+                onMouseEvent = { event ->
+                    Log.d("MousePad", "Received event: $event")
+                },
+                editing = true,
+            )
+        }
     }
 }

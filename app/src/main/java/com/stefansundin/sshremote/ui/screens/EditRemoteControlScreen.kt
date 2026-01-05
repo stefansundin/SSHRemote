@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -71,6 +72,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
@@ -87,6 +89,7 @@ import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SmartVolumeSettingsDialog
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -548,6 +551,78 @@ fun EditRemoteControlScreen(
                 }
                 editingCommand = null
             },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun EditRemoteControlScreenPreview_RemoteTab() {
+    SSHRemoteTheme {
+        EditRemoteControlScreen(
+            onSave = { _, _, _, _ -> },
+            onNavigateBack = {},
+            onSetAsDefaultScreen = {},
+            onTestSmartVolumeSettings = {},
+            initialRemoteCommands = emptyMap(),
+            initialCommands = emptyList(),
+            initialSmartVolumeSettings = null,
+            initialPage = 0,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun EditRemoteControlScreenPreview_MouseTab() {
+    SSHRemoteTheme {
+        EditRemoteControlScreen(
+            onSave = { _, _, _, _ -> },
+            onNavigateBack = {},
+            onSetAsDefaultScreen = {},
+            onTestSmartVolumeSettings = {},
+            initialRemoteCommands = emptyMap(),
+            initialCommands = emptyList(),
+            initialSmartVolumeSettings = null,
+            initialPage = 1,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun EditRemoteControlScreenPreview_KeyboardTab() {
+    SSHRemoteTheme {
+        EditRemoteControlScreen(
+            onSave = { _, _, _, _ -> },
+            onNavigateBack = {},
+            onSetAsDefaultScreen = {},
+            onTestSmartVolumeSettings = {},
+            initialRemoteCommands = emptyMap(),
+            initialCommands = emptyList(),
+            initialSmartVolumeSettings = null,
+            initialPage = 2,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun EditRemoteControlScreenPreview_CommandsTab() {
+    SSHRemoteTheme {
+        EditRemoteControlScreen(
+            onSave = { _, _, _, _ -> },
+            onNavigateBack = {},
+            onSetAsDefaultScreen = {},
+            onTestSmartVolumeSettings = {},
+            initialRemoteCommands = emptyMap(),
+            initialCommands = listOf(Command("uptime")),
+            initialSmartVolumeSettings = null,
+            initialPage = 3,
         )
     }
 }

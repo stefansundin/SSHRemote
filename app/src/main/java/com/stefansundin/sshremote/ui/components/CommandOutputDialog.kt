@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.ClipData
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,6 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.tooling.preview.Preview
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -56,7 +60,7 @@ fun CommandOutputDialog(
         text = {
             SelectionContainer {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(output)
+                    Text(output.trimEnd())
                 }
             }
         },
@@ -89,4 +93,18 @@ fun CommandOutputDialog(
             }
         },
     )
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun CommandOutputDialogPreview() {
+    SSHRemoteTheme {
+        Surface {
+            CommandOutputDialog(
+                output = "Linux pi 6.12.34+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.12.34-1+rpt1~bookworm (2025-06-26) aarch64 GNU/Linux\n",
+                onDismiss = {},
+            )
+        }
+    }
 }

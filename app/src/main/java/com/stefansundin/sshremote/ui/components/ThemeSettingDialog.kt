@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -110,14 +112,17 @@ fun ThemeSettingDialog(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun ThemeSettingDialogPreview() {
     SSHRemoteTheme {
-        ThemeSettingDialog(
-            currentTheme = Theme.SYSTEM,
-            onThemeSelected = {},
-            onConfirm = {},
-            onDismiss = {},
-        )
+        Surface {
+            ThemeSettingDialog(
+                currentTheme = Theme.SYSTEM,
+                onThemeSelected = {},
+                onConfirm = {},
+                onDismiss = {},
+            )
+        }
     }
 }

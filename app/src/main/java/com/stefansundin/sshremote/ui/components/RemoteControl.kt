@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,8 +53,10 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -72,9 +75,11 @@ import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
+import com.stefansundin.sshremote.data.host.macosVlcPreset
+import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.ui.KeyEvent
+import com.stefansundin.sshremote.ui.screens.sampleHost
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
-import com.stefansundin.sshremote.ui.tooling.PreviewData
 
 private val MinDimensionForActionButtons = 400.dp
 
@@ -127,8 +132,10 @@ private fun RemoteControlLayout(
     val context = LocalContext.current
     val isConnected = editing || connectionStatus == ConnectionStatus.CONNECTED
 
-    if (editing) {
-        Toast.makeText(context, "Tap a button to edit its command", Toast.LENGTH_SHORT).show()
+    LaunchedEffect(editing) {
+        if (editing) {
+            Toast.makeText(context, "Tap a button to edit its command", Toast.LENGTH_SHORT).show()
+        }
     }
 
     when (layoutMode) {
@@ -443,47 +450,131 @@ private class ArcShape(private val startAngle: Float, private val sweepAngle: Fl
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 800)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 800,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
-private fun PortraitPreview() {
+private fun RemoteControlPreview_Portrait() {
     SSHRemoteTheme {
-        RemoteControlLayout(
-            RemoteLayoutMode.Portrait,
-            {},
-            host = PreviewData.sampleHostWithSmartVolume,
-            volume = "42%",
-            muted = true,
-        )
+        Surface {
+            RemoteControlLayout(
+                RemoteLayoutMode.Portrait,
+                {},
+                host = sampleHost.copy(smartVolume = SmartVolumeSettings(true)),
+                volume = "42%",
+                muted = true,
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 800)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-private fun PortraitPreview_VLC() {
+private fun RemoteControlPreview_Portrait_NoPreset() {
     SSHRemoteTheme {
-        RemoteControlLayout(RemoteLayoutMode.Portrait, {}, host = PreviewData.sampleHostVlc)
+        Surface {
+            RemoteControlLayout(
+                RemoteLayoutMode.Portrait,
+                {},
+                host = sampleHost.copy(remoteCommands = null),
+                volume = "42%",
+                muted = true,
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 800)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 800,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
+@Composable
+private fun RemoteControlPreview_Portrait_VLC() {
+    SSHRemoteTheme {
+        Surface {
+            RemoteControlLayout(
+                RemoteLayoutMode.Portrait,
+                {},
+                host = sampleHost.copy(remoteCommands = macosVlcPreset),
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true, widthDp = 800, heightDp = 400)
+@Preview(
+    showBackground = true,
+    widthDp = 800,
+    heightDp = 400,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
-private fun LandscapePreview() {
+private fun RemoteControlPreview_Landscape() {
     SSHRemoteTheme {
-        RemoteControlLayout(RemoteLayoutMode.Landscape, {}, host = PreviewData.sampleHost)
+        Surface {
+            RemoteControlLayout(
+                RemoteLayoutMode.Landscape,
+                {},
+                host = sampleHost,
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 400)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 400,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
-private fun CompactPreview() {
+private fun RemoteControlPreview_Compact() {
     SSHRemoteTheme {
-        RemoteControlLayout(RemoteLayoutMode.Compact, {}, host = PreviewData.sampleHost)
+        Surface {
+            RemoteControlLayout(
+                RemoteLayoutMode.Compact,
+                {},
+                host = sampleHost,
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 400)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 400,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
-private fun CompactPreview_WithoutSelect() {
+private fun RemoteControlPreview_Compact_WithoutSelect() {
     SSHRemoteTheme {
-        RemoteControlLayout(RemoteLayoutMode.Compact, {}, host = PreviewData.sampleHostWithoutSelect)
+        Surface {
+            RemoteControlLayout(
+                RemoteLayoutMode.Compact,
+                {},
+                host = sampleHost.copy(remoteCommands = wtypePreset - RemoteControlKey.SELECT),
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
+        }
     }
 }

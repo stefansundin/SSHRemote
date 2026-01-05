@@ -22,10 +22,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.SoundEffectConstants
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -40,9 +42,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,7 +65,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -230,6 +236,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
+                    val view = LocalView.current
                     val scope = rememberCoroutineScope()
                     val uiState by hostViewModel.uiState.collectAsState()
                     val navController = rememberNavController()
@@ -308,6 +315,7 @@ class MainActivity : ComponentActivity() {
                             confirmButton = {
                                 TextButton(
                                     onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showBackupRestoredDialog = false
                                     },
                                 ) {
@@ -493,10 +501,12 @@ class MainActivity : ComponentActivity() {
                                 uiState = uiState,
                                 commands = adHocCommands,
                                 onExecuteCommand = { command, popUpToPrevious ->
-                                    adHocCommandViewModel.addAdHocCommand(command)
-                                    hostViewModel.runCommand(command, showOutput = true)
-                                    if (popUpToPrevious) {
-                                        navController.safePopBackStack()
+                                    scope.launch {
+                                        adHocCommandViewModel.addAdHocCommand(command)
+                                        hostViewModel.runCommand(command, showOutput = true)
+                                        if (popUpToPrevious) {
+                                            navController.safePopBackStack()
+                                        }
                                     }
                                 },
                                 onDeleteCommand = { adHocCommandViewModel.deleteAdHocCommand(it) },
@@ -587,18 +597,34 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, onHelp: () -> Unit) {
+    val view = LocalView.current
+
     AlertDialog(
         title = { Text("Getting started") },
-        text = { Text("The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.\n\nPlease read the Help page if this is the first time you are using this app.") },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text("The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.\n\nPlease read the Help page if this is the first time you are using this app.")
+            }
+        },
         properties = DialogProperties(dismissOnClickOutside = false),
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onConfirm()
+                },
+            ) {
                 Text("Select preset")
             }
         },
         dismissButton = {
-            TextButton(onClick = onHelp) {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onHelp()
+                },
+            ) {
                 Text("Help")
             }
         },
@@ -607,20 +633,23 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, o
 
 @Composable
 private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>?) -> Unit) {
+    val view = LocalView.current
+
     AlertDialog(
         title = { Text("Select preset") },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 (presets.keys + "No preset").forEach { presetKey ->
-                    Text(
-                        text = presetKey,
+                    ListItem(
+                        headlineContent = { Text(presetKey) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
                                 onPresetSelected(presets[presetKey])
-                            }
-                            .padding(vertical = 12.dp),
+                            },
                     )
+                    HorizontalDivider()
                 }
             }
         },
@@ -679,6 +708,28 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
 
         onDispose {
             context.unregisterReceiver(receiver)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f, heightDp = 500)
+@Composable
+private fun GettingStartedDialogPreview() {
+    SSHRemoteTheme {
+        Surface {
+            GettingStartedDialog(onDismiss = {}, onConfirm = {}, onHelp = {})
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f, heightDp = 300)
+@Composable
+private fun SelectPresetDialogPreview() {
+    SSHRemoteTheme {
+        Surface {
+            SelectPresetDialog(onDismiss = {}, onPresetSelected = {})
         }
     }
 }

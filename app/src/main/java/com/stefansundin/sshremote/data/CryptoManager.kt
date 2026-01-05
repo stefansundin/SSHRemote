@@ -26,6 +26,13 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+interface ICryptoManager {
+    fun encrypt(data: ByteArray): ByteArray
+    fun encrypt(data: String): ByteArray
+    fun decrypt(encryptedDataWithIv: ByteArray): ByteArray
+    fun decryptToString(encryptedDataWithIv: ByteArray): String
+}
+
 /**
  * Manages encryption and decryption using AES/GCM/NoPadding.
  *
@@ -34,7 +41,7 @@ import javax.crypto.spec.GCMParameterSpec
  *
  * Keys are 256-bit AES, generated and stored in the Android KeyStore.
  */
-class CryptoManager {
+class CryptoManager: ICryptoManager {
 
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply {
         load(null)
@@ -70,7 +77,7 @@ class CryptoManager {
      * @param data The plaintext data to encrypt.
      * @return A byte array containing the 12-byte IV followed by the ciphertext and authentication tag.
      */
-    fun encrypt(data: ByteArray): ByteArray {
+    override fun encrypt(data: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val secretKey = getSecretKey()
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
@@ -84,7 +91,7 @@ class CryptoManager {
      * @param data The plaintext string to encrypt.
      * @return A byte array containing the IV, ciphertext, and authentication tag.
      */
-    fun encrypt(data: String): ByteArray {
+    override fun encrypt(data: String): ByteArray {
         return encrypt(data.toByteArray(Charsets.UTF_8))
     }
 
@@ -94,7 +101,7 @@ class CryptoManager {
      * ciphertext and authentication tag.
      * @return The original plaintext data.
      */
-    fun decrypt(encryptedDataWithIv: ByteArray): ByteArray {
+    override fun decrypt(encryptedDataWithIv: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val secretKey = getSecretKey()
         val iv = encryptedDataWithIv.copyOfRange(0, GCM_IV_SIZE_BYTES)
@@ -109,7 +116,7 @@ class CryptoManager {
      * @param encryptedDataWithIv The encrypted data to decrypt.
      * @return The original plaintext string.
      */
-    fun decryptToString(encryptedDataWithIv: ByteArray): String {
+    override fun decryptToString(encryptedDataWithIv: ByteArray): String {
         return decrypt(encryptedDataWithIv).toString(Charsets.UTF_8)
     }
 

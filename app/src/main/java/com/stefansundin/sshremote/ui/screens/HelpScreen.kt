@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -107,8 +108,9 @@ fun HelpScreen(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun HelpScreenPreview() {
+private fun HelpScreenPreview() {
     SSHRemoteTheme {
         HelpScreen(onNavigateUp = {})
     }

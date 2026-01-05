@@ -52,6 +52,22 @@ import java.util.UUID
 import kotlin.math.abs
 import kotlin.time.measureTimedValue
 
+interface IEditHostViewModel {
+    suspend fun isPasswordLost(passwordId: String): Boolean
+}
+
+interface IRemoteControlHostViewModel {
+    fun connect(host: Host)
+    fun runRemoteControlCommand(key: RemoteControlKey)
+    fun clearCommandOutput()
+    suspend fun runCommand(
+        command: String,
+        showOutput: Boolean,
+        isRetry: Boolean = false,
+        reuseShell: Boolean = true,
+    ): Result
+}
+
 class HostViewModel(
     private val repository: HostRepository,
     private val identityRepository: IdentityRepository,
@@ -59,7 +75,7 @@ class HostViewModel(
     private val cryptoManager: CryptoManager,
     private val settingsRepository: SettingsRepository,
     private val passwordDao: PasswordDao,
-) : ViewModel() {
+) : ViewModel(), IEditHostViewModel, IRemoteControlHostViewModel {
 
     private val _uiState = MutableStateFlow(RemoteUiState())
     val uiState = _uiState.asStateFlow()
@@ -133,7 +149,7 @@ class HostViewModel(
         }
     }
 
-    suspend fun isPasswordLost(passwordId: String): Boolean {
+    override suspend fun isPasswordLost(passwordId: String): Boolean {
         return passwordDao.getPassword(passwordId) == null
     }
 
@@ -157,7 +173,7 @@ class HostViewModel(
         }
     }
 
-    fun connect(host: Host) {
+    override fun connect(host: Host) {
         connectionJob?.cancel()
         connectionJob = viewModelScope.launch {
             handleConnection(host)
@@ -228,95 +244,104 @@ class HostViewModel(
         }
     }
 
-    fun runCommand(command: String, showOutput: Boolean, isRetry: Boolean = false, reuseShell: Boolean = true) {
+    override suspend fun runCommand(
+        command: String,
+        showOutput: Boolean,
+        isRetry: Boolean,
+        reuseShell: Boolean,
+    ): Result {
         if (_uiState.value.connectionStatus != ConnectionStatus.CONNECTED) {
-            return
+            _uiState.update {
+                it.copy(error = "Not connected")
+            }
+            return Result.Error("Not connected", isConnectionError = true)
         }
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
+        _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
 
-            val (result, duration) = measureTimedValue {
-                if (reuseShell) {
-                    sshRepository.executeCommandReuseShell(command)
-                } else {
-                    sshRepository.executeCommand(command)
+        val (result, duration) = measureTimedValue {
+            if (reuseShell) {
+                sshRepository.executeCommandReuseShell(command)
+            } else {
+                sshRepository.executeCommand(command)
+            }
+        }
+        Log.d("HostViewModel", "executeCommand for '${command}' took $duration")
+
+        when (result) {
+            is Result.Success -> {
+                _uiState.update {
+                    it.copy(
+                        commandOutput = if (showOutput) result.output else null,
+                        isLoading = false,
+                    )
                 }
             }
-            Log.d("HostViewModel", "executeCommand for '${command}' took $duration")
 
-            when (result) {
-                is Result.Success -> {
+            is Result.Error -> {
+                if (result.isConnectionError && !isRetry) {
                     _uiState.update {
                         it.copy(
-                            commandOutput = if (showOutput) result.output else null,
+                            isLoading = false,
+                            error = "Connection lost. Reconnecting...",
+                        )
+                    }
+                    val host = _uiState.value.host
+                    if (host != null) {
+                        handleConnection(host)
+                        if (_uiState.value.connectionStatus == ConnectionStatus.CONNECTED) {
+                            return runCommand(command, showOutput, isRetry = true)
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                connectionStatus = ConnectionStatus.DISCONNECTED,
+                                error = "Cannot reconnect, no active host.",
+                                isLoading = false,
+                            )
+                        }
+                    }
+                } else {
+                    val errorMessage = if (result.isConnectionError) {
+                        "Failed to reconnect."
+                    } else {
+                        result.message
+                    }
+                    _uiState.update {
+                        it.copy(
+                            commandOutput = if (!result.isConnectionError) errorMessage else null,
+                            error = errorMessage,
+                            connectionStatus = if (result.isConnectionError) ConnectionStatus.DISCONNECTED else it.connectionStatus,
                             isLoading = false,
                         )
                     }
                 }
-
-                is Result.Error -> {
-                    if (result.isConnectionError && !isRetry) {
-                        _uiState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = "Connection lost. Reconnecting...",
-                            )
-                        }
-                        val host = _uiState.value.host
-                        if (host != null) {
-                            handleConnection(host)
-                            if (_uiState.value.connectionStatus == ConnectionStatus.CONNECTED) {
-                                runCommand(command, showOutput, isRetry = true)
-                            }
-                        } else {
-                            _uiState.update {
-                                it.copy(
-                                    connectionStatus = ConnectionStatus.DISCONNECTED,
-                                    error = "Cannot reconnect, no active host.",
-                                    isLoading = false,
-                                )
-                            }
-                        }
-                    } else {
-                        val errorMessage = if (result.isConnectionError) {
-                            "Failed to reconnect."
-                        } else {
-                            result.message
-                        }
-                        _uiState.update {
-                            it.copy(
-                                commandOutput = if (!result.isConnectionError) errorMessage else null,
-                                error = if (result.isConnectionError) errorMessage else null,
-                                connectionStatus = if (result.isConnectionError) ConnectionStatus.DISCONNECTED else it.connectionStatus,
-                                isLoading = false,
-                            )
-                        }
-                    }
-                }
             }
         }
+        return result
     }
 
-    fun runRemoteControlCommand(key: RemoteControlKey) {
+    override fun runRemoteControlCommand(key: RemoteControlKey) {
         val command = uiState.value.host?.remoteCommands?.get(key)
         if (command != null) {
             val oldVolume = uiState.value.volume
-            runCommand(command.command, command.showOutput)
             viewModelScope.launch {
-                when (key) {
-                    RemoteControlKey.VOLUME_UP, RemoteControlKey.VOLUME_DOWN -> {
-                        readVolume()
-                        if (uiState.value.volume == "0%" || oldVolume == "0%") {
-                            // Maybe unnecessary? Maybe we can assume it is muted if volume is "0%"?
+                val result = runCommand(command.command, command.showOutput)
+                if (result is Result.Success) {
+                    when (key) {
+                        RemoteControlKey.VOLUME_UP, RemoteControlKey.VOLUME_DOWN -> {
+                            readVolume()
+                            if (uiState.value.volume == "0%" || oldVolume == "0%") {
+                                // Maybe unnecessary? Maybe we can assume it is muted if volume is "0%"?
+                                readMuted()
+                            }
+                        }
+
+                        RemoteControlKey.MUTE -> {
                             readMuted()
                         }
-                    }
 
-                    RemoteControlKey.MUTE -> {
-                        readMuted()
+                        else -> Unit
                     }
-
-                    else -> Unit
                 }
             }
         }
@@ -433,7 +458,7 @@ class HostViewModel(
         }
     }
 
-    fun clearCommandOutput() {
+    override fun clearCommandOutput() {
         _uiState.update { it.copy(commandOutput = null) }
     }
 

@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.screens
 
 import android.content.ClipData
+import android.content.res.Configuration
 import android.net.Uri
 import android.util.Log
 import android.view.SoundEffectConstants
@@ -34,6 +35,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentPaste
@@ -49,6 +52,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -236,6 +240,7 @@ fun AddIdentityScreen(
             if (isFormValid && !isGenerating) {
                 FloatingActionButton(
                     onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
                         handleSave()
                     },
                 ) {
@@ -247,7 +252,11 @@ fun AddIdentityScreen(
             }
         },
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState()),
+        ) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -509,59 +518,72 @@ fun ManualEntryTab(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun AddIdentityScreenPreview_ImportTab() {
+private fun AddIdentityScreenPreview_ImportTab() {
     SSHRemoteTheme {
         AddIdentityScreen(onKeySaved = { _, _ -> }, onKeyGenerated = { _, _, _, _ -> }, onNavigateUp = {})
     }
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun ImportFileTabPreview() {
+private fun ImportFileTabPreview() {
     SSHRemoteTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ImportFileTab(keyTypeDescription = "RSA 4096-bit", onKeyContentRead = {}, onNameSuggestion = {})
+        Surface {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ImportFileTab(keyTypeDescription = "RSA 4096-bit", onKeyContentRead = {}, onNameSuggestion = {})
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun GenerateKeyTabPreview() {
+private fun GenerateKeyTabPreview() {
     SSHRemoteTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            GenerateKeyTab(selectedKeyType = Pair(KeyPair.ED25519, null), onKeyTypeSelected = {})
+        Surface {
+            Column(modifier = Modifier.padding(16.dp)) {
+                GenerateKeyTab(selectedKeyType = Pair(KeyPair.ED25519, null), onKeyTypeSelected = {})
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun ManualEntryTabPreview() {
+private fun ManualEntryTabPreview() {
     SSHRemoteTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ManualEntryTab(
-                privateKey = "",
-                onPrivateKeyChange = {},
-                onNameSuggestion = {},
-                isError = false,
-            )
+        Surface {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ManualEntryTab(
+                    privateKey = "",
+                    onPrivateKeyChange = {},
+                    onNameSuggestion = {},
+                    isError = false,
+                )
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun ManualEntryTabWithErrorPreview() {
+private fun ManualEntryTabWithErrorPreview() {
     SSHRemoteTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ManualEntryTab(
-                privateKey = "invalid key data",
-                onPrivateKeyChange = {},
-                onNameSuggestion = {},
-                isError = true,
-            )
+        Surface {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ManualEntryTab(
+                    privateKey = "invalid key data",
+                    onPrivateKeyChange = {},
+                    onNameSuggestion = {},
+                    isError = true,
+                )
+            }
         }
     }
 }

@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.screens
 
 import android.content.ClipData
+import android.content.res.Configuration
 import android.util.Log
 import android.view.SoundEffectConstants
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -80,29 +81,35 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.KeyPair
 import com.stefansundin.sshremote.R
-import com.stefansundin.sshremote.data.CryptoManager
+import com.stefansundin.sshremote.data.ICryptoManager
+import com.stefansundin.sshremote.data.identity.IIdentityListViewModel
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.identity.IdentityEvent
-import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.components.TextWithInlineIcon
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IdentityListScreen(
-    identityViewModel: IdentityViewModel,
-    cryptoManager: CryptoManager,
+    identityViewModel: IIdentityListViewModel,
+    cryptoManager: ICryptoManager,
     onNavigateToAddIdentity: () -> Unit,
     onNavigateUp: () -> Unit,
     onDelete: (Identity) -> Unit,
@@ -297,6 +304,7 @@ fun IdentityListScreen(
                         "+",
                         Icons.Default.Add,
                         style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 16.dp),
                     )
                 }
@@ -327,7 +335,7 @@ fun IdentityListScreen(
 @Composable
 fun IdentityItem(
     identity: Identity,
-    cryptoManager: CryptoManager,
+    cryptoManager: ICryptoManager,
     onShowPublicKey: () -> Unit,
     onExportPublicKey: () -> Unit,
     onDelete: () -> Unit,
@@ -460,6 +468,138 @@ fun IdentityItem(
                     Text("Cancel")
                 }
             },
+        )
+    }
+}
+
+private class FakeIdentityListViewModel(initialIdentities: List<Identity>?) : IIdentityListViewModel {
+    override val identities = MutableStateFlow(initialIdentities)
+    override val eventFlow = MutableSharedFlow<IdentityEvent>()
+    override fun showPublicKeyFor(identity: Identity) {}
+    override fun exportPublicKeyFor(identity: Identity) {}
+}
+
+private val fakeCryptoManager = object : ICryptoManager {
+    override fun encrypt(data: ByteArray): ByteArray = data
+    override fun encrypt(data: String): ByteArray = data.toByteArray()
+    override fun decrypt(encryptedDataWithIv: ByteArray): ByteArray = encryptedDataWithIv
+    override fun decryptToString(encryptedDataWithIv: ByteArray): String =
+        encryptedDataWithIv.toString(Charsets.UTF_8)
+}
+
+@Suppress("SpellCheckingInspection")
+private val dummyEncryptedKey = """
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABDSThtB3E
+LSKB+A2XMaPS0kAAAAGAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAINTmexYmb9t4XKWd
+FRagjF6/QusbtZwcVCsXwLgMZcL5AAAAoPQ9a73wEivjghvyhyKAHzvLA2LmQQEtWXhObR
+4FXwvPxrRJ4C89yGcdh+fyEujC6tTNt9b2iIQdkvcXPSy/IJjYG1SMsA2sFFC0HsGTeSa7
+aiAf1tEOJGq0UeyyI+SskFK+FCX5g9blOoXJRDQW1qjP7Ige1HoT7rpNwEz/xjlMVAS/Me
+bTweZs5vUHXl3DwGDMbnWc5GZN+figL3dxWVg=
+-----END OPENSSH PRIVATE KEY-----
+""".trimIndent().toByteArray()
+
+@Suppress("SpellCheckingInspection")
+private val dummyUnencryptedKey = """
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACBhHaIoIcFIKPqdxPzTGFZCLO3cyIepqVfEJOxBanbwrQAAAJiExnhehMZ4
+XgAAAAtzc2gtZWQyNTUxOQAAACBhHaIoIcFIKPqdxPzTGFZCLO3cyIepqVfEJOxBanbwrQ
+AAAED3XbOirI60/hldspI2oaMWBL9k50YX8z5uzaCqo0nSlWEdoighwUgo+p3E/NMYVkIs
+7dzIh6mpV8Qk7EFqdvCtAAAAFUR1bW15IFVuZW5jcnlwdGVkIEtleQ==
+-----END OPENSSH PRIVATE KEY-----
+""".trimIndent().toByteArray()
+
+@Suppress("SpellCheckingInspection")
+private val dummyUnencryptedRsaKey = """
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn
+NhAAAAAwEAAQAAAIEAxs5vbAoNQ+OucUpdnOP7L8GTtm7PwK+LPnfGiWsVoji16NapJGZM
+Xee9cgUZrD4BFAtraVPJRYwm1Niba7RH3ic2yd7p6i92hV2OBvV5ag0WBXX/+IWYJu9Ue8
+1LUF4scq+zU9x1iAZbiZ6+yxFG0zjWVEGKVSJj/3zJespJMaEAAAIQwyl04MMpdOAAAAAH
+c3NoLXJzYQAAAIEAxs5vbAoNQ+OucUpdnOP7L8GTtm7PwK+LPnfGiWsVoji16NapJGZMXe
+e9cgUZrD4BFAtraVPJRYwm1Niba7RH3ic2yd7p6i92hV2OBvV5ag0WBXX/+IWYJu9Ue81L
+UF4scq+zU9x1iAZbiZ6+yxFG0zjWVEGKVSJj/3zJespJMaEAAAADAQABAAAAgHGW35jGQY
+AJpdD7IXOT2yAVJVW2CKPaaN+/RcOcWJcAegdYJvoyLO32i4qLGXkNUEZoo+1hPv2qr0Er
+pdmq/ugOjZknszu4CWW4nba3iqI3e2P6vNiOQJ1Ueeso37fZ/FdMMW2Gpm4SEciNM6bJVN
+pRzXdDY73mdBXvEQc0sJPlAAAAQQD5ZSttfTEkY8sujsmY2D4f1ZngZwYS0B+KEL8bC1cu
+tusqNxjEPLdIv0MS4UVFrsQmZyerGYOcuwrZpzsEfhTyAAAAQQD/YL/aqQI92zSwWGYhgt
+tHNKg/UBN6tHcnfTtC91mblRePKyoVB49B9+KimQ6JGOgrnW3SSOM0toO+d619nAtzAAAA
+QQDHSmiSqMJm0i5ndyRZvbuWMnNz166n7VYI4+jJNLVbAdXlkvlTq8VBjnPcOboeZA2yDn
+Gd80I0/AcKP4TOHfGbAAAAGEluc2VjdXJlIFVuZW5jcnlwdGVkIEtleQEC
+-----END OPENSSH PRIVATE KEY-----
+""".trimIndent().toByteArray()
+
+@Suppress("SpellCheckingInspection")
+private val dummyUnencryptedEcdsaKey = """
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS
+1zaGEyLW5pc3RwMjU2AAAACG5pc3RwMjU2AAAAQQS/v1hDGGzttbYcLBuJWR34sauBObjT
+eh+sq8D4GyInLu9304mU8WO4VVLaFHKWX/jyQBW0ip1nFMf60bbJDqC8AAAAsCtN36orTd
++qAAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBL+/WEMYbO21thws
+G4lZHfixq4E5uNN6H6yrwPgbIicu73fTiZTxY7hVUtoUcpZf+PJAFbSKnWcUx/rRtskOoL
+wAAAAgbAr04j8rkq2AmkHd2XAaMX2Tux9VAw34+ZYK7HAhWzAAAAAVRHVtbXkgVW5lbmNy
+eXB0ZWQgS2V5AQID
+-----END OPENSSH PRIVATE KEY-----
+""".trimIndent().toByteArray()
+
+val sampleIdentities = listOf(
+    Identity(
+        id = "1",
+        createdAt = OffsetDateTime.now().minusDays(10),
+        name = "Work Key",
+        encryptedPrivateKey = dummyEncryptedKey,
+    ),
+    Identity(
+        id = "2",
+        createdAt = OffsetDateTime.now().minusMonths(3),
+        name = "Personal NAS",
+        encryptedPrivateKey = dummyUnencryptedKey,
+    ),
+    Identity(
+        id = "3",
+        createdAt = OffsetDateTime.now().minusMonths(12),
+        name = "Raspberry Pi",
+        encryptedPrivateKey = dummyUnencryptedRsaKey,
+    ),
+    Identity(
+        id = "4",
+        createdAt = OffsetDateTime.now().minusMonths(18),
+        name = "Legacy Key",
+        encryptedPrivateKey = dummyUnencryptedEcdsaKey,
+    ),
+)
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun IdentityListScreenPreview() {
+    SSHRemoteTheme {
+        IdentityListScreen(
+            identityViewModel = FakeIdentityListViewModel(sampleIdentities),
+            cryptoManager = fakeCryptoManager,
+            onNavigateToAddIdentity = {},
+            onNavigateUp = {},
+            onDelete = {},
+            onRename = { _, _ -> },
+            onUndoDelete = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun IdentityListScreenPreview_Empty() {
+    SSHRemoteTheme {
+        IdentityListScreen(
+            identityViewModel = FakeIdentityListViewModel(emptyList()),
+            cryptoManager = fakeCryptoManager,
+            onNavigateToAddIdentity = {},
+            onNavigateUp = {},
+            onDelete = {},
+            onRename = { _, _ -> },
+            onUndoDelete = {},
         )
     }
 }

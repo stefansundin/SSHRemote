@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.content.res.Configuration
 import android.view.HapticFeedbackConstants
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.combinedClickable
@@ -71,6 +72,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.R
@@ -223,6 +225,7 @@ fun HostListScreen(
                     Text(
                         stringResource(R.string.no_ssh_hosts_added_yet),
                         style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
                     )
 
                     TextWithInlineIcon(
@@ -230,6 +233,7 @@ fun HostListScreen(
                         "+",
                         Icons.Default.Add,
                         style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 16.dp),
                     )
 
@@ -238,6 +242,7 @@ fun HostListScreen(
                         "?",
                         Icons.AutoMirrored.Filled.Help,
                         style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 16.dp),
                     )
                 }
@@ -380,13 +385,15 @@ fun HostItem(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun HostListScreenPreview() {
+private fun HostListScreenPreview() {
+    val sampleHosts = listOf(
+        sampleHost,
+        Host("2", "Example Host", "example.com", 2222, "admin", null),
+    )
+
     SSHRemoteTheme {
-        val sampleHosts = listOf(
-            Host("1", "Raspberry Pi", "192.168.1.10", 22, "pi", null),
-            Host("2", "Example Host", "example.com", 2222, "admin", null),
-        )
         HostListScreen(
             hosts = sampleHosts,
             onConnectClicked = {},
@@ -404,8 +411,9 @@ fun HostListScreenPreview() {
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun HostListScreenEmptyPreview() {
+private fun HostListScreenPreview_Empty() {
     SSHRemoteTheme {
         HostListScreen(
             hosts = emptyList(),

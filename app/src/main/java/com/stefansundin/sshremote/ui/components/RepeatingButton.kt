@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -29,10 +30,17 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -43,6 +51,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -159,5 +170,38 @@ fun RepeatingButton(
                 .clip(shape)
                 .then(gestureModifier),
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun RepeatingButtonPreview_Icon() {
+    SSHRemoteTheme {
+        Surface {
+            RepeatingButton(
+                onClick = {},
+                modifier = Modifier.size(width = 120.dp, height = 56.dp),
+            ) {
+                Icon(Icons.Default.PlayArrow, contentDescription = "Play/Pause")
+                Icon(Icons.Default.Pause, contentDescription = "Play/Pause")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun RepeatingButtonPreview_Text() {
+    SSHRemoteTheme {
+        Surface {
+            RepeatingButton(
+                onClick = {},
+                modifier = Modifier.size(width = 120.dp, height = 56.dp),
+            ) {
+                Text("Hello World")
+            }
+        }
     }
 }

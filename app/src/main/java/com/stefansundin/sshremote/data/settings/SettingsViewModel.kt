@@ -29,6 +29,7 @@ import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -36,150 +37,178 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+interface ISettingsViewModel {
+    val theme: StateFlow<Theme>
+    val useDynamicColors: StateFlow<Boolean>
+    val backgroundColor: StateFlow<Color?>
+    val primaryColor: StateFlow<Color?>
+    val onPrimaryColor: StateFlow<Color?>
+    val hapticFeedback: StateFlow<HapticFeedback>
+    val keepScreenOn: StateFlow<Boolean>
+    val notificationsEnabled: StateFlow<Boolean>
+    val strictHostKeyChecking: StateFlow<Boolean>
+    val hasHosts: StateFlow<Boolean>
+    val eventFlow: SharedFlow<SettingsEvent>
+
+    fun setTheme(theme: Theme)
+    fun setUseDynamicColors(useDynamicColors: Boolean)
+    fun setBackgroundColor(color: Color?)
+    fun setPrimaryColor(color: Color?)
+    fun setOnPrimaryColor(color: Color?)
+    fun setHapticFeedback(hapticFeedback: HapticFeedback)
+    fun setKeepScreenOn(keepScreenOn: Boolean)
+    fun setNotificationsEnabled(notificationsEnabled: Boolean)
+    fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean)
+    fun exportSettings(context: Context, uri: Uri)
+    suspend fun exportSettingsToString(context: Context): String
+    fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy = ImportStrategy.Replace)
+    fun importSettings(context: Context, json: String, importStrategy: ImportStrategy = ImportStrategy.Replace)
+}
+
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val hostRepository: HostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
-) : ViewModel() {
+) : ViewModel(), ISettingsViewModel {
 
     private val _eventFlow = MutableSharedFlow<SettingsEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
+    override val eventFlow = _eventFlow.asSharedFlow()
 
-    val theme: StateFlow<Theme> = settingsRepository.theme
+    override val theme: StateFlow<Theme> = settingsRepository.theme
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = Theme.SYSTEM,
         )
 
-    fun setTheme(theme: Theme) {
+    override fun setTheme(theme: Theme) {
         viewModelScope.launch {
             settingsRepository.setTheme(theme)
         }
     }
 
-    val useDynamicColors: StateFlow<Boolean> = settingsRepository.useDynamicColors
+    override val useDynamicColors: StateFlow<Boolean> = settingsRepository.useDynamicColors
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = true,
         )
 
-    fun setUseDynamicColors(useDynamicColors: Boolean) {
+    override fun setUseDynamicColors(useDynamicColors: Boolean) {
         viewModelScope.launch {
             settingsRepository.setUseDynamicColors(useDynamicColors)
         }
     }
 
-    val backgroundColor: StateFlow<Color?> = settingsRepository.backgroundColor
+    override val backgroundColor: StateFlow<Color?> = settingsRepository.backgroundColor
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = null,
         )
 
-    fun setBackgroundColor(color: Color?) {
+    override fun setBackgroundColor(color: Color?) {
         viewModelScope.launch {
             settingsRepository.setBackgroundColor(color)
         }
     }
 
-    val primaryColor: StateFlow<Color?> = settingsRepository.primaryColor
+    override val primaryColor: StateFlow<Color?> = settingsRepository.primaryColor
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = null,
         )
 
-    fun setPrimaryColor(color: Color?) {
+    override fun setPrimaryColor(color: Color?) {
         viewModelScope.launch {
             settingsRepository.setPrimaryColor(color)
         }
     }
 
-    val onPrimaryColor: StateFlow<Color?> = settingsRepository.onPrimaryColor
+    override val onPrimaryColor: StateFlow<Color?> = settingsRepository.onPrimaryColor
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = null,
         )
 
-    fun setOnPrimaryColor(color: Color?) {
+    override fun setOnPrimaryColor(color: Color?) {
         viewModelScope.launch {
             settingsRepository.setOnPrimaryColor(color)
         }
     }
 
-    val hapticFeedback: StateFlow<HapticFeedback> = settingsRepository.hapticFeedback
+    override val hapticFeedback: StateFlow<HapticFeedback> = settingsRepository.hapticFeedback
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = HapticFeedback.Medium,
         )
 
-    fun setHapticFeedback(hapticFeedback: HapticFeedback) {
+    override fun setHapticFeedback(hapticFeedback: HapticFeedback) {
         viewModelScope.launch {
             settingsRepository.setHapticFeedback(hapticFeedback)
         }
     }
 
-    val keepScreenOn: StateFlow<Boolean> = settingsRepository.keepScreenOn
+    override val keepScreenOn: StateFlow<Boolean> = settingsRepository.keepScreenOn
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = true,
         )
 
-    fun setKeepScreenOn(keepScreenOn: Boolean) {
+    override fun setKeepScreenOn(keepScreenOn: Boolean) {
         viewModelScope.launch {
             settingsRepository.setKeepScreenOn(keepScreenOn)
         }
     }
 
-    val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
+    override val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = false,
         )
 
-    fun setNotificationsEnabled(enabled: Boolean) {
+    override fun setNotificationsEnabled(notificationsEnabled: Boolean) {
         viewModelScope.launch {
-            settingsRepository.setNotificationsEnabled(enabled)
+            settingsRepository.setNotificationsEnabled(notificationsEnabled)
         }
     }
 
-    val strictHostKeyChecking: StateFlow<Boolean> = settingsRepository.strictHostKeyChecking
+    override val strictHostKeyChecking: StateFlow<Boolean> = settingsRepository.strictHostKeyChecking
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = true,
         )
 
-    fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
+    override fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
         viewModelScope.launch {
             settingsRepository.setStrictHostKeyChecking(strictHostKeyChecking)
         }
     }
 
-    val hasHosts: StateFlow<Boolean> = hostRepository.getAll().map { it.isNotEmpty() }
+    override val hasHosts: StateFlow<Boolean> = hostRepository.getAll().map { it.isNotEmpty() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = false,
         )
 
-    fun exportSettings(context: Context, uri: Uri) {
+    override fun exportSettings(context: Context, uri: Uri) {
         viewModelScope.launch {
             SettingsExporter(context, settingsRepository, hostRepository, adHocCommandRepository).export(uri)
         }
     }
 
-    suspend fun exportSettingsToString(context: Context): String {
+    override suspend fun exportSettingsToString(context: Context): String {
         return SettingsExporter(context, settingsRepository, hostRepository, adHocCommandRepository).exportToString()
     }
 
-    fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy = ImportStrategy.Replace) {
+    override fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy) {
         viewModelScope.launch {
             try {
                 val (count, requestNotificationPermission, theme) =
@@ -198,7 +227,7 @@ class SettingsViewModel(
         }
     }
 
-    fun importSettings(context: Context, json: String, importStrategy: ImportStrategy = ImportStrategy.Replace) {
+    override fun importSettings(context: Context, json: String, importStrategy: ImportStrategy) {
         viewModelScope.launch {
             try {
                 val (count, requestNotificationPermission, theme) =

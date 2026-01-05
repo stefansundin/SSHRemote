@@ -111,9 +111,10 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.host.Host
-import com.stefansundin.sshremote.data.host.HostViewModel
+import com.stefansundin.sshremote.data.host.IEditHostViewModel
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
+import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ExportedCommand
 import com.stefansundin.sshremote.data.settings.ExportedHost
@@ -141,7 +142,7 @@ fun EditHostScreen(
     allUsers: List<String>,
     onSave: (Host, String?) -> Unit,
     onNavigateUp: () -> Unit,
-    hostViewModel: HostViewModel?, // null allowed for preview
+    hostViewModel: IEditHostViewModel,
     scanQrCodeOnStart: Boolean = false,
 ) {
     var name by rememberSaveable(host) { mutableStateOf(host?.name ?: "") }
@@ -159,10 +160,8 @@ fun EditHostScreen(
     var passwordState by rememberSaveable { mutableStateOf(PasswordState.SET) }
     LaunchedEffect(host?.passwordId) {
         val currentPasswordId = host?.passwordId
-        if (currentPasswordId != null && hostViewModel != null) {
-            if (hostViewModel.isPasswordLost(currentPasswordId)) {
-                passwordState = PasswordState.LOST
-            }
+        if (currentPasswordId != null && hostViewModel.isPasswordLost(currentPasswordId)) {
+            passwordState = PasswordState.LOST
         }
     }
 
@@ -993,9 +992,16 @@ private fun ExportHostQrCodeDialog(
     }
 }
 
+val sampleHost = Host("1", "Raspberry Pi", "192.168.1.10", 22, "pi", "passwordId", emptyList(), listOf(""), remoteCommands = wtypePreset)
+
+private val fakeEditHostViewModel = object : IEditHostViewModel {
+    override suspend fun isPasswordLost(passwordId: String): Boolean = passwordId == "lost"
+}
+
 @Preview(showBackground = true, name = "Add Host Preview")
+@Preview(showBackground = true, name = "Add Host Preview (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun AddHostScreenPreview() {
+private fun EditHostScreenPreview_Add() {
     SSHRemoteTheme {
         EditHostScreen(
             host = null,
@@ -1003,23 +1009,40 @@ fun AddHostScreenPreview() {
             onNavigateUp = {},
             identities = emptyList(),
             allUsers = emptyList(),
-            hostViewModel = null,
+            hostViewModel = fakeEditHostViewModel,
         )
     }
 }
 
 @Preview(showBackground = true, name = "Edit Host Preview")
+@Preview(showBackground = true, name = "Edit Host Preview (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
-fun EditHostScreenPreview() {
+private fun EditHostScreenPreview_Edit() {
     SSHRemoteTheme {
-        val sampleHost = Host("1", "Raspberry Pi", "192.168.1.10", 22, "pi", "passwordId", emptyList(), listOf(""))
         EditHostScreen(
             host = sampleHost,
             onSave = { _, _ -> },
             onNavigateUp = {},
             identities = emptyList(),
             allUsers = emptyList(),
-            hostViewModel = null,
+            hostViewModel = fakeEditHostViewModel,
+        )
+    }
+}
+
+// Note: This preview has to be tested in "Interactive Mode".
+@Preview(showBackground = true, name = "Password Lost")
+@Preview(showBackground = true, name = "Password Lost (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun EditHostScreenPreview_PasswordLost() {
+    SSHRemoteTheme {
+        EditHostScreen(
+            host = sampleHost.copy(passwordId = "lost"),
+            onSave = { _, _ -> },
+            onNavigateUp = {},
+            identities = emptyList(),
+            allUsers = emptyList(),
+            hostViewModel = fakeEditHostViewModel,
         )
     }
 }

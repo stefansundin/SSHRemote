@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.screens
 
+import android.content.res.Configuration
 import android.view.HapticFeedbackConstants
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.combinedClickable
@@ -236,8 +237,8 @@ fun AdHocCommandScreen(
     }
 }
 
-@Preview(showBackground = true, name = "Normal Font")
-@Preview(showBackground = true, name = "Large Font", fontScale = 2.0f)
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun AdHocCommandScreenPreview() {
     SSHRemoteTheme {

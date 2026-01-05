@@ -153,9 +153,9 @@ class SettingsRepository(context: Context) {
             preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: false
         }
 
-    suspend fun setNotificationsEnabled(enabled: Boolean) {
+    suspend fun setNotificationsEnabled(notificationsEnabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
+            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = notificationsEnabled
         }
     }
 

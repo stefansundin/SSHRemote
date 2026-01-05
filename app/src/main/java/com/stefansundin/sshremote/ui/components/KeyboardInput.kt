@@ -18,8 +18,10 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,9 +35,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
+import com.stefansundin.sshremote.data.host.macosVlcPreset
+import com.stefansundin.sshremote.ui.screens.sampleHost
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
 fun KeyboardInput(
@@ -113,6 +119,23 @@ fun KeyboardInput(
     LaunchedEffect(isCurrentlySelected, isEnabled) {
         if (isCurrentlySelected && isEnabled) {
             focusRequester.requestFocus()
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun KeyboardInputPreview() {
+    SSHRemoteTheme {
+        Surface {
+            KeyboardInput(
+                isCurrentlySelected = true,
+                onKey = {},
+                onType = {},
+                host = sampleHost.copy(remoteCommands = macosVlcPreset),
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
         }
     }
 }

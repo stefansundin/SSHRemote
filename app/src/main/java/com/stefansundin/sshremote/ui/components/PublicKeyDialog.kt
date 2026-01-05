@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.ClipData
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -138,12 +140,15 @@ object NoWrapOnSpecialCharactersVisualTransformation : VisualTransformation {
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun PublicKeyDialogPreview() {
     SSHRemoteTheme {
-        PublicKeyDialog(
-            publicKey = "ssh-ed25519 AAAA... Comment",
-            onDismiss = {},
-        )
+        Surface {
+            PublicKeyDialog(
+                publicKey = "ssh-ed25519 AAAA... Comment",
+                onDismiss = {},
+            )
+        }
     }
 }

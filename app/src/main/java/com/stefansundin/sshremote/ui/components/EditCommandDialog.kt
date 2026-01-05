@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -38,9 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
 fun EditCommandDialog(
@@ -124,4 +128,34 @@ fun EditCommandDialog(
             }
         },
     )
+}
+
+@Preview(showBackground = true, name = "Add command")
+@Preview(showBackground = true, name = "Add command (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun EditCommandDialogPreview_Add() {
+    SSHRemoteTheme {
+        Surface {
+            EditCommandDialog(
+                command = null,
+                onDismiss = {},
+                onSave = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Edit command")
+@Preview(showBackground = true, name = "Edit command (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun EditCommandDialogPreview_Edit() {
+    SSHRemoteTheme {
+        Surface {
+            EditCommandDialog(
+                command = Command("uptime", name = "Uptime"),
+                onDismiss = {},
+                onSave = {},
+            )
+        }
+    }
 }

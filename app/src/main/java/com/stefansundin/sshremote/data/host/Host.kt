@@ -18,7 +18,6 @@
 
 package com.stefansundin.sshremote.data.host
 
-import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.stefansundin.sshremote.data.settings.ExportedCommand
@@ -77,7 +76,7 @@ data class Host(
                     name = it.name,
                     command = it.command,
                     showOutput = it.showOutput,
-                    repeat = it.repeat
+                    repeat = it.repeat,
                 )
             },
             remoteCommands = remoteCommands?.mapValues {
@@ -85,7 +84,7 @@ data class Host(
                     name = it.value.name,
                     command = it.value.command,
                     showOutput = it.value.showOutput,
-                    repeat = it.value.repeat
+                    repeat = it.value.repeat,
                 )
             },
             startScreen = startScreen,

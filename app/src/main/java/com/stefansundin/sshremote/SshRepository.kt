@@ -30,6 +30,7 @@ import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -65,10 +66,26 @@ data class Message(
     val response: CompletableDeferred<Unit>,
 )
 
+interface ISshRepository {
+    val hostKeyVerification: StateFlow<HostKeyVerification?>
+    val message: StateFlow<Message?>
+    val passwordPrompt: StateFlow<PasswordPrompt?>
+    val passphrasePrompt: StateFlow<PassphrasePrompt?>
+
+    suspend fun connect(details: HostConnectionDetails): List<String>
+    fun onHostKeyVerificationComplete(result: Boolean)
+    fun onMessageDismissed()
+    fun onPasswordPromptComplete(password: String?)
+    fun onPassphrasePromptComplete(passphrase: String?)
+    suspend fun executeCommand(command: String): Result
+    suspend fun executeCommandReuseShell(command: String): Result
+    suspend fun disconnect()
+}
+
 /**
  * A repository for handling SSH connection and command execution.
  */
-class SshRepository(private val settingsRepository: SettingsRepository) {
+class SshRepository(private val settingsRepository: SettingsRepository): ISshRepository {
 
     private val commandMutex = Mutex()
 
@@ -78,16 +95,16 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
     private var channelOutputStream: OutputStream? = null
 
     private val _hostKeyVerification = MutableStateFlow<HostKeyVerification?>(null)
-    val hostKeyVerification = _hostKeyVerification.asStateFlow()
+    override val hostKeyVerification = _hostKeyVerification.asStateFlow()
 
     private val _message = MutableStateFlow<Message?>(null)
-    val message = _message.asStateFlow()
+    override val message = _message.asStateFlow()
 
     private val _passwordPrompt = MutableStateFlow<PasswordPrompt?>(null)
-    val passwordPrompt = _passwordPrompt.asStateFlow()
+    override val passwordPrompt = _passwordPrompt.asStateFlow()
 
     private val _passphrasePrompt = MutableStateFlow<PassphrasePrompt?>(null)
-    val passphrasePrompt = _passphrasePrompt.asStateFlow()
+    override val passphrasePrompt = _passphrasePrompt.asStateFlow()
 
     /**
      * Connects to a host. This is a suspending function and must be called
@@ -96,7 +113,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
      * @param details The connection details from the database.
      * @throws Exception if connection fails.
      */
-    suspend fun connect(details: HostConnectionDetails): List<String> {
+    override suspend fun connect(details: HostConnectionDetails): List<String> {
         return withContext(Dispatchers.IO) {
             session?.disconnect()
 
@@ -190,19 +207,19 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
         }
     }
 
-    fun onHostKeyVerificationComplete(result: Boolean) {
+    override fun onHostKeyVerificationComplete(result: Boolean) {
         _hostKeyVerification.value?.response?.complete(result)
     }
 
-    fun onMessageDismissed() {
+    override fun onMessageDismissed() {
         _message.value?.response?.complete(Unit)
     }
 
-    fun onPasswordPromptComplete(password: String?) {
+    override fun onPasswordPromptComplete(password: String?) {
         _passwordPrompt.value?.response?.complete(password)
     }
 
-    fun onPassphrasePromptComplete(passphrase: String?) {
+    override fun onPassphrasePromptComplete(passphrase: String?) {
         _passphrasePrompt.value?.response?.complete(passphrase)
     }
 
@@ -214,7 +231,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
      * @return The result (output and exit code, or error information) from the command.
      * @throws Exception if not connected or command fails.
      */
-    suspend fun executeCommand(command: String): Result {
+    override suspend fun executeCommand(command: String): Result {
         return withContext(Dispatchers.IO) {
             val session = session
 
@@ -290,7 +307,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
      * @return The result (output and exit code, or error information) from the command.
      * @throws Exception if not connected or command fails.
      */
-    suspend fun executeCommandReuseShell(command: String): Result {
+    override suspend fun executeCommandReuseShell(command: String): Result {
         return commandMutex.withLock {
             withContext(Dispatchers.IO) {
                 try {
@@ -390,7 +407,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) {
     /**
      * Disconnects the current session.
      */
-    suspend fun disconnect() {
+    override suspend fun disconnect() {
         withContext(Dispatchers.IO) {
             disconnectChannel()
             session?.disconnect()

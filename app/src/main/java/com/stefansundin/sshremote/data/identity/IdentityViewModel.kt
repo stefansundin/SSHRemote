@@ -26,6 +26,7 @@ import com.stefansundin.sshremote.data.CryptoManager
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
@@ -41,18 +42,30 @@ import java.io.StringWriter
 import java.security.KeyPairGenerator
 import java.security.Security
 
+interface IIdentityListViewModel {
+    val identities: StateFlow<List<Identity>?>
+    val eventFlow: Flow<IdentityEvent>
+    fun showPublicKeyFor(identity: Identity)
+    fun exportPublicKeyFor(identity: Identity)
+}
+
+interface IRemoteControlIdentityViewModel {
+    val identities: StateFlow<List<Identity>?>
+    suspend fun getPublicKey(identity: Identity): String
+}
+
 class IdentityViewModel(
     private val identityRepository: IdentityRepository,
     private val cryptoManager: CryptoManager,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : ViewModel() {
+) : ViewModel(), IIdentityListViewModel, IRemoteControlIdentityViewModel {
 
     private val _eventChannel = Channel<IdentityEvent>(Channel.BUFFERED)
-    val eventFlow = _eventChannel.receiveAsFlow()
+    override val eventFlow = _eventChannel.receiveAsFlow()
 
     private var lastDeletedKey: Identity? = null
 
-    val identities: StateFlow<List<Identity>?> = identityRepository.getAll()
+    override val identities: StateFlow<List<Identity>?> = identityRepository.getAll()
         .flowOn(ioDispatcher)
         .stateIn(
             scope = viewModelScope,
@@ -165,7 +178,7 @@ class IdentityViewModel(
         }
     }
 
-    fun showPublicKeyFor(identity: Identity) {
+    override fun showPublicKeyFor(identity: Identity) {
         viewModelScope.launch {
             try {
                 val publicKey = getPublicKey(identity)
@@ -176,7 +189,7 @@ class IdentityViewModel(
         }
     }
 
-    fun exportPublicKeyFor(identity: Identity) {
+    override fun exportPublicKeyFor(identity: Identity) {
         viewModelScope.launch {
             try {
                 val publicKey = getPublicKey(identity)
@@ -190,7 +203,7 @@ class IdentityViewModel(
         }
     }
 
-    suspend fun getPublicKey(identity: Identity): String = withContext(ioDispatcher) {
+    override suspend fun getPublicKey(identity: Identity): String = withContext(ioDispatcher) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
         val keyPair = KeyPair.load(JSch(), privateKey, null)
         val outputStream = ByteArrayOutputStream()

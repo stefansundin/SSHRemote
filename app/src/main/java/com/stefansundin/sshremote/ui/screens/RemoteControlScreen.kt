@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.screens
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.os.Build
 import android.view.SoundEffectConstants
 import android.view.WindowManager
@@ -85,19 +86,28 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.stefansundin.sshremote.SshRepository
+import com.stefansundin.sshremote.HapticFeedback
+import com.stefansundin.sshremote.HostKeyVerification
+import com.stefansundin.sshremote.ISshRepository
+import com.stefansundin.sshremote.Message
+import com.stefansundin.sshremote.PassphrasePrompt
+import com.stefansundin.sshremote.PasswordPrompt
+import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
-import com.stefansundin.sshremote.data.host.HostViewModel
+import com.stefansundin.sshremote.data.host.HostConnectionDetails
+import com.stefansundin.sshremote.data.host.IRemoteControlHostViewModel
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteUiState
-import com.stefansundin.sshremote.data.identity.IdentityViewModel
-import com.stefansundin.sshremote.data.settings.SettingsViewModel
+import com.stefansundin.sshremote.data.identity.IRemoteControlIdentityViewModel
+import com.stefansundin.sshremote.data.identity.Identity
+import com.stefansundin.sshremote.data.settings.ISettingsViewModel
 import com.stefansundin.sshremote.notification.NotificationService
 import com.stefansundin.sshremote.notification.toNotificationHost
 import com.stefansundin.sshremote.performHapticFeedback
@@ -112,17 +122,21 @@ import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
 import com.stefansundin.sshremote.ui.components.SpecialKeysRow
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemoteControlScreen(
     host: Host,
     uiState: RemoteUiState,
-    identityViewModel: IdentityViewModel,
-    hostViewModel: HostViewModel,
-    settingsViewModel: SettingsViewModel,
-    sshRepository: SshRepository,
+    identityViewModel: IRemoteControlIdentityViewModel,
+    hostViewModel: IRemoteControlHostViewModel,
+    settingsViewModel: ISettingsViewModel,
+    sshRepository: ISshRepository,
     onMouseMove: (Float, Float, String) -> Unit,
     onMousePan: (Float, Float) -> Unit,
     onDisconnect: () -> Unit,
@@ -201,7 +215,7 @@ fun RemoteControlScreen(
 
     LaunchedEffect(uiState.connectionStatus) {
         if (notificationsEnabled) {
-            uiState.host?.let { NotificationService.start(context, it.toNotificationHost(uiState.connectionStatus)) }
+            host.let { NotificationService.start(context, it.toNotificationHost(uiState.connectionStatus)) }
         }
     }
 
@@ -456,13 +470,15 @@ fun RemoteControlScreen(
                         val publicKey = identityViewModel.getPublicKey(it)
                         val command =
                             "exec sh -c 'cd; umask 077; echo \"\n$publicKey\" >> ~/.ssh/authorized_keys'"
-                        hostViewModel.runCommand(
+                        val result = hostViewModel.runCommand(
                             command = command,
                             showOutput = false,
                             isRetry = false,
                             reuseShell = false,
                         )
-                        snackbarHostState.showSnackbar("Public key copied to host.")
+                        if (result is Result.Success) {
+                            snackbarHostState.showSnackbar("Public key copied to host.")
+                        }
                     }
                     showSelectIdentityDialog = false
                 },
@@ -486,8 +502,7 @@ fun RemoteControlScreen(
 
     BoxWithConstraints(
         modifier = modifier.onPreviewKeyEvent {
-            val smartVolume = uiState.host?.smartVolume
-            if (smartVolume?.controlVolumeWithHardwareButtons == true) {
+            if (host.smartVolume?.controlVolumeWithHardwareButtons == true) {
                 when (it.nativeKeyEvent.keyCode) {
                     android.view.KeyEvent.KEYCODE_VOLUME_DOWN -> {
                         if (it.nativeKeyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
@@ -515,7 +530,7 @@ fun RemoteControlScreen(
             topBar = {
                 if (showTopBar) {
                     TopAppBar(
-                        title = { Text(uiState.host?.name ?: "", maxLines = 1) },
+                        title = { Text(host.name, maxLines = 1) },
                         navigationIcon = {
                             IconButton(
                                 onClick = {
@@ -581,6 +596,7 @@ fun RemoteControlScreen(
                                 )
                                 DropdownMenuItem(
                                     text = { Text("Push public key") },
+                                    enabled = uiState.connectionStatus == ConnectionStatus.CONNECTED,
                                     onClick = {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
@@ -634,7 +650,7 @@ fun RemoteControlScreen(
                             RemoteControl(
                                 onKeyEvent = { event: KeyEvent ->
                                     val key = event.key
-                                    val command = uiState.host?.remoteCommands?.get(key) ?: return@RemoteControl
+                                    val command = host.remoteCommands?.get(key) ?: return@RemoteControl
                                     when (event) {
                                         is KeyEvent.Click -> {
                                             performHapticFeedback(context, uiState.hapticFeedback)
@@ -644,12 +660,14 @@ fun RemoteControlScreen(
                                         is KeyEvent.LongPress -> {
                                             performHapticFeedback(context, uiState.hapticFeedback)
                                             command.longPressCommand?.let {
-                                                hostViewModel.runCommand(it, command.showOutput)
+                                                coroutineScope.launch {
+                                                    hostViewModel.runCommand(it, command.showOutput)
+                                                }
                                             }
                                         }
                                     }
                                 },
-                                host = uiState.host,
+                                host = host,
                                 connectionStatus = uiState.connectionStatus,
                                 volume = uiState.volume,
                                 muted = uiState.muted,
@@ -658,7 +676,7 @@ fun RemoteControlScreen(
 
                         1 -> {
                             MousePad(
-                                host = uiState.host,
+                                host = host,
                                 connectionStatus = uiState.connectionStatus,
                                 onMouseEvent = { event ->
                                     if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
@@ -667,7 +685,7 @@ fun RemoteControlScreen(
                                     }
                                     when (event) {
                                         is MouseEvent.Move -> {
-                                            uiState.host?.remoteCommands?.get(RemoteControlKey.MOUSE_MOVE)
+                                            host.remoteCommands?.get(RemoteControlKey.MOUSE_MOVE)
                                                 ?.let { commandTemplate ->
                                                     onMouseMove(event.dx, event.dy, commandTemplate.command)
                                                 }
@@ -692,10 +710,12 @@ fun RemoteControlScreen(
                         2 -> {
                             val onKey = { key: String ->
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
-                                uiState.host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_KEY_INPUT)
+                                host.remoteCommands?.get(RemoteControlKey.KEYBOARD_KEY_INPUT)
                                     ?.let { commandTemplate ->
                                         val command = commandTemplate.command.format(key)
-                                        hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                        coroutineScope.launch {
+                                            hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                        }
                                     }
                             }
                             Column(
@@ -707,20 +727,25 @@ fun RemoteControlScreen(
                                     isCurrentlySelected = pagerState.currentPage == 2,
                                     onKey = { key -> onKey(key) },
                                     onType = { text ->
-                                        uiState.host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
+                                        host.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
                                             ?.let { commandTemplate ->
                                                 val escapedText = text.replace("'", "'\\''")
                                                 val command = commandTemplate.command.format(escapedText)
-                                                hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                                coroutineScope.launch {
+                                                    hostViewModel.runCommand(
+                                                        command,
+                                                        commandTemplate.showOutput,
+                                                    )
+                                                }
                                             }
                                     },
-                                    host = uiState.host,
+                                    host = host,
                                     connectionStatus = uiState.connectionStatus,
                                     modifier = Modifier.weight(1f),
                                 )
                                 SpecialKeysRow(
                                     onKey = { key -> onKey(key) },
-                                    host = uiState.host,
+                                    host = host,
                                     connectionStatus = uiState.connectionStatus,
                                 )
                             }
@@ -728,13 +753,128 @@ fun RemoteControlScreen(
 
                         3 -> {
                             CommandList(
-                                uiState = uiState,
+                                commands = host.commands,
                                 hostViewModel = hostViewModel,
+                                connectionStatus = uiState.connectionStatus,
                             )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+private val fakeRemoteControlIdentityViewModel = object : IRemoteControlIdentityViewModel {
+    override val identities: StateFlow<List<Identity>?> = MutableStateFlow(emptyList())
+    override suspend fun getPublicKey(identity: Identity): String = ""
+}
+
+private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewModel {
+    override fun connect(host: Host) {}
+    override fun runRemoteControlCommand(key: RemoteControlKey) {}
+    override fun clearCommandOutput() {}
+    override suspend fun runCommand(
+        command: String,
+        showOutput: Boolean,
+        isRetry: Boolean,
+        reuseShell: Boolean,
+    ): Result {
+        return Result.Success("")
+    }
+}
+
+private val fakeSshRepository = object : ISshRepository {
+    override val hostKeyVerification: StateFlow<HostKeyVerification?> = MutableStateFlow(null)
+    override val message: StateFlow<Message?> = MutableStateFlow(null)
+    override val passwordPrompt: StateFlow<PasswordPrompt?> = MutableStateFlow(null)
+    override val passphrasePrompt: StateFlow<PassphrasePrompt?> = MutableStateFlow(null)
+    override suspend fun connect(details: HostConnectionDetails): List<String> = emptyList()
+    override fun onHostKeyVerificationComplete(result: Boolean) {}
+    override fun onMessageDismissed() {}
+    override fun onPasswordPromptComplete(password: String?) {}
+    override fun onPassphrasePromptComplete(passphrase: String?) {}
+    override suspend fun executeCommand(command: String): Result = Result.Success("")
+    override suspend fun executeCommandReuseShell(command: String): Result = Result.Success("")
+    override suspend fun disconnect() {}
+}
+
+@Composable
+fun RemoteControlScreenPreview(
+    modifier: Modifier = Modifier,
+    host: Host = sampleHost,
+    uiState: RemoteUiState = RemoteUiState(
+        host = sampleHost,
+        connectionStatus = ConnectionStatus.CONNECTED,
+        isLoading = false,
+        error = null,
+        commandOutput = null,
+        volume = "75%",
+        muted = false,
+        hapticFeedback = HapticFeedback.Medium,
+    ),
+    identityViewModel: IRemoteControlIdentityViewModel = fakeRemoteControlIdentityViewModel,
+    hostViewModel: IRemoteControlHostViewModel = fakeRemoteControlHostViewModel,
+    settingsViewModel: ISettingsViewModel = fakeSettingsViewModel,
+    sshRepository: ISshRepository = fakeSshRepository,
+    onMouseMove: (Float, Float, String) -> Unit = { _, _, _ -> },
+    onMousePan: (Float, Float) -> Unit = { _, _ -> },
+    onDisconnect: () -> Unit = {},
+    onAdHocCommandClicked: () -> Unit = {},
+    onEditRemoteControlClicked: (Int) -> Unit = {},
+    onClearError: () -> Unit = {},
+    initialPage: Int = 0,
+) {
+    RemoteControlScreen(
+        host = host,
+        uiState = uiState,
+        identityViewModel = identityViewModel,
+        hostViewModel = hostViewModel,
+        settingsViewModel = settingsViewModel,
+        sshRepository = sshRepository,
+        onMouseMove = onMouseMove,
+        onMousePan = onMousePan,
+        onDisconnect = onDisconnect,
+        onAdHocCommandClicked = onAdHocCommandClicked,
+        onEditRemoteControlClicked = onEditRemoteControlClicked,
+        onClearError = onClearError,
+        modifier = modifier,
+        initialPage = initialPage,
+    )
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun RemoteControlScreenPreview_RemoteTab() {
+    SSHRemoteTheme {
+        RemoteControlScreenPreview(initialPage = 0)
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun RemoteControlScreenPreview_MouseTab() {
+    SSHRemoteTheme {
+        RemoteControlScreenPreview(initialPage = 1)
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun RemoteControlScreenPreview_KeyboardTab() {
+    SSHRemoteTheme {
+        RemoteControlScreenPreview(initialPage = 2)
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun RemoteControlScreenPreview_CommandsTab() {
+    SSHRemoteTheme {
+        RemoteControlScreenPreview(initialPage = 3)
     }
 }

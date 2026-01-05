@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,17 +30,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,14 +79,14 @@ fun ColorPickerDialog(
     var isHslMode by remember { mutableStateOf(true) }
 
     // HSL State
-    var hue by remember { mutableStateOf(initialHsl[0]) }
-    var saturation by remember { mutableStateOf(initialHsl[1]) }
-    var lightness by remember { mutableStateOf(initialHsl[2]) }
+    var hue by remember { mutableFloatStateOf(initialHsl[0]) }
+    var saturation by remember { mutableFloatStateOf(initialHsl[1]) }
+    var lightness by remember { mutableFloatStateOf(initialHsl[2]) }
 
     // RGB State
-    var red by remember { mutableStateOf(initialColor.red) }
-    var green by remember { mutableStateOf(initialColor.green) }
-    var blue by remember { mutableStateOf(initialColor.blue) }
+    var red by remember { mutableFloatStateOf(initialColor.red) }
+    var green by remember { mutableFloatStateOf(initialColor.green) }
+    var blue by remember { mutableFloatStateOf(initialColor.blue) }
 
     val hslToColor = { h: Float, s: Float, l: Float ->
         Color.hsl(h, s, l)
@@ -115,7 +120,9 @@ fun ColorPickerDialog(
     AlertDialog(
         title = { Text(title) },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -235,14 +242,17 @@ fun ColorPickerDialog(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun ColorPickerDialogPreview() {
     SSHRemoteTheme {
-        ColorPickerDialog(
-            initialColor = Color.Red,
-            onColorChanged = {},
-            onConfirm = {},
-            onDismiss = {},
-        )
+        Surface {
+            ColorPickerDialog(
+                initialColor = Color.Red,
+                onColorChanged = {},
+                onConfirm = {},
+                onDismiss = {},
+            )
+        }
     }
 }

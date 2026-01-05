@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.os.Build
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.background
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -36,6 +38,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -159,7 +162,7 @@ fun ColorSettingDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .heightIn(min = 56.dp)
                         .clickable {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             originalColor = backgroundColor
@@ -170,8 +173,8 @@ fun ColorSettingDialog(
                     Text(
                         text = "Background color",
                         style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f),
                     )
-                    Spacer(modifier = Modifier.weight(1f))
                     if (backgroundColor != null) {
                         Box(
                             modifier = Modifier
@@ -193,7 +196,7 @@ fun ColorSettingDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .heightIn(min = 56.dp)
                         .clickable {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             originalColor = primaryColor
@@ -204,8 +207,8 @@ fun ColorSettingDialog(
                     Text(
                         text = "Primary color",
                         style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f),
                     )
-                    Spacer(modifier = Modifier.weight(1f))
                     if (primaryColor != null) {
                         Box(
                             modifier = Modifier
@@ -227,7 +230,7 @@ fun ColorSettingDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .heightIn(min = 56.dp)
                         .clickable {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             originalColor = onPrimaryColorColor
@@ -238,8 +241,8 @@ fun ColorSettingDialog(
                     Text(
                         text = "Text on primary color",
                         style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f),
                     )
-                    Spacer(modifier = Modifier.weight(1f))
                     if (onPrimaryColorColor != null) {
                         Box(
                             modifier = Modifier
@@ -285,20 +288,23 @@ fun ColorSettingDialog(
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun ColorSettingDialogPreview() {
     SSHRemoteTheme {
-        ColorSettingDialog(
-            useDynamicColors = false,
-            onUseDynamicColorsChange = {},
-            backgroundColor = Color.Black,
-            onBackgroundColorChange = {},
-            primaryColor = Color.Red,
-            onPrimaryColorChange = {},
-            onPrimaryColorColor = Color.White,
-            onOnPrimaryColorChange = {},
-            onConfirm = {},
-            onDismiss = {},
-        )
+        Surface {
+            ColorSettingDialog(
+                useDynamicColors = false,
+                onUseDynamicColorsChange = {},
+                backgroundColor = Color.Black,
+                onBackgroundColorChange = {},
+                primaryColor = Color.Red,
+                onPrimaryColorChange = {},
+                onPrimaryColorColor = Color.White,
+                onOnPrimaryColorChange = {},
+                onConfirm = {},
+                onDismiss = {},
+            )
+        }
     }
 }

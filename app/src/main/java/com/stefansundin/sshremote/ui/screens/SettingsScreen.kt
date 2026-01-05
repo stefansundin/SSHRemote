@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
@@ -33,6 +34,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -78,6 +80,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -94,14 +97,20 @@ import com.google.zxing.qrcode.QRCodeWriter
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.BuildConfig
+import com.stefansundin.sshremote.HapticFeedback
+import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.data.settings.ISettingsViewModel
 import com.stefansundin.sshremote.data.settings.ImportStrategy
 import com.stefansundin.sshremote.data.settings.SettingsEvent
-import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.ui.components.ColorSettingDialog
 import com.stefansundin.sshremote.ui.components.HapticFeedbackSettingDialog
 import com.stefansundin.sshremote.ui.components.ThemeSettingDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -178,6 +187,9 @@ private fun SettingsSwitchItem(
         Text(
             title,
             style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 16.dp),
         )
         Switch(
             checked = checked,
@@ -195,11 +207,18 @@ private fun ImportSettingsDialog(
 
     AlertDialog(
         title = { Text("Import settings") },
-        text = { Text("In case of conflicts with existing hosts, do you want to update or duplicate?\n\nYou can also choose Replace which will delete all existing hosts.") },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text("In case of conflicts with existing hosts, do you want to update or duplicate?\n\nYou can also choose Replace which will delete all existing hosts.")
+            }
+        },
         properties = DialogProperties(dismissOnClickOutside = false),
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -247,7 +266,7 @@ val ColorSaver = Saver<Color?, Int>(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    settingsViewModel: SettingsViewModel,
+    settingsViewModel: ISettingsViewModel,
     onNavigateUp: () -> Unit,
     onNavigateToIdentityList: () -> Unit,
 ) {
@@ -786,6 +805,101 @@ private fun ExportSettingsQrCodeDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+val fakeSettingsViewModel = object : ISettingsViewModel {
+    override val theme = MutableStateFlow(Theme.SYSTEM)
+    override val useDynamicColors = MutableStateFlow(true)
+    override val backgroundColor = MutableStateFlow<Color?>(null)
+    override val primaryColor = MutableStateFlow<Color?>(null)
+    override val onPrimaryColor = MutableStateFlow<Color?>(null)
+    override val hapticFeedback = MutableStateFlow<HapticFeedback>(HapticFeedback.Medium)
+    override val keepScreenOn = MutableStateFlow(true)
+    override val notificationsEnabled = MutableStateFlow(false)
+    override val strictHostKeyChecking = MutableStateFlow(true)
+    override val hasHosts: StateFlow<Boolean> = MutableStateFlow(true)
+    override val eventFlow: SharedFlow<SettingsEvent> = MutableSharedFlow()
+
+    override fun setTheme(theme: Theme) {
+        this.theme.value = theme
+    }
+
+    override fun setUseDynamicColors(useDynamicColors: Boolean) {
+        this.useDynamicColors.value = useDynamicColors
+    }
+
+    override fun setBackgroundColor(color: Color?) {
+        this.backgroundColor.value = color
+    }
+
+    override fun setPrimaryColor(color: Color?) {
+        this.primaryColor.value = color
+    }
+
+    override fun setOnPrimaryColor(color: Color?) {
+        this.onPrimaryColor.value = color
+    }
+
+    override fun setHapticFeedback(hapticFeedback: HapticFeedback) {
+        this.hapticFeedback.value = hapticFeedback
+    }
+
+    override fun setKeepScreenOn(keepScreenOn: Boolean) {
+        this.keepScreenOn.value = keepScreenOn
+    }
+
+    override fun setNotificationsEnabled(notificationsEnabled: Boolean) {
+        this.notificationsEnabled.value = notificationsEnabled
+    }
+
+    override fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
+        this.strictHostKeyChecking.value = strictHostKeyChecking
+    }
+
+    override fun exportSettings(context: Context, uri: Uri) {}
+    override suspend fun exportSettingsToString(context: Context): String = ""
+    override fun importSettings(
+        context: Context,
+        uri: Uri,
+        importStrategy: ImportStrategy,
+    ) {
+    }
+
+    override fun importSettings(
+        context: Context,
+        json: String,
+        importStrategy: ImportStrategy,
+    ) {
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+fun SettingsScreenPreview() {
+    SSHRemoteTheme {
+        Surface {
+            SettingsScreen(
+                settingsViewModel = fakeSettingsViewModel,
+                onNavigateUp = {},
+                onNavigateToIdentityList = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f, heightDp = 400)
+@Composable
+fun ImportSettingsDialogPreview() {
+    SSHRemoteTheme {
+        Surface {
+            ImportSettingsDialog(
+                onDismissRequest = {},
+                onImport = {},
+            )
         }
     }
 }

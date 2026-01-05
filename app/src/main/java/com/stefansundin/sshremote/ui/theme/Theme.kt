@@ -27,8 +27,11 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.ui.screens.RemoteControlScreenPreview
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -85,4 +88,52 @@ fun SSHRemoteTheme(
         typography = Typography,
         content = content,
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ThemePreview_Light() {
+    SSHRemoteTheme(Theme.LIGHT) {
+        RemoteControlScreenPreview()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ThemePreview_Light_WithoutDynamicColors() {
+    SSHRemoteTheme(Theme.LIGHT, dynamicColor = false) {
+        RemoteControlScreenPreview()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ThemePreview_Dark() {
+    SSHRemoteTheme(Theme.DARK) {
+        RemoteControlScreenPreview()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ThemePreview_Dark_WithoutDynamicColors() {
+    SSHRemoteTheme(Theme.DARK, dynamicColor = false) {
+        RemoteControlScreenPreview()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ThemePreview_BlackBackground() {
+    SSHRemoteTheme(
+        Theme.DARK,
+        colorOverrides = {
+            this.copy(
+                background = Color.Black,
+                surface = Color.Black,
+            )
+        },
+    ) {
+        RemoteControlScreenPreview()
+    }
 }

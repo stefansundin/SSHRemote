@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.content.res.Configuration
 import android.os.Build
 import android.os.VibrationEffect
 import android.view.SoundEffectConstants
@@ -34,6 +35,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -50,10 +52,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.getVibrator
+import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
 fun HapticFeedbackSettingDialog(
@@ -122,7 +126,7 @@ fun HapticFeedbackSettingDialog(
                             .selectable(
                                 selected = (hapticFeedback == currentHapticFeedback),
                                 onClick = {
-                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    // No sound effect here to not interfere with the haptic preview
                                     onSelection(hapticFeedback)
                                 },
                             )
@@ -147,7 +151,7 @@ fun HapticFeedbackSettingDialog(
                         .selectable(
                             selected = currentHapticFeedback is HapticFeedback.Custom,
                             onClick = {
-                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                // No sound effect here to not interfere with the haptic preview
                                 val duration = customDurationString.toLongOrNull() ?: 0L
                                 onSelection(HapticFeedback.Custom(duration))
                             },
@@ -210,4 +214,20 @@ fun HapticFeedbackSettingDialog(
             }
         },
     )
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Composable
+private fun HapticFeedbackSettingDialogPreview() {
+    SSHRemoteTheme {
+        Surface {
+            HapticFeedbackSettingDialog(
+                currentHapticFeedback = HapticFeedback.Medium,
+                onHapticFeedbackSelected = {},
+                onConfirm = {},
+                onDismiss = {},
+            )
+        }
+    }
 }
