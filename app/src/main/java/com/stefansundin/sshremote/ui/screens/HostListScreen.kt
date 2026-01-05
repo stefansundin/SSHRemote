@@ -118,12 +118,14 @@ fun HostListScreen(
                     delay(viewConfiguration.longPressTimeoutMillis)
                     isLongClick = true
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    undoableDeletedHostId = null
                     onAdd(true)
                 }
 
                 is PressInteraction.Release -> {
                     if (!isLongClick) {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
+                        undoableDeletedHostId = null
                         onAdd(false)
                     }
                 }
@@ -174,6 +176,7 @@ fun HostListScreen(
                     IconButton(
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
+                            undoableDeletedHostId = null
                             onHelp()
                         },
                     ) {
@@ -185,6 +188,7 @@ fun HostListScreen(
                     IconButton(
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
+                            undoableDeletedHostId = null
                             onSettings()
                         },
                     ) {
@@ -255,10 +259,22 @@ fun HostListScreen(
                     items(items = hosts, key = { host -> host.id }) { host ->
                         HostItem(
                             host = host,
-                            onConnect = { onConnectClicked(host) },
-                            onEdit = { onEdit(host) },
-                            onClone = { onClone(host) },
-                            onCreateShortcut = { onCreateShortcut(host) },
+                            onConnect = {
+                                undoableDeletedHostId = null
+                                onConnectClicked(host)
+                            },
+                            onEdit = {
+                                undoableDeletedHostId = null
+                                onEdit(host)
+                            },
+                            onClone = {
+                                undoableDeletedHostId = null
+                                onClone(host)
+                            },
+                            onCreateShortcut = {
+                                undoableDeletedHostId = null
+                                onCreateShortcut(host)
+                            },
                             onDelete = {
                                 onDelete(host)
                                 undoableDeletedHostId = host.id

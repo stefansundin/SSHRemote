@@ -152,12 +152,14 @@ fun IdentityListScreen(
                     delay(viewConfiguration.longPressTimeoutMillis)
                     isLongClick = true
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    undoableDeletedIdentityId = null
                     onNavigateToAddIdentity(true)
                 }
 
                 is PressInteraction.Release -> {
                     if (!isLongClick) {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
+                        undoableDeletedIdentityId = null
                         onNavigateToAddIdentity(false)
                     }
                 }

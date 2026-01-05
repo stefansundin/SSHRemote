@@ -122,42 +122,9 @@ fun EditRemoteControlScreen(
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
-    val commandsListState = rememberLazyListState()
-    var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
     val view = LocalView.current
-
-    LaunchedEffect(undoableDeletedCommand) {
-        val deletedCommand = undoableDeletedCommand
-        if (deletedCommand != null) {
-            val (index, command) = deletedCommand
-            val result = snackbarHostState.showSnackbar(
-                message = "Command deleted",
-                actionLabel = "Undo",
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                view.playSoundEffect(SoundEffectConstants.CLICK)
-                val currentCommands = editedCommands.toMutableList()
-                currentCommands.add(index, command)
-                editedCommands = currentCommands
-            } else {
-                undoableDeletedCommand = null
-            }
-        }
-    }
-
-    LaunchedEffect(editedCommands, undoableDeletedCommand) {
-        val deletedCommand = undoableDeletedCommand
-        if (deletedCommand != null) {
-            val (index, command) = deletedCommand
-            if (index < editedCommands.size && editedCommands[index] == command) {
-                commandsListState.animateScrollToItem(index)
-                undoableDeletedCommand = null
-            }
-        }
-    }
 
     BackHandler(enabled = hasUnsavedChanges) {
         showUnsavedBackDialog = true
@@ -259,7 +226,6 @@ fun EditRemoteControlScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Edit Remote Control", maxLines = 1) },
@@ -431,47 +397,14 @@ fun EditRemoteControlScreen(
                     }
 
                     3 -> {
-                        LazyColumn(
-                            state = commandsListState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentPadding = PaddingValues(bottom = 160.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(editedCommands) { command ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(text = command.name ?: command.command, modifier = Modifier.weight(1f))
-                                    IconButton(
-                                        onClick = {
-                                            view.playSoundEffect(SoundEffectConstants.CLICK)
-                                            editingCommandInList = command
-                                            showEditCommandDialog = true
-                                        },
-                                    ) {
-                                        Icon(Icons.Default.Edit, contentDescription = "Edit command")
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            view.playSoundEffect(SoundEffectConstants.CLICK)
-                                            val deletedCommandIndex = editedCommands.indexOf(command)
-                                            editedCommands = editedCommands.filter { it != command }
-                                            undoableDeletedCommand = deletedCommandIndex to command
-                                        },
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = "Delete command",
-                                            tint = MaterialTheme.colorScheme.error,
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        EditCommandsTab(
+                            commands = editedCommands,
+                            onCommandsChanged = { editedCommands = it },
+                            onEditCommand = { command ->
+                                editingCommandInList = command
+                                showEditCommandDialog = true
+                            },
+                        )
                     }
                 }
             }
@@ -551,6 +484,99 @@ fun EditRemoteControlScreen(
                 }
                 editingCommand = null
             },
+        )
+    }
+}
+
+@Composable
+fun EditCommandsTab(
+    commands: List<Command>,
+    onCommandsChanged: (List<Command>) -> Unit,
+    onEditCommand: (Command) -> Unit,
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val commandsListState = rememberLazyListState()
+    var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
+    val view = LocalView.current
+
+    LaunchedEffect(undoableDeletedCommand) {
+        val deletedCommand = undoableDeletedCommand
+        if (deletedCommand != null) {
+            val (index, command) = deletedCommand
+            val result = snackbarHostState.showSnackbar(
+                message = "Command deleted",
+                actionLabel = "Undo",
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                view.playSoundEffect(SoundEffectConstants.CLICK)
+                val currentCommands = commands.toMutableList()
+                currentCommands.add(index, command)
+                onCommandsChanged(currentCommands)
+            } else {
+                undoableDeletedCommand = null
+            }
+        }
+    }
+
+    LaunchedEffect(commands, undoableDeletedCommand) {
+        val deletedCommand = undoableDeletedCommand
+        if (deletedCommand != null) {
+            val (index, command) = deletedCommand
+            if (index < commands.size && commands[index] == command) {
+                commandsListState.animateScrollToItem(index)
+                undoableDeletedCommand = null
+            }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = commandsListState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentPadding = PaddingValues(bottom = 160.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(commands) { command ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(text = command.name ?: command.command, modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onEditCommand(command)
+                        },
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit command")
+                    }
+                    IconButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            val deletedCommandIndex = commands.indexOf(command)
+                            val newCommands = commands.filter { it != command }
+                            onCommandsChanged(newCommands)
+                            undoableDeletedCommand = deletedCommandIndex to command
+                        },
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete command",
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 160.dp),
         )
     }
 }
