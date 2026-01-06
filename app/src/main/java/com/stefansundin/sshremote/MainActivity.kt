@@ -115,8 +115,8 @@ sealed class Screen(val route: String) {
         fun createRoute(hostId: String, initialPage: Int = 0) = "remote_control/$hostId/$initialPage"
     }
 
-    data object EditRemoteControl : Screen("edit_remote_control/{initialPage}") {
-        fun createRoute(initialPage: Int = 0) = "edit_remote_control/$initialPage"
+    data object EditRemoteControl : Screen("edit_remote_control/{hostId}/{initialPage}") {
+        fun createRoute(hostId: String, initialPage: Int = 0) = "edit_remote_control/$hostId/$initialPage"
     }
 
     data object AdHocCommand : Screen("ad_hoc_command")
@@ -419,6 +419,7 @@ class MainActivity : ComponentActivity() {
                                     onEditRemoteControlClicked = { page ->
                                         navController.navigate(
                                             Screen.EditRemoteControl.createRoute(
+                                                host.id,
                                                 page,
                                             ),
                                         )
@@ -446,55 +447,65 @@ class MainActivity : ComponentActivity() {
                         composable(
                             Screen.EditRemoteControl.route,
                             arguments = listOf(
+                                navArgument("hostId") { type = NavType.StringType },
                                 navArgument("initialPage") { type = NavType.IntType },
                             ),
                         ) { backStackEntry ->
+                            val hostId = backStackEntry.arguments?.getString("hostId")
                             val initialPage = backStackEntry.arguments?.getInt("initialPage")!!
-                            EditRemoteControlScreen(
-                                initialRemoteCommands = uiState.host?.remoteCommands ?: emptyMap(),
-                                initialCommands = uiState.host?.commands ?: emptyList(),
-                                initialSmartVolumeSettings = uiState.host?.smartVolume,
-                                onSave = { remoteCommands, commands, smartVolume, navigateBack ->
-                                    scope.launch {
-                                        uiState.host?.let { host ->
+                            val host = hosts?.find { it.id == hostId }
+
+                            if (host != null) {
+                                EditRemoteControlScreen(
+                                    host = host,
+                                    onSave = { remoteCommands, commands, smartVolume, navigateBack ->
+                                        scope.launch {
                                             val updatedHost = host.copy(
                                                 remoteCommands = remoteCommands,
                                                 commands = commands,
                                                 smartVolume = smartVolume,
                                             )
                                             hostViewModel.upsert(updatedHost)
-                                            hostViewModel.updateActiveHostInUiState(updatedHost)
+                                            if (uiState.host?.id == host.id) {
+                                                hostViewModel.updateActiveHostInUiState(updatedHost)
+                                            }
                                             if (navigateBack) {
                                                 navController.safePopBackStack()
                                             }
-                                            hostViewModel.updateVolume()
-                                            hostViewModel.updateMuted()
+                                            if (uiState.host?.id == host.id) {
+                                                hostViewModel.updateVolume()
+                                                hostViewModel.updateMuted()
+                                            }
                                         }
-                                    }
-                                },
-                                onNavigateBack = { navController.safePopBackStack() },
-                                onSetAsDefaultScreen = { startScreen ->
-                                    scope.launch {
-                                        uiState.host?.let { host ->
+                                    },
+                                    onNavigateBack = { navController.safePopBackStack() },
+                                    onSetAsDefaultScreen = { startScreen ->
+                                        scope.launch {
                                             val updatedHost = host.copy(startScreen = startScreen)
                                             hostViewModel.upsert(updatedHost)
-                                            hostViewModel.updateActiveHostInUiState(updatedHost)
+                                            if (uiState.host?.id == host.id) {
+                                                hostViewModel.updateActiveHostInUiState(updatedHost)
+                                            }
                                         }
-                                    }
-                                },
-                                initialPage = initialPage,
-                                onTestSmartVolumeSettings = {
-                                    scope.launch {
-                                        val volume = hostViewModel.readVolume()
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            if (volume == null) "Error reading volume. Please install pactl." else "Volume: $volume",
-                                            Toast.LENGTH_SHORT,
-                                        )
-                                            .show()
-                                    }
-                                },
-                            )
+                                    },
+                                    initialPage = initialPage,
+                                    onTestSmartVolumeSettings = {
+                                        scope.launch {
+                                            val volume = hostViewModel.readVolume()
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                if (volume == null) "Error reading volume. Please install pactl." else "Volume: $volume",
+                                                Toast.LENGTH_SHORT,
+                                            )
+                                                .show()
+                                        }
+                                    },
+                                )
+                            } else {
+                                LaunchedEffect(Unit) {
+                                    navController.safePopBackStack()
+                                }
+                            }
                         }
 
                         composable(Screen.AdHocCommand.route) {

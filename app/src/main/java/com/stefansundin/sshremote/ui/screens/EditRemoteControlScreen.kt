@@ -76,6 +76,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
@@ -95,19 +96,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRemoteControlScreen(
+    host: Host,
     onSave: (Map<RemoteControlKey, Command>, List<Command>, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
     onTestSmartVolumeSettings: () -> Unit,
-    initialRemoteCommands: Map<RemoteControlKey, Command>,
-    initialCommands: List<Command>,
-    initialSmartVolumeSettings: SmartVolumeSettings?,
     initialPage: Int = 0,
 ) {
     var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
-    var editedRemoteCommands by rememberSaveable { mutableStateOf(initialRemoteCommands) }
-    var editedCommands by rememberSaveable { mutableStateOf(initialCommands) }
-    var editedSmartVolumeSettings by rememberSaveable { mutableStateOf(initialSmartVolumeSettings) }
+    var editedRemoteCommands by rememberSaveable { mutableStateOf(host.remoteCommands ?: emptyMap()) }
+    var editedCommands by rememberSaveable { mutableStateOf(host.commands) }
+    var editedSmartVolumeSettings by rememberSaveable { mutableStateOf(host.smartVolume) }
     var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
     var editingCommandInList by rememberSaveable { mutableStateOf<Command?>(null) }
     var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
@@ -115,7 +114,8 @@ fun EditRemoteControlScreen(
     var showSmartVolumeSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
     val hasUnsavedChanges =
-        editedRemoteCommands != initialRemoteCommands || editedCommands != initialCommands || editedSmartVolumeSettings != initialSmartVolumeSettings
+        editedRemoteCommands != (host.remoteCommands
+            ?: emptyMap<RemoteControlKey, Command>()) || editedCommands != host.commands || editedSmartVolumeSettings != host.smartVolume
     var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var resetToPresetKey by rememberSaveable { mutableStateOf("") }
@@ -587,13 +587,11 @@ fun EditCommandsTab(
 private fun EditRemoteControlScreenPreview_RemoteTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
+            host = sampleHost,
             onSave = { _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            initialRemoteCommands = emptyMap(),
-            initialCommands = emptyList(),
-            initialSmartVolumeSettings = null,
             initialPage = 0,
         )
     }
@@ -605,13 +603,11 @@ private fun EditRemoteControlScreenPreview_RemoteTab() {
 private fun EditRemoteControlScreenPreview_MouseTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
+            host = sampleHost,
             onSave = { _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            initialRemoteCommands = emptyMap(),
-            initialCommands = emptyList(),
-            initialSmartVolumeSettings = null,
             initialPage = 1,
         )
     }
@@ -623,13 +619,11 @@ private fun EditRemoteControlScreenPreview_MouseTab() {
 private fun EditRemoteControlScreenPreview_KeyboardTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
+            host = sampleHost,
             onSave = { _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            initialRemoteCommands = emptyMap(),
-            initialCommands = emptyList(),
-            initialSmartVolumeSettings = null,
             initialPage = 2,
         )
     }
@@ -641,13 +635,11 @@ private fun EditRemoteControlScreenPreview_KeyboardTab() {
 private fun EditRemoteControlScreenPreview_CommandsTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
+            host = sampleHost,
             onSave = { _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            initialRemoteCommands = emptyMap(),
-            initialCommands = listOf(Command("uptime")),
-            initialSmartVolumeSettings = null,
             initialPage = 3,
         )
     }
