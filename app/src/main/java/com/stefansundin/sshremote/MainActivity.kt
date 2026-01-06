@@ -467,6 +467,8 @@ class MainActivity : ComponentActivity() {
                                             if (navigateBack) {
                                                 navController.safePopBackStack()
                                             }
+                                            hostViewModel.updateVolume()
+                                            hostViewModel.updateMuted()
                                         }
                                     }
                                 },

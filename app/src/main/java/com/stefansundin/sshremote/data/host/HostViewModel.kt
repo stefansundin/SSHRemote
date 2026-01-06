@@ -223,8 +223,8 @@ class HostViewModel(
             _uiState.update {
                 it.copy(connectionStatus = ConnectionStatus.CONNECTED)
             }
-            readVolume()
-            readMuted()
+            updateVolume()
+            updateMuted()
 
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -329,15 +329,15 @@ class HostViewModel(
                 if (result is Result.Success) {
                     when (key) {
                         RemoteControlKey.VOLUME_UP, RemoteControlKey.VOLUME_DOWN -> {
-                            readVolume()
+                            updateVolume()
                             if (uiState.value.volume == "0%" || oldVolume == "0%") {
                                 // Maybe unnecessary? Maybe we can assume it is muted if volume is "0%"?
-                                readMuted()
+                                updateMuted()
                             }
                         }
 
                         RemoteControlKey.MUTE -> {
-                            readMuted()
+                            updateMuted()
                         }
 
                         else -> Unit
@@ -348,34 +348,52 @@ class HostViewModel(
     }
 
     suspend fun readVolume(): String? {
-        val host = _uiState.value.host
-        if (host?.smartVolume?.readCurrentVolume == true) {
-            val result = sshRepository.executeCommandReuseShell("pactl get-sink-volume @DEFAULT_SINK@")
-            Log.d("HostViewModel", "readVolume result: $result")
-            if (result is Result.Success) {
-                // Extracts the first percent value from this output:
-                // Volume: front-left: 37345 /  57% / -14.65 dB,   front-right: 37345 /  57% / -14.65 dB
-                val volume = Regex("""\d+\s*%""").find(result.output)?.value
-                _uiState.update { it.copy(volume = volume) }
-                return volume
-            }
+        val result = sshRepository.executeCommandReuseShell("pactl get-sink-volume @DEFAULT_SINK@")
+        Log.d("HostViewModel", "readVolume result: $result")
+        if (result is Result.Success) {
+            // Extracts the first percent value from this output:
+            // Volume: front-left: 37345 /  57% / -14.65 dB,   front-right: 37345 /  57% / -14.65 dB
+            val volume = Regex("""\d+\s*%""").find(result.output)?.value
+            return volume
         }
         return null
     }
 
     suspend fun readMuted(): Boolean? {
-        val host = _uiState.value.host
-        if (host?.smartVolume?.readCurrentVolume == true) {
-            val result = sshRepository.executeCommandReuseShell("pactl get-sink-mute @DEFAULT_SINK@")
-            Log.d("HostViewModel", "readMuted result: $result")
-            if (result is Result.Success) {
-                // TODO: Is this output localized?
-                val muted = (result.output.trim() == "Mute: yes")
-                _uiState.update { it.copy(muted = muted) }
-                return muted
-            }
+        val result = sshRepository.executeCommandReuseShell("pactl get-sink-mute @DEFAULT_SINK@")
+        Log.d("HostViewModel", "readMuted result: $result")
+        if (result is Result.Success) {
+            // TODO: Is this output localized?
+            val muted = (result.output.trim() == "Mute: yes")
+            return muted
         }
         return null
+    }
+
+    suspend fun updateVolume() {
+        val host = _uiState.value.host
+        if (host?.smartVolume?.readCurrentVolume == true) {
+            val volume = readVolume()
+            if (volume != null) {
+                _uiState.update { it.copy(volume = volume) }
+            }
+        } else if (_uiState.value.volume != null) {
+            // Remove volume from state if the user turned the feature off
+            _uiState.update { it.copy(volume = null) }
+        }
+    }
+
+    suspend fun updateMuted() {
+        val host = _uiState.value.host
+        if (host?.smartVolume?.readCurrentVolume == true) {
+            val muted = readMuted()
+            if (muted != null) {
+                _uiState.update { it.copy(muted = muted) }
+            }
+        } else if (_uiState.value.muted != null) {
+            // Remove muted from state if the user turned the feature off
+            _uiState.update { it.copy(muted = null) }
+        }
     }
 
     fun onMouseMove(dx: Float, dy: Float, template: String) {
