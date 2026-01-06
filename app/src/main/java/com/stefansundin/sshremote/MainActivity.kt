@@ -466,15 +466,8 @@ class MainActivity : ComponentActivity() {
                                                 smartVolume = smartVolume,
                                             )
                                             hostViewModel.upsert(updatedHost)
-                                            if (uiState.host?.id == host.id) {
-                                                hostViewModel.updateActiveHostInUiState(updatedHost)
-                                            }
                                             if (navigateBack) {
                                                 navController.safePopBackStack()
-                                            }
-                                            if (uiState.host?.id == host.id) {
-                                                hostViewModel.updateVolume()
-                                                hostViewModel.updateMuted()
                                             }
                                         }
                                     },
@@ -483,9 +476,6 @@ class MainActivity : ComponentActivity() {
                                         scope.launch {
                                             val updatedHost = host.copy(startScreen = startScreen)
                                             hostViewModel.upsert(updatedHost)
-                                            if (uiState.host?.id == host.id) {
-                                                hostViewModel.updateActiveHostInUiState(updatedHost)
-                                            }
                                         }
                                     },
                                     initialPage = initialPage,
@@ -592,7 +582,7 @@ class MainActivity : ComponentActivity() {
         if (intent.hasExtra("HOST_ID")) {
             val hostId = intent.getStringExtra("HOST_ID")
             val uiState = hostViewModel.uiState.value
-            if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.host?.id == hostId) {
+            if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostId) {
                 return
             }
             shortcutHostId.value = hostId

@@ -42,8 +42,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -80,6 +83,25 @@ class HostViewModel(
     private val _uiState = MutableStateFlow(RemoteUiState())
     val uiState = _uiState.asStateFlow()
 
+    val allHosts: StateFlow<List<Host>?> = repository.getAll()
+        .flowOn(Dispatchers.IO)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null,
+        )
+
+    val activeHost: StateFlow<Host?> = combine(
+        allHosts,
+        _uiState.map { it.hostId }.distinctUntilChanged(),
+    ) { hosts, hostId ->
+        hosts?.find { it.id == hostId }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = null,
+    )
+
     private var connectionJob: Job? = null
     private var lastDeletedHost: Host? = null
     private var mouseMoveJob: Job? = null
@@ -96,15 +118,23 @@ class HostViewModel(
                 _uiState.update { it.copy(hapticFeedback = hapticFeedback) }
             }
         }
-    }
 
-    val allHosts: StateFlow<List<Host>?> = repository.getAll()
-        .flowOn(Dispatchers.IO)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null,
-        )
+        viewModelScope.launch {
+            activeHost
+                .map { it?.smartVolume?.readCurrentVolume }
+                .distinctUntilChanged()
+                .collectLatest { readCurrentVolume ->
+                    if (readCurrentVolume == true) {
+                        updateVolume()
+                        updateMuted()
+                    } else {
+                        _uiState.update {
+                            it.copy(volume = null, muted = null)
+                        }
+                    }
+                }
+        }
+    }
 
     suspend fun saveHost(host: Host, password: String?) {
         var hostToSave = host
@@ -167,12 +197,6 @@ class HostViewModel(
         lastDeletedHost?.let { repository.upsert(it) }
     }
 
-    fun updateActiveHostInUiState(host: Host) {
-        _uiState.update {
-            it.copy(host = host)
-        }
-    }
-
     override fun connect(host: Host) {
         connectionJob?.cancel()
         connectionJob = viewModelScope.launch {
@@ -183,7 +207,7 @@ class HostViewModel(
     private suspend fun handleConnection(host: Host) {
         _uiState.update {
             RemoteUiState(
-                host = host,
+                hostId = host.id,
                 connectionStatus = ConnectionStatus.CONNECTING,
                 hapticFeedback = it.hapticFeedback,
             )
@@ -285,7 +309,7 @@ class HostViewModel(
                             error = "Connection lost. Reconnecting...",
                         )
                     }
-                    val host = _uiState.value.host
+                    val host = activeHost.value
                     if (host != null) {
                         handleConnection(host)
                         if (_uiState.value.connectionStatus == ConnectionStatus.CONNECTED) {
@@ -321,7 +345,7 @@ class HostViewModel(
     }
 
     override fun runRemoteControlCommand(key: RemoteControlKey) {
-        val command = uiState.value.host?.remoteCommands?.get(key)
+        val command = activeHost.value?.remoteCommands?.get(key)
         if (command != null) {
             val oldVolume = uiState.value.volume
             viewModelScope.launch {
@@ -344,6 +368,8 @@ class HostViewModel(
                     }
                 }
             }
+        } else {
+            Log.e("HostViewModel", "No command found for key: $key")
         }
     }
 
@@ -371,28 +397,22 @@ class HostViewModel(
     }
 
     suspend fun updateVolume() {
-        val host = _uiState.value.host
-        if (host?.smartVolume?.readCurrentVolume == true) {
+        val hostToUse = activeHost.value
+        if (hostToUse?.smartVolume?.readCurrentVolume == true) {
             val volume = readVolume()
             if (volume != null) {
                 _uiState.update { it.copy(volume = volume) }
             }
-        } else if (_uiState.value.volume != null) {
-            // Remove volume from state if the user turned the feature off
-            _uiState.update { it.copy(volume = null) }
         }
     }
 
     suspend fun updateMuted() {
-        val host = _uiState.value.host
-        if (host?.smartVolume?.readCurrentVolume == true) {
+        val hostToUse = activeHost.value
+        if (hostToUse?.smartVolume?.readCurrentVolume == true) {
             val muted = readMuted()
             if (muted != null) {
                 _uiState.update { it.copy(muted = muted) }
             }
-        } else if (_uiState.value.muted != null) {
-            // Remove muted from state if the user turned the feature off
-            _uiState.update { it.copy(muted = null) }
         }
     }
 
@@ -446,7 +466,7 @@ class HostViewModel(
                         if (panDy > 0) RemoteControlKey.MOUSE_PAN_DOWN else RemoteControlKey.MOUSE_PAN_UP
                     }
 
-                    _uiState.value.host?.remoteCommands?.get(key)?.let { command ->
+                    activeHost.value?.remoteCommands?.get(key)?.let { command ->
                         val (result, duration) = measureTimedValue {
                             sshRepository.executeCommandReuseShell(command.command)
                         }
@@ -493,7 +513,7 @@ class HostViewModel(
 }
 
 data class RemoteUiState(
-    val host: Host? = null,
+    val hostId: String? = null,
     val commandOutput: String? = null,
     val isLoading: Boolean = false,
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,

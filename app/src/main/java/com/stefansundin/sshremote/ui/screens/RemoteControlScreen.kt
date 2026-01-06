@@ -240,15 +240,15 @@ fun RemoteControlScreen(
     }
 
     LaunchedEffect(host) {
-        if (uiState.host?.id != host.id) {
+        if (uiState.hostId != host.id) {
             wasConnected = false
             hostViewModel.connect(host)
         }
     }
 
     // Reconnect in case of disconnection
-    LaunchedEffect(host, uiState.connectionStatus, uiState.error, uiState.host) {
-        if (uiState.host?.id == host.id && uiState.connectionStatus == ConnectionStatus.DISCONNECTED && uiState.error == null && wasConnected) {
+    LaunchedEffect(host, uiState.connectionStatus, uiState.error, uiState.hostId) {
+        if (uiState.hostId == host.id && uiState.connectionStatus == ConnectionStatus.DISCONNECTED && uiState.error == null && wasConnected) {
             hostViewModel.connect(host)
         }
     }
@@ -804,7 +804,7 @@ fun RemoteControlScreenPreview(
     modifier: Modifier = Modifier,
     host: Host = sampleHost,
     uiState: RemoteUiState = RemoteUiState(
-        host = sampleHost,
+        hostId = sampleHost.id,
         connectionStatus = ConnectionStatus.CONNECTED,
         isLoading = false,
         error = null,
