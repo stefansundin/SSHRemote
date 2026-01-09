@@ -38,6 +38,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -154,6 +156,8 @@ fun EditHostScreen(
     var user by rememberSaveable(host) { mutableStateOf(host?.user ?: "") }
     var sshConfig by rememberSaveable(host) { mutableStateOf(host?.sshConfig) }
 
+    val coroutineScope = rememberCoroutineScope()
+
     // Only used for QR code import:
     var scanQrCode by rememberSaveable { mutableStateOf(scanQrCodeOnStart) }
     var commands by rememberSaveable(host) { mutableStateOf(host?.commands) }
@@ -225,6 +229,11 @@ fun EditHostScreen(
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
     val view = LocalView.current
 
+    val nameRequester = remember { BringIntoViewRequester() }
+    val hostnameRequester = remember { BringIntoViewRequester() }
+    val portRequester = remember { BringIntoViewRequester() }
+    val userRequester = remember { BringIntoViewRequester() }
+
     fun handleSave() {
         onSubmit()
         if (isFormValid) {
@@ -250,6 +259,13 @@ fun EditHostScreen(
                     startScreen = startScreen,
                 )
             onSave(hostToSave, if (showPasswordField) password else null)
+        } else {
+            coroutineScope.launch {
+                if (!isNameValid) nameRequester.bringIntoView()
+                else if (!isHostValid) hostnameRequester.bringIntoView()
+                else if (!isPortValid) portRequester.bringIntoView()
+                else if (!isUserValid) userRequester.bringIntoView()
+            }
         }
     }
 
@@ -461,7 +477,6 @@ fun EditHostScreen(
     }
 
     var showExportDialog by rememberSaveable { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
 
     if (showExportDialog) {
         AlertDialog(
@@ -626,6 +641,7 @@ fun EditHostScreen(
                 },
                 label = { Text("Name") },
                 modifier = Modifier
+                    .bringIntoViewRequester(nameRequester)
                     .fillMaxWidth()
                     .dpadFocusable(),
                 isError = hasBeenSubmitted && !isNameValid,
@@ -644,6 +660,7 @@ fun EditHostScreen(
                 },
                 label = { Text("Hostname or IP") },
                 modifier = Modifier
+                    .bringIntoViewRequester(hostnameRequester)
                     .fillMaxWidth()
                     .dpadFocusable(),
                 isError = hasBeenSubmitted && !isHostValid,
@@ -664,6 +681,7 @@ fun EditHostScreen(
                 },
                 label = { Text("Port") },
                 modifier = Modifier
+                    .bringIntoViewRequester(portRequester)
                     .fillMaxWidth()
                     .dpadFocusable(),
                 isError = hasBeenSubmitted && !isPortValid,
@@ -688,6 +706,7 @@ fun EditHostScreen(
                     },
                     label = { Text("User") },
                     modifier = Modifier
+                        .bringIntoViewRequester(userRequester)
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                         .fillMaxWidth()
                         .dpadFocusable(),
