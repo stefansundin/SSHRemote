@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
@@ -62,7 +63,9 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
                 value = publicKey,
                 onValueChange = {},
                 readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .dpadFocusable(),
                 visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
             )
         },

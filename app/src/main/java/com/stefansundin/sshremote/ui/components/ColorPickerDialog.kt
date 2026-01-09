@@ -22,6 +22,8 @@ import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +59,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlin.math.roundToInt
 
@@ -178,38 +181,38 @@ fun ColorPickerDialog(
 
                 if (isHslMode) {
                     Text("Hue: ${hue.toInt()}")
-                    Slider(
+                    FocusableSlider(
                         value = hue,
                         onValueChange = { hue = it },
                         valueRange = 0f..360f,
                     )
                     Text("Saturation: ${(saturation * 100).toInt()}%")
-                    Slider(
+                    FocusableSlider(
                         value = saturation,
                         onValueChange = { saturation = it },
                         valueRange = 0f..1f,
                     )
                     Text("Lightness: ${(lightness * 100).toInt()}%")
-                    Slider(
+                    FocusableSlider(
                         value = lightness,
                         onValueChange = { lightness = it },
                         valueRange = 0f..1f,
                     )
                 } else {
                     Text("Red: ${(red * 255).roundToInt()}")
-                    Slider(
+                    FocusableSlider(
                         value = red,
                         onValueChange = { red = it },
                         valueRange = 0f..1f,
                     )
                     Text("Green: ${(green * 255).roundToInt()}")
-                    Slider(
+                    FocusableSlider(
                         value = green,
                         onValueChange = { green = it },
                         valueRange = 0f..1f,
                     )
                     Text("Blue: ${(blue * 255).roundToInt()}")
-                    Slider(
+                    FocusableSlider(
                         value = blue,
                         onValueChange = { blue = it },
                         valueRange = 0f..1f,
@@ -238,6 +241,45 @@ fun ColorPickerDialog(
                 Text("Cancel")
             }
         },
+    )
+}
+
+/**
+ * This enhanced Slider component mostly makes a difference on Android TV.
+ */
+@Composable
+private fun FocusableSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Slider(
+        value = value,
+        onValueChange = onValueChange,
+        valueRange = valueRange,
+        interactionSource = interactionSource,
+        modifier = modifier
+            .dpadFocusable()
+            .then(
+                if (isFocused) {
+                    Modifier
+                        .background(
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            RoundedCornerShape(8.dp),
+                        )
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(8.dp),
+                        )
+                } else {
+                    Modifier
+                },
+            ),
     )
 }
 

@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.getVibrator
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -184,7 +185,8 @@ fun HapticFeedbackSettingDialog(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 16.dp),
+                            .padding(start = 16.dp)
+                            .dpadFocusable(),
                         label = { Text("ms") },
                         singleLine = true,
                     )

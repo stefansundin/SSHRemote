@@ -21,7 +21,6 @@ package com.stefansundin.sshremote.ui.screens
 import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.util.Base64
 import android.util.Log
 import android.view.SoundEffectConstants
@@ -80,11 +79,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -118,6 +119,7 @@ import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ExportedCommand
 import com.stefansundin.sshremote.data.settings.ExportedHost
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -128,6 +130,7 @@ import java.io.InputStreamReader
 import java.net.URLEncoder
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import android.graphics.Color as AndroidColor
 
 private enum class PasswordState {
     SET,
@@ -335,7 +338,7 @@ fun EditHostScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp),
-                        textStyle = androidx.compose.ui.text.TextStyle(fontFamily = FontFamily.Monospace),
+                        textStyle = TextStyle(fontFamily = FontFamily.Monospace),
                     )
                 }
             },
@@ -622,11 +625,11 @@ fun EditHostScreen(
                     }
                 },
                 label = { Text("Name") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .dpadFocusable(),
                 isError = hasBeenSubmitted && !isNameValid,
-                singleLine = false,
-                minLines = 1,
-                maxLines = 2,
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next,
                 ),
@@ -640,7 +643,9 @@ fun EditHostScreen(
                     hostname = newHostname.replace(" ", "").replace("\n", "").take(255)
                 },
                 label = { Text("Hostname or IP") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .dpadFocusable(),
                 isError = hasBeenSubmitted && !isHostValid,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -658,7 +663,9 @@ fun EditHostScreen(
                     }
                 },
                 label = { Text("Port") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .dpadFocusable(),
                 isError = hasBeenSubmitted && !isPortValid,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -682,7 +689,8 @@ fun EditHostScreen(
                     label = { Text("User") },
                     modifier = Modifier
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                     isError = hasBeenSubmitted && !isUserValid,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -728,7 +736,9 @@ fun EditHostScreen(
                             Text("Optional, will be prompted for if not provided")
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
@@ -797,7 +807,8 @@ fun EditHostScreen(
                     },
                     modifier = Modifier
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                 )
                 if (identities != null) {
                     ExposedDropdownMenu(
@@ -911,7 +922,7 @@ private fun ExportHostQrCodeDialog(
                     val bitmap = createBitmap(width, height, Bitmap.Config.RGB_565)
                     for (x in 0 until width) {
                         for (y in 0 until height) {
-                            bitmap[x, y] = if (bitMatrix[x, y]) Color.BLACK else Color.WHITE
+                            bitmap[x, y] = if (bitMatrix[x, y]) AndroidColor.BLACK else AndroidColor.WHITE
                         }
                     }
                     bitmap
@@ -968,7 +979,7 @@ private fun ExportHostQrCodeDialog(
                         } else {
                             Surface(
                                 modifier = Modifier.fillMaxSize(),
-                                color = androidx.compose.ui.graphics.Color.White,
+                                color = Color.White,
                             ) {
                                 CircularProgressIndicator(strokeWidth = 16.dp, modifier = Modifier.padding(128.dp))
                             }

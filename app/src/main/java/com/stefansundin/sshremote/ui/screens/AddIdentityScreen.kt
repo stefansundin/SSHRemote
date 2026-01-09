@@ -78,6 +78,7 @@ import com.jcraft.jsch.KeyPair
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.ui.components.NoWrapOnSpecialCharactersVisualTransformation
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -329,7 +330,8 @@ fun AddIdentityScreen(
                 placeholder = { Text("Defaults to current date") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .dpadFocusable(),
                 singleLine = true,
             )
 

@@ -99,6 +99,7 @@ import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.identity.IdentityEvent
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.components.TextWithInlineIcon
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -479,7 +480,9 @@ fun IdentityItem(
                     onValueChange = { newName = it },
                     label = { Text("New name") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                 )
             },
             onDismissRequest = { isRenameDialogVisible = false },

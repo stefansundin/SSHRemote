@@ -47,6 +47,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -71,14 +72,18 @@ fun EditRemoteCommandDialog(
                         value = newCommand,
                         onValueChange = { newCommand = it },
                         label = { Text("Command") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .dpadFocusable(),
                     )
                     TextField(
                         value = newLongPressCommand,
                         onValueChange = { newLongPressCommand = it },
                         label = { Text("Long press command") },
                         enabled = !repeatCommand,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .dpadFocusable(),
                     )
                     Row(
                         modifier = Modifier

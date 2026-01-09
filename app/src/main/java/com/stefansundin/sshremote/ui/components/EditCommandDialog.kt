@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -65,13 +66,17 @@ fun EditCommandDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Name (optional)") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                 )
                 TextField(
                     value = commandText,
                     onValueChange = { commandText = it },
                     label = { Text("Command") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                 )
                 Row(
                     modifier = Modifier

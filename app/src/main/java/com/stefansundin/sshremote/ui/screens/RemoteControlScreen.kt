@@ -122,11 +122,12 @@ import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
 import com.stefansundin.sshremote.ui.components.SpecialKeysRow
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
+import android.view.KeyEvent as AndroidKeyEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -342,7 +343,9 @@ fun RemoteControlScreen(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Password") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -396,7 +399,9 @@ fun RemoteControlScreen(
                     value = passphrase,
                     onValueChange = { passphrase = it },
                     label = { Text("Passphrase") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                     visualTransformation = if (passphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -504,15 +509,15 @@ fun RemoteControlScreen(
         modifier = modifier.onPreviewKeyEvent {
             if (host.smartVolume?.controlVolumeWithHardwareButtons == true) {
                 when (it.nativeKeyEvent.keyCode) {
-                    android.view.KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                        if (it.nativeKeyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
+                    AndroidKeyEvent.KEYCODE_VOLUME_DOWN -> {
+                        if (it.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) {
                             hostViewModel.runRemoteControlCommand(RemoteControlKey.VOLUME_DOWN)
                         }
                         return@onPreviewKeyEvent true
                     }
 
-                    android.view.KeyEvent.KEYCODE_VOLUME_UP -> {
-                        if (it.nativeKeyEvent.action == android.view.KeyEvent.ACTION_DOWN) {
+                    AndroidKeyEvent.KEYCODE_VOLUME_UP -> {
+                        if (it.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) {
                             hostViewModel.runRemoteControlCommand(RemoteControlKey.VOLUME_UP)
                         }
                         return@onPreviewKeyEvent true

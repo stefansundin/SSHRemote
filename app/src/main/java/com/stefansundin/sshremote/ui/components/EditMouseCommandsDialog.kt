@@ -43,6 +43,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -79,7 +80,9 @@ fun EditMouseCommandsDialog(
                                 this[key] = (this[key] ?: Command("", name = key.title)).copy(command = value)
                             }
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .dpadFocusable(),
                     )
                 }
             }

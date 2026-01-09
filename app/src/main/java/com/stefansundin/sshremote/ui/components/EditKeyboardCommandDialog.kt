@@ -43,6 +43,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
+import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -69,7 +70,9 @@ fun EditKeyboardCommandDialog(
                         newTypeCommand = newTypeCommand.copy(command = value)
                     },
                     label = { Text(RemoteControlKey.KEYBOARD_TYPE_INPUT.title) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                 )
                 TextField(
                     value = newKeyCommand.command,
@@ -77,7 +80,9 @@ fun EditKeyboardCommandDialog(
                         newKeyCommand = newKeyCommand.copy(command = value)
                     },
                     label = { Text(RemoteControlKey.KEYBOARD_KEY_INPUT.title) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
                 )
             }
         },
