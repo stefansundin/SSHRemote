@@ -56,10 +56,10 @@ enum class RemoteControlKey(val title: String) {
  * https://github.com/atx/wtype
  */
 val wtypePreset = mapOf(
-    RemoteControlKey.UP to Command("wtype -k Up"),
-    RemoteControlKey.RIGHT to Command("wtype -k Right"),
-    RemoteControlKey.DOWN to Command("wtype -k Down"),
-    RemoteControlKey.LEFT to Command("wtype -k Left"),
+    RemoteControlKey.UP to Command("wtype -k Up", repeat = true),
+    RemoteControlKey.RIGHT to Command("wtype -k Right", repeat = true),
+    RemoteControlKey.DOWN to Command("wtype -k Down", repeat = true),
+    RemoteControlKey.LEFT to Command("wtype -k Left", repeat = true),
     RemoteControlKey.SELECT to Command("wtype -k return"),
     RemoteControlKey.VOLUME_DOWN to Command("wtype -k XF86AudioLowerVolume"),
     RemoteControlKey.MUTE to Command("wtype -k XF86AudioMute"),
@@ -86,10 +86,10 @@ val wtypePreset = mapOf(
  * https://github.com/jordansissel/xdotool
  */
 val xdotoolPreset = mapOf(
-    RemoteControlKey.UP to Command("DISPLAY=:0 xdotool key Up"),
-    RemoteControlKey.RIGHT to Command("DISPLAY=:0 xdotool key Right"),
-    RemoteControlKey.DOWN to Command("DISPLAY=:0 xdotool key Down"),
-    RemoteControlKey.LEFT to Command("DISPLAY=:0 xdotool key Left"),
+    RemoteControlKey.UP to Command("DISPLAY=:0 xdotool key Up", repeat = true),
+    RemoteControlKey.RIGHT to Command("DISPLAY=:0 xdotool key Right", repeat = true),
+    RemoteControlKey.DOWN to Command("DISPLAY=:0 xdotool key Down", repeat = true),
+    RemoteControlKey.LEFT to Command("DISPLAY=:0 xdotool key Left", repeat = true),
     RemoteControlKey.SELECT to Command("DISPLAY=:0 xdotool key return"),
     RemoteControlKey.VOLUME_DOWN to Command("DISPLAY=:0 xdotool key XF86AudioLowerVolume"),
     RemoteControlKey.MUTE to Command("DISPLAY=:0 xdotool key XF86AudioMute"),
@@ -115,10 +115,10 @@ val xdotoolPreset = mapOf(
  * TODO
  */
 val cecClientPreset = mapOf(
-    RemoteControlKey.UP to Command("echo 'up' | cec-client -s"),
-    RemoteControlKey.RIGHT to Command("echo 'right' | cec-client -s"),
-    RemoteControlKey.DOWN to Command("echo 'down' | cec-client -s"),
-    RemoteControlKey.LEFT to Command("echo 'left' | cec-client -s"),
+    RemoteControlKey.UP to Command("echo 'up' | cec-client -s", repeat = true),
+    RemoteControlKey.RIGHT to Command("echo 'right' | cec-client -s", repeat = true),
+    RemoteControlKey.DOWN to Command("echo 'down' | cec-client -s", repeat = true),
+    RemoteControlKey.LEFT to Command("echo 'left' | cec-client -s", repeat = true),
     RemoteControlKey.SELECT to Command("echo 'select' | cec-client -s"),
     RemoteControlKey.VOLUME_DOWN to Command("echo 'vol-down' | cec-client -s"),
     RemoteControlKey.MUTE to Command("echo 'mute' | cec-client -s"),
@@ -136,10 +136,10 @@ val cecClientPreset = mapOf(
  * To see the dictionary of supported commands, open Script Editor, then in the menu go to File -> Open Dictionary -> VLC.app.
  */
 val macosVlcPreset = mapOf(
-    RemoteControlKey.UP to Command("osascript -e 'tell application \"VLC\" to step forward 3'"),
-    RemoteControlKey.RIGHT to Command("osascript -e 'tell application \"VLC\" to step forward'"),
-    RemoteControlKey.DOWN to Command("osascript -e 'tell application \"VLC\" to step backward 3'"),
-    RemoteControlKey.LEFT to Command("osascript -e 'tell application \"VLC\" to step backward'"),
+    RemoteControlKey.UP to Command("osascript -e 'tell application \"VLC\" to step forward 3'", repeat = true),
+    RemoteControlKey.RIGHT to Command("osascript -e 'tell application \"VLC\" to step forward'", repeat = true),
+    RemoteControlKey.DOWN to Command("osascript -e 'tell application \"VLC\" to step backward 3'", repeat = true),
+    RemoteControlKey.LEFT to Command("osascript -e 'tell application \"VLC\" to step backward'", repeat = true),
     RemoteControlKey.SELECT to Command("osascript -e 'tell application \"VLC\" to fullscreen'"),
     RemoteControlKey.VOLUME_DOWN to Command("osascript -e 'tell application \"VLC\" to volumeDown'"),
     RemoteControlKey.MUTE to Command("osascript -e 'tell application \"VLC\" to mute'"),
@@ -155,10 +155,10 @@ val macosVlcPreset = mapOf(
  * https://developer.android.com/reference/android/view/KeyEvent
  */
 val androidPreset = mapOf(
-    RemoteControlKey.UP to Command("input keyevent KEYCODE_DPAD_UP"),
-    RemoteControlKey.RIGHT to Command("input keyevent KEYCODE_DPAD_RIGHT"),
-    RemoteControlKey.DOWN to Command("input keyevent KEYCODE_DPAD_DOWN"),
-    RemoteControlKey.LEFT to Command("input keyevent KEYCODE_DPAD_LEFT"),
+    RemoteControlKey.UP to Command("input keyevent KEYCODE_DPAD_UP", repeat = true),
+    RemoteControlKey.RIGHT to Command("input keyevent KEYCODE_DPAD_RIGHT", repeat = true),
+    RemoteControlKey.DOWN to Command("input keyevent KEYCODE_DPAD_DOWN", repeat = true),
+    RemoteControlKey.LEFT to Command("input keyevent KEYCODE_DPAD_LEFT", repeat = true),
     RemoteControlKey.SELECT to Command(
         "input keyevent KEYCODE_DPAD_CENTER",
         "input keyevent --longpress KEYCODE_DPAD_CENTER",
