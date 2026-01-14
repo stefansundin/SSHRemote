@@ -723,11 +723,23 @@ fun RemoteControlScreen(
                         }
 
                         2 -> {
-                            val onKey = { key: String ->
+                            val onKey = { keyCode: Int ->
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
                                 host.remoteCommands?.get(RemoteControlKey.KEYBOARD_KEY_INPUT)
                                     ?.let { commandTemplate ->
-                                        val command = commandTemplate.command.format(key)
+                                        val commandRaw = commandTemplate.command
+                                        val command = if (commandRaw.contains("%d")) {
+                                            val linuxKeyCode = getLinuxKeyCode(keyCode)
+                                            commandRaw.replace("%d", linuxKeyCode.toString())
+                                        } else {
+                                            val keyName = getKeyName(keyCode)
+                                            try {
+                                                commandRaw.format(keyName)
+                                            } catch (_: Exception) {
+                                                commandRaw
+                                            }
+                                        }
+
                                         coroutineScope.launch {
                                             hostViewModel.runCommand(command, commandTemplate.showOutput)
                                         }
@@ -891,5 +903,33 @@ private fun RemoteControlScreenPreview_KeyboardTab() {
 private fun RemoteControlScreenPreview_CommandsTab() {
     SSHRemoteTheme {
         RemoteControlScreenPreview(initialPage = 3)
+    }
+}
+
+private fun getLinuxKeyCode(keyCode: Int): Int {
+    return when (keyCode) {
+        AndroidKeyEvent.KEYCODE_DEL -> 14
+        AndroidKeyEvent.KEYCODE_ESCAPE -> 1
+        AndroidKeyEvent.KEYCODE_TAB -> 15
+        AndroidKeyEvent.KEYCODE_CAPS_LOCK -> 58
+        AndroidKeyEvent.KEYCODE_SHIFT_LEFT -> 42
+        AndroidKeyEvent.KEYCODE_CTRL_LEFT -> 29
+        AndroidKeyEvent.KEYCODE_META_LEFT -> 125
+        AndroidKeyEvent.KEYCODE_ALT_LEFT -> 56
+        else -> 0
+    }
+}
+
+private fun getKeyName(keyCode: Int): String {
+    return when (keyCode) {
+        AndroidKeyEvent.KEYCODE_DEL -> "BackSpace"
+        AndroidKeyEvent.KEYCODE_ESCAPE -> "Escape"
+        AndroidKeyEvent.KEYCODE_TAB -> "Tab"
+        AndroidKeyEvent.KEYCODE_CAPS_LOCK -> "Caps_Lock"
+        AndroidKeyEvent.KEYCODE_SHIFT_LEFT -> "Shift_L"
+        AndroidKeyEvent.KEYCODE_CTRL_LEFT -> "Control_L"
+        AndroidKeyEvent.KEYCODE_META_LEFT -> "Super_L"
+        AndroidKeyEvent.KEYCODE_ALT_LEFT -> "Alt_L"
+        else -> ""
     }
 }

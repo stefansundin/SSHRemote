@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.res.Configuration
+import android.view.KeyEvent
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
@@ -39,7 +40,7 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
 fun SpecialKeysRow(
-    onKey: (String) -> Unit,
+    onKey: (Int) -> Unit,
     modifier: Modifier = Modifier,
     host: Host? = null,
     connectionStatus: ConnectionStatus? = null,
@@ -48,13 +49,13 @@ fun SpecialKeysRow(
             (host.remoteCommands != null && !host.remoteCommands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty())
     val isEnabled = connectionStatus == ConnectionStatus.CONNECTED && keyboardConfigured
     val specialKeys = listOf(
-        "Esc" to "Escape",
-        "Tab" to "Tab",
-        "Caps" to "Caps_Lock",
-        "Shift" to "Shift_L",
-        "Ctrl" to "Control_L",
-        "Super" to "Super_L",
-        "Alt" to "Alt_L",
+        "Esc" to KeyEvent.KEYCODE_ESCAPE,
+        "Tab" to KeyEvent.KEYCODE_TAB,
+        "Caps" to KeyEvent.KEYCODE_CAPS_LOCK,
+        "Shift" to KeyEvent.KEYCODE_SHIFT_LEFT,
+        "Ctrl" to KeyEvent.KEYCODE_CTRL_LEFT,
+        "Super" to KeyEvent.KEYCODE_META_LEFT,
+        "Alt" to KeyEvent.KEYCODE_ALT_LEFT,
     )
     val view = LocalView.current
 

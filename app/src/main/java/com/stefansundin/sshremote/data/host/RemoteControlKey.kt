@@ -112,6 +112,66 @@ val xdotoolPreset = mapOf(
 )
 
 /**
+ * ydotool is a generic Linux command-line automation tool.
+ * https://github.com/ReimuNotMoe/ydotool
+ */
+val ydotoolPreset = mapOf(
+    RemoteControlKey.UP to Command("ydotool key 103:1 103:0", repeat = true),
+    RemoteControlKey.RIGHT to Command("ydotool key 106:1 106:0", repeat = true),
+    RemoteControlKey.DOWN to Command("ydotool key 108:1 108:0", repeat = true),
+    RemoteControlKey.LEFT to Command("ydotool key 105:1 105:0", repeat = true),
+    RemoteControlKey.SELECT to Command("ydotool key 28:1 28:0"),
+    RemoteControlKey.VOLUME_DOWN to Command("ydotool key 114:1 114:0"),
+    RemoteControlKey.MUTE to Command("ydotool key 113:1 113:0"),
+    RemoteControlKey.VOLUME_UP to Command("ydotool key 115:1 115:0"),
+    RemoteControlKey.BACK to Command("ydotool key 158:1 158:0"),
+    RemoteControlKey.HOME to Command("ydotool key 172:1 172:0"),
+    RemoteControlKey.MENU to Command("ydotool key 139:1 139:0"),
+    RemoteControlKey.PREVIOUS to Command("ydotool key 165:1 165:0"),
+    RemoteControlKey.PLAY_PAUSE to Command("ydotool key 164:1 164:0"),
+    RemoteControlKey.NEXT to Command("ydotool key 163:1 163:0"),
+    RemoteControlKey.MOUSE_MOVE to Command("ydotool mousemove -- %dx %dy"),
+    RemoteControlKey.MOUSE_LEFT_CLICK to Command("ydotool click 0xC0"),
+    RemoteControlKey.MOUSE_RIGHT_CLICK to Command("ydotool click 0xC1"),
+    RemoteControlKey.MOUSE_PAN_UP to Command("ydotool mousemove --wheel -- 0 1"),
+    RemoteControlKey.MOUSE_PAN_DOWN to Command("ydotool mousemove --wheel -- 0 -1"),
+    RemoteControlKey.MOUSE_PAN_LEFT to Command("ydotool mousemove --wheel -- -1 0"),
+    RemoteControlKey.MOUSE_PAN_RIGHT to Command("ydotool mousemove --wheel -- 1 0"),
+    RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("ydotool type '%s'"),
+    RemoteControlKey.KEYBOARD_KEY_INPUT to Command("ydotool key %d:1 %d:0"),
+)
+
+/**
+ * dotool is a command-line tool to simulate input on Linux.
+ * https://git.sr.ht/~geb/dotool
+ */
+val dotoolPreset = mapOf(
+    RemoteControlKey.UP to Command("echo key up | dotool", repeat = true),
+    RemoteControlKey.RIGHT to Command("echo key right | dotool", repeat = true),
+    RemoteControlKey.DOWN to Command("echo key down | dotool", repeat = true),
+    RemoteControlKey.LEFT to Command("echo key left | dotool", repeat = true),
+    RemoteControlKey.SELECT to Command("echo key enter | dotool"),
+    RemoteControlKey.VOLUME_DOWN to Command("echo key volumedown | dotool"),
+    RemoteControlKey.MUTE to Command("echo key mute | dotool"),
+    RemoteControlKey.VOLUME_UP to Command("echo key volumeup | dotool"),
+    RemoteControlKey.BACK to Command("echo key back | dotool"),
+    RemoteControlKey.HOME to Command("echo key homepage | dotool"),
+    RemoteControlKey.MENU to Command("echo key menu | dotool"),
+    RemoteControlKey.PREVIOUS to Command("echo key previoussong | dotool"),
+    RemoteControlKey.PLAY_PAUSE to Command("echo key playpause | dotool"),
+    RemoteControlKey.NEXT to Command("echo key nextsong | dotool"),
+    RemoteControlKey.MOUSE_MOVE to Command("echo move %dx %dy | dotool"),
+    RemoteControlKey.MOUSE_LEFT_CLICK to Command("echo click left | dotool"),
+    RemoteControlKey.MOUSE_RIGHT_CLICK to Command("echo click right | dotool"),
+    RemoteControlKey.MOUSE_PAN_UP to Command("echo wheel -1 | dotool"),
+    RemoteControlKey.MOUSE_PAN_DOWN to Command("echo wheel 1 | dotool"),
+    RemoteControlKey.MOUSE_PAN_LEFT to Command("echo hwheel -1 | dotool"),
+    RemoteControlKey.MOUSE_PAN_RIGHT to Command("echo hwheel 1 | dotool"),
+    RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("echo type '%s' | dotool"),
+    RemoteControlKey.KEYBOARD_KEY_INPUT to Command("echo key %s | dotool"),
+)
+
+/**
  * TODO
  */
 val cecClientPreset = mapOf(
@@ -177,8 +237,10 @@ val androidPreset = mapOf(
 )
 
 val presets = mapOf(
-    "wtype" to wtypePreset,
     "xdotool" to xdotoolPreset,
+    "wtype" to wtypePreset,
+    "ydotool" to ydotoolPreset,
+    "dotool" to dotoolPreset,
     "cec-client" to cecClientPreset,
     "macOS VLC" to macosVlcPreset,
     "Android" to androidPreset,

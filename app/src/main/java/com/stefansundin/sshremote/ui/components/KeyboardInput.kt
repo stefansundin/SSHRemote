@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.res.Configuration
+import android.view.KeyEvent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Surface
@@ -46,7 +47,7 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 @Composable
 fun KeyboardInput(
     isCurrentlySelected: Boolean,
-    onKey: (String) -> Unit,
+    onKey: (Int) -> Unit,
     onType: (String) -> Unit,
     modifier: Modifier = Modifier,
     host: Host? = null,
@@ -75,7 +76,7 @@ fun KeyboardInput(
 
             if (newText.isEmpty()) {
                 // The user deleted the zero-width space, which is our signal for a backspace
-                onKey("BackSpace")
+                onKey(KeyEvent.KEYCODE_DEL)
                 // Keep the zero-width space in the field to detect the next backspace
                 text = TextFieldValue(zeroWidthSpace, TextRange(zeroWidthSpace.length))
                 return@TextField
@@ -99,7 +100,7 @@ fun KeyboardInput(
             } else if (newText.length < previousText.length) {
                 val deletedChars = previousText.length - newText.length
                 repeat(deletedChars) {
-                    onKey("BackSpace")
+                    onKey(KeyEvent.KEYCODE_DEL)
                 }
             }
             text = if (previousText == zeroWidthSpace) {
