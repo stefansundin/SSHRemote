@@ -37,8 +37,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Fullscreen
@@ -288,7 +290,11 @@ fun RemoteControlScreen(
     hostKeyVerification?.let { verification ->
         AlertDialog(
             title = { Text("Host Key Verification") },
-            text = { Text(verification.message) },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(verification.message)
+                }
+            },
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { sshRepository.onHostKeyVerificationComplete(false) },
             confirmButton = {
@@ -317,7 +323,11 @@ fun RemoteControlScreen(
     message?.let { message ->
         AlertDialog(
             title = { Text("Message") },
-            text = { Text(message.message) },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(message.message)
+                }
+            },
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { sshRepository.onMessageDismissed() },
             confirmButton = {
