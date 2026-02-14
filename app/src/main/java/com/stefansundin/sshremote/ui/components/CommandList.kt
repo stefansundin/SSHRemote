@@ -111,7 +111,7 @@ private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewMode
         command: String,
         showOutput: Boolean,
         isRetry: Boolean,
-        reuseShell: Boolean,
+//        reuseShell: Boolean,
     ): Result {
         return Result.Success("")
     }

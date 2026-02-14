@@ -67,7 +67,7 @@ interface IRemoteControlHostViewModel {
         command: String,
         showOutput: Boolean,
         isRetry: Boolean = false,
-        reuseShell: Boolean = true,
+//        reuseShell: Boolean = true,
     ): Result
 }
 
@@ -272,7 +272,7 @@ class HostViewModel(
         command: String,
         showOutput: Boolean,
         isRetry: Boolean,
-        reuseShell: Boolean,
+//        reuseShell: Boolean,
     ): Result {
         if (_uiState.value.connectionStatus != ConnectionStatus.CONNECTED) {
             _uiState.update {
@@ -283,11 +283,11 @@ class HostViewModel(
         _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
 
         val (result, duration) = measureTimedValue {
-            if (reuseShell) {
-                sshRepository.executeCommandReuseShell(command)
-            } else {
-                sshRepository.executeCommand(command)
-            }
+//            if (reuseShell) {
+//                sshRepository.executeCommandReuseShell(command)
+//            } else {
+            sshRepository.executeCommand(command)
+//            }
         }
         Log.d("HostViewModel", "executeCommand for '${command}' took $duration")
 
