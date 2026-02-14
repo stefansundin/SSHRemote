@@ -19,7 +19,6 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -45,12 +44,12 @@ fun ResponsiveTabRow(
     tabs: @Composable () -> Unit,
 ) {
     SubcomposeLayout(modifier = modifier) { constraints ->
-        val tabMeasurables = subcompose("tabs") {
-            Row { tabs() }
-        }[0]
-        val totalTabsWidth = tabMeasurables.measure(Constraints()).width
+        val tabMeasurables = subcompose("tabs", tabs)
+        val tabWidths = tabMeasurables.map { it.measure(Constraints()).width }
+        val maxTabWidth = tabWidths.maxOfOrNull { it } ?: 0
+        val numTabs = tabMeasurables.size
         val availableWidth = constraints.maxWidth
-        val useScrollable = totalTabsWidth > availableWidth
+        val useScrollable = (maxTabWidth * numTabs) > availableWidth
 
         val tabRowMeasurable = subcompose(if (useScrollable) "scrollable" else "fixed") {
             if (useScrollable) {
@@ -77,6 +76,7 @@ fun ResponsiveTabRow(
 }
 
 @Preview(showBackground = true, widthDp = 500)
+@Preview(showBackground = true, widthDp = 360, name = "Squished")
 @Preview(showBackground = true, widthDp = 250, name = "Scrolling")
 @Preview(
     showBackground = true,
@@ -96,7 +96,7 @@ private fun ResponsiveTabRowPreview() {
                 Tab(
                     selected = selectedTabIndex == index,
                     onClick = { selectedTabIndex = index },
-                    text = { Text(text = title) },
+                    text = { Text(text = title, maxLines = 1) },
                 )
             }
         }
