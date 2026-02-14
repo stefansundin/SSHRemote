@@ -325,18 +325,21 @@ class HostViewModel(
                         }
                     }
                 } else {
-                    val errorMessage = if (result.isConnectionError) {
-                        "Failed to reconnect."
-                    } else {
-                        result.message
-                    }
                     _uiState.update {
-                        it.copy(
-                            commandOutput = if (!result.isConnectionError) errorMessage else null,
-                            error = errorMessage,
-                            connectionStatus = if (result.isConnectionError) ConnectionStatus.DISCONNECTED else it.connectionStatus,
-                            isLoading = false,
-                        )
+                        if (result.isConnectionError) {
+                            it.copy(
+                                commandOutput = null,
+                                error = "Failed to reconnect.",
+                                connectionStatus = ConnectionStatus.DISCONNECTED,
+                                isLoading = false,
+                            )
+                        } else {
+                            it.copy(
+                                commandOutput = result.message,
+                                error = null,
+                                isLoading = false,
+                            )
+                        }
                     }
                 }
             }
