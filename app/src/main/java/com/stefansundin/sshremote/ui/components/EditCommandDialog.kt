@@ -44,22 +44,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.CommandItem
+import com.stefansundin.sshremote.data.host.toItem
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import java.util.UUID
 
 @Composable
 fun EditCommandDialog(
-    command: Command?,
+    commandItem: CommandItem?,
     onDismiss: () -> Unit,
-    onSave: (Command) -> Unit,
+    onSave: (CommandItem) -> Unit,
 ) {
-    var name by rememberSaveable { mutableStateOf(command?.name ?: "") }
-    var commandText by rememberSaveable { mutableStateOf(command?.command ?: "") }
-    var showOutput by rememberSaveable { mutableStateOf(command?.showOutput ?: true) }
+    var name by rememberSaveable { mutableStateOf(commandItem?.command?.name ?: "") }
+    var commandText by rememberSaveable { mutableStateOf(commandItem?.command?.command ?: "") }
+    var showOutput by rememberSaveable { mutableStateOf(commandItem?.command?.showOutput ?: true) }
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text(if (command == null) "Add Command" else "Edit Command") },
+        title = { Text(if (commandItem == null) "Add Command" else "Edit Command") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextField(
@@ -110,10 +113,13 @@ fun EditCommandDialog(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
                     onSave(
-                        Command(
-                            command = commandText,
-                            name = name.ifBlank { null },
-                            showOutput = showOutput,
+                        CommandItem(
+                            key = commandItem?.key ?: UUID.randomUUID().toString(),
+                            Command(
+                                command = commandText,
+                                name = name.ifBlank { null },
+                                showOutput = showOutput,
+                            )
                         ),
                     )
                 },
@@ -142,7 +148,7 @@ private fun EditCommandDialogPreview_Add() {
     SSHRemoteTheme {
         Surface {
             EditCommandDialog(
-                command = null,
+                commandItem = null,
                 onDismiss = {},
                 onSave = {},
             )
@@ -157,7 +163,7 @@ private fun EditCommandDialogPreview_Edit() {
     SSHRemoteTheme {
         Surface {
             EditCommandDialog(
-                command = Command("uptime", name = "Uptime"),
+                commandItem = Command("uptime", name = "Uptime").toItem(),
                 onDismiss = {},
                 onSave = {},
             )

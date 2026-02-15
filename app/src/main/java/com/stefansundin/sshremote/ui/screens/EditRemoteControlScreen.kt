@@ -25,21 +25,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
@@ -51,21 +45,15 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -76,13 +64,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.data.host.Command
+import com.stefansundin.sshremote.data.host.CommandItem
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.data.host.presets
+import com.stefansundin.sshremote.data.host.toItem
 import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.components.EditCommandDialog
+import com.stefansundin.sshremote.ui.components.EditCommandsTab
 import com.stefansundin.sshremote.ui.components.EditKeyboardCommandDialog
 import com.stefansundin.sshremote.ui.components.EditMouseCommandsDialog
 import com.stefansundin.sshremote.ui.components.EditRemoteCommandDialog
@@ -105,17 +96,17 @@ fun EditRemoteControlScreen(
 ) {
     var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
     var editedRemoteCommands by rememberSaveable { mutableStateOf(host.remoteCommands ?: emptyMap()) }
-    var editedCommands by rememberSaveable { mutableStateOf(host.commands) }
+    var editedCommands by rememberSaveable { mutableStateOf(host.commands.map { it.toItem() }) }
     var editedSmartVolumeSettings by rememberSaveable { mutableStateOf(host.smartVolume) }
     var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
-    var editingCommandInList by rememberSaveable { mutableStateOf<Command?>(null) }
+    var editingCommandInList by rememberSaveable { mutableStateOf<CommandItem?>(null) }
     var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
     var showEditKeyboardCommandDialog by rememberSaveable { mutableStateOf(false) }
     var showSmartVolumeSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
     val hasUnsavedChanges =
         editedRemoteCommands != (host.remoteCommands
-            ?: emptyMap<RemoteControlKey, Command>()) || editedCommands != host.commands || editedSmartVolumeSettings != host.smartVolume
+            ?: emptyMap<RemoteControlKey, Command>()) || editedCommands.map { it.command } != host.commands || editedSmartVolumeSettings != host.smartVolume
     var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var resetToPresetKey by rememberSaveable { mutableStateOf("") }
@@ -140,7 +131,7 @@ fun EditRemoteControlScreen(
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
+                        onSave(editedRemoteCommands, editedCommands.map { it.command }, editedSmartVolumeSettings, true)
                     },
                 ) {
                     Text("Save and leave")
@@ -312,7 +303,7 @@ fun EditRemoteControlScreen(
                     icon = { Icon(Icons.Default.Save, contentDescription = "Save") },
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
+                        onSave(editedRemoteCommands, editedCommands.map { it.command }, editedSmartVolumeSettings, true)
                     },
                 )
             }
@@ -398,10 +389,10 @@ fun EditRemoteControlScreen(
 
                     3 -> {
                         EditCommandsTab(
-                            commands = editedCommands,
+                            commandItems = editedCommands,
                             onCommandsChanged = { editedCommands = it },
-                            onEditCommand = { command ->
-                                editingCommandInList = command
+                            onEditCommand = {
+                                editingCommandInList = it
                                 showEditCommandDialog = true
                             },
                         )
@@ -413,16 +404,16 @@ fun EditRemoteControlScreen(
 
     if (showEditCommandDialog) {
         EditCommandDialog(
-            command = editingCommandInList,
+            commandItem = editingCommandInList,
             onDismiss = {
                 showEditCommandDialog = false
                 editingCommandInList = null
             },
-            onSave = { command ->
+            onSave = { commandItem ->
                 editedCommands = if (editingCommandInList != null) {
-                    editedCommands.map { if (it == editingCommandInList) command else it }
+                    editedCommands.map { if (it == editingCommandInList) commandItem else it }
                 } else {
-                    editedCommands + command
+                    editedCommands + commandItem
                 }
                 showEditCommandDialog = false
                 editingCommandInList = null
@@ -484,99 +475,6 @@ fun EditRemoteControlScreen(
                 }
                 editingCommand = null
             },
-        )
-    }
-}
-
-@Composable
-fun EditCommandsTab(
-    commands: List<Command>,
-    onCommandsChanged: (List<Command>) -> Unit,
-    onEditCommand: (Command) -> Unit,
-) {
-    val snackbarHostState = remember { SnackbarHostState() }
-    val commandsListState = rememberLazyListState()
-    var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
-    val view = LocalView.current
-
-    LaunchedEffect(undoableDeletedCommand) {
-        val deletedCommand = undoableDeletedCommand
-        if (deletedCommand != null) {
-            val (index, command) = deletedCommand
-            val result = snackbarHostState.showSnackbar(
-                message = "Command deleted",
-                actionLabel = "Undo",
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                view.playSoundEffect(SoundEffectConstants.CLICK)
-                val currentCommands = commands.toMutableList()
-                currentCommands.add(index, command)
-                onCommandsChanged(currentCommands)
-            } else {
-                undoableDeletedCommand = null
-            }
-        }
-    }
-
-    LaunchedEffect(commands, undoableDeletedCommand) {
-        val deletedCommand = undoableDeletedCommand
-        if (deletedCommand != null) {
-            val (index, command) = deletedCommand
-            if (index < commands.size && commands[index] == command) {
-                commandsListState.animateScrollToItem(index)
-                undoableDeletedCommand = null
-            }
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            state = commandsListState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentPadding = PaddingValues(bottom = 160.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(commands) { command ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(text = command.name ?: command.command, modifier = Modifier.weight(1f))
-                    IconButton(
-                        onClick = {
-                            view.playSoundEffect(SoundEffectConstants.CLICK)
-                            onEditCommand(command)
-                        },
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit command")
-                    }
-                    IconButton(
-                        onClick = {
-                            view.playSoundEffect(SoundEffectConstants.CLICK)
-                            val deletedCommandIndex = commands.indexOf(command)
-                            val newCommands = commands.filter { it != command }
-                            onCommandsChanged(newCommands)
-                            undoableDeletedCommand = deletedCommandIndex to command
-                        },
-                    ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Delete command",
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                }
-            }
-        }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 160.dp),
         )
     }
 }

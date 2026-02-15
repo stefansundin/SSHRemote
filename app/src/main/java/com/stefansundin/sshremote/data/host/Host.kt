@@ -36,7 +36,7 @@ enum class RemoteControlScreen(val tabIndex: Int) {
 }
 
 /**
- * A host is an network device that can be accessed via SSH.
+ * A host is a network device that can be accessed via SSH.
  *
  * A host is also known as an SSH server, but in this app the term host is used consistently, including in the UI.
  */

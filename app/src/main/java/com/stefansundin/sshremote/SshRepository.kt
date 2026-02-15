@@ -284,7 +284,7 @@ class SshRepository(private val settingsRepository: SettingsRepository): ISshRep
                 channel.disconnect()
 
                 if (exitStatus == 0) {
-                    return@withContext Result.Success("Output:\n${output}")
+                    return@withContext Result.Success(output.toString())
                 } else {
                     return@withContext Result.Error("Command failed (Status $exitStatus). Output:\n${output}")
                 }

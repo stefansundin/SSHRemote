@@ -13,6 +13,7 @@ materialIconsExtendedAndroid = "1.7.8"
 datastorePreferences = "1.2.0"
 room = "2.8.4"
 lifecycle = "2.10.0"
+reorderable = "3.0.0"
 securityCrypto = "1.1.0"
 jsch = "2.27.7"
 bouncyCastle = "1.83"
@@ -54,6 +55,7 @@ desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref 
 zxing = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxing" }
 boswelja-compose-core = { group = "io.github.boswelja.markdown", name = "core", version.ref = "composeMarkdown" }
 boswelja-compose-markdown = { group = "io.github.boswelja.markdown", name = "material3", version.ref = "composeMarkdown" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
