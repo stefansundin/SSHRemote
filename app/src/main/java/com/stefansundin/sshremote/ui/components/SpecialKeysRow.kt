@@ -22,23 +22,41 @@ import android.content.res.Configuration
 import android.view.KeyEvent
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+
+private data class KeyData(
+    val label: String,
+    val keyCode: Int,
+    val icon: ImageVector? = null,
+)
 
 @Composable
 fun SpecialKeysRow(
@@ -53,70 +71,133 @@ fun SpecialKeysRow(
     val keyboardConfigured = host == null ||
             (host.remoteCommands != null && !host.remoteCommands[RemoteControlKey.KEYBOARD_KEY_INPUT]?.command.isNullOrEmpty())
     val isEnabled = connectionStatus == ConnectionStatus.CONNECTED && keyboardConfigured
-    val specialKeys = listOf(
-        "Esc" to KeyEvent.KEYCODE_ESCAPE,
-        "Tab" to KeyEvent.KEYCODE_TAB,
-        "Caps" to KeyEvent.KEYCODE_CAPS_LOCK,
-        "Shift" to KeyEvent.KEYCODE_SHIFT_LEFT,
-        "Ctrl" to KeyEvent.KEYCODE_CTRL_LEFT,
-        "Super" to KeyEvent.KEYCODE_META_LEFT,
-        "Alt" to KeyEvent.KEYCODE_ALT_LEFT,
-        "Ins" to KeyEvent.KEYCODE_INSERT,
-        "Del" to KeyEvent.KEYCODE_FORWARD_DEL,
-        "Home" to KeyEvent.KEYCODE_MOVE_HOME,
-        "End" to KeyEvent.KEYCODE_MOVE_END,
-        "PgUp" to KeyEvent.KEYCODE_PAGE_UP,
-        "PgDn" to KeyEvent.KEYCODE_PAGE_DOWN,
-        "↑" to KeyEvent.KEYCODE_DPAD_UP,
-        "↓" to KeyEvent.KEYCODE_DPAD_DOWN,
-        "←" to KeyEvent.KEYCODE_DPAD_LEFT,
-        "→" to KeyEvent.KEYCODE_DPAD_RIGHT,
-    )
+
     val modifiers = setOf(
         KeyEvent.KEYCODE_SHIFT_LEFT,
         KeyEvent.KEYCODE_CTRL_LEFT,
         KeyEvent.KEYCODE_META_LEFT,
         KeyEvent.KEYCODE_ALT_LEFT,
     )
+
     val view = LocalView.current
 
-    FlowRow(
+    val runKey = { keyData: KeyData ->
+        view.playSoundEffect(SoundEffectConstants.CLICK)
+        if (modifiers.contains(keyData.keyCode)) {
+            if (pressedKeys.contains(keyData.keyCode)) {
+                onKeyUp(keyData.keyCode)
+            } else {
+                onKeyDown(keyData.keyCode)
+            }
+        } else {
+            onKey(keyData.keyCode)
+        }
+    }
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        specialKeys.forEach { (label, key) ->
-            val isModifier = modifiers.contains(key)
-            val isPressed = pressedKeys.contains(key)
+        // First row: Main actions and Modifiers
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            val row1 = listOf(
+                KeyData("Esc", KeyEvent.KEYCODE_ESCAPE),
+                KeyData("Tab", KeyEvent.KEYCODE_TAB),
+                KeyData("Ctrl", KeyEvent.KEYCODE_CTRL_LEFT),
+                KeyData("Alt", KeyEvent.KEYCODE_ALT_LEFT),
+                KeyData("Shift", KeyEvent.KEYCODE_SHIFT_LEFT),
+                KeyData("Super", KeyEvent.KEYCODE_META_LEFT),
+                KeyData("Caps", KeyEvent.KEYCODE_CAPS_LOCK),
+            )
+            row1.forEach { keyData ->
+                KeyButton(
+                    keyData = keyData,
+                    isPressed = pressedKeys.contains(keyData.keyCode),
+                    enabled = isEnabled,
+                    onClick = { runKey(keyData) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
 
-            Button(
-                enabled = isEnabled,
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    if (isModifier) {
-                        if (isPressed) {
-                            onKeyUp(key)
-                        } else {
-                            onKeyDown(key)
-                        }
-                    } else {
-                        onKey(key)
-                    }
-                },
-                colors = if (isPressed) {
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    )
-                } else {
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                },
-            ) {
-                Text(label)
+        // Second row: Navigation and Secondary Actions
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            val row2 = listOf(
+                KeyData("Del", KeyEvent.KEYCODE_FORWARD_DEL),
+                KeyData("Home", KeyEvent.KEYCODE_MOVE_HOME),
+                KeyData("End", KeyEvent.KEYCODE_MOVE_END),
+                KeyData("PgUp", KeyEvent.KEYCODE_PAGE_UP),
+                KeyData("PgDn", KeyEvent.KEYCODE_PAGE_DOWN),
+                KeyData("Left", KeyEvent.KEYCODE_DPAD_LEFT, Icons.AutoMirrored.Filled.ArrowBack),
+                KeyData("Up", KeyEvent.KEYCODE_DPAD_UP, Icons.Default.ArrowUpward),
+                KeyData("Down", KeyEvent.KEYCODE_DPAD_DOWN, Icons.Default.ArrowDownward),
+                KeyData("Right", KeyEvent.KEYCODE_DPAD_RIGHT, Icons.AutoMirrored.Filled.ArrowForward),
+            )
+            row2.forEach { keyData ->
+                KeyButton(
+                    keyData = keyData,
+                    isPressed = pressedKeys.contains(keyData.keyCode),
+                    enabled = isEnabled,
+                    onClick = { runKey(keyData) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun KeyButton(
+    keyData: KeyData,
+    isPressed: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val containerColor = if (isPressed) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val contentColor = if (isPressed) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(4.dp),
+        color = containerColor,
+        contentColor = contentColor,
+        modifier = modifier.height(36.dp),
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+        ) {
+            if (keyData.icon != null) {
+                Icon(
+                    imageVector = keyData.icon,
+                    contentDescription = keyData.label,
+                    modifier = Modifier.size(18.dp),
+                )
+            } else {
+                Text(
+                    text = keyData.label,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                )
             }
         }
     }
