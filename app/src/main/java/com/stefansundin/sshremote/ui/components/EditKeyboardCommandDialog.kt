@@ -23,7 +23,6 @@ import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -50,13 +49,11 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
 fun EditKeyboardCommandDialog(
-    typeCommand: Command,
-    keyCommand: Command,
+    initialRemoteCommands: Map<RemoteControlKey, Command>,
     onDismiss: () -> Unit,
-    onSave: (typeCommand: Command, keyCommand: Command) -> Unit,
+    onSave: (Map<RemoteControlKey, Command>) -> Unit,
 ) {
-    var newTypeCommand by rememberSaveable { mutableStateOf(typeCommand) }
-    var newKeyCommand by rememberSaveable { mutableStateOf(keyCommand) }
+    var editedRemoteCommands by rememberSaveable { mutableStateOf(initialRemoteCommands) }
     val view = LocalView.current
 
     AlertDialog(
@@ -66,26 +63,26 @@ fun EditKeyboardCommandDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TextField(
-                    value = newTypeCommand.command,
-                    onValueChange = { value ->
-                        newTypeCommand = newTypeCommand.copy(command = value)
-                    },
-                    label = { Text(RemoteControlKey.KEYBOARD_TYPE_INPUT.title) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .dpadFocusable(),
+                val keyboardKeys = listOf(
+                    RemoteControlKey.KEYBOARD_TYPE_INPUT,
+                    RemoteControlKey.KEYBOARD_KEY_INPUT,
+                    RemoteControlKey.KEYBOARD_KEY_DOWN,
+                    RemoteControlKey.KEYBOARD_KEY_UP,
                 )
-                TextField(
-                    value = newKeyCommand.command,
-                    onValueChange = { value ->
-                        newKeyCommand = newKeyCommand.copy(command = value)
-                    },
-                    label = { Text(RemoteControlKey.KEYBOARD_KEY_INPUT.title) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .dpadFocusable(),
-                )
+                keyboardKeys.forEach { key ->
+                    TextField(
+                        label = { Text(key.title) },
+                        value = editedRemoteCommands[key]?.command ?: "",
+                        onValueChange = { value ->
+                            editedRemoteCommands = editedRemoteCommands.toMutableMap().apply {
+                                this[key] = (this[key] ?: Command("", name = key.title)).copy(command = value)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .dpadFocusable(),
+                    )
+                }
             }
         },
         properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
@@ -94,7 +91,7 @@ fun EditKeyboardCommandDialog(
             TextButton(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onSave(newTypeCommand, newKeyCommand)
+                    onSave(editedRemoteCommands)
                 },
             ) {
                 Text("Save")
@@ -118,15 +115,12 @@ fun EditKeyboardCommandDialog(
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun EditKeyboardCommandDialogPreview() {
-    val remoteCommands = wtypePreset
-
     SSHRemoteTheme {
         Surface {
             EditKeyboardCommandDialog(
-                typeCommand = remoteCommands[RemoteControlKey.KEYBOARD_TYPE_INPUT]!!,
-                keyCommand = remoteCommands[RemoteControlKey.KEYBOARD_KEY_INPUT]!!,
+                initialRemoteCommands = wtypePreset,
                 onDismiss = {},
-                onSave = { _, _ -> },
+                onSave = {},
             )
         }
     }

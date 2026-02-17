@@ -276,7 +276,7 @@ fun RemoteControlScreen(
                 SelectionContainer {
                     Text(uiState.error)
                 }
-           },
+            },
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = onClearError,
             confirmButton = {
@@ -514,9 +514,38 @@ fun RemoteControlScreen(
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
+    var pressedSpecialKeys by rememberSaveable { mutableStateOf(emptySet<Int>()) }
+
+    val runKeyboardCommand = { keyCode: Int, remoteControlKey: RemoteControlKey ->
+        host.remoteCommands?.get(remoteControlKey)
+            ?.let { commandTemplate ->
+                val commandRaw = commandTemplate.command
+                val command = if (commandRaw.contains("%d")) {
+                    val linuxKeyCode = getLinuxKeyCode(keyCode)
+                    commandRaw.replace("%d", linuxKeyCode.toString())
+                } else {
+                    val keyName = getKeyName(keyCode)
+                    try {
+                        commandRaw.format(keyName)
+                    } catch (_: Exception) {
+                        commandRaw
+                    }
+                }
+
+                coroutineScope.launch {
+                    hostViewModel.runCommand(command, commandTemplate.showOutput)
+                }
+            }
+    }
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage != 2) {
+            // Release any pressed special keys when leaving the keyboard tab
+            pressedSpecialKeys.forEach { key ->
+                runKeyboardCommand(key, RemoteControlKey.KEYBOARD_KEY_UP)
+            }
+            pressedSpecialKeys = emptySet()
+
             // Hide the virtual keyboard when the Keyboard tab is no longer focused:
             focusManager.clearFocus()
             // Focus the remote control so volume hardware buttons can be intercepted:
@@ -704,7 +733,8 @@ fun RemoteControlScreen(
                                 connectionStatus = uiState.connectionStatus,
                                 onMouseEvent = { event ->
                                     if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick ||
-                                        event is MouseEvent.LeftDown || event is MouseEvent.RightDown) {
+                                        event is MouseEvent.LeftDown || event is MouseEvent.RightDown
+                                    ) {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
                                         performHapticFeedback(context, uiState.hapticFeedback)
                                     }
@@ -749,28 +779,6 @@ fun RemoteControlScreen(
                         }
 
                         2 -> {
-                            val onKey = { keyCode: Int ->
-                                view.playSoundEffect(SoundEffectConstants.CLICK)
-                                host.remoteCommands?.get(RemoteControlKey.KEYBOARD_KEY_INPUT)
-                                    ?.let { commandTemplate ->
-                                        val commandRaw = commandTemplate.command
-                                        val command = if (commandRaw.contains("%d")) {
-                                            val linuxKeyCode = getLinuxKeyCode(keyCode)
-                                            commandRaw.replace("%d", linuxKeyCode.toString())
-                                        } else {
-                                            val keyName = getKeyName(keyCode)
-                                            try {
-                                                commandRaw.format(keyName)
-                                            } catch (_: Exception) {
-                                                commandRaw
-                                            }
-                                        }
-
-                                        coroutineScope.launch {
-                                            hostViewModel.runCommand(command, commandTemplate.showOutput)
-                                        }
-                                    }
-                            }
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -778,7 +786,11 @@ fun RemoteControlScreen(
                             ) {
                                 KeyboardInput(
                                     isCurrentlySelected = pagerState.currentPage == 2,
-                                    onKey = { key -> onKey(key) },
+                                    onKey = { key ->
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                        runKeyboardCommand(key, RemoteControlKey.KEYBOARD_KEY_INPUT)
+                                    },
                                     onType = { text ->
                                         host.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
                                             ?.let { commandTemplate ->
@@ -797,7 +809,22 @@ fun RemoteControlScreen(
                                     modifier = Modifier.weight(1f),
                                 )
                                 SpecialKeysRow(
-                                    onKey = { key -> onKey(key) },
+                                    onKey = { key ->
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                        runKeyboardCommand(key, RemoteControlKey.KEYBOARD_KEY_INPUT)
+                                    },
+                                    onKeyDown = { key ->
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                        pressedSpecialKeys = pressedSpecialKeys + key
+                                        runKeyboardCommand(key, RemoteControlKey.KEYBOARD_KEY_DOWN)
+                                    },
+                                    onKeyUp = { key ->
+                                        performHapticFeedback(context, uiState.hapticFeedback)
+                                        pressedSpecialKeys = pressedSpecialKeys - key
+                                        runKeyboardCommand(key, RemoteControlKey.KEYBOARD_KEY_UP)
+                                    },
+                                    pressedKeys = pressedSpecialKeys,
                                     host = host,
                                     connectionStatus = uiState.connectionStatus,
                                 )

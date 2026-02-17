@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +43,9 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 @Composable
 fun SpecialKeysRow(
     onKey: (Int) -> Unit,
+    onKeyDown: (Int) -> Unit,
+    onKeyUp: (Int) -> Unit,
+    pressedKeys: Set<Int>,
     modifier: Modifier = Modifier,
     host: Host? = null,
     connectionStatus: ConnectionStatus? = null,
@@ -57,6 +62,12 @@ fun SpecialKeysRow(
         "Super" to KeyEvent.KEYCODE_META_LEFT,
         "Alt" to KeyEvent.KEYCODE_ALT_LEFT,
     )
+    val modifiers = setOf(
+        KeyEvent.KEYCODE_SHIFT_LEFT,
+        KeyEvent.KEYCODE_CTRL_LEFT,
+        KeyEvent.KEYCODE_META_LEFT,
+        KeyEvent.KEYCODE_ALT_LEFT,
+    )
     val view = LocalView.current
 
     FlowRow(
@@ -66,11 +77,33 @@ fun SpecialKeysRow(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         specialKeys.forEach { (label, key) ->
+            val isModifier = modifiers.contains(key)
+            val isPressed = pressedKeys.contains(key)
+
             Button(
                 enabled = isEnabled,
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onKey(key)
+                    if (isModifier) {
+                        if (isPressed) {
+                            onKeyUp(key)
+                        } else {
+                            onKeyDown(key)
+                        }
+                    } else {
+                        onKey(key)
+                    }
+                },
+                colors = if (isPressed) {
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    )
+                } else {
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
                 },
             ) {
                 Text(label)
@@ -85,7 +118,13 @@ fun SpecialKeysRow(
 private fun SpecialKeysRowPreview() {
     SSHRemoteTheme {
         Surface {
-            SpecialKeysRow(onKey = {}, connectionStatus = ConnectionStatus.CONNECTED)
+            SpecialKeysRow(
+                onKey = {},
+                onKeyDown = {},
+                onKeyUp = {},
+                pressedKeys = emptySet(),
+                connectionStatus = ConnectionStatus.CONNECTED,
+            )
         }
     }
 }

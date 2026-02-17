@@ -53,6 +53,8 @@ enum class RemoteControlKey(val title: String) {
     // Keyboard
     KEYBOARD_TYPE_INPUT("Keyboard Type"),
     KEYBOARD_KEY_INPUT("Keyboard Key"),
+    KEYBOARD_KEY_DOWN("Keyboard Key Down"),
+    KEYBOARD_KEY_UP("Keyboard Key Up"),
 }
 
 /**
@@ -87,6 +89,8 @@ val wtypePreset = mapOf(
     RemoteControlKey.MOUSE_PAN_RIGHT to Command("wtype -A axis_h -1"),
     RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("wtype '%s'"),
     RemoteControlKey.KEYBOARD_KEY_INPUT to Command("wtype -k %s"),
+    RemoteControlKey.KEYBOARD_KEY_DOWN to Command("wtype -P %s"),
+    RemoteControlKey.KEYBOARD_KEY_UP to Command("wtype -p %s"),
 )
 
 /**
@@ -121,6 +125,8 @@ val xdotoolPreset = mapOf(
     RemoteControlKey.MOUSE_PAN_RIGHT to Command("DISPLAY=:0 xdotool click 6"),
     RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("DISPLAY=:0 xdotool type '%s'"),
     RemoteControlKey.KEYBOARD_KEY_INPUT to Command("DISPLAY=:0 xdotool key %s"),
+    RemoteControlKey.KEYBOARD_KEY_DOWN to Command("DISPLAY=:0 xdotool keydown %s"),
+    RemoteControlKey.KEYBOARD_KEY_UP to Command("DISPLAY=:0 xdotool keyup %s"),
 )
 
 /**
@@ -155,6 +161,8 @@ val ydotoolPreset = mapOf(
     RemoteControlKey.MOUSE_PAN_RIGHT to Command("ydotool mousemove --wheel -- -1 0"),
     RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("ydotool type '%s'"),
     RemoteControlKey.KEYBOARD_KEY_INPUT to Command("ydotool key %d:1 %d:0"),
+    RemoteControlKey.KEYBOARD_KEY_DOWN to Command("ydotool key %d:1"),
+    RemoteControlKey.KEYBOARD_KEY_UP to Command("ydotool key %d:0"),
 )
 
 /**
@@ -189,6 +197,8 @@ val dotoolPreset = mapOf(
     RemoteControlKey.MOUSE_PAN_RIGHT to Command("echo hwheel 1 | dotool"),
     RemoteControlKey.KEYBOARD_TYPE_INPUT to Command("echo type '%s' | dotool"),
     RemoteControlKey.KEYBOARD_KEY_INPUT to Command("echo key %s | dotool"),
+    RemoteControlKey.KEYBOARD_KEY_DOWN to Command("echo keydown %s | dotool"),
+    RemoteControlKey.KEYBOARD_KEY_UP to Command("echo keyup %s | dotool"),
 )
 
 /**

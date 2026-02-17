@@ -434,20 +434,10 @@ fun EditRemoteControlScreen(
 
     if (showEditKeyboardCommandDialog) {
         EditKeyboardCommandDialog(
-            typeCommand = editedRemoteCommands[RemoteControlKey.KEYBOARD_TYPE_INPUT] ?: Command(
-                "",
-                name = RemoteControlKey.KEYBOARD_TYPE_INPUT.title,
-            ),
-            keyCommand = editedRemoteCommands[RemoteControlKey.KEYBOARD_KEY_INPUT] ?: Command(
-                "",
-                name = RemoteControlKey.KEYBOARD_KEY_INPUT.title,
-            ),
+            initialRemoteCommands = editedRemoteCommands,
             onDismiss = { showEditKeyboardCommandDialog = false },
-            onSave = { newTypeCommand, newKeyCommand ->
-                editedRemoteCommands = editedRemoteCommands.toMutableMap().apply {
-                    this[RemoteControlKey.KEYBOARD_TYPE_INPUT] = newTypeCommand
-                    this[RemoteControlKey.KEYBOARD_KEY_INPUT] = newKeyCommand
-                }
+            onSave = {
+                editedRemoteCommands = it
                 showEditKeyboardCommandDialog = false
             },
         )
