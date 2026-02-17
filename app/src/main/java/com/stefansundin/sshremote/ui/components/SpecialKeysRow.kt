@@ -21,6 +21,8 @@ package com.stefansundin.sshremote.ui.components
 import android.content.res.Configuration
 import android.view.KeyEvent
 import android.view.SoundEffectConstants
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +42,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,6 +56,7 @@ import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.delay
 
 private data class KeyData(
     val label: String,
@@ -77,6 +83,17 @@ fun SpecialKeysRow(
         KeyEvent.KEYCODE_CTRL_LEFT,
         KeyEvent.KEYCODE_META_LEFT,
         KeyEvent.KEYCODE_ALT_LEFT,
+    )
+
+    val repeatableKeys = setOf(
+        KeyEvent.KEYCODE_DPAD_UP,
+        KeyEvent.KEYCODE_DPAD_DOWN,
+        KeyEvent.KEYCODE_DPAD_LEFT,
+        KeyEvent.KEYCODE_DPAD_RIGHT,
+        KeyEvent.KEYCODE_PAGE_UP,
+        KeyEvent.KEYCODE_PAGE_DOWN,
+        KeyEvent.KEYCODE_FORWARD_DEL,
+        KeyEvent.KEYCODE_TAB,
     )
 
     val view = LocalView.current
@@ -120,6 +137,7 @@ fun SpecialKeysRow(
                     isPressed = pressedKeys.contains(keyData.keyCode),
                     enabled = isEnabled,
                     onClick = { runKey(keyData) },
+                    repeatable = repeatableKeys.contains(keyData.keyCode),
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -147,6 +165,7 @@ fun SpecialKeysRow(
                     isPressed = pressedKeys.contains(keyData.keyCode),
                     enabled = isEnabled,
                     onClick = { runKey(keyData) },
+                    repeatable = repeatableKeys.contains(keyData.keyCode),
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -161,25 +180,41 @@ private fun KeyButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    repeatable: Boolean = false,
 ) {
-    val containerColor = if (isPressed) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHeld by interactionSource.collectIsPressedAsState()
+
+    if (repeatable && enabled && isHeld) {
+        LaunchedEffect(keyData.keyCode) {
+            onClick()
+            delay(500)
+            while (true) {
+                onClick()
+                delay(100)
+            }
+        }
+    }
+
+    val containerColor = if (isPressed || isHeld) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.surfaceVariant
     }
 
-    val contentColor = if (isPressed) {
+    val contentColor = if (isPressed || isHeld) {
         MaterialTheme.colorScheme.onPrimary
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Surface(
-        onClick = onClick,
+        onClick = { if (!repeatable) onClick() },
         enabled = enabled,
         shape = RoundedCornerShape(4.dp),
         color = containerColor,
         contentColor = contentColor,
+        interactionSource = interactionSource,
         modifier = modifier.height(36.dp),
     ) {
         Box(
