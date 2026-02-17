@@ -5,7 +5,9 @@
       <w>hwheel</w>
       <w>keyevent</w>
       <w>longpress</w>
+      <w>mousedown</w>
       <w>mousemove</w>
+      <w>mouseup</w>
       <w>nextsong</w>
       <w>pactl</w>
       <w>playpause</w>

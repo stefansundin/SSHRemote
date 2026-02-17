@@ -23,6 +23,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.MouseEvent
 import com.stefansundin.sshremote.ui.screens.sampleHost
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -78,6 +80,14 @@ fun MousePad(
         host == null || !host.remoteCommands?.get(RemoteControlKey.MOUSE_LEFT_CLICK)?.command.isNullOrEmpty()
     val rightClickConfigured =
         host == null || !host.remoteCommands?.get(RemoteControlKey.MOUSE_RIGHT_CLICK)?.command.isNullOrEmpty()
+    val leftDownUpConfigured = host == null || (host.remoteCommands != null &&
+            !host.remoteCommands[RemoteControlKey.MOUSE_LEFT_DOWN]?.command.isNullOrEmpty() &&
+            !host.remoteCommands[RemoteControlKey.MOUSE_LEFT_UP]?.command.isNullOrEmpty()
+            )
+    val rightDownUpConfigured = host == null || (host.remoteCommands != null &&
+            !host.remoteCommands[RemoteControlKey.MOUSE_RIGHT_DOWN]?.command.isNullOrEmpty() &&
+            !host.remoteCommands[RemoteControlKey.MOUSE_RIGHT_UP]?.command.isNullOrEmpty()
+            )
     val scrollingConfigured =
         host == null ||
                 (host.remoteCommands != null &&
@@ -98,30 +108,51 @@ fun MousePad(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         TouchPad(
-            { dx, dy -> onMouseEvent(MouseEvent.Move(dx, dy)) },
-            { dx, dy -> onMouseEvent(MouseEvent.Pan(dx, dy)) },
-            { onMouseEvent(MouseEvent.LeftClick) },
-            { onMouseEvent(MouseEvent.RightClick) },
-            editing,
-            mouseMoveConfigured,
-            leftClickConfigured,
-            rightClickConfigured,
-            scrollingConfigured,
-            Modifier.weight(1f),
+            onMove = { dx, dy -> onMouseEvent(MouseEvent.Move(dx, dy)) },
+            onPan = { dx, dy -> onMouseEvent(MouseEvent.Pan(dx, dy)) },
+            onLeftClick = { onMouseEvent(MouseEvent.LeftClick) },
+            onRightClick = { onMouseEvent(MouseEvent.RightClick) },
+            onLeftDown = { onMouseEvent(MouseEvent.LeftDown) },
+            onLeftUp = { onMouseEvent(MouseEvent.LeftUp) },
+            editing = editing,
+            mouseMoveConfigured = mouseMoveConfigured,
+            leftClickConfigured = leftClickConfigured,
+            rightClickConfigured = rightClickConfigured,
+            scrollingConfigured = scrollingConfigured,
+            leftDownUpConfigured = leftDownUpConfigured,
+            modifier = Modifier.weight(1f),
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
         ) {
             Button(
-                onClick = { onMouseEvent(MouseEvent.LeftClick) },
-                enabled = isEnabled && leftClickConfigured,
+                onClick = { },
+                enabled = isEnabled && leftDownUpConfigured,
+                modifier = Modifier.pointerInput(isEnabled, leftDownUpConfigured) {
+                    if (!isEnabled || !leftDownUpConfigured) return@pointerInput
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        onMouseEvent(MouseEvent.LeftDown)
+                        waitForUpOrCancellation()
+                        onMouseEvent(MouseEvent.LeftUp)
+                    }
+                },
             ) {
                 Text("Left Click")
             }
             Button(
-                onClick = { onMouseEvent(MouseEvent.RightClick) },
-                enabled = isEnabled && rightClickConfigured,
+                onClick = { },
+                enabled = isEnabled && rightDownUpConfigured,
+                modifier = Modifier.pointerInput(isEnabled, rightDownUpConfigured) {
+                    if (!isEnabled || !rightDownUpConfigured) return@pointerInput
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        onMouseEvent(MouseEvent.RightDown)
+                        waitForUpOrCancellation()
+                        onMouseEvent(MouseEvent.RightUp)
+                    }
+                },
             ) {
                 Text("Right Click")
             }
@@ -131,9 +162,10 @@ fun MousePad(
 
 private enum class GestureState {
     Undecided,
-    LongPress,
+    LongPressDrag,
     Move,
     Scroll,
+    TwoFingerLongPress,
 }
 
 @Composable
@@ -142,28 +174,35 @@ private fun TouchPad(
     onPan: (dx: Float, dy: Float) -> Unit,
     onLeftClick: () -> Unit,
     onRightClick: () -> Unit,
+    onLeftDown: () -> Unit,
+    onLeftUp: () -> Unit,
     editing: Boolean,
     mouseMoveConfigured: Boolean,
     leftClickConfigured: Boolean,
     rightClickConfigured: Boolean,
     scrollingConfigured: Boolean,
+    leftDownUpConfigured: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .pointerInput(leftClickConfigured, rightClickConfigured) {
+            .pointerInput(leftClickConfigured, rightClickConfigured, leftDownUpConfigured) {
                 coroutineScope {
                     awaitEachGesture {
                         var state = GestureState.Undecided
                         val down = awaitFirstDown(requireUnconsumed = false)
 
-                        val longPressJob = launch {
-                            if (!rightClickConfigured) return@launch
-                            delay(viewConfiguration.longPressTimeoutMillis)
-                            state = GestureState.LongPress
-                            onRightClick()
-                        }
+                        val longPressJob = if (leftDownUpConfigured) {
+                            launch {
+                                delay(viewConfiguration.longPressTimeoutMillis)
+                                state = GestureState.LongPressDrag
+                                onLeftDown()
+                            }
+                        } else null
+
+                        var twoFingerLongPressJob: Job? = null
+                        var initialTwoFingerCentroid = Offset.Unspecified
 
                         do {
                             val event = awaitPointerEvent()
@@ -174,20 +213,42 @@ private fun TouchPad(
                                 if (pointer != null) {
                                     val distance = pointer.position - down.position
                                     if (pressedChanges.size > 1) {
-                                        longPressJob.cancel()
-                                        state = GestureState.Scroll
+                                        longPressJob?.cancel()
+                                        state = GestureState.TwoFingerLongPress
+                                        initialTwoFingerCentroid = pressedChanges
+                                            .map { it.position }
+                                            .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                        if (rightClickConfigured) {
+                                            twoFingerLongPressJob = launch {
+                                                delay(viewConfiguration.longPressTimeoutMillis)
+                                                onRightClick()
+                                            }
+                                        }
                                     } else if (distance.getDistanceSquared() > viewConfiguration.touchSlop * viewConfiguration.touchSlop) {
-                                        longPressJob.cancel()
+                                        longPressJob?.cancel()
                                         state = GestureState.Move
                                     }
                                 }
                             }
 
-                            if (state == GestureState.Move && pressedChanges.size > 1) {
-                                state = GestureState.Scroll
+                            if (state == GestureState.TwoFingerLongPress) {
+                                if (pressedChanges.size < 2) {
+                                    twoFingerLongPressJob?.cancel()
+                                    twoFingerLongPressJob = null
+                                } else {
+                                    val currentCentroid = pressedChanges
+                                        .map { it.position }
+                                        .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
+                                    val totalDistance = (currentCentroid - initialTwoFingerCentroid).getDistance()
+                                    if (totalDistance > viewConfiguration.touchSlop) {
+                                        twoFingerLongPressJob?.cancel()
+                                        twoFingerLongPressJob = null
+                                        state = GestureState.Scroll
+                                    }
+                                }
                             }
 
-                            if (state == GestureState.Move) {
+                            if (state == GestureState.Move || state == GestureState.LongPressDrag) {
                                 val pointer = pressedChanges.find { it.id == down.id }
                                 if (pointer != null) {
                                     val change = pointer.positionChange()
@@ -206,14 +267,15 @@ private fun TouchPad(
                                 }
                             }
                             event.changes.forEach { it.consume() }
-                        } while (event.changes.any { it.pressed } && state != GestureState.LongPress)
+                        } while (event.changes.any { it.pressed })
 
-                        longPressJob.cancel()
+                        longPressJob?.cancel()
+                        twoFingerLongPressJob?.cancel()
 
-                        if (state == GestureState.Undecided) {
-                            if (leftClickConfigured) {
-                                onLeftClick()
-                            }
+                        when (state) {
+                            GestureState.Undecided -> if (leftClickConfigured) onLeftClick()
+                            GestureState.LongPressDrag -> if (leftDownUpConfigured) onLeftUp()
+                            else -> {}
                         }
                     }
                 }
@@ -233,10 +295,13 @@ private fun TouchPad(
                     if (mouseMoveConfigured || leftClickConfigured || rightClickConfigured || scrollingConfigured) {
                         Text("Mouse Pad", textAlign = TextAlign.Center)
                         if (leftClickConfigured) {
-                            Text("Tap for left click", textAlign = TextAlign.Center)
+                            Text("Tap to left click", textAlign = TextAlign.Center)
+                        }
+                        if (leftDownUpConfigured) {
+                            Text("Long press to click and drag", textAlign = TextAlign.Center)
                         }
                         if (rightClickConfigured) {
-                            Text("Long press for right click", textAlign = TextAlign.Center)
+                            Text("Long press with two fingers to right click", textAlign = TextAlign.Center)
                         }
                         if (scrollingConfigured) {
                             Text("Scroll using two fingers", textAlign = TextAlign.Center)

@@ -22,5 +22,9 @@ sealed interface MouseEvent {
     data class Move(val dx: Float, val dy: Float) : MouseEvent
     object LeftClick : MouseEvent
     object RightClick : MouseEvent
+    object LeftDown : MouseEvent
+    object LeftUp : MouseEvent
+    object RightDown : MouseEvent
+    object RightUp : MouseEvent
     data class Pan(val dx: Float, val dy: Float) : MouseEvent
 }

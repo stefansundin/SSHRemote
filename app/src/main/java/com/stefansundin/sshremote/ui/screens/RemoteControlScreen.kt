@@ -694,7 +694,8 @@ fun RemoteControlScreen(
                                 host = host,
                                 connectionStatus = uiState.connectionStatus,
                                 onMouseEvent = { event ->
-                                    if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick) {
+                                    if (event is MouseEvent.LeftClick || event is MouseEvent.RightClick ||
+                                        event is MouseEvent.LeftDown || event is MouseEvent.RightDown) {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
                                         performHapticFeedback(context, uiState.hapticFeedback)
                                     }
@@ -712,6 +713,22 @@ fun RemoteControlScreen(
 
                                         MouseEvent.RightClick -> {
                                             hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_RIGHT_CLICK)
+                                        }
+
+                                        MouseEvent.LeftDown -> {
+                                            hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_LEFT_DOWN)
+                                        }
+
+                                        MouseEvent.LeftUp -> {
+                                            hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_LEFT_UP)
+                                        }
+
+                                        MouseEvent.RightDown -> {
+                                            hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_RIGHT_DOWN)
+                                        }
+
+                                        MouseEvent.RightUp -> {
+                                            hostViewModel.runRemoteControlCommand(RemoteControlKey.MOUSE_RIGHT_UP)
                                         }
 
                                         is MouseEvent.Pan -> {
