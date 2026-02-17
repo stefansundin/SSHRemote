@@ -257,9 +257,9 @@ val androidPreset = mapOf(
 )
 
 val presets = mapOf(
+    "ydotool" to ydotoolPreset,
     "xdotool" to xdotoolPreset,
     "wtype" to wtypePreset,
-    "ydotool" to ydotoolPreset,
     "dotool" to dotoolPreset,
     "cec-client" to cecClientPreset,
     "macOS VLC" to macosVlcPreset,
