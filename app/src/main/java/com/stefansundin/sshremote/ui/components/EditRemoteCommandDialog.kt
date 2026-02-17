@@ -24,7 +24,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +51,7 @@ import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.ui.dpadFocusable
+import com.stefansundin.sshremote.ui.portraitImePadding
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -65,7 +69,10 @@ fun EditRemoteCommandDialog(
     AlertDialog(
         title = { Text("Edit Command") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 Text("Key: ${key.title}", style = MaterialTheme.typography.titleLarge)
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextField(
@@ -111,7 +118,7 @@ fun EditRemoteCommandDialog(
                 }
             }
         },
-        properties = DialogProperties(dismissOnClickOutside = false),
+        properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
@@ -140,6 +147,7 @@ fun EditRemoteCommandDialog(
                 Text("Cancel")
             }
         },
+        modifier = Modifier.portraitImePadding(),
     )
 }
 

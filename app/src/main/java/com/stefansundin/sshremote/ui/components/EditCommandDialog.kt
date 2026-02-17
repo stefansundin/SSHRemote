@@ -24,7 +24,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -47,6 +50,7 @@ import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.CommandItem
 import com.stefansundin.sshremote.data.host.toItem
 import com.stefansundin.sshremote.ui.dpadFocusable
+import com.stefansundin.sshremote.ui.portraitImePadding
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import java.util.UUID
 
@@ -64,7 +68,10 @@ fun EditCommandDialog(
     AlertDialog(
         title = { Text(if (commandItem == null) "Add Command" else "Edit Command") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 TextField(
                     value = name,
                     onValueChange = { name = it },
@@ -106,7 +113,7 @@ fun EditCommandDialog(
                 }
             }
         },
-        properties = DialogProperties(dismissOnClickOutside = false),
+        properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(
@@ -119,7 +126,7 @@ fun EditCommandDialog(
                                 command = commandText,
                                 name = name.ifBlank { null },
                                 showOutput = showOutput,
-                            )
+                            ),
                         ),
                     )
                 },
@@ -138,11 +145,17 @@ fun EditCommandDialog(
                 Text("Cancel")
             }
         },
+        modifier = Modifier.portraitImePadding(),
     )
 }
 
 @Preview(showBackground = true, name = "Add command")
-@Preview(showBackground = true, name = "Add command (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(
+    showBackground = true,
+    name = "Add command (dark and large font)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun EditCommandDialogPreview_Add() {
     SSHRemoteTheme {
@@ -157,7 +170,12 @@ private fun EditCommandDialogPreview_Add() {
 }
 
 @Preview(showBackground = true, name = "Edit command")
-@Preview(showBackground = true, name = "Edit command (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(
+    showBackground = true,
+    name = "Edit command (dark and large font)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun EditCommandDialogPreview_Edit() {
     SSHRemoteTheme {

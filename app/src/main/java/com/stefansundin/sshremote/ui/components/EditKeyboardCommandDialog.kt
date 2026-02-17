@@ -23,6 +23,7 @@ import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -44,6 +45,7 @@ import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.ui.dpadFocusable
+import com.stefansundin.sshremote.ui.portraitImePadding
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -86,7 +88,7 @@ fun EditKeyboardCommandDialog(
                 )
             }
         },
-        properties = DialogProperties(dismissOnClickOutside = false),
+        properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
@@ -108,6 +110,7 @@ fun EditKeyboardCommandDialog(
                 Text("Cancel")
             }
         },
+        modifier = Modifier.portraitImePadding(),
     )
 }
 

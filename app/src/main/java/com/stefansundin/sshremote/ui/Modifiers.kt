@@ -18,6 +18,9 @@
 
 package com.stefansundin.sshremote.ui
 
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.input.key.Key
@@ -30,6 +33,7 @@ import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
@@ -79,5 +83,19 @@ private class DpadFocusableNode : Modifier.Node(), KeyInputModifierNode, Composi
 
     override fun onKeyEvent(event: KeyEvent): Boolean {
         return false
+    }
+}
+
+/**
+ * Applies imePadding only when the device is in portrait orientation.
+ * In landscape, imePadding can make dialogs unusable as the keyboard takes up most of the screen.
+ */
+@Composable
+fun Modifier.portraitImePadding(): Modifier {
+    val configuration = LocalConfiguration.current
+    return if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        this.then(Modifier.imePadding())
+    } else {
+        this
     }
 }

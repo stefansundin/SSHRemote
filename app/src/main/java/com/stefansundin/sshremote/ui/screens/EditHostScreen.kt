@@ -122,6 +122,7 @@ import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ExportedCommand
 import com.stefansundin.sshremote.data.settings.ExportedHost
 import com.stefansundin.sshremote.ui.dpadFocusable
+import com.stefansundin.sshremote.ui.portraitImePadding
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -345,7 +346,10 @@ fun EditHostScreen(
         AlertDialog(
             title = { Text("SSH Configuration") },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     Text("JSch configuration is mostly like OpenSSH, but not exactly. Please do your research (click the Help button below).")
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
@@ -361,6 +365,7 @@ fun EditHostScreen(
             properties = DialogProperties(
                 usePlatformDefaultWidth = false,
                 dismissOnClickOutside = false,
+                decorFitsSystemWindows = false,
             ),
             onDismissRequest = { showSshConfigDialog = false },
             confirmButton = {
@@ -401,7 +406,7 @@ fun EditHostScreen(
                     }
                 }
             },
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.portraitImePadding().padding(16.dp),
         )
     }
 

@@ -44,6 +44,7 @@ import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.ui.dpadFocusable
+import com.stefansundin.sshremote.ui.portraitImePadding
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -91,7 +92,7 @@ fun EditMouseCommandsDialog(
                 }
             }
         },
-        properties = DialogProperties(dismissOnClickOutside = false),
+        properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
@@ -113,6 +114,7 @@ fun EditMouseCommandsDialog(
                 Text("Cancel")
             }
         },
+        modifier = Modifier.portraitImePadding(),
     )
 }
 
