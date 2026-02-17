@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -254,7 +255,10 @@ fun IdentityListScreen(
     if (errorMessage != null) {
         AlertDialog(
             title = { Text("Error") },
-            text = { Text(errorMessage!!) },
+            text = {
+                SelectionContainer {
+                    Text(errorMessage!!)
+                }},
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { errorMessage = null },
             confirmButton = {
