@@ -519,21 +519,25 @@ fun RemoteControlScreen(
     val runKeyboardCommand = { keyCode: Int, remoteControlKey: RemoteControlKey ->
         host.remoteCommands?.get(remoteControlKey)
             ?.let { commandTemplate ->
-                val commandRaw = commandTemplate.command
-                val command = if (commandRaw.contains("%d")) {
-                    val linuxKeyCode = getLinuxKeyCode(keyCode)
-                    commandRaw.replace("%d", linuxKeyCode.toString())
-                } else {
-                    val keyName = getKeyName(keyCode)
-                    try {
-                        commandRaw.format(keyName)
-                    } catch (_: Exception) {
-                        commandRaw
+                try {
+                    val commandRaw = commandTemplate.command
+                    val command = if (commandRaw.contains("%d")) {
+                        val linuxKeyCode = getLinuxKeyCode(keyCode)
+                        commandRaw.replace("%d", linuxKeyCode.toString())
+                    } else {
+                        val keyName = getKeyName(keyCode)
+                        try {
+                            commandRaw.format(keyName)
+                        } catch (_: Exception) {
+                            commandRaw
+                        }
                     }
-                }
 
-                coroutineScope.launch {
-                    hostViewModel.runCommand(command, commandTemplate.showOutput)
+                    coroutineScope.launch {
+                        hostViewModel.runCommand(command, commandTemplate.showOutput)
+                    }
+                } catch (e: IllegalArgumentException) {
+                    // Ignore unsupported keys
                 }
             }
     }
@@ -962,6 +966,7 @@ private fun RemoteControlScreenPreview_CommandsTab() {
 private fun getLinuxKeyCode(keyCode: Int): Int {
     return when (keyCode) {
         AndroidKeyEvent.KEYCODE_DEL -> 14
+        AndroidKeyEvent.KEYCODE_FORWARD_DEL -> 111
         AndroidKeyEvent.KEYCODE_ESCAPE -> 1
         AndroidKeyEvent.KEYCODE_TAB -> 15
         AndroidKeyEvent.KEYCODE_CAPS_LOCK -> 58
@@ -969,13 +974,23 @@ private fun getLinuxKeyCode(keyCode: Int): Int {
         AndroidKeyEvent.KEYCODE_CTRL_LEFT -> 29
         AndroidKeyEvent.KEYCODE_META_LEFT -> 125
         AndroidKeyEvent.KEYCODE_ALT_LEFT -> 56
-        else -> 0
+        AndroidKeyEvent.KEYCODE_INSERT -> 110
+        AndroidKeyEvent.KEYCODE_MOVE_HOME -> 102
+        AndroidKeyEvent.KEYCODE_MOVE_END -> 107
+        AndroidKeyEvent.KEYCODE_PAGE_UP -> 104
+        AndroidKeyEvent.KEYCODE_PAGE_DOWN -> 109
+        AndroidKeyEvent.KEYCODE_DPAD_UP -> 103
+        AndroidKeyEvent.KEYCODE_DPAD_DOWN -> 108
+        AndroidKeyEvent.KEYCODE_DPAD_LEFT -> 105
+        AndroidKeyEvent.KEYCODE_DPAD_RIGHT -> 106
+        else -> throw IllegalArgumentException("Unsupported key code: $keyCode")
     }
 }
 
 private fun getKeyName(keyCode: Int): String {
     return when (keyCode) {
         AndroidKeyEvent.KEYCODE_DEL -> "BackSpace"
+        AndroidKeyEvent.KEYCODE_FORWARD_DEL -> "Delete"
         AndroidKeyEvent.KEYCODE_ESCAPE -> "Escape"
         AndroidKeyEvent.KEYCODE_TAB -> "Tab"
         AndroidKeyEvent.KEYCODE_CAPS_LOCK -> "Caps_Lock"
@@ -983,6 +998,15 @@ private fun getKeyName(keyCode: Int): String {
         AndroidKeyEvent.KEYCODE_CTRL_LEFT -> "Control_L"
         AndroidKeyEvent.KEYCODE_META_LEFT -> "Super_L"
         AndroidKeyEvent.KEYCODE_ALT_LEFT -> "Alt_L"
-        else -> ""
+        AndroidKeyEvent.KEYCODE_INSERT -> "Insert"
+        AndroidKeyEvent.KEYCODE_MOVE_HOME -> "Home"
+        AndroidKeyEvent.KEYCODE_MOVE_END -> "End"
+        AndroidKeyEvent.KEYCODE_PAGE_UP -> "Page_Up"
+        AndroidKeyEvent.KEYCODE_PAGE_DOWN -> "Page_Down"
+        AndroidKeyEvent.KEYCODE_DPAD_UP -> "Up"
+        AndroidKeyEvent.KEYCODE_DPAD_DOWN -> "Down"
+        AndroidKeyEvent.KEYCODE_DPAD_LEFT -> "Left"
+        AndroidKeyEvent.KEYCODE_DPAD_RIGHT -> "Right"
+        else -> throw IllegalArgumentException("Unsupported key code: $keyCode")
     }
 }

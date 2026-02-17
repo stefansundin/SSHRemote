@@ -61,6 +61,16 @@ fun SpecialKeysRow(
         "Ctrl" to KeyEvent.KEYCODE_CTRL_LEFT,
         "Super" to KeyEvent.KEYCODE_META_LEFT,
         "Alt" to KeyEvent.KEYCODE_ALT_LEFT,
+        "Ins" to KeyEvent.KEYCODE_INSERT,
+        "Del" to KeyEvent.KEYCODE_FORWARD_DEL,
+        "Home" to KeyEvent.KEYCODE_MOVE_HOME,
+        "End" to KeyEvent.KEYCODE_MOVE_END,
+        "PgUp" to KeyEvent.KEYCODE_PAGE_UP,
+        "PgDn" to KeyEvent.KEYCODE_PAGE_DOWN,
+        "↑" to KeyEvent.KEYCODE_DPAD_UP,
+        "↓" to KeyEvent.KEYCODE_DPAD_DOWN,
+        "←" to KeyEvent.KEYCODE_DPAD_LEFT,
+        "→" to KeyEvent.KEYCODE_DPAD_RIGHT,
     )
     val modifiers = setOf(
         KeyEvent.KEYCODE_SHIFT_LEFT,
