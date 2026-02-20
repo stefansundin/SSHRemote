@@ -36,9 +36,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
@@ -66,12 +68,12 @@ fun CommandList(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                "No commands have been added.",
+                stringResource(R.string.no_commands_added),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
             Text(
-                "Edit the remote control to add commands.",
+                stringResource(R.string.edit_remote_to_add_commands),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(16.dp),

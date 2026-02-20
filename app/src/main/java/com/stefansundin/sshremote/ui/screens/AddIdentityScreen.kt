@@ -70,6 +70,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -77,6 +78,7 @@ import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.components.NoWrapOnSpecialCharactersVisualTransformation
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -104,7 +106,11 @@ fun AddIdentityScreen(
     var name by rememberSaveable { mutableStateOf("") }
     var privateKey by rememberSaveable { mutableStateOf("") }
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-    val tabTitles = listOf("Import", "Generate", "Enter Manually")
+    val tabTitles = listOf(
+        stringResource(R.string.tab_import),
+        stringResource(R.string.tab_generate),
+        stringResource(R.string.tab_manual),
+    )
     var isKeyContentValid by rememberSaveable { mutableStateOf(false) }
     var importKeyTypeDescription by rememberSaveable { mutableStateOf<String?>(null) }
     var generateKeyType by rememberSaveable { mutableStateOf<Pair<Int, Int?>>(Pair(KeyPair.ED25519, null)) }
@@ -122,10 +128,13 @@ fun AddIdentityScreen(
             (selectedTabIndex == 1) ||
             (selectedTabIndex == 2 && isKeyContentValid)
 
+    val keyNamePrefix = stringResource(R.string.generated_key_name)
+    val invalidKeyFormatMsg = stringResource(R.string.invalid_key_format)
+
     fun handleSave() {
         val finalName = name.ifBlank {
             val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
-            "Key $dateAndTime"
+            "$keyNamePrefix $dateAndTime"
         }
         when (selectedTabIndex) {
             0, 2 -> onKeySaved(finalName, privateKey)
@@ -162,7 +171,7 @@ fun AddIdentityScreen(
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     privateKey = content
-                    importError = e.message ?: "Invalid key format"
+                    importError = e.message ?: invalidKeyFormatMsg
                 }
                 Log.e("AddIdentityScreen", "Error parsing key", e)
             }
@@ -187,12 +196,13 @@ fun AddIdentityScreen(
         }
     }
 
+    val scanQrCodeKeyPrompt = stringResource(R.string.scan_qr_code_key_prompt)
     LaunchedEffect(scanQrCode) {
         if (scanQrCode) {
             scanQrCode = false
             val options = ScanOptions()
             options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-            options.setPrompt("Encode your private key file to a QR code")
+            options.setPrompt(scanQrCodeKeyPrompt)
             options.setBeepEnabled(false)
             options.setOrientationLocked(false)
             qrScanLauncher.launch(options)
@@ -201,8 +211,8 @@ fun AddIdentityScreen(
 
     if (showSaveDialog) {
         AlertDialog(
-            title = { Text("Unsaved changes") },
-            text = { Text("Do you want to save the key before leaving?") },
+            title = { Text(stringResource(R.string.unsaved_changes_title)) },
+            text = { Text(stringResource(R.string.unsaved_key_changes_text)) },
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { showSaveDialog = false },
             confirmButton = {
@@ -212,7 +222,7 @@ fun AddIdentityScreen(
                         handleSave()
                     },
                 ) {
-                    Text("Save and leave")
+                    Text(stringResource(R.string.save_and_leave))
                 }
             },
             dismissButton = {
@@ -222,7 +232,7 @@ fun AddIdentityScreen(
                         onNavigateUp()
                     },
                 ) {
-                    Text("Discard and leave")
+                    Text(stringResource(R.string.discard_and_leave))
                 }
             },
         )
@@ -230,7 +240,7 @@ fun AddIdentityScreen(
 
     if (isGenerating) {
         AlertDialog(
-            title = { Text("Generating Key") },
+            title = { Text(stringResource(R.string.generating_key_title)) },
             text = {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -238,7 +248,7 @@ fun AddIdentityScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     CircularProgressIndicator()
-                    Text("Please wait, this can take a moment...")
+                    Text(stringResource(R.string.please_wait_generating))
                 }
             },
             onDismissRequest = { /* cannot be dismissed */ },
@@ -281,7 +291,7 @@ fun AddIdentityScreen(
         modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
-                title = { Text("Add SSH Key") },
+                title = { Text(stringResource(R.string.add_ssh_key_title)) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -296,7 +306,7 @@ fun AddIdentityScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -312,7 +322,7 @@ fun AddIdentityScreen(
                 ) {
                     Icon(
                         Icons.Default.Save,
-                        contentDescription = "Save SSH Key",
+                        contentDescription = stringResource(R.string.save),
                     )
                 }
             }
@@ -326,8 +336,8 @@ fun AddIdentityScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Key Name (optional)") },
-                placeholder = { Text("Defaults to current date") },
+                label = { Text(stringResource(R.string.key_name_optional)) },
+                placeholder = { Text(stringResource(R.string.key_name_default_hint)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -394,30 +404,30 @@ fun ImportTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("Select a private key file from your device.")
+        Text(stringResource(R.string.select_key_file_prompt))
         Button(
             onClick = {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
                 onPickFile()
             },
         ) {
-            Text("Select File")
+            Text(stringResource(R.string.select_file))
         }
 
-        Text("Or scan a QR code.")
+        Text(stringResource(R.string.or_scan_qr_code))
         Button(
             onClick = {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
                 onScanQr()
             },
         ) {
-            Text("Scan QR Code")
+            Text(stringResource(R.string.scan_qr_code))
         }
 
         if (error != null) {
-            Text("Error: $error")
+            Text(stringResource(R.string.error_format, error))
         } else if (keyTypeDescription != null) {
-            Text("Key Type: $keyTypeDescription")
+            Text(stringResource(R.string.key_type_format, keyTypeDescription))
         }
     }
 }
@@ -426,8 +436,8 @@ fun ImportTab(
 fun GenerateKeyTab(selectedKeyType: Pair<Int, Int?>, onKeyTypeSelected: (Pair<Int, Int?>) -> Unit) {
     val keyTypeOptions = listOf(
         "Ed25519" to Pair(KeyPair.ED25519, null),
-        "RSA (2048-bit)" to Pair(KeyPair.RSA, 2048),
-        "RSA (4096-bit)" to Pair(KeyPair.RSA, 4096),
+        stringResource(R.string.key_create_type_format, "RSA", 2048) to Pair(KeyPair.RSA, 2048),
+        stringResource(R.string.key_create_type_format, "RSA", 4096) to Pair(KeyPair.RSA, 4096),
     )
     val view = LocalView.current
 
@@ -435,7 +445,7 @@ fun GenerateKeyTab(selectedKeyType: Pair<Int, Int?>, onKeyTypeSelected: (Pair<In
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("Select the type of key to generate:")
+        Text(stringResource(R.string.select_key_type_prompt))
         keyTypeOptions.forEach { (label, type) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -502,9 +512,9 @@ fun ManualEntryTab(
     OutlinedTextField(
         value = privateKey,
         onValueChange = onPrivateKeyChange,
-        label = { Text("Private Key") },
+        label = { Text(stringResource(R.string.private_key)) },
         placeholder = { Text("-----BEGIN OPENSSH PRIVATE KEY-----") },
-        supportingText = { if (isError) Text("Invalid key format") },
+        supportingText = { if (isError) Text(stringResource(R.string.invalid_key_format)) },
         isError = isError,
         visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
         modifier = Modifier
@@ -525,10 +535,10 @@ fun ManualEntryTab(
     ) {
         Icon(
             imageVector = Icons.Default.ContentPaste,
-            contentDescription = "Paste from clipboard",
+            contentDescription = stringResource(R.string.paste_from_clipboard),
             modifier = Modifier.padding(end = 8.dp),
         )
-        Text("Paste from clipboard")
+        Text(stringResource(R.string.paste_from_clipboard))
     }
 }
 

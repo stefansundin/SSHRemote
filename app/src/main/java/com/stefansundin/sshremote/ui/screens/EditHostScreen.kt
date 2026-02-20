@@ -87,6 +87,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -112,6 +113,7 @@ import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.IEditHostViewModel
@@ -272,8 +274,8 @@ fun EditHostScreen(
 
     if (showSaveDialog) {
         AlertDialog(
-            title = { Text("Unsaved changes") },
-            text = { Text("Do you want to save the host before leaving?") },
+            title = { Text(stringResource(R.string.unsaved_changes_title)) },
+            text = { Text(stringResource(R.string.unsaved_changes_text)) },
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { showSaveDialog = false },
             confirmButton = {
@@ -288,9 +290,9 @@ fun EditHostScreen(
                     },
                 ) {
                     if (isFormValid) {
-                        Text("Save and leave")
+                        Text(stringResource(R.string.save_and_leave))
                     } else {
-                        Text("Stay")
+                        Text(stringResource(R.string.stay))
                     }
                 }
             },
@@ -301,7 +303,7 @@ fun EditHostScreen(
                         onNavigateUp()
                     },
                 ) {
-                    Text("Discard and leave")
+                    Text(stringResource(R.string.discard_and_leave))
                 }
             },
         )
@@ -312,8 +314,8 @@ fun EditHostScreen(
 
     if (showSshConfigWarning) {
         AlertDialog(
-            title = { Text("Advanced Users Only") },
-            text = { Text("Changing SSH configuration values is intended for advanced users. Incorrect settings may prevent connection.") },
+            title = { Text(stringResource(R.string.advanced_users_only)) },
+            text = { Text(stringResource(R.string.advanced_users_warning)) },
             onDismissRequest = { showSshConfigWarning = false },
             confirmButton = {
                 TextButton(
@@ -323,7 +325,7 @@ fun EditHostScreen(
                         showSshConfigDialog = true
                     },
                 ) {
-                    Text("I know what I am doing")
+                    Text(stringResource(R.string.i_know_what_i_am_doing))
                 }
             },
             dismissButton = {
@@ -333,7 +335,7 @@ fun EditHostScreen(
                         showSshConfigWarning = false
                     },
                 ) {
-                    Text("Go back")
+                    Text(stringResource(R.string.go_back))
                 }
             },
         )
@@ -344,13 +346,13 @@ fun EditHostScreen(
         var currentConfig by rememberSaveable { mutableStateOf(sshConfig ?: Host.DEFAULT_SSH_CONFIG) }
 
         AlertDialog(
-            title = { Text("SSH Configuration") },
+            title = { Text(stringResource(R.string.ssh_configuration_title)) },
             text = {
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text("JSch configuration is mostly like OpenSSH, but not exactly. Please do your research (click the Help button below).")
+                    Text(stringResource(R.string.jsch_config_description))
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
                         value = currentConfig,
@@ -379,7 +381,7 @@ fun EditHostScreen(
                             showSshConfigDialog = false
                         },
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.save))
                     }
                 }
             },
@@ -393,7 +395,7 @@ fun EditHostScreen(
                             uriHandler.openUri("https://github.com/stefansundin/SSHRemote/discussions/2")
                         },
                     ) {
-                        Text("Help")
+                        Text(stringResource(R.string.help))
                     }
                     TextButton(
                         onClick = {
@@ -402,11 +404,13 @@ fun EditHostScreen(
                             showSshConfigDialog = false
                         },
                     ) {
-                        Text("Reset to defaults")
+                        Text(stringResource(R.string.reset_to_default))
                     }
                 }
             },
-            modifier = Modifier.portraitImePadding().padding(16.dp),
+            modifier = Modifier
+                .portraitImePadding()
+                .padding(16.dp),
         )
     }
 
@@ -469,12 +473,13 @@ fun EditHostScreen(
         }
     }
 
+    val scanQrCodePrompt = stringResource(R.string.scan_qr_code_prompt)
     LaunchedEffect(scanQrCode) {
         if (scanQrCode) {
             scanQrCode = false
             val options = ScanOptions()
             options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-            options.setPrompt("Scan a QR code to import host")
+            options.setPrompt(scanQrCodePrompt)
             options.setBeepEnabled(false)
             options.setOrientationLocked(false)
             qrScanLauncher.launch(options)
@@ -485,8 +490,8 @@ fun EditHostScreen(
 
     if (showExportDialog) {
         AlertDialog(
-            title = { Text("Export Host") },
-            text = { Text("Choose what to include in the QR code.") },
+            title = { Text(stringResource(R.string.export_host_title)) },
+            text = { Text(stringResource(R.string.choose_what_to_include)) },
             onDismissRequest = { showExportDialog = false },
             confirmButton = {
                 TextButton(
@@ -504,7 +509,7 @@ fun EditHostScreen(
                         }
                     },
                 ) {
-                    Text("Full configuration")
+                    Text(stringResource(R.string.full_configuration))
                 }
             },
             dismissButton = {
@@ -526,7 +531,7 @@ fun EditHostScreen(
                         qrCodeString = url
                     },
                 ) {
-                    Text("Connection details only")
+                    Text(stringResource(R.string.connection_details_only))
                 }
             },
         )
@@ -537,7 +542,7 @@ fun EditHostScreen(
         showSaveDialog = true
     }
 
-    val title = if (host == null) "Add Host" else "Edit Host"
+    val title = stringResource(if (host == null) R.string.add_host_title else R.string.edit_host_title)
 
     Scaffold(
         modifier = Modifier.imePadding(),
@@ -557,7 +562,7 @@ fun EditHostScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Cancel",
+                            contentDescription = stringResource(R.string.cancel),
                         )
                     }
                 },
@@ -571,7 +576,7 @@ fun EditHostScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options",
+                            contentDescription = stringResource(R.string.more_options),
                         )
                     }
                     DropdownMenu(
@@ -579,7 +584,7 @@ fun EditHostScreen(
                         onDismissRequest = { menuExpanded = false },
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Advanced SSH Config") },
+                            text = { Text(stringResource(R.string.advanced_ssh_config)) },
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
                                 menuExpanded = false
@@ -592,7 +597,7 @@ fun EditHostScreen(
                         )
                         if (host != null) {
                             DropdownMenuItem(
-                                text = { Text("Export to QR code") },
+                                text = { Text(stringResource(R.string.export_to_qr_code)) },
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     menuExpanded = false
@@ -601,7 +606,7 @@ fun EditHostScreen(
                             )
                         } else {
                             DropdownMenuItem(
-                                text = { Text("Scan QR code") },
+                                text = { Text(stringResource(R.string.scan_qr_code)) },
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     menuExpanded = false
@@ -621,7 +626,7 @@ fun EditHostScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Save,
-                    contentDescription = "Save",
+                    contentDescription = stringResource(R.string.save),
                 )
             }
         },
@@ -644,7 +649,7 @@ fun EditHostScreen(
                         name = newName.take(100)
                     }
                 },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.name)) },
                 modifier = Modifier
                     .bringIntoViewRequester(nameRequester)
                     .fillMaxWidth()
@@ -663,7 +668,7 @@ fun EditHostScreen(
                     // Disallow spaces and newlines
                     hostname = newHostname.replace(" ", "").replace("\n", "").take(255)
                 },
-                label = { Text("Hostname or IP") },
+                label = { Text(stringResource(R.string.hostname_or_ip)) },
                 modifier = Modifier
                     .bringIntoViewRequester(hostnameRequester)
                     .fillMaxWidth()
@@ -684,7 +689,7 @@ fun EditHostScreen(
                         port = newPort.take(5)
                     }
                 },
-                label = { Text("Port") },
+                label = { Text(stringResource(R.string.port)) },
                 modifier = Modifier
                     .bringIntoViewRequester(portRequester)
                     .fillMaxWidth()
@@ -709,7 +714,7 @@ fun EditHostScreen(
                         // Disallow spaces and newlines
                         user = newUser.replace(" ", "").replace("\n", "").take(32)
                     },
-                    label = { Text("User") },
+                    label = { Text(stringResource(R.string.user)) },
                     modifier = Modifier
                         .bringIntoViewRequester(userRequester)
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
@@ -750,15 +755,19 @@ fun EditHostScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text(stringResource(R.string.password)) },
                     supportingText = {
-                        if (passwordState == PasswordState.LOST) {
-                            Text("Passwords are not backed up, please re-enter")
-                        } else if (isPasswordSet) {
-                            Text("Enter a new password, or leave empty to clear it")
-                        } else {
-                            Text("Optional, will be prompted for if not provided")
-                        }
+                        Text(
+                            stringResource(
+                                if (passwordState == PasswordState.LOST) {
+                                    R.string.passwords_not_backed_up
+                                } else if (isPasswordSet) {
+                                    R.string.enter_new_password_or_empty
+                                } else {
+                                    R.string.optional_password_prompt
+                                },
+                            ),
+                        )
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -772,7 +781,8 @@ fun EditHostScreen(
                     trailingIcon = {
                         val image =
                             if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        val description = if (passwordVisible) "Hide password" else "Show password"
+                        val description =
+                            stringResource(if (passwordVisible) R.string.hide_password else R.string.show_password)
                         IconToggleButton(
                             checked = passwordVisible,
                             onCheckedChange = {
@@ -791,7 +801,7 @@ fun EditHostScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = if (passwordState == PasswordState.LOST) "Password lost" else "Password saved",
+                        text = stringResource(if (passwordState == PasswordState.LOST) R.string.password_lost else R.string.password_saved),
                         modifier = Modifier.padding(start = 8.dp),
                     )
                     TextButton(
@@ -800,7 +810,9 @@ fun EditHostScreen(
                             userWantsToChangePassword = true
                         },
                     ) {
-                        Text(if (passwordState == PasswordState.LOST) "Re-enter" else "Change or Clear")
+                        Text(
+                            stringResource(if (passwordState == PasswordState.LOST) R.string.re_enter else R.string.change_or_clear),
+                        )
                     }
                 }
             }
@@ -813,17 +825,17 @@ fun EditHostScreen(
                 OutlinedTextField(
                     readOnly = true,
                     value = if (identities == null) {
-                        "Loading..."
+                        stringResource(R.string.loading)
                     } else if (selectedIdentityIds == null) {
-                        "Use any key"
+                        stringResource(R.string.use_any_key)
                     } else if (selectedIdentityIds!!.isEmpty()) {
-                        "Do not use keys"
+                        stringResource(R.string.do_not_use_keys)
                     } else {
                         identities.filter { selectedIdentityIds!!.contains(it.id) }
                             .joinToString(", ") { it.name }
                     },
                     onValueChange = { },
-                    label = { Text("SSH Key") },
+                    label = { Text(stringResource(R.string.ssh_key)) },
                     trailingIcon = {
                         if (identities != null) {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = identityDropdownExpanded)
@@ -840,7 +852,7 @@ fun EditHostScreen(
                         onDismissRequest = { identityDropdownExpanded = false },
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Use any key") },
+                            text = { Text(stringResource(R.string.use_any_key)) },
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
                                 selectedIdentityIds = null
@@ -848,7 +860,7 @@ fun EditHostScreen(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Do not use keys") },
+                            text = { Text(stringResource(R.string.do_not_use_keys)) },
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
                                 selectedIdentityIds = listOf()
@@ -879,7 +891,7 @@ fun EditHostScreen(
                 ) {
                     val keyCount = knownHosts.size
                     Text(
-                        text = "Saved host keys: $keyCount",
+                        text = stringResource(R.string.saved_host_keys, keyCount),
                         modifier = Modifier.padding(start = 8.dp),
                     )
                     Button(
@@ -889,7 +901,7 @@ fun EditHostScreen(
                             knownHosts = emptyList()
                         },
                     ) {
-                        Text("Clear")
+                        Text(stringResource(R.string.clear))
                     }
                 }
             }
@@ -976,7 +988,7 @@ private fun ExportHostQrCodeDialog(
                 ) {
                     if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                         Text(
-                            "Scan the QR code to import host",
+                            stringResource(R.string.scan_qr_code_to_import),
                             style = MaterialTheme.typography.titleLarge,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp),
@@ -997,7 +1009,7 @@ private fun ExportHostQrCodeDialog(
                         if (qrCodeBitmap != null) {
                             Image(
                                 bitmap = qrCodeBitmap!!.asImageBitmap(),
-                                contentDescription = "QR Code",
+                                contentDescription = stringResource(R.string.qr_code_content_description),
                                 modifier = Modifier.fillMaxSize(),
                             )
                         } else {
@@ -1018,7 +1030,7 @@ private fun ExportHostQrCodeDialog(
                             },
                             modifier = Modifier.padding(top = 24.dp),
                         ) {
-                            Text("Close")
+                            Text(stringResource(R.string.close))
                         }
                     }
                 }
@@ -1027,14 +1039,29 @@ private fun ExportHostQrCodeDialog(
     }
 }
 
-val sampleHost = Host("1", "Raspberry Pi", "192.168.1.10", 22, "pi", "passwordId", emptyList(), listOf(""), remoteCommands = wtypePreset)
+val sampleHost = Host(
+    "1",
+    "Raspberry Pi",
+    "192.168.1.10",
+    22,
+    "pi",
+    "passwordId",
+    emptyList(),
+    listOf(""),
+    remoteCommands = wtypePreset,
+)
 
 private val fakeEditHostViewModel = object : IEditHostViewModel {
     override suspend fun isPasswordLost(passwordId: String): Boolean = passwordId == "lost"
 }
 
 @Preview(showBackground = true, name = "Add Host Preview")
-@Preview(showBackground = true, name = "Add Host Preview (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(
+    showBackground = true,
+    name = "Add Host Preview (dark and large font)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun EditHostScreenPreview_Add() {
     SSHRemoteTheme {
@@ -1050,7 +1077,12 @@ private fun EditHostScreenPreview_Add() {
 }
 
 @Preview(showBackground = true, name = "Edit Host Preview")
-@Preview(showBackground = true, name = "Edit Host Preview (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(
+    showBackground = true,
+    name = "Edit Host Preview (dark and large font)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun EditHostScreenPreview_Edit() {
     SSHRemoteTheme {
@@ -1067,7 +1099,12 @@ private fun EditHostScreenPreview_Edit() {
 
 // Note: This preview has to be tested in "Interactive Mode".
 @Preview(showBackground = true, name = "Password Lost")
-@Preview(showBackground = true, name = "Password Lost (dark and large font)", uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(
+    showBackground = true,
+    name = "Password Lost (dark and large font)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun EditHostScreenPreview_PasswordLost() {
     SSHRemoteTheme {

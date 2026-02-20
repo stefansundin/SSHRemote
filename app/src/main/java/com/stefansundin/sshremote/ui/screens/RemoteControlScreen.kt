@@ -86,6 +86,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -101,6 +102,7 @@ import com.stefansundin.sshremote.ISshRepository
 import com.stefansundin.sshremote.Message
 import com.stefansundin.sshremote.PassphrasePrompt
 import com.stefansundin.sshremote.PasswordPrompt
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
@@ -271,7 +273,7 @@ fun RemoteControlScreen(
 
     if (uiState.error != null) {
         AlertDialog(
-            title = { Text("Connection Error") },
+            title = { Text(stringResource(R.string.connection_error)) },
             text = {
                 SelectionContainer {
                     Text(uiState.error)
@@ -286,7 +288,7 @@ fun RemoteControlScreen(
                         onClearError()
                     },
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
         )
@@ -294,7 +296,7 @@ fun RemoteControlScreen(
 
     hostKeyVerification?.let { verification ->
         AlertDialog(
-            title = { Text("Host Key Verification") },
+            title = { Text(stringResource(R.string.host_key_verification)) },
             text = {
                 SelectionContainer {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -311,7 +313,7 @@ fun RemoteControlScreen(
                         sshRepository.onHostKeyVerificationComplete(true)
                     },
                 ) {
-                    Text("Accept")
+                    Text(stringResource(R.string.accept))
                 }
             },
             dismissButton = {
@@ -321,19 +323,19 @@ fun RemoteControlScreen(
                         sshRepository.onHostKeyVerificationComplete(false)
                     },
                 ) {
-                    Text("Reject")
+                    Text(stringResource(R.string.reject))
                 }
             },
         )
     }
 
-    message?.let { message ->
+    message?.let { msg ->
         AlertDialog(
-            title = { Text("Message") },
+            title = { Text(stringResource(R.string.message)) },
             text = {
                 SelectionContainer {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        Text(message.message)
+                        Text(msg.message)
                     }
                 }
             },
@@ -346,7 +348,7 @@ fun RemoteControlScreen(
                         sshRepository.onMessageDismissed()
                     },
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
         )
@@ -361,7 +363,7 @@ fun RemoteControlScreen(
                 TextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text(stringResource(R.string.password)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .dpadFocusable(),
@@ -371,7 +373,8 @@ fun RemoteControlScreen(
                     keyboardActions = KeyboardActions(onDone = { sshRepository.onPasswordPromptComplete(password) }),
                     trailingIcon = {
                         val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        val description = if (passwordVisible) "Hide password" else "Show password"
+                        val description =
+                            stringResource(if (passwordVisible) R.string.hide_password else R.string.show_password)
                         IconButton(
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -392,7 +395,7 @@ fun RemoteControlScreen(
                         sshRepository.onPasswordPromptComplete(password)
                     },
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
@@ -402,7 +405,7 @@ fun RemoteControlScreen(
                         sshRepository.onPasswordPromptComplete(null)
                     },
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -417,7 +420,7 @@ fun RemoteControlScreen(
                 TextField(
                     value = passphrase,
                     onValueChange = { passphrase = it },
-                    label = { Text("Passphrase") },
+                    label = { Text(stringResource(R.string.passphrase)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .dpadFocusable(),
@@ -427,7 +430,8 @@ fun RemoteControlScreen(
                     keyboardActions = KeyboardActions(onDone = { sshRepository.onPassphrasePromptComplete(passphrase) }),
                     trailingIcon = {
                         val image = if (passphraseVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        val description = if (passphraseVisible) "Hide passphrase" else "Show passphrase"
+                        val description =
+                            stringResource(if (passphraseVisible) R.string.hide_passphrase else R.string.show_passphrase)
                         IconButton(
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -448,7 +452,7 @@ fun RemoteControlScreen(
                         sshRepository.onPassphrasePromptComplete(passphrase)
                     },
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
@@ -458,7 +462,7 @@ fun RemoteControlScreen(
                         sshRepository.onPassphrasePromptComplete(null)
                     },
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -468,7 +472,7 @@ fun RemoteControlScreen(
         val identities by identityViewModel.identities.collectAsState()
         if (identities == null) {
             AlertDialog(
-                title = { Text("Select public key") },
+                title = { Text(stringResource(R.string.select_public_key)) },
                 text = {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
@@ -482,11 +486,12 @@ fun RemoteControlScreen(
                             showSelectIdentityDialog = false
                         },
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 },
             )
         } else {
+            val publicKeyCopiedMsg = stringResource(R.string.public_key_copied)
             SelectIdentityDialog(
                 identities = identities!!,
                 onIdentitySelected = {
@@ -501,7 +506,7 @@ fun RemoteControlScreen(
 //                            reuseShell = false,
                         )
                         if (result is Result.Success) {
-                            snackbarHostState.showSnackbar("Public key copied to host.")
+                            snackbarHostState.showSnackbar(publicKeyCopiedMsg)
                         }
                     }
                     showSelectIdentityDialog = false
@@ -595,7 +600,10 @@ fun RemoteControlScreen(
                                     onDisconnect()
                                 },
                             ) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Disconnect")
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.disconnect),
+                                )
                             }
                         },
                         actions = {
@@ -619,7 +627,7 @@ fun RemoteControlScreen(
                                 ) {
                                     Icon(
                                         if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                                        contentDescription = if (isFullscreen) "Exit fullscreen" else "Fullscreen",
+                                        contentDescription = stringResource(if (isFullscreen) R.string.exit_fullscreen else R.string.fullscreen),
                                     )
                                 }
                             }
@@ -629,14 +637,14 @@ fun RemoteControlScreen(
                                     showMenu = !showMenu
                                 },
                             ) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                                Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
                             }
                             DropdownMenu(
                                 expanded = showMenu,
                                 onDismissRequest = { showMenu = false },
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Ad-hoc command") },
+                                    text = { Text(stringResource(R.string.ad_hoc_command)) },
                                     onClick = {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
@@ -644,7 +652,7 @@ fun RemoteControlScreen(
                                     },
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Edit remote control") },
+                                    text = { Text(stringResource(R.string.edit_remote_control)) },
                                     onClick = {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
@@ -652,7 +660,7 @@ fun RemoteControlScreen(
                                     },
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Push public key") },
+                                    text = { Text(stringResource(R.string.push_public_key)) },
                                     enabled = uiState.connectionStatus == ConnectionStatus.CONNECTED,
                                     onClick = {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -674,7 +682,12 @@ fun RemoteControlScreen(
                     .focusRequester(focusRequester)
                     .focusable(),
             ) {
-                val tabTitles = listOf("Remote", "Mouse", "Keyboard", "Commands")
+                val tabTitles = listOf(
+                    stringResource(R.string.tab_remote),
+                    stringResource(R.string.tab_mouse),
+                    stringResource(R.string.tab_keyboard),
+                    stringResource(R.string.tab_commands),
+                )
 
                 if (showTabs) {
                     ResponsiveTabRow(

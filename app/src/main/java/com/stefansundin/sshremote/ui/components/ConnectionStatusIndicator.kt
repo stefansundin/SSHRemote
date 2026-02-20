@@ -72,7 +72,7 @@ private fun ConnectionStatusIndicatorPreview() {
         Surface {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
             ) {
                 ConnectionStatusIndicator(connectionStatus = ConnectionStatus.CONNECTED)
                 ConnectionStatusIndicator(connectionStatus = ConnectionStatus.CONNECTING)

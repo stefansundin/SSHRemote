@@ -84,8 +84,8 @@ class IdentityViewModel(
                     ),
                 )
                 _eventChannel.send(IdentityEvent.KeyAdded)
-            } catch (_: Exception) {
-                _eventChannel.send(IdentityEvent.Error("Failed to save the imported key."))
+            } catch (e: Exception) {
+                _eventChannel.send(IdentityEvent.Error("Failed to save the imported key: ${e.message}"))
             }
         }
     }

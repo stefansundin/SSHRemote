@@ -43,9 +43,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
@@ -65,11 +67,11 @@ fun SmartVolumeSettingsDialog(
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text("Smart volume settings") },
+        title = { Text(stringResource(R.string.smart_volume_settings)) },
         text = {
             Column {
                 Text(
-                    text = "Requires that pactl is installed.",
+                    text = stringResource(R.string.pactl_installation_requirement),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp),
                 )
@@ -91,7 +93,7 @@ fun SmartVolumeSettingsDialog(
                         onCheckedChange = null,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Read Current Volume")
+                    Text(stringResource(R.string.read_current_volume))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -112,7 +114,7 @@ fun SmartVolumeSettingsDialog(
                         onCheckedChange = null,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Control volume with hardware buttons")
+                    Text(stringResource(R.string.control_volume_with_hardware_buttons))
                 }
 
                 Button(
@@ -124,7 +126,7 @@ fun SmartVolumeSettingsDialog(
                         .align(Alignment.End)
                         .padding(top = 8.dp),
                 ) {
-                    Text("Test pactl")
+                    Text(stringResource(R.string.test_pactl))
                 }
             }
         },
@@ -141,7 +143,7 @@ fun SmartVolumeSettingsDialog(
                     )
                 },
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
@@ -151,7 +153,7 @@ fun SmartVolumeSettingsDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -166,11 +168,11 @@ private fun SmartVolumeSettingsDialogPreview() {
             SmartVolumeSettingsDialog(
                 settings = SmartVolumeSettings(
                     readCurrentVolume = true,
-                    controlVolumeWithHardwareButtons = true
+                    controlVolumeWithHardwareButtons = true,
                 ),
                 onDismiss = {},
                 onSave = {},
-                onTest = {}
+                onTest = {},
             )
         }
     }

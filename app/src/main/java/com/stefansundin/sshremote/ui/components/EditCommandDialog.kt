@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
@@ -42,10 +41,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.CommandItem
 import com.stefansundin.sshremote.data.host.toItem
@@ -66,7 +67,7 @@ fun EditCommandDialog(
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text(if (commandItem == null) "Add Command" else "Edit Command") },
+        title = { Text(stringResource(if (commandItem == null) R.string.add_command else R.string.edit_command)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -75,7 +76,7 @@ fun EditCommandDialog(
                 TextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name (optional)") },
+                    label = { Text(stringResource(R.string.name_optional)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .dpadFocusable(),
@@ -83,7 +84,7 @@ fun EditCommandDialog(
                 TextField(
                     value = commandText,
                     onValueChange = { commandText = it },
-                    label = { Text("Command") },
+                    label = { Text(stringResource(R.string.command)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .dpadFocusable(),
@@ -109,7 +110,7 @@ fun EditCommandDialog(
                             showOutput = it
                         },
                     )
-                    Text("Show output")
+                    Text(stringResource(R.string.show_output))
                 }
             }
         },
@@ -132,7 +133,7 @@ fun EditCommandDialog(
                 },
                 enabled = commandText.isNotBlank(),
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
@@ -142,7 +143,7 @@ fun EditCommandDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
         modifier = Modifier.portraitImePadding(),

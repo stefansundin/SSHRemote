@@ -34,6 +34,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.clickable
@@ -66,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
@@ -129,10 +131,10 @@ sealed class Screen(val route: String) {
     data object Help : Screen("help")
 }
 
-enum class Theme {
-    SYSTEM,
-    LIGHT,
-    DARK
+enum class Theme(@StringRes val labelRes: Int) {
+    SYSTEM(R.string.theme_system),
+    LIGHT(R.string.theme_light),
+    DARK(R.string.theme_dark)
 }
 
 private fun NavController.safePopBackStack() {
@@ -309,8 +311,8 @@ class MainActivity : ComponentActivity() {
 
                     if (showBackupRestoredDialog) {
                         AlertDialog(
-                            title = { Text("Restored from backup") },
-                            text = { Text("The application data was restored from a backup. For security reasons, encrypted data such as SSH keys and passwords are not included in backups.\n\nPlease configure these again.") },
+                            title = { Text(stringResource(R.string.restored_from_backup_title)) },
+                            text = { Text(stringResource(R.string.restored_from_backup_text)) },
                             properties = DialogProperties(dismissOnClickOutside = false),
                             onDismissRequest = {
                                 showBackupRestoredDialog = false
@@ -322,7 +324,7 @@ class MainActivity : ComponentActivity() {
                                         showBackupRestoredDialog = false
                                     },
                                 ) {
-                                    Text("OK")
+                                    Text(stringResource(R.string.ok))
                                 }
                             },
                         )
@@ -482,9 +484,14 @@ class MainActivity : ComponentActivity() {
                                     onTestSmartVolumeSettings = {
                                         scope.launch {
                                             val volume = hostViewModel.readVolume()
+                                            val message = if (volume == null) {
+                                                getString(R.string.error_reading_volume)
+                                            } else {
+                                                getString(R.string.volume_format, volume)
+                                            }
                                             Toast.makeText(
                                                 this@MainActivity,
-                                                if (volume == null) "Error reading volume. Please install pactl." else "Volume: $volume",
+                                                message,
                                                 Toast.LENGTH_SHORT,
                                             )
                                                 .show()
@@ -598,7 +605,7 @@ class MainActivity : ComponentActivity() {
 
         val shortcutInfo = ShortcutInfoCompat.Builder(context, "host_${host.id}")
             .setShortLabel(host.name)
-            .setLongLabel("Connect to ${host.name}")
+            .setLongLabel(getString(R.string.connect_to_host, host.name))
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(intent)
             .build()
@@ -612,10 +619,10 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, o
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text("Getting started") },
+        title = { Text(stringResource(R.string.getting_started_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text("The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.\n\nPlease read the Help page if this is the first time you are using this app.")
+                Text(stringResource(R.string.getting_started_text))
             }
         },
         properties = DialogProperties(dismissOnClickOutside = false),
@@ -627,7 +634,7 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, o
                     onConfirm()
                 },
             ) {
-                Text("Select preset")
+                Text(stringResource(R.string.select_preset))
             }
         },
         dismissButton = {
@@ -637,7 +644,7 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, o
                     onHelp()
                 },
             ) {
-                Text("Help")
+                Text(stringResource(R.string.help))
             }
         },
     )
@@ -646,12 +653,13 @@ private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, o
 @Composable
 private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>?) -> Unit) {
     val view = LocalView.current
+    val noPreset = stringResource(R.string.no_preset)
 
     AlertDialog(
-        title = { Text("Select preset") },
+        title = { Text(stringResource(R.string.select_preset)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                (presets.keys + "No preset").forEach { presetKey ->
+                (presets.keys + noPreset).forEach { presetKey ->
                     ListItem(
                         headlineContent = { Text(presetKey) },
                         modifier = Modifier

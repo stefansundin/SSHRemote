@@ -35,8 +35,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -70,11 +72,17 @@ fun HelpScreen(
     onNavigateUp: () -> Unit,
 ) {
     val view = LocalView.current
+    val resources = LocalResources.current
+    val helpText = remember(resources) {
+        resources.openRawResource(R.raw.help)
+            .bufferedReader()
+            .use { it.readText() }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Help") },
+                title = { Text(stringResource(R.string.help)) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -84,7 +92,7 @@ fun HelpScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -96,7 +104,7 @@ fun HelpScreen(
         },
     ) { innerPadding ->
         MarkdownDocument(
-            stringResource(R.string.help_content),
+            helpText,
             textStyleModifiers = textStyleModifiers(),
             modifier = Modifier
                 .padding(innerPadding)

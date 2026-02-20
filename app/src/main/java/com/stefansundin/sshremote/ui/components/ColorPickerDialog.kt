@@ -56,16 +56,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlin.math.roundToInt
 
 @Composable
 fun ColorPickerDialog(
-    title: String = "Choose a color",
+    title: String = stringResource(R.string.choose_a_color),
     initialColor: Color,
     onColorChanged: (Color) -> Unit,
     onConfirm: () -> Unit,
@@ -163,7 +165,7 @@ fun ColorPickerDialog(
                                 isHslMode = true
                             }
                         },
-                        text = { Text("HSL") },
+                        text = { Text(stringResource(R.string.hsl)) },
                     )
                     Tab(
                         selected = !isHslMode,
@@ -174,44 +176,44 @@ fun ColorPickerDialog(
                                 isHslMode = false
                             }
                         },
-                        text = { Text("RGB") },
+                        text = { Text(stringResource(R.string.rgb)) },
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
                 if (isHslMode) {
-                    Text("Hue: ${hue.toInt()}")
+                    Text(stringResource(R.string.hue_format, hue.toInt()))
                     FocusableSlider(
                         value = hue,
                         onValueChange = { hue = it },
                         valueRange = 0f..360f,
                     )
-                    Text("Saturation: ${(saturation * 100).toInt()}%")
+                    Text(stringResource(R.string.saturation_format, (saturation * 100).toInt()))
                     FocusableSlider(
                         value = saturation,
                         onValueChange = { saturation = it },
                         valueRange = 0f..1f,
                     )
-                    Text("Lightness: ${(lightness * 100).toInt()}%")
+                    Text(stringResource(R.string.lightness_format, (lightness * 100).toInt()))
                     FocusableSlider(
                         value = lightness,
                         onValueChange = { lightness = it },
                         valueRange = 0f..1f,
                     )
                 } else {
-                    Text("Red: ${(red * 255).roundToInt()}")
+                    Text(stringResource(R.string.red_format, (red * 255).roundToInt()))
                     FocusableSlider(
                         value = red,
                         onValueChange = { red = it },
                         valueRange = 0f..1f,
                     )
-                    Text("Green: ${(green * 255).roundToInt()}")
+                    Text(stringResource(R.string.green_format, (green * 255).roundToInt()))
                     FocusableSlider(
                         value = green,
                         onValueChange = { green = it },
                         valueRange = 0f..1f,
                     )
-                    Text("Blue: ${(blue * 255).roundToInt()}")
+                    Text(stringResource(R.string.blue_format, (blue * 255).roundToInt()))
                     FocusableSlider(
                         value = blue,
                         onValueChange = { blue = it },
@@ -228,7 +230,7 @@ fun ColorPickerDialog(
                     onConfirm()
                 },
             ) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {
@@ -238,7 +240,7 @@ fun ColorPickerDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

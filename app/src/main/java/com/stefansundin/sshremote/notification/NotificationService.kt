@@ -85,18 +85,18 @@ class NotificationService : Service() {
         val text: String
         when (host.status) {
             ConnectionStatus.CONNECTED -> {
-                title = "Connected to ${host.name}"
-                text = "Remote control active"
+                title = getString(R.string.notification_connected_to, host.name)
+                text = getString(R.string.notification_active)
             }
 
             ConnectionStatus.CONNECTING -> {
-                title = "Connecting to ${host.name}"
-                text = "Please wait..."
+                title = getString(R.string.notification_connecting_to, host.name)
+                text = getString(R.string.please_wait)
             }
 
             ConnectionStatus.DISCONNECTED -> {
-                title = "Disconnected from ${host.name}"
-                text = "Remote control inactive"
+                title = getString(R.string.notification_disconnected_from, host.name)
+                text = getString(R.string.notification_inactive)
             }
         }
 
@@ -107,8 +107,20 @@ class NotificationService : Service() {
             .setSound(null)
             .setOngoing(false) // Allow swipe to dismiss
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .addAction(NotificationCompat.Action.Builder(null, "Open", pendingIntent).build())
-            .addAction(NotificationCompat.Action.Builder(null, "Close", closePendingIntent).build())
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    null,
+                    getString(R.string.notification_open),
+                    pendingIntent
+                ).build()
+            )
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    null,
+                    getString(R.string.notification_close),
+                    closePendingIntent
+                ).build()
+            )
 
         if (host.status == ConnectionStatus.CONNECTED) {
             val remoteViews = RemoteViews(packageName, R.layout.notification_remote_control).apply {
@@ -183,7 +195,7 @@ class NotificationService : Service() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val serviceChannel = NotificationChannel(
                     CHANNEL_ID,
-                    "Remote Control",
+                    context.getString(R.string.notification_channel_name),
                     NotificationManager.IMPORTANCE_DEFAULT,
                 ).apply {
                     setSound(null, null)

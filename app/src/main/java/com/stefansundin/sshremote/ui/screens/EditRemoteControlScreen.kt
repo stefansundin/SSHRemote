@@ -60,9 +60,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.CommandItem
 import com.stefansundin.sshremote.data.host.Host
@@ -123,8 +125,8 @@ fun EditRemoteControlScreen(
 
     if (showUnsavedBackDialog) {
         AlertDialog(
-            title = { Text("Unsaved changes") },
-            text = { Text("Do you want to save your changes before leaving?") },
+            title = { Text(stringResource(R.string.unsaved_changes_title)) },
+            text = { Text(stringResource(R.string.unsaved_changes_remote_control_text)) },
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { showUnsavedBackDialog = false },
             confirmButton = {
@@ -134,7 +136,7 @@ fun EditRemoteControlScreen(
                         onSave(editedRemoteCommands, editedCommands.map { it.command }, editedSmartVolumeSettings, true)
                     },
                 ) {
-                    Text("Save and leave")
+                    Text(stringResource(R.string.save_and_leave))
                 }
             },
             dismissButton = {
@@ -144,7 +146,7 @@ fun EditRemoteControlScreen(
                         onNavigateBack()
                     },
                 ) {
-                    Text("Discard and leave")
+                    Text(stringResource(R.string.discard_and_leave))
                 }
             },
         )
@@ -152,8 +154,8 @@ fun EditRemoteControlScreen(
 
     if (showResetDialog) {
         AlertDialog(
-            title = { Text("Reset commands?") },
-            text = { Text("This will reset all remote control commands to their default $resetToPresetKey values.") },
+            title = { Text(stringResource(R.string.reset_commands_title)) },
+            text = { Text(stringResource(R.string.reset_commands_text, resetToPresetKey)) },
             onDismissRequest = { showResetDialog = false },
             confirmButton = {
                 TextButton(
@@ -165,7 +167,7 @@ fun EditRemoteControlScreen(
                         showResetDialog = false
                     },
                 ) {
-                    Text("Reset")
+                    Text(stringResource(R.string.reset))
                 }
             },
             dismissButton = {
@@ -175,7 +177,7 @@ fun EditRemoteControlScreen(
                         showResetDialog = false
                     },
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -183,7 +185,7 @@ fun EditRemoteControlScreen(
 
     if (showSelectPresetDialog) {
         AlertDialog(
-            title = { Text("Reset to preset") },
+            title = { Text(stringResource(R.string.reset_to_preset_title)) },
             text = {
                 Column {
                     presets.keys.forEach { presetKey ->
@@ -210,7 +212,7 @@ fun EditRemoteControlScreen(
                         showSelectPresetDialog = false
                     },
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -219,7 +221,7 @@ fun EditRemoteControlScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Remote Control", maxLines = 1) },
+                title = { Text(stringResource(R.string.edit_remote_control), maxLines = 1) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -231,7 +233,10 @@ fun EditRemoteControlScreen(
                             }
                         },
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_back),
+                        )
                     }
                 },
                 actions = {
@@ -242,14 +247,14 @@ fun EditRemoteControlScreen(
                                 showMenu = true
                             },
                         ) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
                         }
                         DropdownMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Set as default tab") },
+                                text = { Text(stringResource(R.string.set_as_default_tab)) },
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     val startScreen =
@@ -260,7 +265,7 @@ fun EditRemoteControlScreen(
                                 },
                             )
                             DropdownMenuItem(
-                                text = { Text("Smart volume settings") },
+                                text = { Text(stringResource(R.string.smart_volume_settings)) },
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     showMenu = false
@@ -269,7 +274,7 @@ fun EditRemoteControlScreen(
                             )
                             if (pagerState.currentPage != 3) {
                                 DropdownMenuItem(
-                                    text = { Text("Reset to preset") },
+                                    text = { Text(stringResource(R.string.reset_to_preset_title)) },
                                     onClick = {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
                                         showMenu = false
@@ -295,12 +300,12 @@ fun EditRemoteControlScreen(
                             showEditCommandDialog = true
                         },
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add command")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_command))
                     }
                 }
                 ExtendedFloatingActionButton(
-                    text = { Text("Save") },
-                    icon = { Icon(Icons.Default.Save, contentDescription = "Save") },
+                    text = { Text(stringResource(R.string.save)) },
+                    icon = { Icon(Icons.Default.Save, contentDescription = stringResource(R.string.save)) },
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
                         onSave(editedRemoteCommands, editedCommands.map { it.command }, editedSmartVolumeSettings, true)
@@ -314,7 +319,12 @@ fun EditRemoteControlScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            val tabTitles = listOf("Remote", "Mouse", "Keyboard", "Commands")
+            val tabTitles = listOf(
+                stringResource(R.string.tab_remote),
+                stringResource(R.string.tab_mouse),
+                stringResource(R.string.tab_keyboard),
+                stringResource(R.string.tab_commands),
+            )
 
             ResponsiveTabRow(
                 selectedTabIndex = pagerState.currentPage,
@@ -350,8 +360,7 @@ fun EditRemoteControlScreen(
                                 onKeyEvent = { event ->
                                     if (event is KeyEvent.Click) {
                                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                                        val command =
-                                            editedRemoteCommands[event.key] ?: Command("", name = event.key.title)
+                                        val command = editedRemoteCommands[event.key] ?: Command("")
                                         editingCommand = event.key to command
                                     }
                                 },
@@ -382,7 +391,7 @@ fun EditRemoteControlScreen(
                                     showEditKeyboardCommandDialog = true
                                 },
                             ) {
-                                Text("Edit keyboard commands")
+                                Text(stringResource(R.string.edit_keyboard_commands))
                             }
                         }
                     }

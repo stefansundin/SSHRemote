@@ -45,9 +45,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
@@ -139,7 +141,7 @@ fun MousePad(
                     }
                 },
             ) {
-                Text("Left Click")
+                Text(stringResource(R.string.left_click))
             }
             Button(
                 onClick = { },
@@ -154,7 +156,7 @@ fun MousePad(
                     }
                 },
             ) {
-                Text("Right Click")
+                Text(stringResource(R.string.right_click))
             }
         }
     }
@@ -289,26 +291,29 @@ private fun TouchPad(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 if (editing) {
-                    Text("Mouse Pad", textAlign = TextAlign.Center)
-                    Text("Tap to edit mouse commands", textAlign = TextAlign.Center)
+                    Text(stringResource(R.string.mouse_pad), textAlign = TextAlign.Center)
+                    Text(stringResource(R.string.tap_to_edit_mouse_commands), textAlign = TextAlign.Center)
                 } else {
                     if (mouseMoveConfigured || leftClickConfigured || rightClickConfigured || scrollingConfigured) {
-                        Text("Mouse Pad", textAlign = TextAlign.Center)
+                        Text(stringResource(R.string.mouse_pad), textAlign = TextAlign.Center)
                         if (leftClickConfigured) {
-                            Text("Tap to left click", textAlign = TextAlign.Center)
+                            Text(stringResource(R.string.tap_to_left_click), textAlign = TextAlign.Center)
                         }
                         if (leftDownUpConfigured) {
-                            Text("Long press to click and drag", textAlign = TextAlign.Center)
+                            Text(stringResource(R.string.long_press_to_click_and_drag), textAlign = TextAlign.Center)
                         }
                         if (rightClickConfigured) {
-                            Text("Long press with two fingers to right click", textAlign = TextAlign.Center)
+                            Text(
+                                stringResource(R.string.long_press_two_fingers_to_right_click),
+                                textAlign = TextAlign.Center,
+                            )
                         }
                         if (scrollingConfigured) {
-                            Text("Scroll using two fingers", textAlign = TextAlign.Center)
+                            Text(stringResource(R.string.scroll_using_two_fingers), textAlign = TextAlign.Center)
                         }
                     } else {
-                        Text("Mouse Pad Disabled", textAlign = TextAlign.Center)
-                        Text("Mouse commands not configured", textAlign = TextAlign.Center)
+                        Text(stringResource(R.string.mouse_pad_disabled), textAlign = TextAlign.Center)
+                        Text(stringResource(R.string.mouse_commands_not_configured), textAlign = TextAlign.Center)
                     }
                 }
             }

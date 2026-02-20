@@ -38,9 +38,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
@@ -54,7 +56,7 @@ fun ThemeSettingDialog(
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text("Choose theme") },
+        title = { Text(stringResource(R.string.theme)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -79,7 +81,7 @@ fun ThemeSettingDialog(
                             onClick = null,
                         )
                         Text(
-                            text = theme.name.lowercase().replaceFirstChar { it.uppercase() },
+                            text = stringResource(theme.labelRes),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 16.dp),
                         )
@@ -95,7 +97,7 @@ fun ThemeSettingDialog(
                     onConfirm()
                 },
             ) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {
@@ -105,7 +107,7 @@ fun ThemeSettingDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

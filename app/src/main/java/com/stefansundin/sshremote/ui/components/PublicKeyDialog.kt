@@ -40,11 +40,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
@@ -56,7 +58,7 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     AlertDialog(
-        title = { Text("Public Key") },
+        title = { Text(stringResource(R.string.public_key_title)) },
         text = {
             // A scrollable text field is good for long keys
             OutlinedTextField(
@@ -77,24 +79,25 @@ fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
                     onDismiss()
                 },
             ) {
-                Text("Close")
+                Text(stringResource(R.string.close))
             }
         },
         dismissButton = {
+            val label = stringResource(R.string.public_ssh_key_label)
             TextButton(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
-                    val clipData = ClipData.newPlainText("Public SSH key", publicKey)
+                    val clipData = ClipData.newPlainText(label, publicKey)
                     scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
                 },
             ) {
                 Icon(
                     Icons.Outlined.ContentCopy,
-                    contentDescription = "Copy",
+                    contentDescription = stringResource(R.string.copy),
                     modifier = Modifier.size(ButtonDefaults.IconSize),
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text("Copy")
+                Text(stringResource(R.string.copy))
             }
         },
     )

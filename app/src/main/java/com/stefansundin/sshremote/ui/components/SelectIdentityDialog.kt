@@ -1,3 +1,21 @@
+/*
+ * SSH Remote
+ * Copyright (C) 2026  Stefan Sundin
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.stefansundin.sshremote.ui.components
 
 import android.content.res.Configuration
@@ -17,8 +35,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.ui.screens.sampleIdentities
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -32,14 +52,14 @@ fun SelectIdentityDialog(
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text("Select public key") },
+        title = { Text(stringResource(R.string.select_public_key)) },
         text = {
             if (identities.isEmpty()) {
-                Text("No keys found. Create an SSH key in the app settings.")
+                Text(stringResource(R.string.no_keys_found_prompt))
             } else {
                 Column {
                     Text(
-                        text = "Key will be added to host's ~/.ssh/authorized_keys file.",
+                        text = stringResource(R.string.key_addition_info),
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                     LazyColumn {
@@ -67,7 +87,7 @@ fun SelectIdentityDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

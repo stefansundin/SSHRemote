@@ -46,6 +46,13 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        // Fixes @StringRes warning:
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+    }
+}
+
 dependencies {
     // Core and Lifecycle
     implementation(libs.androidx.core.ktx)

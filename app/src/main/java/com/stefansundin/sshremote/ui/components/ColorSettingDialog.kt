@@ -52,9 +52,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 
 @Composable
@@ -78,7 +80,7 @@ fun ColorSettingDialog(
 
     if (showBackgroundColorPicker) {
         ColorPickerDialog(
-            title = "Choose background color",
+            title = stringResource(R.string.choose_background_color),
             initialColor = backgroundColor ?: MaterialTheme.colorScheme.background,
             onColorChanged = onBackgroundColorChange,
             onConfirm = {
@@ -93,7 +95,7 @@ fun ColorSettingDialog(
 
     if (showPrimaryColorPicker) {
         ColorPickerDialog(
-            title = "Choose primary color",
+            title = stringResource(R.string.choose_primary_color),
             initialColor = primaryColor ?: MaterialTheme.colorScheme.primary,
             onColorChanged = onPrimaryColorChange,
             onConfirm = {
@@ -108,7 +110,7 @@ fun ColorSettingDialog(
 
     if (showOnPrimaryColorPicker) {
         ColorPickerDialog(
-            title = "Choose text on primary color",
+            title = stringResource(R.string.choose_on_primary_color),
             initialColor = onPrimaryColorColor ?: MaterialTheme.colorScheme.onPrimary,
             onColorChanged = onOnPrimaryColorChange,
             onConfirm = {
@@ -122,7 +124,7 @@ fun ColorSettingDialog(
     }
 
     AlertDialog(
-        title = { Text("Color options") },
+        title = { Text(stringResource(R.string.color_options)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -143,7 +145,7 @@ fun ColorSettingDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Dynamic colors",
+                            text = stringResource(R.string.dynamic_colors),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         Spacer(modifier = Modifier.weight(1f))
@@ -154,7 +156,7 @@ fun ColorSettingDialog(
                     }
                 }
                 Text(
-                    text = "Color overrides",
+                    text = stringResource(R.string.color_overrides),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(vertical = 8.dp),
@@ -171,7 +173,7 @@ fun ColorSettingDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Background color",
+                        text = stringResource(R.string.background_color),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f),
                     )
@@ -190,7 +192,7 @@ fun ColorSettingDialog(
                         },
                         enabled = backgroundColor != null,
                     ) {
-                        Text("Clear")
+                        Text(stringResource(R.string.clear))
                     }
                 }
                 Row(
@@ -205,7 +207,7 @@ fun ColorSettingDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Primary color",
+                        text = stringResource(R.string.primary_color),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f),
                     )
@@ -224,7 +226,7 @@ fun ColorSettingDialog(
                         },
                         enabled = primaryColor != null,
                     ) {
-                        Text("Clear")
+                        Text(stringResource(R.string.clear))
                     }
                 }
                 Row(
@@ -239,7 +241,7 @@ fun ColorSettingDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Text on primary color",
+                        text = stringResource(R.string.text_on_primary_color),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f),
                     )
@@ -258,7 +260,7 @@ fun ColorSettingDialog(
                         },
                         enabled = onPrimaryColorColor != null,
                     ) {
-                        Text("Clear")
+                        Text(stringResource(R.string.clear))
                     }
                 }
             }
@@ -271,7 +273,7 @@ fun ColorSettingDialog(
                     onConfirm()
                 },
             ) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {
@@ -281,7 +283,7 @@ fun ColorSettingDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

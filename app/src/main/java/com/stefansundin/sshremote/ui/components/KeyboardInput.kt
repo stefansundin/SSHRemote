@@ -34,9 +34,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
@@ -67,7 +69,7 @@ fun KeyboardInput(
     // This TextField is used to bring up the keyboard and capture the input.
     // The text field itself is not the primary way of handling input, the onKeyEvent modifier is.
     TextField(
-        value = if (keyboardConfigured) text else TextFieldValue("Keyboard commands not configured"),
+        value = if (keyboardConfigured) text else TextFieldValue(stringResource(R.string.keyboard_commands_not_configured)),
         enabled = isEnabled,
         keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
         onValueChange = {

@@ -58,7 +58,7 @@ class LenientRemoteControlKeyMapTypeAdapter(private val gson: Gson) : TypeAdapte
                     continue
                 }
                 val command: Command? = if (reader.peek() == JsonToken.STRING) {
-                    Command(command = reader.nextString(), name = key.title)
+                    Command(command = reader.nextString())
                 } else {
                     gson.fromJson(reader, Command::class.java)
                 }

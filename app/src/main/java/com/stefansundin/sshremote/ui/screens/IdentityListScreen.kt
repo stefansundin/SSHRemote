@@ -82,6 +82,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.toClipEntry
@@ -137,6 +138,7 @@ fun IdentityListScreen(
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
     val view = LocalView.current
+    val resources = LocalResources.current
     val coroutineScope = rememberCoroutineScope()
 
     // Long pressing the FAB will launch directly into the QR code scanner
@@ -191,8 +193,8 @@ fun IdentityListScreen(
         val id = undoableDeletedIdentityId
         if (id != null) {
             val result = snackbarHostState.showSnackbar(
-                message = "SSH key deleted",
-                actionLabel = "Undo",
+                message = resources.getString(R.string.ssh_key_deleted),
+                actionLabel = resources.getString(R.string.undo),
                 duration = SnackbarDuration.Indefinite,
             )
             if (result == SnackbarResult.ActionPerformed) {
@@ -254,11 +256,12 @@ fun IdentityListScreen(
 
     if (errorMessage != null) {
         AlertDialog(
-            title = { Text("Error") },
+            title = { Text(stringResource(R.string.error)) },
             text = {
                 SelectionContainer {
                     Text(errorMessage!!)
-                }},
+                }
+            },
             properties = DialogProperties(dismissOnClickOutside = false),
             onDismissRequest = { errorMessage = null },
             confirmButton = {
@@ -268,24 +271,25 @@ fun IdentityListScreen(
                         errorMessage = null
                     },
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        val clipData = ClipData.newPlainText("Command output", errorMessage)
+                        val clipData =
+                            ClipData.newPlainText(resources.getString(R.string.command_output_label), errorMessage)
                         coroutineScope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
                     },
                 ) {
                     Icon(
                         Icons.Outlined.ContentCopy,
-                        contentDescription = "Copy",
+                        contentDescription = stringResource(R.string.copy),
                         modifier = Modifier.size(ButtonDefaults.IconSize),
                     )
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("Copy")
+                    Text(stringResource(R.string.copy))
                 }
             },
         )
@@ -295,7 +299,7 @@ fun IdentityListScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("SSH Keys") },
+                title = { Text(stringResource(R.string.ssh_keys)) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -305,7 +309,7 @@ fun IdentityListScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back",
+                            contentDescription = stringResource(R.string.navigate_back),
                         )
                     }
                 },
@@ -316,7 +320,7 @@ fun IdentityListScreen(
                 onClick = {},
                 interactionSource = interactionSource,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add SSH Key")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_ssh_key))
             }
         },
     ) { innerPadding ->
@@ -339,7 +343,7 @@ fun IdentityListScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text("No SSH keys added yet.", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.no_ssh_keys_added_yet), style = MaterialTheme.typography.bodyLarge)
 
                     TextWithInlineIcon(
                         stringResource(R.string.empty_list_add_prompt),
@@ -387,23 +391,25 @@ fun IdentityItem(
     var isRenameDialogVisible by rememberSaveable { mutableStateOf(false) }
     var newName by rememberSaveable { mutableStateOf(identity.name) }
     val view = LocalView.current
+    val resources = LocalResources.current
 
-    val (keyInfo, isEncrypted) = remember(identity, cryptoManager) {
+    val (keyInfo, isEncrypted) = remember(identity, cryptoManager, resources) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
         try {
             val keyPair = KeyPair.load(JSch(), privateKey, null)
             val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-            var info = keyPair.keyTypeString
+            var type = keyPair.keyTypeString
             if (keyPair.keyType == KeyPair.RSA) {
-                info += " ${keyPair.keySize}-bit"
+                type = resources.getString(R.string.key_list_type_format, type, keyPair.keySize)
             }
-            info += " - ${identity.createdAt.format(formatter)}"
+            val date = identity.createdAt.format(formatter)
+            val info = resources.getString(R.string.identity_info_format, type, date)
             val encrypted = keyPair.isEncrypted
             keyPair.dispose()
             Pair(info, encrypted)
         } catch (e: JSchException) {
             Log.e("IdentityItem", "Invalid key", e)
-            Pair("Invalid key", false)
+            Pair(resources.getString(R.string.invalid_key), false)
         }
     }
 
@@ -414,7 +420,7 @@ fun IdentityItem(
                 if (isEncrypted) {
                     Icon(
                         imageVector = Icons.Default.Lock,
-                        contentDescription = "Passphrase protected",
+                        contentDescription = stringResource(R.string.passphrase_protected),
                         modifier = Modifier.padding(start = 8.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -432,14 +438,14 @@ fun IdentityItem(
                         isContextMenuVisible = true
                     },
                 ) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
                 }
                 DropdownMenu(
                     expanded = isContextMenuVisible,
                     onDismissRequest = { isContextMenuVisible = false },
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Rename") },
+                        text = { Text(stringResource(R.string.rename)) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             isRenameDialogVisible = true
@@ -447,7 +453,7 @@ fun IdentityItem(
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("View public key") },
+                        text = { Text(stringResource(R.string.view_public_key)) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             onShowPublicKey()
@@ -455,7 +461,7 @@ fun IdentityItem(
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("Export public key") },
+                        text = { Text(stringResource(R.string.export_public_key)) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             onExportPublicKey()
@@ -463,7 +469,7 @@ fun IdentityItem(
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                        text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             onDelete()
@@ -477,12 +483,12 @@ fun IdentityItem(
 
     if (isRenameDialogVisible) {
         AlertDialog(
-            title = { Text("Rename SSH Key") },
+            title = { Text(stringResource(R.string.rename_ssh_key_title)) },
             text = {
                 TextField(
                     value = newName,
                     onValueChange = { newName = it },
-                    label = { Text("New name") },
+                    label = { Text(stringResource(R.string.new_name)) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -499,7 +505,7 @@ fun IdentityItem(
                     },
                     enabled = newName.isNotBlank(),
                 ) {
-                    Text("Rename")
+                    Text(stringResource(R.string.rename))
                 }
             },
             dismissButton = {
@@ -509,7 +515,7 @@ fun IdentityItem(
                         isRenameDialogVisible = false
                     },
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )

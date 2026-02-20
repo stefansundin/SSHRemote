@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -139,7 +140,7 @@ fun HapticFeedbackSettingDialog(
                             onClick = null,
                         )
                         Text(
-                            text = hapticFeedback.label,
+                            text = stringResource(hapticFeedback.labelRes, hapticFeedback.duration),
                             modifier = Modifier.padding(start = 16.dp),
                         )
                     }

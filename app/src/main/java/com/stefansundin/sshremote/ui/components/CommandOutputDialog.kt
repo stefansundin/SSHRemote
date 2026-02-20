@@ -40,9 +40,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
@@ -53,10 +56,11 @@ fun CommandOutputDialog(
 ) {
     val clipboard = LocalClipboard.current
     val view = LocalView.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
 
     AlertDialog(
-        title = { Text("Command Output") },
+        title = { Text(stringResource(R.string.command_output)) },
         text = {
             SelectionContainer {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -72,24 +76,24 @@ fun CommandOutputDialog(
                     onDismiss()
                 },
             ) {
-                Text("Close")
+                Text(stringResource(R.string.close))
             }
         },
         dismissButton = {
             TextButton(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
-                    val clipData = ClipData.newPlainText("Command output", output)
+                    val clipData = ClipData.newPlainText(resources.getString(R.string.command_output), output)
                     scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
                 },
             ) {
                 Icon(
                     Icons.Outlined.ContentCopy,
-                    contentDescription = "Copy",
+                    contentDescription = stringResource(R.string.copy),
                     modifier = Modifier.size(ButtonDefaults.IconSize),
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text("Copy")
+                Text(stringResource(R.string.copy))
             }
         },
     )

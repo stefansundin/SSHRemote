@@ -64,9 +64,11 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
@@ -107,7 +109,7 @@ fun AdHocCommandScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ad-Hoc Command") },
+                title = { Text(stringResource(R.string.ad_hoc_command_title)) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -115,7 +117,10 @@ fun AdHocCommandScreen(
                             onNavigateUp()
                         },
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.key_back),
+                        )
                     }
                 },
                 actions = {
@@ -126,14 +131,19 @@ fun AdHocCommandScreen(
                                 showMenu = true
                             },
                         ) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more))
                         }
                         DropdownMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Clear history", color = MaterialTheme.colorScheme.error) },
+                                text = {
+                                    Text(
+                                        stringResource(R.string.clear_history),
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                },
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     onClearHistory()
@@ -179,7 +189,12 @@ fun AdHocCommandScreen(
                             onDismissRequest = { showContextMenuFor = null },
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                                text = {
+                                    Text(
+                                        stringResource(R.string.delete),
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                },
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     onDeleteCommand(command)
@@ -198,7 +213,7 @@ fun AdHocCommandScreen(
                 TextField(
                     value = commandText,
                     onValueChange = { commandText = it },
-                    label = { Text("Command") },
+                    label = { Text(stringResource(R.string.command)) },
                     modifier = Modifier
                         .weight(1f)
                         .onPreviewKeyEvent {
@@ -226,7 +241,7 @@ fun AdHocCommandScreen(
                 )
                 Icon(
                     Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Execute",
+                    contentDescription = stringResource(R.string.execute),
                     modifier = Modifier.combinedClickable(
                         onClick = executeAndStay,
                         onLongClick = executeAndGoBack,

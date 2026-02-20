@@ -66,11 +66,13 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
@@ -131,10 +133,11 @@ private fun RemoteControlLayout(
 ) {
     val context = LocalContext.current
     val isConnected = editing || connectionStatus == ConnectionStatus.CONNECTED
+    val tapToEditButtonCommand = stringResource(R.string.tap_to_edit_button_command)
 
     LaunchedEffect(editing) {
         if (editing) {
-            Toast.makeText(context, "Tap a button to edit its command", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, tapToEditButtonCommand, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -196,7 +199,7 @@ private fun StatusText(
         } else if (host.remoteCommands == null) {
             // This text is only displayed when the user picks "No preset" upon first connection
             Text(
-                "Please configure the remote control commands by entering edit mode via the menu.",
+                stringResource(R.string.configure_remote_commands_prompt),
                 textAlign = TextAlign.Center,
             )
         }
@@ -207,7 +210,10 @@ private fun StatusText(
 private fun VolumeStatus(smartVolumeSettings: SmartVolumeSettings?, volume: String?, muted: Boolean?) {
     if (smartVolumeSettings?.readCurrentVolume == true) {
         if (volume != null) {
-            Text("Volume: $volume${if (muted == true) " (muted)" else ""}")
+            Text(
+                if (muted == true) stringResource(R.string.volume_muted_format, volume)
+                else stringResource(R.string.volume_format, volume),
+            )
         } else {
             // Render an empty Text to prevent components moving once we have the volume
             Text("")
@@ -236,13 +242,16 @@ private fun ActionButtons(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             RemoteButton(RemoteControlKey.VOLUME_DOWN, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.AutoMirrored.Filled.VolumeDown, contentDescription = "Volume Down")
+                Icon(
+                    Icons.AutoMirrored.Filled.VolumeDown,
+                    contentDescription = stringResource(R.string.key_volume_down),
+                )
             }
             RemoteButton(RemoteControlKey.MUTE, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.AutoMirrored.Filled.VolumeOff, contentDescription = "Mute")
+                Icon(Icons.AutoMirrored.Filled.VolumeOff, contentDescription = stringResource(R.string.key_mute))
             }
             RemoteButton(RemoteControlKey.VOLUME_UP, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Volume Up")
+                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = stringResource(R.string.key_volume_up))
             }
         }
         Row(
@@ -250,13 +259,13 @@ private fun ActionButtons(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             RemoteButton(RemoteControlKey.BACK, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.key_back))
             }
             RemoteButton(RemoteControlKey.HOME, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.Default.Home, contentDescription = "Home")
+                Icon(Icons.Default.Home, contentDescription = stringResource(R.string.key_home))
             }
             RemoteButton(RemoteControlKey.MENU, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.key_menu))
             }
         }
         Row(
@@ -264,14 +273,14 @@ private fun ActionButtons(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             RemoteButton(RemoteControlKey.PREVIOUS, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.Default.SkipPrevious, contentDescription = "Previous")
+                Icon(Icons.Default.SkipPrevious, contentDescription = stringResource(R.string.key_previous))
             }
             RemoteButton(RemoteControlKey.PLAY_PAUSE, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Play/Pause")
-                Icon(Icons.Default.Pause, contentDescription = "Play/Pause")
+                Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.key_play_pause))
+                Icon(Icons.Default.Pause, contentDescription = stringResource(R.string.key_play_pause))
             }
             RemoteButton(RemoteControlKey.NEXT, onKeyEvent, host, editing, isConnected, buttonModifier) {
-                Icon(Icons.Default.SkipNext, contentDescription = "Next")
+                Icon(Icons.Default.SkipNext, contentDescription = stringResource(R.string.key_next))
             }
         }
     }
@@ -307,7 +316,7 @@ private fun Dpad(
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = "Up",
+                contentDescription = stringResource(R.string.key_up),
                 modifier = Modifier
                     .size(iconSize)
                     .offset(y = -iconOffset),
@@ -327,7 +336,7 @@ private fun Dpad(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Right",
+                contentDescription = stringResource(R.string.key_right),
                 modifier = Modifier
                     .size(iconSize)
                     .offset(x = iconOffset),
@@ -347,7 +356,7 @@ private fun Dpad(
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Down",
+                contentDescription = stringResource(R.string.key_down),
                 modifier = Modifier
                     .size(iconSize)
                     .offset(y = iconOffset),
@@ -367,7 +376,7 @@ private fun Dpad(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Left",
+                contentDescription = stringResource(R.string.key_left),
                 modifier = Modifier
                     .size(iconSize)
                     .offset(x = -iconOffset),
@@ -391,7 +400,7 @@ private fun Dpad(
             ) {
                 Icon(
                     Icons.Default.RadioButtonUnchecked,
-                    contentDescription = "Select",
+                    contentDescription = stringResource(R.string.key_select),
                     modifier = Modifier.fillMaxSize(0.8f),
                 )
             }

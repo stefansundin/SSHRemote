@@ -36,10 +36,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
@@ -57,7 +60,7 @@ fun EditKeyboardCommandDialog(
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text("Edit Keyboard Commands") },
+        title = { Text(stringResource(R.string.edit_keyboard_commands)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -71,11 +74,11 @@ fun EditKeyboardCommandDialog(
                 )
                 keyboardKeys.forEach { key ->
                     TextField(
-                        label = { Text(key.title) },
+                        label = { Text(stringResource(key.titleRes)) },
                         value = editedRemoteCommands[key]?.command ?: "",
                         onValueChange = { value ->
                             editedRemoteCommands = editedRemoteCommands.toMutableMap().apply {
-                                this[key] = (this[key] ?: Command("", name = key.title)).copy(command = value)
+                                this[key] = (this[key] ?: Command("")).copy(command = value)
                             }
                         },
                         modifier = Modifier
@@ -94,7 +97,7 @@ fun EditKeyboardCommandDialog(
                     onSave(editedRemoteCommands)
                 },
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
@@ -104,7 +107,7 @@ fun EditKeyboardCommandDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
         modifier = Modifier.portraitImePadding(),

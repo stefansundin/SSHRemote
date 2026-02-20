@@ -82,6 +82,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -100,6 +101,7 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.BuildConfig
 import com.stefansundin.sshremote.HapticFeedback
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.ISettingsViewModel
 import com.stefansundin.sshremote.data.settings.ImportStrategy
@@ -228,10 +230,10 @@ private fun ImportSettingsDialog(
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text("Import settings") },
+        title = { Text(stringResource(R.string.import_settings_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text("In case of conflicts with existing hosts, do you want to update or duplicate?\n\nYou can also choose Replace which will delete all existing hosts.")
+                Text(stringResource(R.string.import_settings_text))
             }
         },
         properties = DialogProperties(dismissOnClickOutside = false),
@@ -247,7 +249,7 @@ private fun ImportSettingsDialog(
                         onImport(ImportStrategy.Upsert)
                     },
                 ) {
-                    Text("Update")
+                    Text(stringResource(R.string.update))
                 }
                 TextButton(
                     onClick = {
@@ -255,7 +257,7 @@ private fun ImportSettingsDialog(
                         onImport(ImportStrategy.Duplicate)
                     },
                 ) {
-                    Text("Duplicate")
+                    Text(stringResource(R.string.duplicate))
                 }
                 TextButton(
                     onClick = {
@@ -263,7 +265,7 @@ private fun ImportSettingsDialog(
                         onImport(ImportStrategy.Replace)
                     },
                 ) {
-                    Text("Replace")
+                    Text(stringResource(R.string.replace))
                 }
             }
         },
@@ -274,7 +276,7 @@ private fun ImportSettingsDialog(
                     onDismissRequest()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -320,13 +322,14 @@ fun SettingsScreen(
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
     val hasHosts by settingsViewModel.hasHosts.collectAsState()
 
+    val permissionDeniedMsg = stringResource(R.string.permission_denied)
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
         if (isGranted) {
             settingsViewModel.setNotificationsEnabled(true)
         } else {
-            Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, permissionDeniedMsg, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -363,11 +366,12 @@ fun SettingsScreen(
         previewOnPrimaryColor = onPrimaryColor
     }
 
+    val successfullyImportedHostsMsg = stringResource(R.string.successfully_imported_hosts)
     LaunchedEffect(Unit) {
         settingsViewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is SettingsEvent.ImportSuccess -> {
-                    val message = "Successfully imported ${event.count} hosts."
+                    val message = String.format(successfullyImportedHostsMsg, event.count)
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
 
@@ -418,6 +422,7 @@ fun SettingsScreen(
         }
     }
 
+    val exportSettingsTooLargeForQrMsg = stringResource(R.string.export_settings_too_large_for_qr)
     exportJson?.let { json ->
         ExportSettingsQrCodeDialog(
             json = json,
@@ -426,7 +431,7 @@ fun SettingsScreen(
                 exportJson = null
                 Toast.makeText(
                     context,
-                    "Data is too large for a QR code. Use file export instead.",
+                    exportSettingsTooLargeForQrMsg,
                     Toast.LENGTH_LONG,
                 ).show()
             },
@@ -517,7 +522,7 @@ fun SettingsScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Settings") },
+                    title = { Text(stringResource(R.string.settings)) },
                     navigationIcon = {
                         IconButton(
                             onClick = {
@@ -530,7 +535,7 @@ fun SettingsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                             )
                         }
                     },
@@ -542,10 +547,10 @@ fun SettingsScreen(
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState()),
             ) {
-                SettingsGroup("Appearance") {
+                SettingsGroup(stringResource(R.string.appearance)) {
                     SettingsItem(
-                        title = "Theme",
-                        subtitle = savedTheme.name.lowercase().replaceFirstChar { it.uppercase() },
+                        title = stringResource(R.string.theme),
+                        subtitle = stringResource(savedTheme.labelRes),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             previewTheme = savedTheme
@@ -553,8 +558,8 @@ fun SettingsScreen(
                         },
                     )
                     SettingsItem(
-                        title = "Colors",
-                        subtitle = "Customize the application colors",
+                        title = stringResource(R.string.colors),
+                        subtitle = stringResource(R.string.customize_colors),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             previewUseDynamicColors = useDynamicColors
@@ -568,10 +573,10 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
-                SettingsGroup("Remote control") {
+                SettingsGroup(stringResource(R.string.remote_control_group)) {
                     SettingsItem(
-                        title = "Haptic feedback",
-                        subtitle = savedHapticFeedback.label,
+                        title = stringResource(R.string.haptic_feedback),
+                        subtitle = stringResource(savedHapticFeedback.labelRes, savedHapticFeedback.duration),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             previewHapticFeedback = savedHapticFeedback
@@ -579,12 +584,12 @@ fun SettingsScreen(
                         },
                     )
                     SettingsSwitchItem(
-                        title = "Keep screen on",
+                        title = stringResource(R.string.keep_screen_on),
                         checked = keepScreenOn,
                         onCheckedChange = { settingsViewModel.setKeepScreenOn(it) },
                     )
                     SettingsSwitchItem(
-                        title = "Show notification",
+                        title = stringResource(R.string.show_notification),
                         checked = notificationsEnabled,
                         onCheckedChange = {
                             if (it) {
@@ -602,15 +607,15 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
-                SettingsGroup("Security") {
+                SettingsGroup(stringResource(R.string.security)) {
                     SettingsItem(
-                        title = "SSH Keys",
-                        subtitle = "Manage SSH keys for authentication",
+                        title = stringResource(R.string.ssh_keys),
+                        subtitle = stringResource(R.string.ssh_keys_subtitle),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onNavigateToIdentityList,
                     )
                     SettingsSwitchItem(
-                        title = "Strict host key checking",
+                        title = stringResource(R.string.strict_host_key_checking),
                         checked = strictHostKeyChecking,
                         onCheckedChange = { settingsViewModel.setStrictHostKeyChecking(it) },
                     )
@@ -618,10 +623,10 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
-                SettingsGroup("Data") {
+                SettingsGroup(stringResource(R.string.data)) {
                     SettingsItem(
-                        title = "Export to file",
-                        subtitle = "Export settings and hosts to a file.",
+                        title = stringResource(R.string.export_to_file),
+                        subtitle = stringResource(R.string.export_to_file_subtitle),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
@@ -630,14 +635,14 @@ fun SettingsScreen(
                         },
                     )
                     SettingsItem(
-                        title = "Import from file",
-                        subtitle = "Import settings and hosts from a file.",
+                        title = stringResource(R.string.import_from_file),
+                        subtitle = stringResource(R.string.import_from_file_subtitle),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { importLauncher.launch(arrayOf("application/json")) },
                     )
                     SettingsItem(
-                        title = "Export to QR code",
-                        subtitle = "Export settings and hosts to a QR code.",
+                        title = stringResource(R.string.export_to_qr_code),
+                        subtitle = stringResource(R.string.export_to_qr_code_subtitle),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             coroutineScope.launch {
@@ -645,14 +650,15 @@ fun SettingsScreen(
                             }
                         },
                     )
+                    val scanPrompt = stringResource(R.string.scan_qr_code_settings_prompt)
                     SettingsItem(
-                        title = "Import from QR code",
-                        subtitle = "Import settings and hosts from a QR code.",
+                        title = stringResource(R.string.import_from_qr_code),
+                        subtitle = stringResource(R.string.import_from_qr_code_subtitle),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             val options = ScanOptions()
                             options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                            options.setPrompt("Scan a QR code to import settings")
+                            options.setPrompt(scanPrompt)
                             options.setBeepEnabled(false)
                             options.setOrientationLocked(false)
                             qrScanLauncher.launch(options)
@@ -662,41 +668,41 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
-                SettingsGroup("About SSH Remote") {
+                SettingsGroup(stringResource(R.string.about_app)) {
                     SettingsItem(
-                        title = "App version",
+                        title = stringResource(R.string.app_version),
                         subtitle = BuildConfig.VERSION_NAME,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     SettingsItem(
-                        title = "Author",
-                        subtitle = "Developed by Stefan Sundin",
+                        title = stringResource(R.string.author),
+                        subtitle = stringResource(R.string.author_name),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     SettingsItem(
-                        title = "Donate",
-                        subtitle = "Support the developer",
+                        title = stringResource(R.string.donate),
+                        subtitle = stringResource(R.string.support_developer),
                         modifier = Modifier.fillMaxWidth(),
                         icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://stefansundin.github.io/donate") },
                     )
                     SettingsItem(
-                        title = "License",
-                        subtitle = "GNU General Public License v3.0",
+                        title = stringResource(R.string.license),
+                        subtitle = stringResource(R.string.license_name),
                         modifier = Modifier.fillMaxWidth(),
                         icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://www.gnu.org/licenses/gpl-3.0.html") },
                     )
                     SettingsItem(
-                        title = "Source code",
-                        subtitle = "View on GitHub",
+                        title = stringResource(R.string.source_code),
+                        subtitle = stringResource(R.string.view_on_github),
                         modifier = Modifier.fillMaxWidth(),
                         icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://github.com/stefansundin/SSHRemote") },
                     )
                     SettingsItem(
-                        title = "SSH library",
-                        subtitle = "Using mwiede/jsch ${BuildConfig.JSCH_VERSION}",
+                        title = stringResource(R.string.ssh_library),
+                        subtitle = stringResource(R.string.ssh_library_subtitle, BuildConfig.JSCH_VERSION),
                         modifier = Modifier.fillMaxWidth(),
                         icon = Icons.AutoMirrored.Filled.OpenInNew,
                         onClick = { uriHandler.openUri("https://github.com/mwiede/jsch") },
@@ -785,7 +791,7 @@ private fun ExportSettingsQrCodeDialog(
                 ) {
                     if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                         Text(
-                            "Scan the QR code to import settings",
+                            stringResource(R.string.scan_qr_code_to_import_settings),
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(bottom = 24.dp),
                         )
@@ -805,7 +811,7 @@ private fun ExportSettingsQrCodeDialog(
                         if (qrCodeBitmap != null) {
                             Image(
                                 bitmap = qrCodeBitmap!!.asImageBitmap(),
-                                contentDescription = "QR Code",
+                                contentDescription = stringResource(R.string.qr_code_content_description),
                                 modifier = Modifier.fillMaxSize(),
                             )
                         } else {
@@ -826,7 +832,7 @@ private fun ExportSettingsQrCodeDialog(
                             },
                             modifier = Modifier.padding(top = 24.dp),
                         ) {
-                            Text("Close")
+                            Text(stringResource(R.string.close))
                         }
                     }
                 }

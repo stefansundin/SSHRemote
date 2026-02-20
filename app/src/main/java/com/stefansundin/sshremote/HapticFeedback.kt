@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote
 
 import android.os.Parcelable
+import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -29,13 +30,14 @@ sealed class HapticFeedback(val duration: kotlin.Long) : Parcelable {
     data object Long : HapticFeedback(80)
     data class Custom(val customDuration: kotlin.Long) : HapticFeedback(customDuration)
 
-    val label: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            is Off -> "Off"
-            is Short -> "Short ($duration ms)"
-            is Medium -> "Medium ($duration ms)"
-            is Long -> "Long ($duration ms)"
-            is Custom -> "Custom ($duration ms)"
+            is Off -> R.string.haptic_off
+            is Short -> R.string.haptic_short
+            is Medium -> R.string.haptic_medium
+            is Long -> R.string.haptic_long
+            is Custom -> R.string.haptic_custom
         }
 
     companion object {

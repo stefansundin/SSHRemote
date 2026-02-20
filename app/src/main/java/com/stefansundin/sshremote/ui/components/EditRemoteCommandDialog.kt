@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
@@ -43,10 +42,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.wtypePreset
@@ -67,18 +68,21 @@ fun EditRemoteCommandDialog(
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text("Edit Command") },
+        title = { Text(stringResource(R.string.edit_command)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Text("Key: ${key.title}", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    stringResource(R.string.key_title_format, stringResource(key.titleRes)),
+                    style = MaterialTheme.typography.titleLarge,
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextField(
                         value = newCommand,
                         onValueChange = { newCommand = it },
-                        label = { Text("Command") },
+                        label = { Text(stringResource(R.string.command)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .dpadFocusable(),
@@ -86,7 +90,7 @@ fun EditRemoteCommandDialog(
                     TextField(
                         value = newLongPressCommand,
                         onValueChange = { newLongPressCommand = it },
-                        label = { Text("Long press command") },
+                        label = { Text(stringResource(R.string.long_press_command)) },
                         enabled = !repeatCommand,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -113,7 +117,7 @@ fun EditRemoteCommandDialog(
                                 repeatCommand = it
                             },
                         )
-                        Text("Repeat command while button is pressed")
+                        Text(stringResource(R.string.repeat_command_while_pressed))
                     }
                 }
             }
@@ -134,7 +138,7 @@ fun EditRemoteCommandDialog(
                     )
                 },
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
@@ -144,7 +148,7 @@ fun EditRemoteCommandDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
         modifier = Modifier.portraitImePadding(),

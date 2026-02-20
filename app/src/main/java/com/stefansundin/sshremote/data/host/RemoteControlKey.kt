@@ -18,43 +18,46 @@
 
 package com.stefansundin.sshremote.data.host
 
-enum class RemoteControlKey(val title: String) {
+import androidx.annotation.StringRes
+import com.stefansundin.sshremote.R
+
+enum class RemoteControlKey(@StringRes val titleRes: Int) {
     // Dpad
-    UP("Up"),
-    RIGHT("Right"),
-    DOWN("Down"),
-    LEFT("Left"),
-    SELECT("Select"),
+    UP(R.string.key_up),
+    RIGHT(R.string.key_right),
+    DOWN(R.string.key_down),
+    LEFT(R.string.key_left),
+    SELECT(R.string.key_select),
 
     // Action buttons
-    VOLUME_DOWN("Volume Down"),
-    MUTE("Mute"),
-    VOLUME_UP("Volume Up"),
-    BACK("Back"),
-    HOME("Home"),
-    MENU("Menu"),
-    PREVIOUS("Previous"),
-    PLAY_PAUSE("Play/Pause"),
-    NEXT("Next"),
+    VOLUME_DOWN(R.string.key_volume_down),
+    MUTE(R.string.key_mute),
+    VOLUME_UP(R.string.key_volume_up),
+    BACK(R.string.key_back),
+    HOME(R.string.key_home),
+    MENU(R.string.key_menu),
+    PREVIOUS(R.string.key_previous),
+    PLAY_PAUSE(R.string.key_play_pause),
+    NEXT(R.string.key_next),
 
     // Mouse
-    MOUSE_MOVE("Mouse Move"),
-    MOUSE_LEFT_CLICK("Left Click"),
-    MOUSE_RIGHT_CLICK("Right Click"),
-    MOUSE_LEFT_DOWN("Left Button Down"),
-    MOUSE_LEFT_UP("Left Button Up"),
-    MOUSE_RIGHT_DOWN("Right Button Down"),
-    MOUSE_RIGHT_UP("Right Button Up"),
-    MOUSE_PAN_UP("Two-Finger Pan Up"),
-    MOUSE_PAN_DOWN("Two-Finger Pan Down"),
-    MOUSE_PAN_LEFT("Two-Finger Pan Left"),
-    MOUSE_PAN_RIGHT("Two-Finger Pan Right"),
+    MOUSE_MOVE(R.string.key_mouse_move),
+    MOUSE_LEFT_CLICK(R.string.left_click),
+    MOUSE_RIGHT_CLICK(R.string.right_click),
+    MOUSE_LEFT_DOWN(R.string.key_mouse_left_down),
+    MOUSE_LEFT_UP(R.string.key_mouse_left_up),
+    MOUSE_RIGHT_DOWN(R.string.key_mouse_right_down),
+    MOUSE_RIGHT_UP(R.string.key_mouse_right_up),
+    MOUSE_PAN_UP(R.string.key_mouse_pan_up),
+    MOUSE_PAN_DOWN(R.string.key_mouse_pan_down),
+    MOUSE_PAN_LEFT(R.string.key_mouse_pan_left),
+    MOUSE_PAN_RIGHT(R.string.key_mouse_pan_right),
 
     // Keyboard
-    KEYBOARD_TYPE_INPUT("Keyboard Type"),
-    KEYBOARD_KEY_INPUT("Keyboard Key"),
-    KEYBOARD_KEY_DOWN("Keyboard Key Down"),
-    KEYBOARD_KEY_UP("Keyboard Key Up"),
+    KEYBOARD_TYPE_INPUT(R.string.key_keyboard_type_text),
+    KEYBOARD_KEY_INPUT(R.string.key_keyboard_key_press),
+    KEYBOARD_KEY_DOWN(R.string.key_keyboard_key_down),
+    KEYBOARD_KEY_UP(R.string.key_keyboard_key_up),
 }
 
 /**

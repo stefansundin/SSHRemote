@@ -137,12 +137,15 @@ fun HostListScreen(
         }
     }
 
+    val hostDeletedMsg = stringResource(R.string.host_deleted)
+    val undoLabel = stringResource(R.string.undo)
+
     LaunchedEffect(undoableDeletedHostId) {
         val id = undoableDeletedHostId
         if (id != null) {
             val result = snackbarHostState.showSnackbar(
-                message = "Host deleted",
-                actionLabel = "Undo",
+                message = hostDeletedMsg,
+                actionLabel = undoLabel,
             )
             if (result == SnackbarResult.ActionPerformed) {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -167,7 +170,7 @@ fun HostListScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Hosts") },
+                title = { Text(stringResource(R.string.hosts_title)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
@@ -182,7 +185,7 @@ fun HostListScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Help,
-                            contentDescription = "Help",
+                            contentDescription = stringResource(R.string.help),
                         )
                     }
                     IconButton(
@@ -194,7 +197,7 @@ fun HostListScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
+                            contentDescription = stringResource(R.string.settings),
                         )
                     }
                 },
@@ -205,7 +208,7 @@ fun HostListScreen(
                 onClick = {},
                 interactionSource = interactionSource,
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add SSH Host")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_ssh_host))
             }
         },
     ) { innerPadding ->
@@ -353,7 +356,7 @@ fun HostItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options",
+                        contentDescription = stringResource(R.string.more_options),
                     )
                 }
 
@@ -362,7 +365,7 @@ fun HostItem(
                     onDismissRequest = { isContextMenuVisible = false },
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Edit") },
+                        text = { Text(stringResource(R.string.edit)) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             onEdit()
@@ -370,7 +373,7 @@ fun HostItem(
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("Clone") },
+                        text = { Text(stringResource(R.string.clone)) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             onClone()
@@ -378,7 +381,7 @@ fun HostItem(
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("Add to Home Screen") },
+                        text = { Text(stringResource(R.string.add_to_home_screen)) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             onCreateShortcut()
@@ -386,7 +389,7 @@ fun HostItem(
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                        text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             onDelete()

@@ -49,9 +49,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
@@ -123,13 +125,13 @@ fun SpecialKeysRow(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             val row1 = listOf(
-                KeyData("Esc", KeyEvent.KEYCODE_ESCAPE),
-                KeyData("Tab", KeyEvent.KEYCODE_TAB),
-                KeyData("Ctrl", KeyEvent.KEYCODE_CTRL_LEFT),
-                KeyData("Alt", KeyEvent.KEYCODE_ALT_LEFT),
-                KeyData("Shift", KeyEvent.KEYCODE_SHIFT_LEFT),
-                KeyData("Super", KeyEvent.KEYCODE_META_LEFT),
-                KeyData("Caps", KeyEvent.KEYCODE_CAPS_LOCK),
+                KeyData(stringResource(R.string.key_esc), KeyEvent.KEYCODE_ESCAPE),
+                KeyData(stringResource(R.string.key_tab), KeyEvent.KEYCODE_TAB),
+                KeyData(stringResource(R.string.key_ctrl), KeyEvent.KEYCODE_CTRL_LEFT),
+                KeyData(stringResource(R.string.key_alt), KeyEvent.KEYCODE_ALT_LEFT),
+                KeyData(stringResource(R.string.key_shift), KeyEvent.KEYCODE_SHIFT_LEFT),
+                KeyData(stringResource(R.string.key_super), KeyEvent.KEYCODE_META_LEFT),
+                KeyData(stringResource(R.string.key_caps), KeyEvent.KEYCODE_CAPS_LOCK),
             )
             row1.forEach { keyData ->
                 KeyButton(
@@ -149,15 +151,15 @@ fun SpecialKeysRow(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             val row2 = listOf(
-                KeyData("Del", KeyEvent.KEYCODE_FORWARD_DEL),
-                KeyData("Home", KeyEvent.KEYCODE_MOVE_HOME),
-                KeyData("End", KeyEvent.KEYCODE_MOVE_END),
-                KeyData("PgUp", KeyEvent.KEYCODE_PAGE_UP),
-                KeyData("PgDn", KeyEvent.KEYCODE_PAGE_DOWN),
-                KeyData("Left", KeyEvent.KEYCODE_DPAD_LEFT, Icons.AutoMirrored.Filled.ArrowBack),
-                KeyData("Up", KeyEvent.KEYCODE_DPAD_UP, Icons.Default.ArrowUpward),
-                KeyData("Down", KeyEvent.KEYCODE_DPAD_DOWN, Icons.Default.ArrowDownward),
-                KeyData("Right", KeyEvent.KEYCODE_DPAD_RIGHT, Icons.AutoMirrored.Filled.ArrowForward),
+                KeyData(stringResource(R.string.key_del), KeyEvent.KEYCODE_FORWARD_DEL),
+                KeyData(stringResource(R.string.key_home), KeyEvent.KEYCODE_MOVE_HOME),
+                KeyData(stringResource(R.string.key_end), KeyEvent.KEYCODE_MOVE_END),
+                KeyData(stringResource(R.string.key_pageup), KeyEvent.KEYCODE_PAGE_UP),
+                KeyData(stringResource(R.string.key_pagedown), KeyEvent.KEYCODE_PAGE_DOWN),
+                KeyData(stringResource(R.string.key_left), KeyEvent.KEYCODE_DPAD_LEFT, Icons.AutoMirrored.Filled.ArrowBack),
+                KeyData(stringResource(R.string.key_up), KeyEvent.KEYCODE_DPAD_UP, Icons.Default.ArrowUpward),
+                KeyData(stringResource(R.string.key_down), KeyEvent.KEYCODE_DPAD_DOWN, Icons.Default.ArrowDownward),
+                KeyData(stringResource(R.string.key_right), KeyEvent.KEYCODE_DPAD_RIGHT, Icons.AutoMirrored.Filled.ArrowForward),
             )
             row2.forEach { keyData ->
                 KeyButton(

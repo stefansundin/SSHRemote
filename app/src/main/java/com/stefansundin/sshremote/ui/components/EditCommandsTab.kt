@@ -1,3 +1,21 @@
+/*
+ * SSH Remote
+ * Copyright (C) 2026  Stefan Sundin
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.stefansundin.sshremote.ui.components
 
 import android.content.res.Configuration
@@ -37,9 +55,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.CommandItem
 import com.stefansundin.sshremote.data.host.toItem
@@ -65,13 +85,16 @@ fun EditCommandsTab(
         onCommandsChanged(newCommandItems)
     }
 
+    val commandDeletedMsg = stringResource(R.string.command_deleted)
+    val undoLabel = stringResource(R.string.undo)
+
     LaunchedEffect(undoableDeletedCommand) {
         val deletedCommand = undoableDeletedCommand
         if (deletedCommand != null) {
             val (index, command) = deletedCommand
             val result = snackbarHostState.showSnackbar(
-                message = "Command deleted",
-                actionLabel = "Undo",
+                message = commandDeletedMsg,
+                actionLabel = undoLabel,
             )
             if (result == SnackbarResult.ActionPerformed) {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -127,7 +150,7 @@ fun EditCommandsTab(
                                 .clearAndSetSemantics { },
                             onClick = {},
                         ) {
-                            Icon(Icons.Rounded.DragHandle, contentDescription = "Reorder")
+                            Icon(Icons.Rounded.DragHandle, contentDescription = stringResource(R.string.reorder))
                         }
                         Text(
                             text = commandItem.command.name ?: commandItem.command.command,
@@ -139,7 +162,7 @@ fun EditCommandsTab(
                                 onEditCommand(commandItem)
                             },
                         ) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit command")
+                            Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
                         }
                         IconButton(
                             onClick = {
@@ -152,7 +175,7 @@ fun EditCommandsTab(
                         ) {
                             Icon(
                                 Icons.Default.Delete,
-                                contentDescription = "Delete command",
+                                contentDescription = stringResource(R.string.delete),
                                 tint = MaterialTheme.colorScheme.error,
                             )
                         }
