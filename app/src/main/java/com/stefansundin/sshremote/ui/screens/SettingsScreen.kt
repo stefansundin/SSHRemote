@@ -366,12 +366,15 @@ fun SettingsScreen(
         previewOnPrimaryColor = onPrimaryColor
     }
 
-    val successfullyImportedHostsMsg = stringResource(R.string.successfully_imported_hosts)
     LaunchedEffect(Unit) {
         settingsViewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is SettingsEvent.ImportSuccess -> {
-                    val message = String.format(successfullyImportedHostsMsg, event.count)
+                    val message = context.resources.getQuantityString(
+                        R.plurals.successfully_imported_hosts,
+                        event.count,
+                        event.count,
+                    )
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
 

@@ -189,7 +189,7 @@ fun EditHostScreen(
             originalIds
         }
         val resultIds =
-            if (originalIds != null && originalIds.isNotEmpty() && validIds?.isEmpty() == true && identities != null) {
+            if (!originalIds.isNullOrEmpty() && validIds?.isEmpty() == true && identities != null) {
                 // Stale reference case: all selected keys are gone. Switch to "Use any key".
                 // Only do this if we are sure identities are loaded (not null)
                 null

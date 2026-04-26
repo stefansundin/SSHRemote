@@ -29,7 +29,7 @@ val gson: Gson = GsonBuilder()
     .registerTypeAdapterFactory(
         // Creates a TypeAdapter for Map<RemoteControlKey, Command> that is passed the gson instance
         object : com.google.gson.TypeAdapterFactory {
-            override fun <T : Any?> create(gson: Gson, type: TypeToken<T>): TypeAdapter<T>? {
+            override fun <T> create(gson: Gson, type: TypeToken<T>): TypeAdapter<T>? {
                 if (type.type == object : TypeToken<Map<RemoteControlKey, Command>>() {}.type) {
                     @Suppress("UNCHECKED_CAST")
                     return LenientRemoteControlKeyMapTypeAdapter(gson) as TypeAdapter<T>

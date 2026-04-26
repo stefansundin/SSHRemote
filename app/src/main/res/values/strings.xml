@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">OK</string>
@@ -27,8 +27,6 @@
     <string name="duplicate">Duplicate</string>
     <string name="replace">Replace</string>
     <string name="permission_denied">Permission denied</string>
-    <string name="milliseconds_unit">ms</string>
-    <string name="custom">Custom</string>
     <string name="reset">Reset</string>
     <string name="reset_to_default">Reset to default</string>
     <string name="discard_and_leave">Discard and leave</string>
@@ -175,7 +173,6 @@
     <!-- SSH Keys -->
     <string name="ssh_keys">SSH Keys</string>
     <string name="ssh_key">SSH Key</string>
-    <string name="manage_ssh_keys">Manage SSH keys</string>
     <string name="add_ssh_key">Add SSH Key</string>
     <string name="add_ssh_key_title">Add SSH Key</string>
     <string name="no_ssh_keys_added_yet">No SSH keys added yet.</string>
@@ -197,8 +194,6 @@
     <string name="new_name">New name</string>
     <string name="invalid_key">Invalid key</string>
     <string name="invalid_key_format">Invalid key format</string>
-    <string name="import_private_key">Import private key</string>
-    <string name="paste_private_key_prompt">Paste your private key here</string>
     <string name="private_key">Private Key</string>
     <string name="paste_from_clipboard">Paste from clipboard</string>
     <string name="generated_key_name">Generated Key</string>
@@ -213,7 +208,7 @@
     <string name="tab_generate">Generate</string>
     <string name="tab_manual">Manual</string>
     <string name="key_type_format">Key type: %s</string>
-    <string name="key_create_type_format">%1$s (%2$d bits)</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d bits)</string>
     <string name="key_list_type_format">%1$s %2$d-bit</string>
     <string name="unsaved_key_changes_text">You have unsaved changes. Do you want to save the key before leaving?</string>
     <string name="no_keys_found_prompt">No keys found. Create an SSH key in the app settings.</string>
@@ -226,7 +221,6 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="dark_theme">Dark theme</string>
     <string name="dynamic_colors">Dynamic colors</string>
     <string name="haptic_feedback">Haptic feedback</string>
     <string name="haptic_off">Off</string>
@@ -234,9 +228,7 @@
     <string name="haptic_medium">Medium (%d ms)</string>
     <string name="haptic_long">Long (%d ms)</string>
     <string name="haptic_custom">Custom (%d ms)</string>
-    <string name="vibration_duration_info">Vibration duration in milliseconds</string>
     <string name="show_notification">Show notification</string>
-    <string name="notifications_experimental">Notifications (Experimental)</string>
     <string name="keep_screen_on">Keep screen on</string>
     <string name="security">Security</string>
     <string name="ssh_keys_subtitle">Manage SSH keys for authentication</string>
@@ -246,14 +238,10 @@
     <string name="color_overrides">Color overrides</string>
     <string name="choose_a_color">Choose a color</string>
     <string name="primary_color">Primary color</string>
-    <string name="select_primary_color">Select primary color</string>
     <string name="choose_primary_color">Choose primary color</string>
-    <string name="on_primary_color">Text color on primary</string>
-    <string name="select_on_primary_color">Select text color on primary</string>
     <string name="choose_on_primary_color">Choose text color on primary</string>
     <string name="text_on_primary_color">Text color on primary</string>
     <string name="background_color">Background color</string>
-    <string name="select_background_color">Select background color</string>
     <string name="choose_background_color">Choose background color</string>
     <string name="hsl">HSL</string>
     <string name="rgb">RGB</string>
@@ -266,15 +254,8 @@
 
     <!-- Data Management -->
     <string name="data">Data</string>
-    <string name="backup_and_restore">Backup and Restore</string>
-    <string name="select_backup_file">Select a backup file</string>
-    <string name="failed_to_restore_backup">Failed to restore backup</string>
-    <string name="restore_successful">Restore successful</string>
     <string name="restored_from_backup_title">Restored from backup</string>
     <string name="restored_from_backup_text">The application data was restored from a backup. For security reasons, encrypted data such as SSH keys and passwords are not included in backups.\n\nPlease configure these again.</string>
-    <string name="clear_all_data">Clear all data</string>
-    <string name="clear_all_data_warning">Are you sure you want to clear all data? This will delete all hosts, SSH keys and passwords.</string>
-    <string name="delete_everything">Delete everything</string>
     <string name="export_to_file">Export to file</string>
     <string name="export_to_file_subtitle">Export settings and hosts to a file.</string>
     <string name="import_from_file">Import from file</string>
@@ -297,7 +278,10 @@
     <string name="qr_code_content_description">QR Code</string>
     <string name="import_settings_title">Import settings</string>
     <string name="import_settings_text">In case of conflicts with existing hosts, do you want to update or duplicate?\n\nYou can also choose Replace which will delete all existing hosts.</string>
-    <string name="successfully_imported_hosts">Successfully imported %d hosts.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="one">Successfully imported %d host.</item>
+        <item quantity="other">Successfully imported %d hosts.</item>
+    </plurals>
 
     <!-- About -->
     <string name="about_app">About SSH Remote</string>

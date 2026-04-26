@@ -99,6 +99,7 @@ fun CommandOutputDialog(
     )
 }
 
+@Suppress("SpellCheckingInspection")
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
 @Preview(showBackground = true, widthDp = 400, heightDp = 600, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
