@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -165,7 +166,7 @@ private fun RemoteControlLayout(
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
                 ) {
                     StatusText(host, editing, volume, muted)
-                    ActionButtons(onKeyEvent, host, editing, isConnected)
+                    ActionButtons(onKeyEvent, host, editing, isConnected, muted)
                 }
             }
         }
@@ -180,7 +181,7 @@ private fun RemoteControlLayout(
             ) {
                 StatusText(host, editing, volume, muted)
                 Dpad(onKeyEvent, host, editing, isConnected)
-                ActionButtons(onKeyEvent, host, editing, isConnected)
+                ActionButtons(onKeyEvent, host, editing, isConnected, muted)
             }
         }
     }
@@ -227,6 +228,7 @@ private fun ActionButtons(
     host: Host?,
     editing: Boolean,
     isConnected: Boolean,
+    muted: Boolean? = null,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
@@ -247,7 +249,19 @@ private fun ActionButtons(
                     contentDescription = stringResource(R.string.key_volume_down),
                 )
             }
-            RemoteButton(RemoteControlKey.MUTE, onKeyEvent, host, editing, isConnected, buttonModifier) {
+            RemoteButton(
+                key = RemoteControlKey.MUTE,
+                onKeyEvent = onKeyEvent,
+                host = host,
+                editing = editing,
+                isConnected = isConnected,
+                modifier = buttonModifier,
+                colors = if (muted == true) {
+                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                } else {
+                    ButtonDefaults.buttonColors()
+                }
+            ) {
                 Icon(Icons.AutoMirrored.Filled.VolumeOff, contentDescription = stringResource(R.string.key_mute))
             }
             RemoteButton(RemoteControlKey.VOLUME_UP, onKeyEvent, host, editing, isConnected, buttonModifier) {
