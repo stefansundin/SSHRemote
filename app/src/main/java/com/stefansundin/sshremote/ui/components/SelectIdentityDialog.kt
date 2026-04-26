@@ -93,8 +93,14 @@ fun SelectIdentityDialog(
     )
 }
 
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(showBackground = true, widthDp = 400, heightDp = 600)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun SelectIdentityDialogPreview() {
     SSHRemoteTheme {

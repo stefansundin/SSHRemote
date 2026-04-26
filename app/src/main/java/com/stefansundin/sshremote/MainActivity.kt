@@ -737,8 +737,14 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
     }
 }
 
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f, heightDp = 500)
+@Preview(showBackground = true, widthDp = 400, heightDp = 600)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun GettingStartedDialogPreview() {
     SSHRemoteTheme {
@@ -748,8 +754,14 @@ private fun GettingStartedDialogPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f, heightDp = 300)
+@Preview(showBackground = true, widthDp = 400, heightDp = 600)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun SelectPresetDialogPreview() {
     SSHRemoteTheme {

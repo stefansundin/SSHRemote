@@ -150,9 +150,11 @@ fun EditCommandDialog(
     )
 }
 
-@Preview(showBackground = true, name = "Add command")
+@Preview(showBackground = true, widthDp = 400, heightDp = 600, name = "Add command")
 @Preview(
     showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
     name = "Add command (dark and large font)",
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     fontScale = 2.0f,
@@ -170,9 +172,11 @@ private fun EditCommandDialogPreview_Add() {
     }
 }
 
-@Preview(showBackground = true, name = "Edit command")
+@Preview(showBackground = true, widthDp = 400, heightDp = 600, name = "Edit command")
 @Preview(
     showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
     name = "Edit command (dark and large font)",
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     fontScale = 2.0f,

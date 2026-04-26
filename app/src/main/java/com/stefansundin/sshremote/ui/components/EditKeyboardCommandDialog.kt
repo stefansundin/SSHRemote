@@ -36,7 +36,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -114,8 +113,14 @@ fun EditKeyboardCommandDialog(
     )
 }
 
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(showBackground = true, widthDp = 400, heightDp = 600)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun EditKeyboardCommandDialogPreview() {
     SSHRemoteTheme {
