@@ -213,7 +213,6 @@ fun RemoteControlScreen(
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 }
             }
-            NotificationService.stop(context) // TODO: Remove this when NotificationService can maintain its own SSH connection
         }
     }
 
@@ -222,6 +221,12 @@ fun RemoteControlScreen(
     LaunchedEffect(uiState.connectionStatus) {
         if (notificationsEnabled) {
             host.let { NotificationService.start(context, it.toNotificationHost(uiState.connectionStatus)) }
+        }
+    }
+
+    LaunchedEffect(uiState.connectionStatus) {
+        if (uiState.connectionStatus == ConnectionStatus.DISCONNECTED) {
+            NotificationService.stop(context)
         }
     }
 

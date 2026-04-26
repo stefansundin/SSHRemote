@@ -596,6 +596,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        NotificationService.stop(this)
+    }
+
     private fun createShortcut(context: Context, host: Host) {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_MAIN
