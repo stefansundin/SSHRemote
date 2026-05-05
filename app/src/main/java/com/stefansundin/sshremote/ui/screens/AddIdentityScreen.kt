@@ -21,6 +21,7 @@ package com.stefansundin.sshremote.ui.screens
 import android.content.ClipData
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Parcelable
 import android.util.Log
 import android.view.SoundEffectConstants
 import androidx.activity.compose.BackHandler
@@ -86,6 +87,7 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
@@ -97,33 +99,86 @@ import java.util.zip.ZipInputStream
 
 val keyTypes = mapOf(KeyPair.ED25519 to "Ed25519", KeyPair.RSA to "RSA")
 
-data class ParsedPrivateKey(
-    val privateKey: String,
-    val suggestedName: String,
-)
-
-data class SavedIdentityImport(
+@Parcelize
+data class IdentityKeyData(
     val name: String,
     val privateKey: String,
     val certificate: String? = null,
-)
+) : Parcelable
 
-data class ZipKey(
-    val name: String,
-    val privateKey: String,
-    val certificate: String? = null,
-)
+private const val OPENSSH_PRIVATE_KEY_BEGIN_MARKER = "-----BEGIN OPENSSH PRIVATE KEY-----"
+private const val OPENSSH_PRIVATE_KEY_END_MARKER = "-----END OPENSSH PRIVATE KEY-----"
+
+fun isOpenSshCertificateLine(line: String): Boolean {
+    val parts = line.trim().split(Regex("\\s+"), limit = 3)
+    return parts.size >= 2 && parts[0].contains("-cert-v01@openssh.com")
+}
+
+fun decodeBase64OrNull(content: String): ByteArray? {
+    val trimmed = content.trim()
+    if (trimmed.isEmpty()) {
+        return null
+    }
+
+    return try {
+        Base64.getMimeDecoder().decode(trimmed)
+    } catch (_: IllegalArgumentException) {
+        try {
+            Base64.getDecoder().decode(trimmed)
+        } catch (_: IllegalArgumentException) {
+            try {
+                Base64.getUrlDecoder().decode(trimmed)
+            } catch (_: IllegalArgumentException) {
+                null
+            }
+        }
+    }
+}
+
+fun splitPrivateKeyAndCertificate(content: String): Pair<String, String?> {
+    val trimmedContent = content.trim()
+    val beginMarkerIndex = trimmedContent.indexOf(OPENSSH_PRIVATE_KEY_BEGIN_MARKER)
+    if (beginMarkerIndex == -1) {
+        return trimmedContent to null
+    }
+
+    val endMarkerIndex = trimmedContent.indexOf(OPENSSH_PRIVATE_KEY_END_MARKER, beginMarkerIndex)
+    if (endMarkerIndex == -1) {
+        return trimmedContent to null
+    }
+
+    val privateKeyEndIndex = endMarkerIndex + OPENSSH_PRIVATE_KEY_END_MARKER.length
+    val privateKeyContent = trimmedContent.substring(beginMarkerIndex, privateKeyEndIndex).trim()
+
+    val trailingLine = trimmedContent
+        .substring(privateKeyEndIndex)
+        .lineSequence()
+        .map { it.trim() }
+        .firstOrNull { it.isNotBlank() }
+
+    val leadingLine = trimmedContent
+        .substring(0, beginMarkerIndex)
+        .lineSequence()
+        .map { it.trim() }
+        .lastOrNull { it.isNotBlank() }
+
+    val certificate = trailingLine?.takeIf(::isOpenSshCertificateLine)
+        ?: leadingLine?.takeIf(::isOpenSshCertificateLine)
+
+    return privateKeyContent to certificate
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIdentityScreen(
-    onKeysSaved: (keys: List<SavedIdentityImport>) -> Unit,
+    onKeysSaved: (keys: List<IdentityKeyData>) -> Unit,
     onKeyGenerated: suspend (name: String, type: Int, size: Int?, comment: String) -> Unit,
     onNavigateUp: () -> Unit,
     scanQrCodeOnStart: Boolean = false,
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var privateKey by rememberSaveable { mutableStateOf("") }
+    var certificate by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabTitles = listOf(
         stringResource(R.string.tab_import),
@@ -132,11 +187,7 @@ fun AddIdentityScreen(
     )
     var isKeyContentValid by rememberSaveable { mutableStateOf(false) }
     var importKeyTypeDescription by rememberSaveable { mutableStateOf<String?>(null) }
-    var zipKeyNames by rememberSaveable { mutableStateOf(listOf<String>()) }
-    var zipPrivateKeys by rememberSaveable { mutableStateOf(listOf<String>()) }
-    var zipCertificates by rememberSaveable { mutableStateOf(listOf<String?>()) }
-    var zipSummary by rememberSaveable { mutableStateOf<String?>(null) }
-    var showZipDialog by rememberSaveable { mutableStateOf(false) }
+    var zipKeys by rememberSaveable { mutableStateOf(emptyList<IdentityKeyData>()) }
     var generateKeyType by rememberSaveable { mutableStateOf<Pair<Int, Int?>>(Pair(KeyPair.ED25519, null)) }
     var isGenerating by rememberSaveable { mutableStateOf(false) }
     var scanQrCode by rememberSaveable { mutableStateOf(scanQrCodeOnStart) }
@@ -148,7 +199,12 @@ fun AddIdentityScreen(
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
     var importError by rememberSaveable { mutableStateOf<String?>(null) }
 
-    val hasZipKeys = zipPrivateKeys.isNotEmpty()
+    val hasZipKeys = zipKeys.isNotEmpty()
+    val zipSummary = if (hasZipKeys) resources.getQuantityString(
+        R.plurals.zip_keys_detected_in_zip,
+        zipKeys.size,
+        zipKeys.size,
+    ) else null
     val hasUnsavedChanges = privateKey.isNotBlank() || hasZipKeys
     val isFormValid = (selectedTabIndex == 0 && (isKeyContentValid || hasZipKeys)) ||
             (selectedTabIndex == 1) ||
@@ -159,15 +215,8 @@ fun AddIdentityScreen(
     val zipNoValidKeysMsg = stringResource(R.string.zip_no_valid_keys)
 
     fun saveZipKeys() {
-        val keys = zipPrivateKeys.mapIndexed { index, key ->
-            val resolvedName = zipKeyNames.getOrNull(index).orEmpty().ifBlank {
-                "$keyNamePrefix ${index + 1}"
-            }
-            SavedIdentityImport(
-                name = resolvedName,
-                privateKey = key,
-                certificate = zipCertificates.getOrNull(index),
-            )
+        val keys = zipKeys.mapIndexed { index, key ->
+            if (key.name.isBlank()) key.copy(name = "$keyNamePrefix ${index + 1}") else key
         }
         onKeysSaved(keys)
     }
@@ -177,12 +226,22 @@ fun AddIdentityScreen(
             val dateAndTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
             "$keyNamePrefix $dateAndTime"
         }
+        val (privateKeyContent, parsedCertificate) = splitPrivateKeyAndCertificate(privateKey)
+        val certificateToSave = parsedCertificate ?: certificate
         when (selectedTabIndex) {
             0 -> {
                 if (hasZipKeys) {
                     saveZipKeys()
                 } else {
-                    onKeysSaved(listOf(SavedIdentityImport(name = finalName, privateKey = privateKey)))
+                    onKeysSaved(
+                        listOf(
+                            IdentityKeyData(
+                                name = finalName,
+                                privateKey = privateKeyContent,
+                                certificate = certificateToSave,
+                            ),
+                        ),
+                    )
                 }
             }
 
@@ -193,24 +252,37 @@ fun AddIdentityScreen(
                 }
             }
 
-            2 -> onKeysSaved(listOf(SavedIdentityImport(name = finalName, privateKey = privateKey)))
+            2 -> {
+                onKeysSaved(
+                    listOf(
+                        IdentityKeyData(
+                            name = finalName,
+                            privateKey = privateKeyContent,
+                            certificate = certificateToSave,
+                        ),
+                    ),
+                )
+            }
         }
     }
 
-    fun parsePrivateKeyContent(content: String): ParsedPrivateKey {
+    fun parsePrivateKeyContent(content: String): IdentityKeyData {
         var finalKey = content.trim()
         if (!finalKey.startsWith("-----")) {
-            val decoded = Base64.getMimeDecoder().decode(finalKey)
+            val decoded = decodeBase64OrNull(finalKey)
+                ?: throw IllegalArgumentException("Invalid base64-encoded key payload")
             val inputStream = GZIPInputStream(ByteArrayInputStream(decoded))
             val decompressed = inputStream.bufferedReader(StandardCharsets.UTF_8).readText()
             finalKey = decompressed.trim()
         }
-        val keyPair = KeyPair.load(JSch(), finalKey.toByteArray(), null)
+        val (privateKeyContent, parsedCertificate) = splitPrivateKeyAndCertificate(finalKey)
+        val keyPair = KeyPair.load(JSch(), privateKeyContent.toByteArray(), null)
         val comment = keyPair.publicKeyComment.trim()
         keyPair.dispose()
-        return ParsedPrivateKey(
-            privateKey = finalKey,
-            suggestedName = comment,
+        return IdentityKeyData(
+            name = comment,
+            privateKey = privateKeyContent,
+            certificate = parsedCertificate,
         )
     }
 
@@ -241,41 +313,10 @@ fun AddIdentityScreen(
         return entries
     }
 
-    fun parseAndSetKey(content: String) {
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                val parsedKey = parsePrivateKeyContent(content)
-
-                withContext(Dispatchers.Main) {
-                    importError = null
-                    zipSummary = null
-                    showZipDialog = false
-                    zipKeyNames = emptyList()
-                    zipPrivateKeys = emptyList()
-                    zipCertificates = emptyList()
-                    privateKey = parsedKey.privateKey
-                    if (parsedKey.suggestedName.isNotBlank()) {
-                        name = parsedKey.suggestedName
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    zipKeyNames = emptyList()
-                    zipPrivateKeys = emptyList()
-                    zipCertificates = emptyList()
-                    zipSummary = null
-                    showZipDialog = false
-                    privateKey = content
-                    importError = e.message ?: invalidKeyFormatMsg
-                }
-                Log.e("AddIdentityScreen", "Error parsing key", e)
-            }
-        }
-    }
 
     fun parseAndSetZipKeys(content: ByteArray) {
         coroutineScope.launch(Dispatchers.IO) {
-            val validKeys = mutableListOf<ZipKey>()
+            val validKeys = mutableListOf<IdentityKeyData>()
             try {
                 val zipContentByPath = readZipTextEntries(content)
 
@@ -286,13 +327,18 @@ fun AddIdentityScreen(
                     try {
                         val parsedKey = parsePrivateKeyContent(entryText)
                         val certificatePath = "$entryPath-cert.pub"
+                        val fallbackCertificatePath = "${entryPath.substringBeforeLast('.', entryPath)}-cert.pub"
                         val certificate = zipContentByPath[certificatePath]
+                            ?: zipContentByPath.entries.firstOrNull {
+                                it.key.equals(certificatePath, ignoreCase = true) ||
+                                        it.key.equals(fallbackCertificatePath, ignoreCase = true)
+                            }?.value
                         val entryFileName = entryPath.substringAfterLast('/').trim()
-                        val resolvedName = parsedKey.suggestedName.ifBlank { entryFileName }
-                        validKeys += ZipKey(
+                        val resolvedName = parsedKey.name.ifBlank { entryFileName }
+                        validKeys += IdentityKeyData(
                             name = resolvedName,
                             privateKey = parsedKey.privateKey,
-                            certificate = certificate,
+                            certificate = certificate ?: parsedKey.certificate,
                         )
                     } catch (_: Exception) {
                     }
@@ -302,54 +348,66 @@ fun AddIdentityScreen(
                     importError = null
                     importKeyTypeDescription = null
                     if (validKeys.isEmpty()) {
-                        zipKeyNames = emptyList()
-                        zipPrivateKeys = emptyList()
-                        zipCertificates = emptyList()
-                        zipSummary = null
-                        showZipDialog = false
+                        zipKeys = emptyList()
+                        certificate = null
                         importError = zipNoValidKeysMsg
                         return@withContext
                     }
 
-                    if (validKeys.size == 1) {
-                        val importedKey = validKeys.first()
-                        zipKeyNames = listOf(importedKey.name)
-                        zipPrivateKeys = listOf(importedKey.privateKey)
-                        zipCertificates = listOf(importedKey.certificate)
-                        zipSummary = null
-                        showZipDialog = false
-                        if (importedKey.certificate == null) {
-                            privateKey = importedKey.privateKey
-                            zipKeyNames = emptyList()
-                            zipPrivateKeys = emptyList()
-                            zipCertificates = emptyList()
-                        } else {
-                            privateKey = ""
-                        }
-                        if (importedKey.name.isNotBlank()) {
-                            name = importedKey.name
-                        }
-                        return@withContext
-                    }
-
                     privateKey = ""
-                    zipKeyNames = validKeys.map { it.name }
-                    zipPrivateKeys = validKeys.map { it.privateKey }
-                    zipCertificates = validKeys.map { it.certificate }
-                    zipSummary =
-                        resources.getQuantityString(R.plurals.zip_keys_detected_in_zip, validKeys.size, validKeys.size)
-                    showZipDialog = true
+                    certificate = null
+                    zipKeys = validKeys
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    zipKeyNames = emptyList()
-                    zipPrivateKeys = emptyList()
-                    zipCertificates = emptyList()
-                    zipSummary = null
-                    showZipDialog = false
+                    zipKeys = emptyList()
+                    certificate = null
+                    importKeyTypeDescription = null
                     importError = e.message ?: invalidKeyFormatMsg
                 }
                 Log.e("AddIdentityScreen", "Error parsing zip", e)
+            }
+        }
+    }
+
+    fun parseAndSetKey(content: String) {
+        coroutineScope.launch(Dispatchers.IO) {
+            // Check if the content is a base64-encoded zip file
+            val trimmed = content.trim()
+            if (!trimmed.startsWith("-----")) {
+                val decoded = decodeBase64OrNull(trimmed)
+                if (decoded != null && isZipContent(decoded)) {
+                    parseAndSetZipKeys(decoded)
+                    return@launch
+                }
+            }
+
+            try {
+                val parsedKey = parsePrivateKeyContent(content)
+
+                withContext(Dispatchers.Main) {
+                    importError = null
+                    zipKeys = emptyList()
+                    certificate = parsedKey.certificate
+                    privateKey = buildString {
+                        append(parsedKey.privateKey)
+                        if (!parsedKey.certificate.isNullOrBlank()) {
+                            append("\n")
+                            append(parsedKey.certificate)
+                        }
+                    }
+                    if (parsedKey.name.isNotBlank()) {
+                        name = parsedKey.name
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    zipKeys = emptyList()
+                    certificate = null
+                    privateKey = content
+                    importError = e.message ?: invalidKeyFormatMsg
+                }
+                Log.e("AddIdentityScreen", "Error parsing key", e)
             }
         }
     }
@@ -418,12 +476,12 @@ fun AddIdentityScreen(
         )
     }
 
-    if (showZipDialog && zipSummary != null) {
+    if (hasZipKeys) {
         AlertDialog(
             title = { Text(stringResource(R.string.zip_keys_detected_title)) },
             text = { Text(zipSummary!!) },
             properties = DialogProperties(dismissOnClickOutside = false),
-            onDismissRequest = { showZipDialog = false },
+            onDismissRequest = { zipKeys = emptyList() },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -438,11 +496,8 @@ fun AddIdentityScreen(
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        showZipDialog = false
-                        zipSummary = null
-                        zipKeyNames = emptyList()
-                        zipPrivateKeys = emptyList()
-                        zipCertificates = emptyList()
+                        zipKeys = emptyList()
+                        certificate = null
                     },
                 ) {
                     Text(stringResource(R.string.cancel))
@@ -479,8 +534,8 @@ fun AddIdentityScreen(
                 false
             } else {
                 try {
-                    val jsch = JSch()
-                    val keyPair = KeyPair.load(jsch, privateKey.toByteArray(), null)
+                    val (privateKeyContent, parsedCertificate) = splitPrivateKeyAndCertificate(privateKey)
+                    val keyPair = KeyPair.load(JSch(), privateKeyContent.toByteArray(), null)
                     if (keyTypes.containsKey(keyPair.keyType)) {
                         importKeyTypeDescription = keyTypes[keyPair.keyType]
                         if (keyPair.keyType == KeyPair.RSA) {
@@ -489,9 +544,11 @@ fun AddIdentityScreen(
                     } else {
                         importKeyTypeDescription = keyPair.keyTypeString
                     }
+                    certificate = parsedCertificate
                     keyPair.dispose()
                     true
                 } catch (_: Exception) {
+                    certificate = null
                     false
                 }
             }
@@ -710,7 +767,8 @@ fun ManualEntryTab(
     LaunchedEffect(privateKey) {
         withContext(Dispatchers.IO) {
             try {
-                val keyPair = KeyPair.load(JSch(), privateKey.toByteArray(), null)
+                val (privateKeyContent, _) = splitPrivateKeyAndCertificate(privateKey)
+                val keyPair = KeyPair.load(JSch(), privateKeyContent.toByteArray(), null)
                 val comment = keyPair.publicKeyComment
                 if (comment.isNotBlank()) {
                     onNameSuggestion(comment)
