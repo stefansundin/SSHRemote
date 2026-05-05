@@ -161,6 +161,28 @@ class IdentityViewModel(
         }
     }
 
+    fun attachCertificate(identity: Identity, certificate: String) {
+        // No validation since jsch doesn't offer a convenient way of using its validation methods, and I don't want to maintain that myself.
+        viewModelScope.launch {
+            try {
+                val encryptedCertificate = cryptoManager.encrypt(certificate.toByteArray())
+                identityRepository.update(identity.copy(encryptedCertificate = encryptedCertificate))
+            } catch (e: Exception) {
+                _eventChannel.send(IdentityEvent.Error("Failed to attach certificate: ${e.message}"))
+            }
+        }
+    }
+
+    fun deleteCertificate(identity: Identity) {
+        viewModelScope.launch {
+            try {
+                identityRepository.update(identity.copy(encryptedCertificate = null))
+            } catch (e: Exception) {
+                _eventChannel.send(IdentityEvent.Error("Failed to delete certificate: ${e.message}"))
+            }
+        }
+    }
+
     fun delete(identity: Identity) {
         viewModelScope.launch {
             try {

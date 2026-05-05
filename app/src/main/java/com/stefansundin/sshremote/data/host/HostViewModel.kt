@@ -217,10 +217,12 @@ class HostViewModel(
                 host.identityIds?.map { id ->
                     async { identityRepository.get(id).first() }
                 }?.awaitAll()?.filterNotNull() ?: identityRepository.getAll().first()
-            }
-
-            val privateKeys = identities.map { key ->
-                Pair(key.name, cryptoManager.decryptToString(key.encryptedPrivateKey))
+            }.map { identity ->
+                HostConnectionDetails.Identity(
+                    name = identity.name,
+                    privateKey = cryptoManager.decryptToString(identity.encryptedPrivateKey),
+                    certificate = identity.encryptedCertificate?.let { cryptoManager.decryptToString(it) },
+                )
             }
 
             val password = host.passwordId?.let {
@@ -234,7 +236,7 @@ class HostViewModel(
                 port = host.port,
                 user = host.user,
                 password = password,
-                privateKeys = privateKeys,
+                identities = identities,
                 knownHosts = host.knownHosts,
                 sshConfig = host.sshConfig ?: Host.DEFAULT_SSH_CONFIG,
             )

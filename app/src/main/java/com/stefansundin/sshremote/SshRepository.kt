@@ -85,7 +85,7 @@ interface ISshRepository {
 /**
  * A repository for handling SSH connection and command execution.
  */
-class SshRepository(private val settingsRepository: SettingsRepository): ISshRepository {
+class SshRepository(private val settingsRepository: SettingsRepository) : ISshRepository {
 
     private val commandMutex = Mutex()
 
@@ -129,8 +129,9 @@ class SshRepository(private val settingsRepository: SettingsRepository): ISshRep
                 details.knownHosts.joinToString("\n").let { jsch.setKnownHosts(it.byteInputStream()) }
             }
 
-            details.privateKeys?.forEach { (name, key) ->
-                jsch.addIdentity(name, key.toByteArray(), null, null)
+            details.identities?.forEach { identity ->
+                val certificate = identity.certificate?.toByteArray()
+                jsch.addIdentity(identity.name, identity.privateKey.toByteArray(), certificate, null)
             }
 
             val newSession = jsch.getSession(details.user, details.hostname, details.port)

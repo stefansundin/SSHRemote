@@ -213,6 +213,12 @@
     <string name="unsaved_key_changes_text">You have unsaved changes. Do you want to save the key before leaving?</string>
     <string name="no_keys_found_prompt">No keys found. Create an SSH key in the app settings.</string>
     <string name="key_addition_info">Key will be added to host\'s ~/.ssh/authorized_keys file.</string>
+    <string name="attach_certificate">Attach certificate</string>
+    <string name="certificate_attached">Certificate attached</string>
+    <string name="replace_certificate_title">Replace certificate?</string>
+    <string name="replace_certificate_text">This key already has a certificate attached. Do you want to replace it?</string>
+    <string name="delete_certificate">Delete certificate</string>
+    <string name="certificate">Certificate</string>
 
     <!-- Settings -->
     <string name="settings">Settings</string>
@@ -275,6 +281,7 @@
     <string name="scan_qr_code_settings_prompt">Scan a QR code to import settings</string>
     <string name="scan_qr_code_to_import_settings">Scan the QR code to import settings</string>
     <string name="scan_qr_code_key_prompt">Scan QR code to import SSH key</string>
+    <string name="scan_qr_code_certificate_prompt">Scan QR code to import SSH certificate</string>
     <string name="qr_code_content_description">QR Code</string>
     <string name="import_settings_title">Import settings</string>
     <string name="import_settings_text">In case of conflicts with existing hosts, do you want to update or duplicate?\n\nYou can also choose Replace which will delete all existing hosts.</string>

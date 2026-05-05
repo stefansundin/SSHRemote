@@ -30,7 +30,7 @@ import com.stefansundin.sshremote.data.password.PasswordDao
 
 @Database(
     entities = [Identity::class, Password::class],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)

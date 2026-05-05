@@ -546,8 +546,10 @@ class MainActivity : ComponentActivity() {
                                 onNavigateUp = {
                                     navController.safePopBackStack()
                                 },
-                                onDelete = { key -> identityViewModel.delete(key) },
-                                onRename = { key, newName -> identityViewModel.rename(key, newName) },
+                                onDelete = { identity -> identityViewModel.delete(identity) },
+                                onRename = { identity, newName -> identityViewModel.rename(identity, newName) },
+                                onAttachCertificate = { identity, cert -> identityViewModel.attachCertificate(identity, cert) },
+                                onDeleteCertificate = { identity -> identityViewModel.deleteCertificate(identity) },
                                 onUndoDelete = { identityViewModel.undoDelete() },
                             )
                         }

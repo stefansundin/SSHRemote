@@ -35,4 +35,5 @@ data class Identity(
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
     val name: String,
     val encryptedPrivateKey: ByteArray,
+    val encryptedCertificate: ByteArray? = null,
 )

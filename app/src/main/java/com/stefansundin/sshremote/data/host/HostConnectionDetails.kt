@@ -26,7 +26,13 @@ data class HostConnectionDetails(
     val port: Int,
     val user: String,
     val password: String?,
-    val privateKeys: List<Pair<String, String>>?,
+    val identities: List<Identity>?,
     val knownHosts: List<String>,
     val sshConfig: String,
-)
+) {
+    data class Identity(
+        val name: String,
+        val privateKey: String,
+        val certificate: String?,
+    )
+}

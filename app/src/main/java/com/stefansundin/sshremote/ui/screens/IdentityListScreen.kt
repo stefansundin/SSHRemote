@@ -35,15 +35,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -59,6 +63,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -94,11 +99,14 @@ import androidx.compose.ui.window.DialogProperties
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.KeyPair
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.ICryptoManager
 import com.stefansundin.sshremote.data.identity.IIdentityListViewModel
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.identity.IdentityEvent
+import com.stefansundin.sshremote.ui.components.NoWrapOnSpecialCharactersVisualTransformation
 import com.stefansundin.sshremote.ui.components.PublicKeyDialog
 import com.stefansundin.sshremote.ui.components.TextWithInlineIcon
 import com.stefansundin.sshremote.ui.dpadFocusable
@@ -122,6 +130,8 @@ fun IdentityListScreen(
     onNavigateUp: () -> Unit,
     onDelete: (Identity) -> Unit,
     onRename: (Identity, String) -> Unit,
+    onAttachCertificate: (Identity, String) -> Unit,
+    onDeleteCertificate: (Identity) -> Unit,
     onUndoDelete: () -> Unit,
 ) {
     val identities by identityViewModel.identities.collectAsState()
@@ -370,6 +380,8 @@ fun IdentityListScreen(
                                 undoableDeletedIdentityId = identity.id
                             },
                             onRename = { newName -> onRename(identity, newName) },
+                            onAttachCertificate = { cert -> onAttachCertificate(identity, cert) },
+                            onDeleteCertificate = { onDeleteCertificate(identity) },
                         )
                     }
                 }
@@ -386,12 +398,33 @@ fun IdentityItem(
     onExportPublicKey: () -> Unit,
     onDelete: () -> Unit,
     onRename: (String) -> Unit,
+    onAttachCertificate: (String) -> Unit,
+    onDeleteCertificate: () -> Unit,
 ) {
+    val hasCertificate = identity.encryptedCertificate != null
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
     var isRenameDialogVisible by rememberSaveable { mutableStateOf(false) }
     var newName by rememberSaveable { mutableStateOf(identity.name) }
+    var showReplaceCertWarning by rememberSaveable { mutableStateOf(false) }
+    var showAttachCertDialog by rememberSaveable { mutableStateOf(false) }
+    var certInput by rememberSaveable { mutableStateOf("") }
+    var scanQrCode by rememberSaveable { mutableStateOf(false) }
     val view = LocalView.current
+    val context = LocalContext.current
+    val clipboard = LocalClipboard.current
     val resources = LocalResources.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val certFilePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                context.contentResolver.openInputStream(it)?.use { inputStream ->
+                    certInput = inputStream.reader().readText().trim()
+                }
+            }
+        },
+    )
 
     val (keyInfo, isEncrypted) = remember(identity, cryptoManager, resources) {
         val privateKey = cryptoManager.decrypt(identity.encryptedPrivateKey)
@@ -415,12 +448,23 @@ fun IdentityItem(
 
     ListItem(
         headlineContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(identity.name)
+            Row(verticalAlignment = Alignment.Top) {
+                Text(
+                    identity.name,
+                    modifier = Modifier.weight(1f),
+                )
                 if (isEncrypted) {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = stringResource(R.string.passphrase_protected),
+                        modifier = Modifier.padding(start = 8.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (hasCertificate) {
+                    Icon(
+                        imageVector = Icons.Default.Attachment,
+                        contentDescription = stringResource(R.string.certificate_attached),
                         modifier = Modifier.padding(start = 8.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -453,6 +497,19 @@ fun IdentityItem(
                         },
                     )
                     DropdownMenuItem(
+                        text = { Text(stringResource(R.string.attach_certificate)) },
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            isContextMenuVisible = false
+                            if (hasCertificate) {
+                                showReplaceCertWarning = true
+                            } else {
+                                certInput = ""
+                                showAttachCertDialog = true
+                            }
+                        },
+                    )
+                    DropdownMenuItem(
                         text = { Text(stringResource(R.string.view_public_key)) },
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -480,6 +537,148 @@ fun IdentityItem(
             }
         },
     )
+
+    if (showReplaceCertWarning) {
+        AlertDialog(
+            title = { Text(stringResource(R.string.replace_certificate_title)) },
+            text = { Text(stringResource(R.string.replace_certificate_text)) },
+            onDismissRequest = { showReplaceCertWarning = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        showReplaceCertWarning = false
+                        certInput = ""
+                        showAttachCertDialog = true
+                    },
+                ) {
+                    Text(stringResource(R.string.replace))
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onDeleteCertificate()
+                            showReplaceCertWarning = false
+                        },
+                    ) {
+                        Text(stringResource(R.string.delete_certificate))
+                    }
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            showReplaceCertWarning = false
+                        },
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            },
+        )
+    }
+
+    val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            certInput = result.contents.trim()
+        }
+    }
+
+    val scanQrCodeCertificatePrompt = stringResource(R.string.scan_qr_code_certificate_prompt)
+    LaunchedEffect(scanQrCode) {
+        if (scanQrCode) {
+            scanQrCode = false
+            val options = ScanOptions()
+            options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            options.setPrompt(scanQrCodeCertificatePrompt)
+            options.setBeepEnabled(false)
+            options.setOrientationLocked(false)
+            qrScanLauncher.launch(options)
+        }
+    }
+
+    if (showAttachCertDialog) {
+        AlertDialog(
+            title = { Text(stringResource(R.string.attach_certificate)) },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedTextField(
+                        value = certInput,
+                        onValueChange = { certInput = it },
+                        label = { Text(stringResource(R.string.certificate)) },
+                        placeholder = { Text("ssh-ed25519-cert-v01@openssh.com AAAA…") },
+                        visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp),
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        TextButton(
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                certFilePicker.launch("*/*")
+                            },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(stringResource(R.string.select_file))
+                        }
+                        TextButton(
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                coroutineScope.launch {
+                                    val clipEntry = clipboard.getClipEntry() ?: return@launch
+                                    val text = getClipEntryText(clipEntry.clipData) ?: return@launch
+                                    certInput = text.trim()
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(stringResource(R.string.paste_from_clipboard))
+                        }
+                    }
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            scanQrCode = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.scan_qr_code))
+                    }
+                }
+            },
+            onDismissRequest = { showAttachCertDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onAttachCertificate(certInput.trim())
+                        showAttachCertDialog = false
+                    },
+                    enabled = certInput.isNotBlank(),
+                ) {
+                    Text(stringResource(R.string.attach_certificate))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        showAttachCertDialog = false
+                    },
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
 
     if (isRenameDialogVisible) {
         AlertDialog(
@@ -581,6 +780,11 @@ Gd80I0/AcKP4TOHfGbAAAAGEluc2VjdXJlIFVuZW5jcnlwdGVkIEtleQEC
 """.trimIndent().toByteArray()
 
 @Suppress("SpellCheckingInspection")
+private val dummyUnencryptedRsaKeyCertificate = """
+ssh-rsa-cert-v01@openssh.com AAAAHHNzaC1yc2EtY2VydC12MDFAb3BlbnNzaC5jb20AAAAgONiQ4M6WM6nMKOenKOz08kWm6dp0IFEwmkheo2maKQ4AAAADAQABAAAAgQDGzm9sCg1D465xSl2c4/svwZO2bs/Ar4s+d8aJaxWiOLXo1qkkZkxd571yBRmsPgEUC2tpU8lFjCbU2JtrtEfeJzbJ3unqL3aFXY4G9XlqDRYFdf/4hZgm71R7zUtQXixyr7NT3HWIBluJnr7LEUbTONZUQYpVImP/fMl6ykkxoQAAAAAAAAAAAAAAAQAAAAJwaQAAAAYAAAACcGkAAAAAAAAAAP//////////AAAAAAAAAIIAAAAVcGVybWl0LVgxMS1mb3J3YXJkaW5nAAAAAAAAABdwZXJtaXQtYWdlbnQtZm9yd2FyZGluZwAAAAAAAAAWcGVybWl0LXBvcnQtZm9yd2FyZGluZwAAAAAAAAAKcGVybWl0LXB0eQAAAAAAAAAOcGVybWl0LXVzZXItcmMAAAAAAAAAAAAAADMAAAALc3NoLWVkMjU1MTkAAAAgVBqK4PcN893KbFi8DTqEhu0Xf2XkOXLJKjJ2a8K0p3AAAABTAAAAC3NzaC1lZDI1NTE5AAAAQLG80AToroiVcRQTkLhvrMIN0HKMDGoxyBvwNARL1FclkEJ6VD5VHIe+8ua/OaS3aMX4WKa/oujFy2G+p0u1RQI= (null)
+""".trimIndent().toByteArray()
+
+@Suppress("SpellCheckingInspection")
 private val dummyUnencryptedEcdsaKey = """
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS
@@ -611,6 +815,7 @@ val sampleIdentities = listOf(
         createdAt = OffsetDateTime.now().minusMonths(12),
         name = "Raspberry Pi",
         encryptedPrivateKey = dummyUnencryptedRsaKey,
+        encryptedCertificate = dummyUnencryptedRsaKeyCertificate,
     ),
     Identity(
         id = "4",
@@ -632,6 +837,8 @@ private fun IdentityListScreenPreview() {
             onNavigateUp = {},
             onDelete = {},
             onRename = { _, _ -> },
+            onAttachCertificate = { _, _ -> },
+            onDeleteCertificate = {},
             onUndoDelete = {},
         )
     }
@@ -649,6 +856,8 @@ private fun IdentityListScreenPreview_Empty() {
             onNavigateUp = {},
             onDelete = {},
             onRename = { _, _ -> },
+            onAttachCertificate = { _, _ -> },
+            onDeleteCertificate = {},
             onUndoDelete = {},
         )
     }

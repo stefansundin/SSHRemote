@@ -867,13 +867,13 @@ fun EditHostScreen(
                                 identityDropdownExpanded = false
                             },
                         )
-                        identities.forEach { key ->
+                        identities.forEach { identity ->
                             DropdownMenuItem(
-                                text = { Text(key.name) },
+                                text = { Text(identity.name) },
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     // Later this might support multiple key assignments
-                                    selectedIdentityIds = listOf(key.id)
+                                    selectedIdentityIds = listOf(identity.id)
                                     identityDropdownExpanded = false
                                 },
                             )
