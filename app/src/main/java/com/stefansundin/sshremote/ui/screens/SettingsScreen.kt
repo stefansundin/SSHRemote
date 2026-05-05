@@ -80,6 +80,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -295,6 +296,7 @@ fun SettingsScreen(
     onNavigateToIdentityList: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -370,7 +372,7 @@ fun SettingsScreen(
         settingsViewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is SettingsEvent.ImportSuccess -> {
-                    val message = context.resources.getQuantityString(
+                    val message = resources.getQuantityString(
                         R.plurals.successfully_imported_hosts,
                         event.count,
                         event.count,

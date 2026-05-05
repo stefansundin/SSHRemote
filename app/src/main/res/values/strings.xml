@@ -202,6 +202,12 @@
     <string name="key_name_optional">Key name (optional)</string>
     <string name="key_name_default_hint">My SSH Key</string>
     <string name="select_key_file_prompt">Select an SSH private key file</string>
+    <string name="zip_keys_detected_title">Keys detected</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="one">Detected %d SSH key in zip file.</item>
+        <item quantity="other">Detected %d SSH keys in zip file.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">No valid SSH private keys found in zip file.</string>
     <string name="select_key_type_prompt">Select the key type to generate</string>
     <string name="or_scan_qr_code">or scan a QR code</string>
     <string name="tab_import">Import</string>

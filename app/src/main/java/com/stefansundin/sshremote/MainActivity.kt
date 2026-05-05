@@ -562,8 +562,10 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val scan = backStackEntry.arguments?.getBoolean("scan") ?: false
                             AddIdentityScreen(
-                                onKeySaved = { name, privateKey ->
-                                    identityViewModel.insert(name, privateKey)
+                                onKeysSaved = { keys ->
+                                    keys.forEach { (name, privateKey) ->
+                                        identityViewModel.insert(name, privateKey)
+                                    }
                                     navController.safePopBackStack()
                                 },
                                 onKeyGenerated = { name, type, size, comment ->
