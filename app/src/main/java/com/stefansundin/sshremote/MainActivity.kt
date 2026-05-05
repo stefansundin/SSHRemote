@@ -548,7 +548,12 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onDelete = { identity -> identityViewModel.delete(identity) },
                                 onRename = { identity, newName -> identityViewModel.rename(identity, newName) },
-                                onAttachCertificate = { identity, cert -> identityViewModel.attachCertificate(identity, cert) },
+                                onAttachCertificate = { identity, cert ->
+                                    identityViewModel.attachCertificate(
+                                        identity,
+                                        cert,
+                                    )
+                                },
                                 onDeleteCertificate = { identity -> identityViewModel.deleteCertificate(identity) },
                                 onUndoDelete = { identityViewModel.undoDelete() },
                             )
@@ -563,8 +568,12 @@ class MainActivity : ComponentActivity() {
                             val scan = backStackEntry.arguments?.getBoolean("scan") ?: false
                             AddIdentityScreen(
                                 onKeysSaved = { keys ->
-                                    keys.forEach { (name, privateKey) ->
-                                        identityViewModel.insert(name, privateKey)
+                                    keys.forEach { key ->
+                                        identityViewModel.insert(
+                                            name = key.name,
+                                            privateKey = key.privateKey,
+                                            certificate = key.certificate,
+                                        )
                                     }
                                     navController.safePopBackStack()
                                 },

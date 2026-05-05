@@ -102,15 +102,22 @@ data class ParsedPrivateKey(
     val suggestedName: String,
 )
 
+data class SavedIdentityImport(
+    val name: String,
+    val privateKey: String,
+    val certificate: String? = null,
+)
+
 data class ZipKey(
     val name: String,
     val privateKey: String,
+    val certificate: String? = null,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIdentityScreen(
-    onKeysSaved: (keys: List<Pair<String, String>>) -> Unit,
+    onKeysSaved: (keys: List<SavedIdentityImport>) -> Unit,
     onKeyGenerated: suspend (name: String, type: Int, size: Int?, comment: String) -> Unit,
     onNavigateUp: () -> Unit,
     scanQrCodeOnStart: Boolean = false,
@@ -127,6 +134,7 @@ fun AddIdentityScreen(
     var importKeyTypeDescription by rememberSaveable { mutableStateOf<String?>(null) }
     var zipKeyNames by rememberSaveable { mutableStateOf(listOf<String>()) }
     var zipPrivateKeys by rememberSaveable { mutableStateOf(listOf<String>()) }
+    var zipCertificates by rememberSaveable { mutableStateOf(listOf<String?>()) }
     var zipSummary by rememberSaveable { mutableStateOf<String?>(null) }
     var showZipDialog by rememberSaveable { mutableStateOf(false) }
     var generateKeyType by rememberSaveable { mutableStateOf<Pair<Int, Int?>>(Pair(KeyPair.ED25519, null)) }
@@ -155,7 +163,11 @@ fun AddIdentityScreen(
             val resolvedName = zipKeyNames.getOrNull(index).orEmpty().ifBlank {
                 "$keyNamePrefix ${index + 1}"
             }
-            resolvedName to key
+            SavedIdentityImport(
+                name = resolvedName,
+                privateKey = key,
+                certificate = zipCertificates.getOrNull(index),
+            )
         }
         onKeysSaved(keys)
     }
@@ -170,7 +182,7 @@ fun AddIdentityScreen(
                 if (hasZipKeys) {
                     saveZipKeys()
                 } else {
-                    onKeysSaved(listOf(finalName to privateKey))
+                    onKeysSaved(listOf(SavedIdentityImport(name = finalName, privateKey = privateKey)))
                 }
             }
 
@@ -181,7 +193,7 @@ fun AddIdentityScreen(
                 }
             }
 
-            2 -> onKeysSaved(listOf(finalName to privateKey))
+            2 -> onKeysSaved(listOf(SavedIdentityImport(name = finalName, privateKey = privateKey)))
         }
     }
 
@@ -210,6 +222,25 @@ fun AddIdentityScreen(
                 (content[3] == 4.toByte() || content[3] == 6.toByte() || content[3] == 8.toByte())
     }
 
+    fun readZipTextEntries(content: ByteArray): Map<String, String> {
+        val entries = linkedMapOf<String, String>()
+        ZipInputStream(ByteArrayInputStream(content)).use { zipStream ->
+            var entry = zipStream.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory) {
+                    val entryPath = entry.name.trim().removePrefix("./").trimStart('/')
+                    val entryText = zipStream.readBytes().toString(StandardCharsets.UTF_8).trim()
+                    if (entryText.isNotBlank()) {
+                        entries.putIfAbsent(entryPath, entryText)
+                    }
+                }
+                zipStream.closeEntry()
+                entry = zipStream.nextEntry
+            }
+        }
+        return entries
+    }
+
     fun parseAndSetKey(content: String) {
         coroutineScope.launch(Dispatchers.IO) {
             try {
@@ -221,6 +252,7 @@ fun AddIdentityScreen(
                     showZipDialog = false
                     zipKeyNames = emptyList()
                     zipPrivateKeys = emptyList()
+                    zipCertificates = emptyList()
                     privateKey = parsedKey.privateKey
                     if (parsedKey.suggestedName.isNotBlank()) {
                         name = parsedKey.suggestedName
@@ -230,6 +262,7 @@ fun AddIdentityScreen(
                 withContext(Dispatchers.Main) {
                     zipKeyNames = emptyList()
                     zipPrivateKeys = emptyList()
+                    zipCertificates = emptyList()
                     zipSummary = null
                     showZipDialog = false
                     privateKey = content
@@ -244,26 +277,24 @@ fun AddIdentityScreen(
         coroutineScope.launch(Dispatchers.IO) {
             val validKeys = mutableListOf<ZipKey>()
             try {
-                ZipInputStream(ByteArrayInputStream(content)).use { zipStream ->
-                    var entry = zipStream.nextEntry
-                    while (entry != null) {
-                        if (!entry.isDirectory) {
-                            try {
-                                val entryText = zipStream.readBytes().toString(StandardCharsets.UTF_8)
-                                if (entryText.isNotBlank()) {
-                                    val parsedKey = parsePrivateKeyContent(entryText)
-                                    val entryFileName = entry.name.substringAfterLast('/').trim()
-                                    val resolvedName = parsedKey.suggestedName.ifBlank { entryFileName }
-                                    validKeys += ZipKey(
-                                        name = resolvedName,
-                                        privateKey = parsedKey.privateKey,
-                                    )
-                                }
-                            } catch (_: Exception) {
-                            }
-                        }
-                        zipStream.closeEntry()
-                        entry = zipStream.nextEntry
+                val zipContentByPath = readZipTextEntries(content)
+
+                zipContentByPath.forEach { (entryPath, entryText) ->
+                    if (entryPath.endsWith(".pub", ignoreCase = true)) {
+                        return@forEach
+                    }
+                    try {
+                        val parsedKey = parsePrivateKeyContent(entryText)
+                        val certificatePath = "$entryPath-cert.pub"
+                        val certificate = zipContentByPath[certificatePath]
+                        val entryFileName = entryPath.substringAfterLast('/').trim()
+                        val resolvedName = parsedKey.suggestedName.ifBlank { entryFileName }
+                        validKeys += ZipKey(
+                            name = resolvedName,
+                            privateKey = parsedKey.privateKey,
+                            certificate = certificate,
+                        )
+                    } catch (_: Exception) {
                     }
                 }
 
@@ -273,6 +304,7 @@ fun AddIdentityScreen(
                     if (validKeys.isEmpty()) {
                         zipKeyNames = emptyList()
                         zipPrivateKeys = emptyList()
+                        zipCertificates = emptyList()
                         zipSummary = null
                         showZipDialog = false
                         importError = zipNoValidKeysMsg
@@ -281,11 +313,19 @@ fun AddIdentityScreen(
 
                     if (validKeys.size == 1) {
                         val importedKey = validKeys.first()
-                        zipKeyNames = emptyList()
-                        zipPrivateKeys = emptyList()
+                        zipKeyNames = listOf(importedKey.name)
+                        zipPrivateKeys = listOf(importedKey.privateKey)
+                        zipCertificates = listOf(importedKey.certificate)
                         zipSummary = null
                         showZipDialog = false
-                        privateKey = importedKey.privateKey
+                        if (importedKey.certificate == null) {
+                            privateKey = importedKey.privateKey
+                            zipKeyNames = emptyList()
+                            zipPrivateKeys = emptyList()
+                            zipCertificates = emptyList()
+                        } else {
+                            privateKey = ""
+                        }
                         if (importedKey.name.isNotBlank()) {
                             name = importedKey.name
                         }
@@ -295,6 +335,7 @@ fun AddIdentityScreen(
                     privateKey = ""
                     zipKeyNames = validKeys.map { it.name }
                     zipPrivateKeys = validKeys.map { it.privateKey }
+                    zipCertificates = validKeys.map { it.certificate }
                     zipSummary =
                         resources.getQuantityString(R.plurals.zip_keys_detected_in_zip, validKeys.size, validKeys.size)
                     showZipDialog = true
@@ -303,6 +344,7 @@ fun AddIdentityScreen(
                 withContext(Dispatchers.Main) {
                     zipKeyNames = emptyList()
                     zipPrivateKeys = emptyList()
+                    zipCertificates = emptyList()
                     zipSummary = null
                     showZipDialog = false
                     importError = e.message ?: invalidKeyFormatMsg
@@ -400,6 +442,7 @@ fun AddIdentityScreen(
                         zipSummary = null
                         zipKeyNames = emptyList()
                         zipPrivateKeys = emptyList()
+                        zipCertificates = emptyList()
                     },
                 ) {
                     Text(stringResource(R.string.cancel))

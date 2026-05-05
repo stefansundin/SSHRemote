@@ -73,14 +73,18 @@ class IdentityViewModel(
             initialValue = null,
         )
 
-    fun insert(name: String, privateKey: String) {
+    fun insert(name: String, privateKey: String, certificate: String? = null) {
         viewModelScope.launch {
             try {
                 val encryptedPrivateKey = cryptoManager.encrypt(privateKey.toByteArray())
+                val encryptedCertificate = certificate
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { cryptoManager.encrypt(it.toByteArray()) }
                 identityRepository.insert(
                     Identity(
                         name = name,
                         encryptedPrivateKey = encryptedPrivateKey,
+                        encryptedCertificate = encryptedCertificate,
                     ),
                 )
                 _eventChannel.send(IdentityEvent.KeyAdded)
