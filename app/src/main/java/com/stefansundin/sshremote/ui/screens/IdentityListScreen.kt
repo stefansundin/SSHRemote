@@ -599,6 +599,10 @@ fun IdentityItem(
     }
 
     if (showAttachCertDialog) {
+        val trimmedCertInput = certInput.trim()
+        val hasCertInput = trimmedCertInput.isNotEmpty()
+        val isCertInputValid = !hasCertInput || isOpenSshCertificateLine(trimmedCertInput)
+
         AlertDialog(
             title = { Text(stringResource(R.string.attach_certificate)) },
             text = {
@@ -611,6 +615,12 @@ fun IdentityItem(
                         onValueChange = { certInput = it },
                         label = { Text(stringResource(R.string.certificate)) },
                         placeholder = { Text("ssh-ed25519-cert-v01@openssh.com AAAA…") },
+                        supportingText = {
+                            if (hasCertInput && !isCertInputValid) {
+                                Text(stringResource(R.string.invalid_certificate_format))
+                            }
+                        },
+                        isError = hasCertInput && !isCertInputValid,
                         visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -659,10 +669,10 @@ fun IdentityItem(
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onAttachCertificate(certInput.trim())
+                        onAttachCertificate(trimmedCertInput)
                         showAttachCertDialog = false
                     },
-                    enabled = certInput.isNotBlank(),
+                    enabled = hasCertInput && isCertInputValid,
                 ) {
                     Text(stringResource(R.string.attach_certificate))
                 }

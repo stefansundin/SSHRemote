@@ -194,6 +194,7 @@
     <string name="new_name">New name</string>
     <string name="invalid_key">Invalid key</string>
     <string name="invalid_key_format">Invalid key format</string>
+    <string name="invalid_certificate_format">Invalid certificate format</string>
     <string name="private_key">Private Key</string>
     <string name="paste_from_clipboard">Paste from clipboard</string>
     <string name="generated_key_name">Generated Key</string>

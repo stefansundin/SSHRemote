@@ -166,7 +166,6 @@ class IdentityViewModel(
     }
 
     fun attachCertificate(identity: Identity, certificate: String) {
-        // No validation since jsch doesn't offer a convenient way of using its validation methods, and I don't want to maintain that myself.
         viewModelScope.launch {
             try {
                 val encryptedCertificate = cryptoManager.encrypt(certificate.toByteArray())
