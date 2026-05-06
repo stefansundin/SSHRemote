@@ -32,6 +32,8 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.gson
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
+import com.stefansundin.sshremote.data.knownhost.KnownHost
+import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import java.io.ByteArrayInputStream
@@ -54,6 +56,7 @@ class SettingsImporter(
     private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val hostRepository: HostRepository,
+    private val knownHostRepository: KnownHostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
 
@@ -139,6 +142,7 @@ class SettingsImporter(
 
             if (importStrategy == ImportStrategy.Replace) {
                 hostRepository.deleteAll()
+                knownHostRepository.deleteAll()
                 adHocCommandRepository.deleteAll()
             }
 
@@ -167,6 +171,18 @@ class SettingsImporter(
                 hostRepository.upsert(host)
             }
 
+            settings.knownHosts?.forEach { exportedKnownHost ->
+                try {
+                    val knownHost = KnownHost(
+                        line = exportedKnownHost.line,
+                        createdAt = OffsetDateTime.parse(exportedKnownHost.createdAt),
+                    )
+                    knownHostRepository.insert(knownHost)
+                } catch (_: DateTimeParseException) {
+                    // Ignore data with invalid date format
+                }
+            }
+
             settings.adHocCommands?.forEach { exportedAdHocCommand ->
                 try {
                     val adHocCommand = AdHocCommand(
@@ -175,7 +191,7 @@ class SettingsImporter(
                     )
                     adHocCommandRepository.insert(adHocCommand)
                 } catch (_: DateTimeParseException) {
-                    // Ignore commands with invalid date format
+                    // Ignore data with invalid date format
                 }
             }
 

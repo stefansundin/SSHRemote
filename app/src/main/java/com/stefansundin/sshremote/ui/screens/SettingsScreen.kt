@@ -144,14 +144,25 @@ private fun SettingsItem(
     subtitle: String,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
+    enabled: Boolean = true,
     onClick: (() -> Unit)? = null,
 ) {
     val view = LocalView.current
+    val contentColor = if (enabled) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    }
+    val subtitleColor = if (enabled) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+    }
 
     Row(
         modifier = modifier
             .then(
-                if (onClick != null) {
+                if (onClick != null && enabled) {
                     Modifier.clickable(
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -171,18 +182,19 @@ private fun SettingsItem(
             Text(
                 title,
                 style = MaterialTheme.typography.bodyLarge,
+                color = contentColor,
             )
             Text(
                 subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleColor,
             )
         }
         if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = subtitleColor,
                 modifier = Modifier.padding(start = 16.dp),
             )
         }
@@ -294,6 +306,7 @@ fun SettingsScreen(
     settingsViewModel: ISettingsViewModel,
     onNavigateUp: () -> Unit,
     onNavigateToIdentityList: () -> Unit,
+    onNavigateToKnownHostList: () -> Unit,
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -404,7 +417,7 @@ fun SettingsScreen(
             )
         } else {
             LaunchedEffect(Unit) {
-                settingsViewModel.importSettings(context, uri)
+                settingsViewModel.importSettings(context, uri, ImportStrategy.Upsert)
                 importUri = null
             }
         }
@@ -421,7 +434,7 @@ fun SettingsScreen(
             )
         } else {
             LaunchedEffect(Unit) {
-                settingsViewModel.importSettings(context, json)
+                settingsViewModel.importSettings(context, json, ImportStrategy.Upsert)
                 importJson = null
             }
         }
@@ -618,6 +631,13 @@ fun SettingsScreen(
                         subtitle = stringResource(R.string.ssh_keys_subtitle),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = onNavigateToIdentityList,
+                    )
+                    SettingsItem(
+                        title = stringResource(R.string.known_hosts),
+                        subtitle = stringResource(R.string.known_hosts_subtitle),
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = strictHostKeyChecking,
+                        onClick = onNavigateToKnownHostList,
                     )
                     SettingsSwitchItem(
                         title = stringResource(R.string.strict_host_key_checking),
@@ -922,6 +942,7 @@ fun SettingsScreenPreview() {
                 settingsViewModel = fakeSettingsViewModel,
                 onNavigateUp = {},
                 onNavigateToIdentityList = {},
+                onNavigateToKnownHostList = {},
             )
         }
     }

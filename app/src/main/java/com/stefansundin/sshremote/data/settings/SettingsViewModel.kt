@@ -28,6 +28,7 @@ import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
+import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,13 +62,14 @@ interface ISettingsViewModel {
     fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean)
     fun exportSettings(context: Context, uri: Uri)
     suspend fun exportSettingsToString(context: Context): String
-    fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy = ImportStrategy.Replace)
-    fun importSettings(context: Context, json: String, importStrategy: ImportStrategy = ImportStrategy.Replace)
+    fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy)
+    fun importSettings(context: Context, json: String, importStrategy: ImportStrategy)
 }
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val hostRepository: HostRepository,
+    private val knownHostRepository: KnownHostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) : ViewModel(), ISettingsViewModel {
 
@@ -200,19 +202,37 @@ class SettingsViewModel(
 
     override fun exportSettings(context: Context, uri: Uri) {
         viewModelScope.launch {
-            SettingsExporter(context, settingsRepository, hostRepository, adHocCommandRepository).export(uri)
+            SettingsExporter(
+                context,
+                settingsRepository,
+                hostRepository,
+                knownHostRepository,
+                adHocCommandRepository,
+            ).export(uri)
         }
     }
 
     override suspend fun exportSettingsToString(context: Context): String {
-        return SettingsExporter(context, settingsRepository, hostRepository, adHocCommandRepository).exportToString()
+        return SettingsExporter(
+            context,
+            settingsRepository,
+            hostRepository,
+            knownHostRepository,
+            adHocCommandRepository,
+        ).exportToString()
     }
 
     override fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy) {
         viewModelScope.launch {
             try {
                 val (count, requestNotificationPermission, theme) =
-                    SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
+                    SettingsImporter(
+                        context,
+                        settingsRepository,
+                        hostRepository,
+                        knownHostRepository,
+                        adHocCommandRepository,
+                    )
                         .import(uri, importStrategy)
                 if (theme != null) {
                     setTheme(theme)
@@ -231,7 +251,13 @@ class SettingsViewModel(
         viewModelScope.launch {
             try {
                 val (count, requestNotificationPermission, theme) =
-                    SettingsImporter(context, settingsRepository, hostRepository, adHocCommandRepository)
+                    SettingsImporter(
+                        context,
+                        settingsRepository,
+                        hostRepository,
+                        knownHostRepository,
+                        adHocCommandRepository,
+                    )
                         .import(json, importStrategy)
                 if (theme != null) {
                     setTheme(theme)
@@ -256,13 +282,19 @@ sealed class SettingsEvent {
 class SettingsViewModelFactory(
     private val settingsRepository: SettingsRepository,
     private val hostRepository: HostRepository,
+    private val knownHostRepository: KnownHostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(settingsRepository, hostRepository, adHocCommandRepository) as T
+            return SettingsViewModel(
+                settingsRepository,
+                hostRepository,
+                knownHostRepository,
+                adHocCommandRepository,
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

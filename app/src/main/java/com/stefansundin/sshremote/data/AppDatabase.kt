@@ -27,16 +27,19 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommand
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandDao
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostDao
+import com.stefansundin.sshremote.data.knownhost.KnownHost
+import com.stefansundin.sshremote.data.knownhost.KnownHostDao
 
 @Database(
-    entities = [Host::class, AdHocCommand::class],
-    version = 9,
+    entities = [Host::class, KnownHost::class, AdHocCommand::class],
+    version = 12,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun hostDao(): HostDao
+    abstract fun knownHostDao(): KnownHostDao
     abstract fun adHocCommandDao(): AdHocCommandDao
 
     companion object {

@@ -46,6 +46,12 @@ data class ExportedHost(
 }
 
 @Keep
+data class ExportedKnownHost(
+    val line: String,
+    val createdAt: String,
+)
+
+@Keep
 data class ExportedAdHocCommand(
     val command: String,
     val lastUsed: String,
@@ -63,5 +69,6 @@ data class ExportedSettings(
     val notificationsEnabled: Boolean?,
     val strictHostKeyChecking: Boolean?,
     val hosts: List<ExportedHost>?,
+    val knownHosts: List<ExportedKnownHost>?,
     val adHocCommands: List<ExportedAdHocCommand>?,
 )

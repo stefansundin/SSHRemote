@@ -21,6 +21,7 @@ package com.stefansundin.sshremote
 import android.util.Log
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.ChannelShell
+import com.jcraft.jsch.HostKey
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.OpenSSHConfig
 import com.jcraft.jsch.Session
@@ -72,7 +73,7 @@ interface ISshRepository {
     val passwordPrompt: StateFlow<PasswordPrompt?>
     val passphrasePrompt: StateFlow<PassphrasePrompt?>
 
-    suspend fun connect(details: HostConnectionDetails): List<String>
+    suspend fun connect(details: HostConnectionDetails): HostKey?
     fun onHostKeyVerificationComplete(result: Boolean)
     fun onMessageDismissed()
     fun onPasswordPromptComplete(password: String?)
@@ -113,7 +114,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
      * @param details The connection details from the database.
      * @throws Exception if connection fails.
      */
-    override suspend fun connect(details: HostConnectionDetails): List<String> {
+    override suspend fun connect(details: HostConnectionDetails): HostKey? {
         return withContext(Dispatchers.IO) {
             session?.disconnect()
 
@@ -201,10 +202,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
             Log.d("SshRepository", "Connecting to ${details.hostname}")
             newSession.connect(30000) // 30-second timeout
 
-            val hostKeyRepository = jsch.hostKeyRepository
-            val newKnownHosts = hostKeyRepository.hostKey.joinToString("\n") { "${it.host} ${it.type} ${it.key}" }
-
-            return@withContext newKnownHosts.split("\n").filter { it.isNotEmpty() }
+            return@withContext newSession.hostKey
         }
     }
 

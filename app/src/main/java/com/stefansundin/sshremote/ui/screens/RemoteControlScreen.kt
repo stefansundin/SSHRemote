@@ -96,6 +96,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.jcraft.jsch.HostKey
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.HostKeyVerification
 import com.stefansundin.sshremote.ISshRepository
@@ -891,7 +892,7 @@ private val fakeSshRepository = object : ISshRepository {
     override val message: StateFlow<Message?> = MutableStateFlow(null)
     override val passwordPrompt: StateFlow<PasswordPrompt?> = MutableStateFlow(null)
     override val passphrasePrompt: StateFlow<PassphrasePrompt?> = MutableStateFlow(null)
-    override suspend fun connect(details: HostConnectionDetails): List<String> = emptyList()
+    override suspend fun connect(details: HostConnectionDetails): HostKey? = null
     override fun onHostKeyVerificationComplete(result: Boolean) {}
     override fun onMessageDismissed() {}
     override fun onPasswordPromptComplete(password: String?) {}

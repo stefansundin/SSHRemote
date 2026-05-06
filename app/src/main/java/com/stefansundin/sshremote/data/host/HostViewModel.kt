@@ -27,6 +27,7 @@ import com.stefansundin.sshremote.Result
 import com.stefansundin.sshremote.SshRepository
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.identity.IdentityRepository
+import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import com.stefansundin.sshremote.data.password.Password
 import com.stefansundin.sshremote.data.password.PasswordDao
 import com.stefansundin.sshremote.data.settings.SettingsRepository
@@ -74,6 +75,7 @@ interface IRemoteControlHostViewModel {
 class HostViewModel(
     private val repository: HostRepository,
     private val identityRepository: IdentityRepository,
+    private val knownHostRepository: KnownHostRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
     private val settingsRepository: SettingsRepository,
@@ -224,28 +226,33 @@ class HostViewModel(
                     certificate = identity.encryptedCertificate?.let { cryptoManager.decryptToString(it) },
                 )
             }
-
             val password = host.passwordId?.let {
                 passwordDao.getPassword(it)?.let { password ->
                     cryptoManager.decryptToString(password.encryptedPassword)
                 }
             }
-
+            val knownHosts = host.knownHosts + knownHostRepository.getAll().first().map { it.line }
             val connectionDetails = HostConnectionDetails(
                 hostname = host.hostname,
                 port = host.port,
                 user = host.user,
                 password = password,
                 identities = identities,
-                knownHosts = host.knownHosts,
+                knownHosts = knownHosts,
                 sshConfig = host.sshConfig ?: Host.DEFAULT_SSH_CONFIG,
             )
 
-            val newKnownHosts = sshRepository.connect(connectionDetails)
-            if (newKnownHosts != connectionDetails.knownHosts) {
-                val updatedHost = host.copy(knownHosts = newKnownHosts)
-                repository.upsert(updatedHost)
+            val hostKeyUsed = sshRepository.connect(connectionDetails)
+            if (hostKeyUsed != null) {
+                val knownHostsLine =
+                    "${hostKeyUsed.marker.orEmpty()} ${hostKeyUsed.host} ${hostKeyUsed.type} ${hostKeyUsed.key} ${hostKeyUsed.comment.orEmpty()}".trim()
+                if (!host.knownHosts.contains(knownHostsLine)) {
+                    Log.d("HostViewModel", "New host key: $knownHostsLine")
+                    val updatedHost = host.copy(knownHosts = host.knownHosts + knownHostsLine)
+                    repository.upsert(updatedHost)
+                }
             }
+
             _uiState.update {
                 it.copy(connectionStatus = ConnectionStatus.CONNECTED)
             }
@@ -531,6 +538,7 @@ data class RemoteUiState(
 class HostViewModelFactory(
     private val repository: HostRepository,
     private val identityRepository: IdentityRepository,
+    private val knownHostRepository: KnownHostRepository,
     private val sshRepository: SshRepository,
     private val cryptoManager: CryptoManager,
     private val settingsRepository: SettingsRepository,
@@ -542,6 +550,7 @@ class HostViewModelFactory(
             return HostViewModel(
                 repository,
                 identityRepository,
+                knownHostRepository,
                 sshRepository,
                 cryptoManager,
                 settingsRepository,

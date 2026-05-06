@@ -92,6 +92,8 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.presets
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
+import com.stefansundin.sshremote.data.knownhost.KnownHostViewModel
+import com.stefansundin.sshremote.data.knownhost.KnownHostViewModelFactory
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
 import com.stefansundin.sshremote.notification.NotificationService
@@ -102,6 +104,7 @@ import com.stefansundin.sshremote.ui.screens.EditRemoteControlScreen
 import com.stefansundin.sshremote.ui.screens.HelpScreen
 import com.stefansundin.sshremote.ui.screens.HostListScreen
 import com.stefansundin.sshremote.ui.screens.IdentityListScreen
+import com.stefansundin.sshremote.ui.screens.KnownHostListScreen
 import com.stefansundin.sshremote.ui.screens.RemoteControlScreen
 import com.stefansundin.sshremote.ui.screens.SettingsScreen
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -124,6 +127,7 @@ sealed class Screen(val route: String) {
     data object AdHocCommand : Screen("ad_hoc_command")
     data object Settings : Screen("settings")
     data object IdentityList : Screen("identity_list")
+    data object KnownHostList : Screen("known_host_list")
     data object AddIdentity : Screen("add_identity?scan={scan}") {
         fun createRoute(scan: Boolean = false) = "add_identity?scan=$scan"
     }
@@ -156,6 +160,7 @@ class MainActivity : ComponentActivity() {
         HostViewModelFactory(
             app.hostRepository,
             app.identityRepository,
+            app.knownHostRepository,
             sshRepository,
             cryptoManager,
             app.settingsRepository,
@@ -165,7 +170,12 @@ class MainActivity : ComponentActivity() {
 
     private val settingsViewModel: SettingsViewModel by viewModels {
         val app = (application as SshRemoteApplication)
-        SettingsViewModelFactory(app.settingsRepository, app.hostRepository, app.adHocCommandRepository)
+        SettingsViewModelFactory(
+            app.settingsRepository,
+            app.hostRepository,
+            app.knownHostRepository,
+            app.adHocCommandRepository,
+        )
     }
 
     private val identityViewModel: IdentityViewModel by viewModels {
@@ -174,6 +184,11 @@ class MainActivity : ComponentActivity() {
             app.identityRepository,
             cryptoManager,
         )
+    }
+
+    private val knownHostViewModel: KnownHostViewModel by viewModels {
+        val app = (application as SshRemoteApplication)
+        KnownHostViewModelFactory(app.knownHostRepository)
     }
 
     private val adHocCommandViewModel: AdHocCommandViewModel by viewModels {
@@ -530,6 +545,7 @@ class MainActivity : ComponentActivity() {
                             SettingsScreen(
                                 settingsViewModel = settingsViewModel,
                                 onNavigateToIdentityList = { navController.navigate(Screen.IdentityList.route) },
+                                onNavigateToKnownHostList = { navController.navigate(Screen.KnownHostList.route) },
                                 onNavigateUp = {
                                     navController.safePopBackStack()
                                 },
@@ -556,6 +572,13 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onDeleteCertificate = { identity -> identityViewModel.deleteCertificate(identity) },
                                 onUndoDelete = { identityViewModel.undoDelete() },
+                            )
+                        }
+
+                        composable(Screen.KnownHostList.route) {
+                            KnownHostListScreen(
+                                knownHostViewModel = knownHostViewModel,
+                                onNavigateUp = { navController.safePopBackStack() },
                             )
                         }
 

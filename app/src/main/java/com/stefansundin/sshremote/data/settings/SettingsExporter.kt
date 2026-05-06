@@ -28,6 +28,7 @@ import com.google.gson.GsonBuilder
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.HostRepository
+import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import kotlinx.coroutines.flow.first
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
@@ -53,6 +54,7 @@ class SettingsExporter(
     private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val hostRepository: HostRepository,
+    private val knownHostRepository: KnownHostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
 
@@ -96,6 +98,12 @@ class SettingsExporter(
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
         val hosts = hostRepository.getAll().first().map { it.toExportedHost() }
+        val knownHosts = knownHostRepository.getAll().first().map { knownHost ->
+            ExportedKnownHost(
+                line = knownHost.line,
+                createdAt = knownHost.createdAt.toString(),
+            )
+        }
         val adHocCommands = adHocCommandRepository.getAll().first().map { command ->
             ExportedAdHocCommand(
                 command = command.command,
@@ -113,6 +121,7 @@ class SettingsExporter(
             notificationsEnabled,
             strictHostKeyChecking,
             hosts,
+            knownHosts,
             adHocCommands,
         )
     }

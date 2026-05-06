@@ -24,6 +24,7 @@ import com.stefansundin.sshremote.data.EncryptedAppDatabase
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.identity.IdentityRepository
+import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import com.stefansundin.sshremote.data.settings.SettingsRepository
 import com.stefansundin.sshremote.notification.NotificationService
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ class SshRemoteApplication : Application() {
 
     val hostRepository by lazy { HostRepository(database.hostDao()) }
     val identityRepository by lazy { IdentityRepository(encryptedDatabase.identityDao()) }
+    val knownHostRepository by lazy { KnownHostRepository(database.knownHostDao()) }
     val passwordDao by lazy { encryptedDatabase.passwordDao() }
     val adHocCommandRepository by lazy { AdHocCommandRepository(database.adHocCommandDao()) }
     val settingsRepository by lazy { SettingsRepository(this) }
