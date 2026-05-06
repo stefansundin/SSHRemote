@@ -814,6 +814,7 @@ val sampleIdentities = listOf(
         createdAt = OffsetDateTime.now().minusDays(10),
         name = "Work Key",
         encryptedPrivateKey = dummyEncryptedKey,
+        encryptedCertificate = dummyUnencryptedRsaKeyCertificate,
     ),
     Identity(
         id = "2",

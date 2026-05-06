@@ -54,6 +54,7 @@
     <string name="passwords_not_backed_up">Passwords are not backed up, please re-enter</string>
     <string name="enter_new_password_or_empty">Enter a new password, or leave empty to clear it</string>
     <string name="optional_password_prompt">Optional, will be prompted for if not provided</string>
+    <string name="optional">Optional</string>
     <string name="re_enter">Re-enter</string> <!-- context: "Re-enter" a lost password -->
     <string name="change_or_clear">Change or Clear</string>
     <string name="unsaved_changes_title">Unsaved changes</string>
@@ -169,6 +170,7 @@
     <string name="ssh_configuration_title">SSH Configuration</string>
     <string name="jsch_config_description">JSch configuration is mostly like OpenSSH, but not exactly. Please do your research (click the Help button below).</string>
     <string name="strict_host_key_checking">Strict host key checking</string>
+    <string name="allow_password_prompting">Allow password prompting</string>
 
     <!-- SSH Keys -->
     <string name="ssh_keys">SSH Keys</string>

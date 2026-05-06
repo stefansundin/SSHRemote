@@ -49,6 +49,7 @@ class SettingsRepository(context: Context) {
         val HAPTIC_FEEDBACK_DURATION = longPreferencesKey("haptic_feedback_duration")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
+        val ALLOW_PASSWORD_PROMPTING = booleanPreferencesKey("allow_password_prompting")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     }
 
@@ -167,6 +168,17 @@ class SettingsRepository(context: Context) {
     suspend fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.STRICT_HOST_KEY_CHECKING] = strictHostKeyChecking
+        }
+    }
+
+    val allowPasswordPrompting: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ALLOW_PASSWORD_PROMPTING] ?: true
+        }
+
+    suspend fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ALLOW_PASSWORD_PROMPTING] = allowPasswordPrompting
         }
     }
 }

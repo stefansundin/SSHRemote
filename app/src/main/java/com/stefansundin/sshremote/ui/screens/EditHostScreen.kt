@@ -63,6 +63,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -98,6 +99,7 @@ import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ExportedCommand
 import com.stefansundin.sshremote.data.settings.ExportedHost
+import com.stefansundin.sshremote.data.settings.ISettingsViewModel
 import com.stefansundin.sshremote.ui.components.QrCodeDialog
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.portraitImePadding
@@ -124,6 +126,7 @@ fun EditHostScreen(
     onSave: (Host, String?) -> Unit,
     onNavigateUp: () -> Unit,
     hostViewModel: IEditHostViewModel,
+    settingsViewModel: ISettingsViewModel,
     scanQrCodeOnStart: Boolean = false,
 ) {
     var name by rememberSaveable(host) { mutableStateOf(host?.name ?: "") }
@@ -149,6 +152,7 @@ fun EditHostScreen(
     }
 
     val isPasswordSet = host?.passwordId != null
+    val allowPasswordPrompting = settingsViewModel.allowPasswordPrompting.collectAsState().value
     var userWantsToChangePassword by rememberSaveable { mutableStateOf(false) }
     val showPasswordField = !isPasswordSet || userWantsToChangePassword
 
@@ -737,8 +741,10 @@ fun EditHostScreen(
                                     R.string.passwords_not_backed_up
                                 } else if (isPasswordSet) {
                                     R.string.enter_new_password_or_empty
-                                } else {
+                                } else if (allowPasswordPrompting) {
                                     R.string.optional_password_prompt
+                                } else {
+                                    R.string.optional
                                 },
                             ),
                         )
@@ -919,6 +925,7 @@ private fun EditHostScreenPreview_Add() {
             identities = emptyList(),
             allUsers = emptyList(),
             hostViewModel = fakeEditHostViewModel,
+            settingsViewModel = fakeSettingsViewModel,
         )
     }
 }
@@ -940,6 +947,7 @@ private fun EditHostScreenPreview_Edit() {
             identities = emptyList(),
             allUsers = emptyList(),
             hostViewModel = fakeEditHostViewModel,
+            settingsViewModel = fakeSettingsViewModel,
         )
     }
 }
@@ -962,6 +970,7 @@ private fun EditHostScreenPreview_PasswordLost() {
             identities = emptyList(),
             allUsers = emptyList(),
             hostViewModel = fakeEditHostViewModel,
+            settingsViewModel = fakeSettingsViewModel,
         )
     }
 }

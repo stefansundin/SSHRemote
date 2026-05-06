@@ -68,6 +68,7 @@ data class ExportedSettings(
     val keepScreenOn: Boolean?,
     val notificationsEnabled: Boolean?,
     val strictHostKeyChecking: Boolean?,
+    val allowPasswordPrompting: Boolean?,
     val hosts: List<ExportedHost>?,
     val knownHosts: List<ExportedKnownHost>?,
     val adHocCommands: List<ExportedAdHocCommand>?,

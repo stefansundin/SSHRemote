@@ -126,6 +126,8 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
             jsch.configRepository = OpenSSHConfig.parse(details.sshConfig)
 
             val useStrictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
+            val allowPasswordPrompting = settingsRepository.allowPasswordPrompting.first()
+
             if (useStrictHostKeyChecking) {
                 details.knownHosts.joinToString("\n").let { jsch.setKnownHosts(it.byteInputStream()) }
             }
@@ -162,7 +164,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
                 }
 
                 override fun promptPassword(message: String): Boolean {
-                    if (userCancelledAuth) return false
+                    if (userCancelledAuth || !allowPasswordPrompting) return false
                     passwordPromptMessage = message
                     return true
                 }
@@ -197,7 +199,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
                 }
             }
 
-            details.password?.let { newSession.setPassword(it) }
+            details.password?.let { newSession.setPassword(it.toByteArray()) }
 
             Log.d("SshRepository", "Connecting to ${details.hostname}")
             newSession.connect(30000) // 30-second timeout

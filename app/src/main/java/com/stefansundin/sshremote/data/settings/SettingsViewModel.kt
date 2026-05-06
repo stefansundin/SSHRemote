@@ -48,6 +48,7 @@ interface ISettingsViewModel {
     val keepScreenOn: StateFlow<Boolean>
     val notificationsEnabled: StateFlow<Boolean>
     val strictHostKeyChecking: StateFlow<Boolean>
+    val allowPasswordPrompting: StateFlow<Boolean>
     val hasHosts: StateFlow<Boolean>
     val eventFlow: SharedFlow<SettingsEvent>
 
@@ -60,6 +61,7 @@ interface ISettingsViewModel {
     fun setKeepScreenOn(keepScreenOn: Boolean)
     fun setNotificationsEnabled(notificationsEnabled: Boolean)
     fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean)
+    fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean)
     fun exportSettings(context: Context, uri: Uri)
     suspend fun exportSettingsToString(context: Context): String
     fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy)
@@ -190,6 +192,19 @@ class SettingsViewModel(
     override fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
         viewModelScope.launch {
             settingsRepository.setStrictHostKeyChecking(strictHostKeyChecking)
+        }
+    }
+
+    override val allowPasswordPrompting: StateFlow<Boolean> = settingsRepository.allowPasswordPrompting
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = true,
+        )
+
+    override fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setAllowPasswordPrompting(allowPasswordPrompting)
         }
     }
 

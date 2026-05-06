@@ -139,6 +139,9 @@ class SettingsImporter(
             if (settings.strictHostKeyChecking != null) {
                 settingsRepository.setStrictHostKeyChecking(settings.strictHostKeyChecking)
             }
+            if (settings.allowPasswordPrompting != null) {
+                settingsRepository.setAllowPasswordPrompting(settings.allowPasswordPrompting)
+            }
 
             if (importStrategy == ImportStrategy.Replace) {
                 hostRepository.deleteAll()

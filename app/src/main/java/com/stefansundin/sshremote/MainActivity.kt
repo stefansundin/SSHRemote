@@ -405,6 +405,7 @@ class MainActivity : ComponentActivity() {
                                     navController.safePopBackStack()
                                 },
                                 hostViewModel = hostViewModel,
+                                settingsViewModel = settingsViewModel,
                                 scanQrCodeOnStart = scan,
                             )
                         }

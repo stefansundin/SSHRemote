@@ -310,6 +310,7 @@ fun SettingsScreen(
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
+    val allowPasswordPrompting by settingsViewModel.allowPasswordPrompting.collectAsState()
     val hasHosts by settingsViewModel.hasHosts.collectAsState()
 
     val permissionDeniedMsg = stringResource(R.string.permission_denied)
@@ -620,6 +621,11 @@ fun SettingsScreen(
                         checked = strictHostKeyChecking,
                         onCheckedChange = { settingsViewModel.setStrictHostKeyChecking(it) },
                     )
+                    SettingsSwitchItem(
+                        title = stringResource(R.string.allow_password_prompting),
+                        checked = allowPasswordPrompting,
+                        onCheckedChange = { settingsViewModel.setAllowPasswordPrompting(it) },
+                    )
                 }
 
                 HorizontalDivider()
@@ -726,6 +732,7 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
     override val keepScreenOn = MutableStateFlow(true)
     override val notificationsEnabled = MutableStateFlow(false)
     override val strictHostKeyChecking = MutableStateFlow(true)
+    override val allowPasswordPrompting = MutableStateFlow(true)
     override val hasHosts: StateFlow<Boolean> = MutableStateFlow(true)
     override val eventFlow: SharedFlow<SettingsEvent> = MutableSharedFlow()
 
@@ -763,6 +770,10 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
 
     override fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean) {
         this.strictHostKeyChecking.value = strictHostKeyChecking
+    }
+
+    override fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
+        this.allowPasswordPrompting.value = allowPasswordPrompting
     }
 
     override fun exportSettings(context: Context, uri: Uri) {}

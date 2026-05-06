@@ -97,6 +97,7 @@ class SettingsExporter(
         val keepScreenOn = settingsRepository.keepScreenOn.first()
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
+        val allowPasswordPrompting = settingsRepository.allowPasswordPrompting.first()
         val hosts = hostRepository.getAll().first().map { it.toExportedHost() }
         val knownHosts = knownHostRepository.getAll().first().map { knownHost ->
             ExportedKnownHost(
@@ -120,6 +121,7 @@ class SettingsExporter(
             keepScreenOn,
             notificationsEnabled,
             strictHostKeyChecking,
+            allowPasswordPrompting,
             hosts,
             knownHosts,
             adHocCommands,
