@@ -300,6 +300,7 @@
     <string name="scan_qr_code_settings_prompt">Scan a QR code to import settings</string>
     <string name="scan_qr_code_to_import_settings">Scan the QR code to import settings</string>
     <string name="scan_qr_code_key_prompt">Scan QR code to import SSH key</string>
+    <string name="scan_qr_code_public_key_prompt">This QR code contains your public SSH key</string>
     <string name="scan_qr_code_certificate_prompt">Scan QR code to import SSH certificate</string>
     <string name="qr_code_content_description">QR Code</string>
     <string name="import_settings_title">Import settings</string>

@@ -21,6 +21,8 @@ package com.stefansundin.sshremote.ui.components
 import android.content.ClipData
 import android.content.res.Configuration
 import android.view.SoundEffectConstants
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -35,7 +37,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalView
@@ -46,30 +53,59 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun PublicKeyDialog(publicKey: String, onDismiss: () -> Unit) {
+fun PublicKeyDialog(publicKey: String, qrCodeExportTitle: Int? = null, onDismiss: () -> Unit) {
     val clipboard = LocalClipboard.current
     val view = LocalView.current
     val scope = rememberCoroutineScope()
+    var showQrDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Public SSH keys can be exported to QR codes
+    // There isn't a feature to scan these in the app, but it could be used to conveniently create certificates on another device, at least that's the theoretical use case
+    if (showQrDialog && qrCodeExportTitle != null) {
+        QrCodeDialog(
+            qrCodeString = publicKey,
+            title = stringResource(qrCodeExportTitle),
+            onDismissRequest = { showQrDialog = false },
+            onError = { showQrDialog = false },
+        )
+    }
 
     AlertDialog(
         title = { Text(stringResource(R.string.public_key_title)) },
         text = {
-            // A scrollable text field is good for long keys
-            OutlinedTextField(
-                value = publicKey,
-                onValueChange = {},
-                readOnly = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .dpadFocusable(),
-                visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // A scrollable text field is good for long keys
+                OutlinedTextField(
+                    value = publicKey,
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
+                    visualTransformation = NoWrapOnSpecialCharactersVisualTransformation,
+                )
+
+                if (qrCodeExportTitle != null) {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            showQrDialog = true
+                        },
+                    ) {
+                        Text(stringResource(R.string.export_to_qr_code))
+                    }
+                }
+            }
         },
         onDismissRequest = onDismiss,
         confirmButton = {

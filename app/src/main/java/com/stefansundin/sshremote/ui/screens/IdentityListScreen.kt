@@ -260,6 +260,7 @@ fun IdentityListScreen(
     if (showPublicKeyDialog) {
         PublicKeyDialog(
             publicKey = publicKeyToShow,
+            qrCodeExportTitle = R.string.scan_qr_code_public_key_prompt,
             onDismiss = { showPublicKeyDialog = false },
         )
     }
