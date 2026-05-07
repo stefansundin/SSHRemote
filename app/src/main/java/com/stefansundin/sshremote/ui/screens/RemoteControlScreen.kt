@@ -547,7 +547,7 @@ fun RemoteControlScreen(
                     coroutineScope.launch {
                         hostViewModel.runCommand(command, commandTemplate.showOutput)
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     // Ignore unsupported keys
                 }
             }

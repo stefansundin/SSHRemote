@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
@@ -38,14 +39,16 @@ import androidx.compose.ui.unit.dp
 fun RowWithCheckbox(
     checked: Boolean,
     text: String,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val view = LocalView.current
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .padding(vertical = 6.dp)
             .toggleable(
                 value = checked,
                 enabled = enabled,
