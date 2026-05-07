@@ -44,7 +44,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:theme="@style/Theme.SSHRemote"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|keyboardHidden|keyboard|navigation|screenSize|smallestScreenSize|screenLayout|uiMode|density|fontScale"
-            android:launchMode="singleTop">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -67,6 +67,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
+
+        <!-- Share target activity alias -->
+        <activity-alias
+            android:name=".ShareTargetActivity"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
     </application>
 

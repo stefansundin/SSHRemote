@@ -349,4 +349,13 @@
     <string name="notification_inactive">Remote control inactive</string>
     <string name="notification_open">Open</string>
     <string name="notification_close">Close</string>
+
+    <!-- Share -->
+    <string name="sharing">Sharing</string>
+    <string name="share_target_enabled">Enable share target</string>
+    <string name="share_target_enabled_subtitle">This app will appear in the share menu for plain text content. Shared text will be typed on the connected host using the keyboard type command.</string>
+    <string name="share_not_connected_title">Not connected</string>
+    <string name="share_not_connected_text">To use the share feature, first connect to a host.</string>
+    <string name="share_missing_keyboard_type_command_title">Keyboard type command not configured</string>
+    <string name="share_missing_keyboard_type_command_text">This host does not have the keyboard type input command configured. Edit the host remote control settings and set a command for typing text.</string>
 </resources>

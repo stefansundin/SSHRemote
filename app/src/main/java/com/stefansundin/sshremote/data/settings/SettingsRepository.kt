@@ -51,6 +51,7 @@ class SettingsRepository(context: Context) {
         val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
         val ALLOW_PASSWORD_PROMPTING = booleanPreferencesKey("allow_password_prompting")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val SHARE_TARGET_ENABLED = booleanPreferencesKey("share_target_enabled")
     }
 
     val theme: Flow<Theme> = dataStore.data
@@ -179,6 +180,17 @@ class SettingsRepository(context: Context) {
     suspend fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ALLOW_PASSWORD_PROMPTING] = allowPasswordPrompting
+        }
+    }
+
+    val shareTargetEnabled: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.SHARE_TARGET_ENABLED] ?: false
+        }
+
+    suspend fun setShareTargetEnabled(shareTargetEnabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHARE_TARGET_ENABLED] = shareTargetEnabled
         }
     }
 }

@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
@@ -197,6 +198,18 @@ class MainActivity : ComponentActivity() {
     }
 
     private var shortcutHostId = mutableStateOf<String?>(null)
+    private var sharedText = mutableStateOf<String?>(null)
+
+    private fun handleIncomingIntent(intent: Intent?) {
+        if (intent == null) return
+        if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+            sharedText.value = intent.getStringExtra(Intent.EXTRA_TEXT)
+            return
+        }
+        if (intent.hasExtra("HOST_ID")) {
+            shortcutHostId.value = intent.getStringExtra("HOST_ID")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -205,10 +218,7 @@ class MainActivity : ComponentActivity() {
             Log.w("MainActivity", "Activity recreated!")
         }
         enableEdgeToEdge()
-
-        if (intent?.hasExtra("HOST_ID") == true) {
-            shortcutHostId.value = intent.getStringExtra("HOST_ID")
-        }
+        handleIncomingIntent(intent)
 
         setContent {
             val theme by settingsViewModel.theme.collectAsState()
@@ -263,10 +273,61 @@ class MainActivity : ComponentActivity() {
                     val app = LocalContext.current.applicationContext as SshRemoteApplication
                     var showBackupRestoredDialog by rememberSaveable { mutableStateOf(app.isRestoredFromBackup) }
                     val hosts by hostViewModel.allHosts.collectAsState()
+                    val shareTargetEnabled by settingsViewModel.shareTargetEnabled.collectAsState()
 
                     var hostForPresetSelection by remember { mutableStateOf<Host?>(null) }
                     var showGettingStartedDialog by rememberSaveable { mutableStateOf(false) }
                     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
+                    var showShareNotConnectedDialog by rememberSaveable { mutableStateOf(false) }
+                    var showShareMissingKeyboardTypeCommandDialog by rememberSaveable { mutableStateOf(false) }
+
+                    // Enable/disable the share target activity alias based on setting
+                    LaunchedEffect(shareTargetEnabled) {
+                        val componentName =
+                            android.content.ComponentName(this@MainActivity, "${packageName}.ShareTargetActivity")
+                        val newState = if (shareTargetEnabled) {
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        } else {
+                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                        }
+                        packageManager.setComponentEnabledSetting(componentName, newState, PackageManager.DONT_KILL_APP)
+                    }
+
+                    // Handle incoming shared text
+                    LaunchedEffect(sharedText.value, uiState.connectionStatus, uiState.hostId, hosts) {
+                        val text = sharedText.value ?: return@LaunchedEffect
+                        if (uiState.connectionStatus == ConnectionStatus.CONNECTED) {
+                            val host = hosts?.find { it.id == uiState.hostId }
+                            val commandTemplate = host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
+                            if (commandTemplate != null) {
+                                sharedText.value = null
+                                val escapedText = text.replace("'", "'\\''")
+                                val command = commandTemplate.command.format(escapedText)
+                                // Run in a stable scope so this work is not canceled when sharedText changes
+                                scope.launch {
+                                    hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                }
+                            } else {
+                                sharedText.value = null
+                                showShareMissingKeyboardTypeCommandDialog = true
+                            }
+                        } else {
+                            sharedText.value = null
+                            showShareNotConnectedDialog = true
+                        }
+                    }
+
+                    if (showShareNotConnectedDialog) {
+                        ShareNotConnectedDialog(
+                            onDismiss = { showShareNotConnectedDialog = false },
+                        )
+                    }
+
+                    if (showShareMissingKeyboardTypeCommandDialog) {
+                        ShareMissingKeyboardTypeCommandDialog(
+                            onDismiss = { showShareMissingKeyboardTypeCommandDialog = false },
+                        )
+                    }
 
                     val onConnect = { host: Host ->
                         if (host.remoteCommands == null) {
@@ -623,13 +684,18 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+            handleIncomingIntent(intent)
+            return
+        }
         if (intent.hasExtra("HOST_ID")) {
             val hostId = intent.getStringExtra("HOST_ID")
             val uiState = hostViewModel.uiState.value
             if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostId) {
                 return
             }
-            shortcutHostId.value = hostId
+            handleIncomingIntent(intent)
         }
     }
 
@@ -774,6 +840,56 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
     }
 }
 
+@Composable
+private fun ShareNotConnectedDialog(onDismiss: () -> Unit) {
+    val view = LocalView.current
+
+    AlertDialog(
+        title = { Text(stringResource(R.string.share_not_connected_title)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(stringResource(R.string.share_not_connected_text))
+            }
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+    )
+}
+
+@Composable
+private fun ShareMissingKeyboardTypeCommandDialog(onDismiss: () -> Unit) {
+    val view = LocalView.current
+
+    AlertDialog(
+        title = { Text(stringResource(R.string.share_missing_keyboard_type_command_title)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(stringResource(R.string.share_missing_keyboard_type_command_text))
+            }
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+    )
+}
+
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
 @Preview(
     showBackground = true,
@@ -804,6 +920,23 @@ private fun SelectPresetDialogPreview() {
     SSHRemoteTheme {
         Surface {
             SelectPresetDialog(onDismiss = {}, onPresetSelected = {})
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 600)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
+@Composable
+private fun ShareNotConnectedDialogPreview() {
+    SSHRemoteTheme {
+        Surface {
+            ShareNotConnectedDialog(onDismiss = {})
         }
     }
 }

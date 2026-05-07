@@ -95,7 +95,7 @@ class SettingsImporter(
         if (hex == null) return null
         return try {
             Color(hex.toColorInt())
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             null
         }
     }
@@ -141,6 +141,9 @@ class SettingsImporter(
             }
             if (settings.allowPasswordPrompting != null) {
                 settingsRepository.setAllowPasswordPrompting(settings.allowPasswordPrompting)
+            }
+            if (settings.shareTargetEnabled != null) {
+                settingsRepository.setShareTargetEnabled(settings.shareTargetEnabled)
             }
 
             if (importStrategy == ImportStrategy.Replace) {

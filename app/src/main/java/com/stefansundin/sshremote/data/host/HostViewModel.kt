@@ -291,12 +291,17 @@ class HostViewModel(
         }
         _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
 
-        val (result, duration) = measureTimedValue {
+        val (result, duration) = try {
+            measureTimedValue {
 //            if (reuseShell) {
 //                sshRepository.executeCommandReuseShell(command)
 //            } else {
-            sshRepository.executeCommand(command)
+                sshRepository.executeCommand(command)
 //            }
+            }
+        } catch (e: CancellationException) {
+            _uiState.update { it.copy(isLoading = false) }
+            throw e
         }
         Log.d("HostViewModel", "executeCommand for '${command}' took $duration")
 

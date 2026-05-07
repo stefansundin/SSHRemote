@@ -311,6 +311,7 @@ fun SettingsScreen(
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
     val allowPasswordPrompting by settingsViewModel.allowPasswordPrompting.collectAsState()
+    val shareTargetEnabled by settingsViewModel.shareTargetEnabled.collectAsState()
     val hasHosts by settingsViewModel.hasHosts.collectAsState()
 
     val permissionDeniedMsg = stringResource(R.string.permission_denied)
@@ -630,6 +631,26 @@ fun SettingsScreen(
 
                 HorizontalDivider()
 
+                SettingsGroup(stringResource(R.string.sharing)) {
+                    SettingsSwitchItem(
+                        title = stringResource(R.string.share_target_enabled),
+                        checked = shareTargetEnabled,
+                        onCheckedChange = { settingsViewModel.setShareTargetEnabled(it) },
+                    )
+                    if (shareTargetEnabled) {
+                        Text(
+                            stringResource(R.string.share_target_enabled_subtitle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 16.dp),
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+
                 SettingsGroup(stringResource(R.string.data)) {
                     SettingsItem(
                         title = stringResource(R.string.export_to_file),
@@ -733,6 +754,7 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
     override val notificationsEnabled = MutableStateFlow(false)
     override val strictHostKeyChecking = MutableStateFlow(true)
     override val allowPasswordPrompting = MutableStateFlow(true)
+    override val shareTargetEnabled = MutableStateFlow(false)
     override val hasHosts: StateFlow<Boolean> = MutableStateFlow(true)
     override val eventFlow: SharedFlow<SettingsEvent> = MutableSharedFlow()
 
@@ -774,6 +796,10 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
 
     override fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
         this.allowPasswordPrompting.value = allowPasswordPrompting
+    }
+
+    override fun setShareTargetEnabled(shareTargetEnabled: Boolean) {
+        this.shareTargetEnabled.value = shareTargetEnabled
     }
 
     override fun exportSettings(context: Context, uri: Uri) {}
