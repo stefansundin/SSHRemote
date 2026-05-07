@@ -58,6 +58,9 @@ enum class RemoteControlKey(@StringRes val titleRes: Int) {
     KEYBOARD_KEY_INPUT(R.string.key_keyboard_key_press),
     KEYBOARD_KEY_DOWN(R.string.key_keyboard_key_down),
     KEYBOARD_KEY_UP(R.string.key_keyboard_key_up),
+
+    // Share
+    SHARE_TEXT(R.string.share_text),
 }
 
 /**

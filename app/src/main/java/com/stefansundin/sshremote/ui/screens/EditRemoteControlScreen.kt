@@ -82,6 +82,7 @@ import com.stefansundin.sshremote.ui.components.EditRemoteCommandDialog
 import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
+import com.stefansundin.sshremote.ui.components.ShareTargetSettingsDialog
 import com.stefansundin.sshremote.ui.components.SmartVolumeSettingsDialog
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
@@ -94,6 +95,7 @@ fun EditRemoteControlScreen(
     onNavigateBack: () -> Unit,
     onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
     onTestSmartVolumeSettings: () -> Unit,
+    shareTargetEnabled: Boolean,
     initialPage: Int = 0,
 ) {
     var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
@@ -105,6 +107,7 @@ fun EditRemoteControlScreen(
     var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
     var showEditKeyboardCommandDialog by rememberSaveable { mutableStateOf(false) }
     var showSmartVolumeSettingsDialog by rememberSaveable { mutableStateOf(false) }
+    var showShareTargetSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
     val hasUnsavedChanges =
         editedRemoteCommands != (host.remoteCommands
@@ -270,6 +273,14 @@ fun EditRemoteControlScreen(
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
                                     showMenu = false
                                     showSmartVolumeSettingsDialog = true
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.share_target_settings)) },
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    showMenu = false
+                                    showShareTargetSettingsDialog = true
                                 },
                             )
                             if (pagerState.currentPage != 3) {
@@ -452,6 +463,35 @@ fun EditRemoteControlScreen(
         )
     }
 
+    if (showShareTargetSettingsDialog) {
+        if (shareTargetEnabled) {
+            ShareTargetSettingsDialog(
+                initialRemoteCommands = editedRemoteCommands,
+                onDismiss = { showShareTargetSettingsDialog = false },
+                onSave = {
+                    editedRemoteCommands = it
+                    showShareTargetSettingsDialog = false
+                },
+            )
+        } else {
+            AlertDialog(
+                title = { Text(stringResource(R.string.share_target_disabled_title)) },
+                text = { Text(stringResource(R.string.share_target_disabled_text)) },
+                onDismissRequest = { showShareTargetSettingsDialog = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            showShareTargetSettingsDialog = false
+                        },
+                    ) {
+                        Text(stringResource(R.string.ok))
+                    }
+                },
+            )
+        }
+    }
+
     if (showSmartVolumeSettingsDialog) {
         SmartVolumeSettingsDialog(
             settings = editedSmartVolumeSettings,
@@ -489,6 +529,7 @@ private fun EditRemoteControlScreenPreview_RemoteTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            shareTargetEnabled = true,
             initialPage = 0,
         )
     }
@@ -505,6 +546,7 @@ private fun EditRemoteControlScreenPreview_MouseTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            shareTargetEnabled = true,
             initialPage = 1,
         )
     }
@@ -521,6 +563,7 @@ private fun EditRemoteControlScreenPreview_KeyboardTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            shareTargetEnabled = true,
             initialPage = 2,
         )
     }
@@ -537,6 +580,7 @@ private fun EditRemoteControlScreenPreview_CommandsTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            shareTargetEnabled = true,
             initialPage = 3,
         )
     }

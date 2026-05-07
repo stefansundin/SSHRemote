@@ -353,9 +353,15 @@
     <!-- Share -->
     <string name="sharing">Sharing</string>
     <string name="share_target_enabled">Enable share target</string>
-    <string name="share_target_enabled_subtitle">This app will appear in the share menu for plain text content. Shared text will be typed on the connected host using the keyboard type command.</string>
+    <string name="share_target_enabled_subtitle">This app will appear in the share menu for plain text content. By default, shared text will be typed on the connected host using the keyboard type command, but this can be customized per host.</string>
+    <string name="share_target_disabled_title">Share target is disabled</string>
+    <string name="share_target_disabled_text">Enable the share target setting first. It can be found in the app settings.</string>
     <string name="share_not_connected_title">Not connected</string>
     <string name="share_not_connected_text">To use the share feature, first connect to a host.</string>
-    <string name="share_missing_keyboard_type_command_title">Keyboard type command not configured</string>
-    <string name="share_missing_keyboard_type_command_text">This host does not have the keyboard type input command configured. Edit the host remote control settings and set a command for typing text.</string>
+    <string name="share_missing_share_command_title">Share command not configured</string>
+    <string name="share_missing_share_command_text">This host does not have the share command configured. Edit the host remote control settings and set a command for sharing text.</string>
+    <string name="share_text">Share Text</string>
+    <string name="share_target_settings">Share target settings</string>
+    <string name="use_keyboard_type_command">Use keyboard type command</string>
+    <string name="custom_share_command">Custom share command</string>
 </resources>

@@ -279,7 +279,7 @@ class MainActivity : ComponentActivity() {
                     var showGettingStartedDialog by rememberSaveable { mutableStateOf(false) }
                     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
                     var showShareNotConnectedDialog by rememberSaveable { mutableStateOf(false) }
-                    var showShareMissingKeyboardTypeCommandDialog by rememberSaveable { mutableStateOf(false) }
+                    var showMissingShareCommandDialog by rememberSaveable { mutableStateOf(false) }
 
                     // Enable/disable the share target activity alias based on setting
                     LaunchedEffect(shareTargetEnabled) {
@@ -298,8 +298,9 @@ class MainActivity : ComponentActivity() {
                         val text = sharedText.value ?: return@LaunchedEffect
                         if (uiState.connectionStatus == ConnectionStatus.CONNECTED) {
                             val host = hosts?.find { it.id == uiState.hostId }
-                            val commandTemplate = host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
-                            if (commandTemplate != null) {
+                            val commandTemplate = host?.remoteCommands?.get(RemoteControlKey.SHARE_TEXT)
+                                ?: host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
+                            if (commandTemplate?.command?.isNotEmpty() == true) {
                                 sharedText.value = null
                                 val escapedText = text.replace("'", "'\\''")
                                 val command = commandTemplate.command.format(escapedText)
@@ -309,7 +310,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             } else {
                                 sharedText.value = null
-                                showShareMissingKeyboardTypeCommandDialog = true
+                                showMissingShareCommandDialog = true
                             }
                         } else {
                             sharedText.value = null
@@ -323,9 +324,9 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    if (showShareMissingKeyboardTypeCommandDialog) {
-                        ShareMissingKeyboardTypeCommandDialog(
-                            onDismiss = { showShareMissingKeyboardTypeCommandDialog = false },
+                    if (showMissingShareCommandDialog) {
+                        ShareMissingShareCommandDialog(
+                            onDismiss = { showMissingShareCommandDialog = false },
                         )
                     }
 
@@ -558,6 +559,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     initialPage = initialPage,
+                                    shareTargetEnabled = shareTargetEnabled,
                                     onTestSmartVolumeSettings = {
                                         scope.launch {
                                             val volume = hostViewModel.readVolume()
@@ -866,14 +868,14 @@ private fun ShareNotConnectedDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun ShareMissingKeyboardTypeCommandDialog(onDismiss: () -> Unit) {
+private fun ShareMissingShareCommandDialog(onDismiss: () -> Unit) {
     val view = LocalView.current
 
     AlertDialog(
-        title = { Text(stringResource(R.string.share_missing_keyboard_type_command_title)) },
+        title = { Text(stringResource(R.string.share_missing_share_command_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.share_missing_keyboard_type_command_text))
+                Text(stringResource(R.string.share_missing_share_command_text))
             }
         },
         onDismissRequest = onDismiss,

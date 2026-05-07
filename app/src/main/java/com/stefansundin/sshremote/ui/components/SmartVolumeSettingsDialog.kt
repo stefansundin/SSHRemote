@@ -21,16 +21,11 @@ package com.stefansundin.sshremote.ui.components
 import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,9 +39,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -75,47 +70,17 @@ fun SmartVolumeSettingsDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp),
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = readCurrentVolume,
-                            onValueChange = {
-                                view.playSoundEffect(SoundEffectConstants.CLICK)
-                                readCurrentVolume = it
-                            },
-                            role = Role.Checkbox,
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = readCurrentVolume,
-                        onCheckedChange = null,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.read_current_volume))
-                }
+                RowWithCheckbox(
+                    checked = readCurrentVolume,
+                    text = stringResource(R.string.read_current_volume),
+                    onCheckedChange = { readCurrentVolume = it },
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = controlVolumeWithHardwareButtons,
-                            onValueChange = {
-                                view.playSoundEffect(SoundEffectConstants.CLICK)
-                                controlVolumeWithHardwareButtons = it
-                            },
-                            role = Role.Checkbox,
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = controlVolumeWithHardwareButtons,
-                        onCheckedChange = null,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.control_volume_with_hardware_buttons))
-                }
+                RowWithCheckbox(
+                    checked = controlVolumeWithHardwareButtons,
+                    text = stringResource(R.string.control_volume_with_hardware_buttons),
+                    onCheckedChange = { controlVolumeWithHardwareButtons = it },
+                )
 
                 Button(
                     onClick = {
@@ -130,6 +95,7 @@ fun SmartVolumeSettingsDialog(
                 }
             }
         },
+        properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
