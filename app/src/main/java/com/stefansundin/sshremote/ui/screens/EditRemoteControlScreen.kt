@@ -54,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -98,16 +99,18 @@ fun EditRemoteControlScreen(
     shareTargetEnabled: Boolean,
     initialPage: Int = 0,
 ) {
-    var editingCommand by rememberSaveable { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
-    var editedRemoteCommands by rememberSaveable { mutableStateOf(host.remoteCommands ?: emptyMap()) }
-    var editedCommands by rememberSaveable { mutableStateOf(host.commands.map { it.toItem() }) }
-    var editedSmartVolumeSettings by rememberSaveable { mutableStateOf(host.smartVolume) }
     var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
-    var editingCommandInList by rememberSaveable { mutableStateOf<CommandItem?>(null) }
     var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
     var showEditKeyboardCommandDialog by rememberSaveable { mutableStateOf(false) }
     var showSmartVolumeSettingsDialog by rememberSaveable { mutableStateOf(false) }
     var showShareTargetSettingsDialog by rememberSaveable { mutableStateOf(false) }
+
+    // These values are not Bundle-saveable; keep them in composition memory to avoid parcel crashes.
+    var editingCommand by remember { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
+    var editedRemoteCommands by remember { mutableStateOf(host.remoteCommands ?: emptyMap()) }
+    var editedCommands by remember { mutableStateOf(host.commands.map { it.toItem() }) }
+    var editedSmartVolumeSettings by remember { mutableStateOf(host.smartVolume) }
+    var editingCommandInList by remember { mutableStateOf<CommandItem?>(null) }
 
     val hasUnsavedChanges =
         editedRemoteCommands != (host.remoteCommands
