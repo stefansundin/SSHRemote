@@ -116,7 +116,10 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
      */
     override suspend fun connect(details: HostConnectionDetails): HostKey? {
         return withContext(Dispatchers.IO) {
+            clearPendingPrompts()
+            disconnectChannel()
             session?.disconnect()
+            session = null
 
             if (BuildConfig.DEBUG) {
                 JSch.setLogger(JschLogger())
@@ -405,6 +408,18 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
         channelOutputStream = null
     }
 
+    private fun clearPendingPrompts() {
+        _hostKeyVerification.value?.response?.complete(false)
+        _message.value?.response?.complete(Unit)
+        _passwordPrompt.value?.response?.complete(null)
+        _passphrasePrompt.value?.response?.complete(null)
+
+        _hostKeyVerification.value = null
+        _message.value = null
+        _passwordPrompt.value = null
+        _passphrasePrompt.value = null
+    }
+
     /**
      * Disconnects the current session.
      */
@@ -413,6 +428,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
             disconnectChannel()
             session?.disconnect()
             session = null
+            clearPendingPrompts()
         }
     }
 }
