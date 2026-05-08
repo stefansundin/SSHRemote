@@ -27,6 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -43,8 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
-import com.stefansundin.sshremote.data.host.CommandItem
-import com.stefansundin.sshremote.data.host.toItem
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.portraitImePadding
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -52,17 +51,25 @@ import java.util.UUID
 
 @Composable
 fun EditCommandDialog(
-    commandItem: CommandItem?,
+    command: Command?,
     onDismiss: () -> Unit,
-    onSave: (CommandItem) -> Unit,
+    onSave: (Command) -> Unit,
+    onAddToHomeScreen: (String) -> Unit,
 ) {
-    var name by rememberSaveable { mutableStateOf(commandItem?.command?.name ?: "") }
-    var commandText by rememberSaveable { mutableStateOf(commandItem?.command?.command ?: "") }
-    var showOutput by rememberSaveable { mutableStateOf(commandItem?.command?.showOutput ?: true) }
+    var name by rememberSaveable { mutableStateOf(command?.name ?: "") }
+    var commandText by rememberSaveable { mutableStateOf(command?.command ?: "") }
+    var showOutput by rememberSaveable { mutableStateOf(command?.showOutput ?: true) }
     val view = LocalView.current
 
+    fun buildCommand() = Command(
+        id = command?.id ?: UUID.randomUUID().toString(),
+        name = name.ifBlank { null },
+        command = commandText,
+        showOutput = showOutput,
+    )
+
     AlertDialog(
-        title = { Text(stringResource(if (commandItem == null) R.string.add_command else R.string.edit_command)) },
+        title = { Text(stringResource(if (command == null) R.string.add_command else R.string.edit_command)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -89,6 +96,19 @@ fun EditCommandDialog(
                     text = stringResource(R.string.show_output),
                     onCheckedChange = { showOutput = it },
                 )
+                OutlinedButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        val updatedCommand = buildCommand()
+                        onSave(updatedCommand)
+                        onAddToHomeScreen(updatedCommand.id)
+                        onDismiss()
+                    },
+                    enabled = commandText.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.add_to_home_screen))
+                }
             }
         },
         properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
@@ -97,16 +117,8 @@ fun EditCommandDialog(
             Button(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onSave(
-                        CommandItem(
-                            key = commandItem?.key ?: UUID.randomUUID().toString(),
-                            Command(
-                                command = commandText,
-                                name = name.ifBlank { null },
-                                showOutput = showOutput,
-                            ),
-                        ),
-                    )
+                    onSave(buildCommand())
+                    onDismiss()
                 },
                 enabled = commandText.isNotBlank(),
             ) {
@@ -141,9 +153,10 @@ private fun EditCommandDialogPreview_Add() {
     SSHRemoteTheme {
         Surface {
             EditCommandDialog(
-                commandItem = null,
+                command = null,
                 onDismiss = {},
                 onSave = {},
+                onAddToHomeScreen = {},
             )
         }
     }
@@ -163,9 +176,10 @@ private fun EditCommandDialogPreview_Edit() {
     SSHRemoteTheme {
         Surface {
             EditCommandDialog(
-                commandItem = Command("uptime", name = "Uptime").toItem(),
+                command = Command("uptime", name = "Uptime"),
                 onDismiss = {},
                 onSave = {},
+                onAddToHomeScreen = {},
             )
         }
     }

@@ -67,13 +67,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
-import com.stefansundin.sshremote.data.host.CommandItem
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.data.host.presets
-import com.stefansundin.sshremote.data.host.toItem
 import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.components.EditCommandDialog
 import com.stefansundin.sshremote.ui.components.EditCommandsTab
@@ -96,30 +94,32 @@ fun EditRemoteControlScreen(
     onNavigateBack: () -> Unit,
     onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
     onTestSmartVolumeSettings: () -> Unit,
+    onAddCommandShortcut: (Host, String) -> Unit,
+    onAddRemoteCommandShortcut: (Host, RemoteControlKey) -> Unit,
     shareTargetEnabled: Boolean,
     initialPage: Int = 0,
 ) {
-    var showEditCommandDialog by rememberSaveable { mutableStateOf(false) }
-    var showEditMouseCommandsDialog by rememberSaveable { mutableStateOf(false) }
-    var showEditKeyboardCommandDialog by rememberSaveable { mutableStateOf(false) }
-    var showSmartVolumeSettingsDialog by rememberSaveable { mutableStateOf(false) }
-    var showShareTargetSettingsDialog by rememberSaveable { mutableStateOf(false) }
+    var showEditCommandDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showEditMouseCommandsDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showEditKeyboardCommandDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showSmartVolumeSettingsDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showShareTargetSettingsDialog by rememberSaveable(host.id) { mutableStateOf(false) }
 
     // These values are not Bundle-saveable; keep them in composition memory to avoid parcel crashes.
-    var editingCommand by remember { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
-    var editedRemoteCommands by remember { mutableStateOf(host.remoteCommands ?: emptyMap()) }
-    var editedCommands by remember { mutableStateOf(host.commands.map { it.toItem() }) }
-    var editedSmartVolumeSettings by remember { mutableStateOf(host.smartVolume) }
-    var editingCommandInList by remember { mutableStateOf<CommandItem?>(null) }
+    var editingCommand by remember(host.id) { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
+    var editedRemoteCommands by remember(host.id) { mutableStateOf(host.remoteCommands ?: emptyMap()) }
+    var editedCommands by remember(host.id) { mutableStateOf(host.commands) }
+    var editedSmartVolumeSettings by remember(host.id) { mutableStateOf(host.smartVolume) }
+    var editingCommandInList by remember(host.id) { mutableStateOf<Command?>(null) }
 
     val hasUnsavedChanges =
         editedRemoteCommands != (host.remoteCommands
-            ?: emptyMap<RemoteControlKey, Command>()) || editedCommands.map { it.command } != host.commands || editedSmartVolumeSettings != host.smartVolume
-    var showUnsavedBackDialog by rememberSaveable { mutableStateOf(false) }
-    var showMenu by rememberSaveable { mutableStateOf(false) }
-    var resetToPresetKey by rememberSaveable { mutableStateOf("") }
-    var showResetDialog by rememberSaveable { mutableStateOf(false) }
-    var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
+            ?: emptyMap<RemoteControlKey, Command>()) || editedCommands != host.commands || editedSmartVolumeSettings != host.smartVolume
+    var showUnsavedBackDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showMenu by rememberSaveable(host.id) { mutableStateOf(false) }
+    var resetToPresetKey by rememberSaveable(host.id) { mutableStateOf("") }
+    var showResetDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showSelectPresetDialog by rememberSaveable(host.id) { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
@@ -139,7 +139,7 @@ fun EditRemoteControlScreen(
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onSave(editedRemoteCommands, editedCommands.map { it.command }, editedSmartVolumeSettings, true)
+                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
                     },
                 ) {
                     Text(stringResource(R.string.save_and_leave))
@@ -322,7 +322,7 @@ fun EditRemoteControlScreen(
                     icon = { Icon(Icons.Default.Save, contentDescription = stringResource(R.string.save)) },
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onSave(editedRemoteCommands, editedCommands.map { it.command }, editedSmartVolumeSettings, true)
+                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
                     },
                 )
             }
@@ -412,7 +412,7 @@ fun EditRemoteControlScreen(
 
                     3 -> {
                         EditCommandsTab(
-                            commandItems = editedCommands,
+                            commands = editedCommands,
                             onCommandsChanged = { editedCommands = it },
                             onEditCommand = {
                                 editingCommandInList = it
@@ -427,19 +427,28 @@ fun EditRemoteControlScreen(
 
     if (showEditCommandDialog) {
         EditCommandDialog(
-            commandItem = editingCommandInList,
+            command = editingCommandInList,
             onDismiss = {
                 showEditCommandDialog = false
                 editingCommandInList = null
             },
-            onSave = { commandItem ->
-                editedCommands = if (editingCommandInList != null) {
-                    editedCommands.map { if (it == editingCommandInList) commandItem else it }
+            onSave = { command ->
+                val editingId = editingCommandInList?.id
+                editedCommands = if (editingId != null) {
+                    editedCommands.map { if (it.id == editingId) command else it }
                 } else {
-                    editedCommands + commandItem
+                    editedCommands + command
                 }
-                showEditCommandDialog = false
-                editingCommandInList = null
+            },
+            onAddToHomeScreen = { commandId ->
+                onAddCommandShortcut(
+                    host.copy(
+                        commands = editedCommands,
+                        remoteCommands = editedRemoteCommands,
+                        smartVolume = editedSmartVolumeSettings,
+                    ),
+                    commandId,
+                )
             },
         )
     }
@@ -515,7 +524,16 @@ fun EditRemoteControlScreen(
                 editedRemoteCommands = editedRemoteCommands.toMutableMap().apply {
                     this[key] = newCommand
                 }
-                editingCommand = null
+            },
+            onAddToHomeScreen = { key ->
+                onAddRemoteCommandShortcut(
+                    host.copy(
+                        commands = editedCommands,
+                        remoteCommands = editedRemoteCommands,
+                        smartVolume = editedSmartVolumeSettings,
+                    ),
+                    key,
+                )
             },
         )
     }
@@ -532,6 +550,8 @@ private fun EditRemoteControlScreenPreview_RemoteTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            onAddCommandShortcut = { _, _ -> },
+            onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 0,
         )
@@ -549,6 +569,8 @@ private fun EditRemoteControlScreenPreview_MouseTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            onAddCommandShortcut = { _, _ -> },
+            onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 1,
         )
@@ -566,6 +588,8 @@ private fun EditRemoteControlScreenPreview_KeyboardTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            onAddCommandShortcut = { _, _ -> },
+            onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 2,
         )
@@ -583,6 +607,8 @@ private fun EditRemoteControlScreenPreview_CommandsTab() {
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
+            onAddCommandShortcut = { _, _ -> },
+            onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 3,
         )

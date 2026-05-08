@@ -73,17 +73,17 @@ data class Host(
             knownHosts = knownHosts,
             commands = commands.map {
                 ExportedCommand(
+                    id = it.id,
                     name = it.name,
                     command = it.command,
                     showOutput = it.showOutput,
-                    repeat = it.repeat,
                 )
             },
             remoteCommands = remoteCommands?.mapValues {
                 ExportedCommand(
                     name = it.value.name,
                     command = it.value.command,
-                    showOutput = it.value.showOutput,
+                    longPressCommand = it.value.longPressCommand,
                     repeat = it.value.repeat,
                 )
             },

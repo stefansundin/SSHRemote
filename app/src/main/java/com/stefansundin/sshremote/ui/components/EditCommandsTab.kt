@@ -61,28 +61,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.data.host.Command
-import com.stefansundin.sshremote.data.host.CommandItem
-import com.stefansundin.sshremote.data.host.toItem
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun EditCommandsTab(
-    commandItems: List<CommandItem>,
-    onCommandsChanged: (List<CommandItem>) -> Unit,
-    onEditCommand: (CommandItem) -> Unit,
+    commands: List<Command>,
+    onCommandsChanged: (List<Command>) -> Unit,
+    onEditCommand: (Command) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val commandsListState = rememberLazyListState()
-    var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, CommandItem>?>(null) }
+    var undoableDeletedCommand by rememberSaveable { mutableStateOf<Pair<Int, Command>?>(null) }
     val view = LocalView.current
     val hapticFeedback = LocalHapticFeedback.current
     val reorderableLazyListState = rememberReorderableLazyListState(commandsListState) { from, to ->
-        val newCommandItems = commandItems.toMutableList().apply {
+        val newCommands = commands.toMutableList().apply {
             add(to.index, removeAt(from.index))
         }
-        onCommandsChanged(newCommandItems)
+        onCommandsChanged(newCommands)
     }
 
     val commandDeletedMsg = stringResource(R.string.command_deleted)
@@ -98,7 +96,7 @@ fun EditCommandsTab(
             )
             if (result == SnackbarResult.ActionPerformed) {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
-                val currentCommands = commandItems.toMutableList()
+                val currentCommands = commands.toMutableList()
                 currentCommands.add(index, command)
                 onCommandsChanged(currentCommands)
             } else {
@@ -107,11 +105,11 @@ fun EditCommandsTab(
         }
     }
 
-    LaunchedEffect(commandItems, undoableDeletedCommand) {
+    LaunchedEffect(commands, undoableDeletedCommand) {
         val deletedCommand = undoableDeletedCommand
         if (deletedCommand != null) {
             val (index, command) = deletedCommand
-            if (index < commandItems.size && commandItems[index] == command) {
+            if (index < commands.size && commands[index].id == command.id) {
                 commandsListState.animateScrollToItem(index)
                 undoableDeletedCommand = null
             }
@@ -127,8 +125,8 @@ fun EditCommandsTab(
             contentPadding = PaddingValues(bottom = 160.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(commandItems, key = { it.key }) { commandItem ->
-                ReorderableItem(reorderableLazyListState, key = commandItem.key) {
+            items(commands, key = { it.id }) { command ->
+                ReorderableItem(reorderableLazyListState, key = command.id) {
                     val interactionSource = remember { MutableInteractionSource() }
 
                     Row(
@@ -153,13 +151,13 @@ fun EditCommandsTab(
                             Icon(Icons.Rounded.DragHandle, contentDescription = stringResource(R.string.reorder))
                         }
                         Text(
-                            text = commandItem.command.name ?: commandItem.command.command,
+                            text = command.name ?: command.command,
                             modifier = Modifier.weight(1f),
                         )
                         IconButton(
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
-                                onEditCommand(commandItem)
+                                onEditCommand(command)
                             },
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
@@ -167,10 +165,12 @@ fun EditCommandsTab(
                         IconButton(
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
-                                val deletedCommandIndex = commandItems.indexOf(commandItem)
-                                val newCommands = commandItems.filter { it != commandItem }
-                                onCommandsChanged(newCommands)
-                                undoableDeletedCommand = deletedCommandIndex to commandItem
+                                val deletedCommandIndex = commands.indexOfFirst { it.id == command.id }
+                                if (deletedCommandIndex >= 0) {
+                                    val newCommands = commands.toMutableList().apply { removeAt(deletedCommandIndex) }
+                                    onCommandsChanged(newCommands)
+                                    undoableDeletedCommand = deletedCommandIndex to command
+                                }
                             },
                         ) {
                             Icon(
@@ -193,7 +193,10 @@ fun EditCommandsTab(
     }
 }
 
-val sampleCommandItems = listOf(Command("uptime", name = "Uptime").toItem(), Command("whoami").toItem())
+val sampleCommands = listOf(
+    Command("uptime", name = "Uptime"),
+    Command("whoami"),
+)
 
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
@@ -202,7 +205,7 @@ private fun EditCommandsTabPreview() {
     SSHRemoteTheme {
         Surface {
             EditCommandsTab(
-                commandItems = sampleCommandItems,
+                commands = sampleCommands,
                 onCommandsChanged = {},
                 onEditCommand = {},
             )

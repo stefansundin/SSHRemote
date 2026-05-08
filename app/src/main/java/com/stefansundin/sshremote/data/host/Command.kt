@@ -20,7 +20,6 @@ package com.stefansundin.sshremote.data.host
 
 import android.os.Parcelable
 import androidx.annotation.Keep
-import androidx.compose.runtime.Immutable
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
@@ -32,22 +31,5 @@ data class Command(
     val name: String? = null,
     val showOutput: Boolean = false,
     val repeat: Boolean = false,
+    val id: String = UUID.randomUUID().toString(),
 ) : Parcelable
-
-
-
-/**
- * CommandItem is a wrapper of Command that makes it easier to reorder a list of them.
- */
-@Immutable
-data class CommandItem(
-    val key: String = UUID.randomUUID().toString(),
-    val command: Command,
-)
-
-fun Command.toItem(): CommandItem {
-    return CommandItem(
-        key = UUID.randomUUID().toString(),
-        command = this,
-    )
-}

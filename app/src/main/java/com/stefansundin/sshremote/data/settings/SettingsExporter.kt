@@ -31,21 +31,25 @@ import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import kotlinx.coroutines.flow.first
 import java.io.ByteArrayOutputStream
+import java.util.UUID
 import java.util.zip.GZIPOutputStream
 
 @Keep
 data class ExportedCommand(
+    val id: String? = null,
     val name: String?,
     val command: String,
-    val showOutput: Boolean,
-    val repeat: Boolean,
+    val longPressCommand: String? = null,
+    val showOutput: Boolean? = null,
+    val repeat: Boolean? = null,
 ) {
     fun toCommand(): Command {
         return Command(
+            id = id ?: UUID.randomUUID().toString(),
             name = name,
             command = command,
-            showOutput = showOutput,
-            repeat = repeat,
+            showOutput = showOutput ?: false,
+            repeat = repeat ?: false,
         )
     }
 }

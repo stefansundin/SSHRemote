@@ -78,7 +78,7 @@ class IdentityViewModel(
             try {
                 val encryptedPrivateKey = cryptoManager.encrypt(privateKey.toByteArray())
                 val encryptedCertificate = certificate
-                    ?.takeIf { it.isNotBlank() }
+                    ?.ifBlank { null }
                     ?.let { cryptoManager.encrypt(it.toByteArray()) }
                 identityRepository.insert(
                     Identity(

@@ -27,6 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,12 +56,19 @@ fun EditRemoteCommandDialog(
     command: Pair<RemoteControlKey, Command>,
     onDismiss: () -> Unit,
     onSave: (RemoteControlKey, Command) -> Unit,
+    onAddToHomeScreen: (RemoteControlKey) -> Unit,
 ) {
     val (key, initialCommand) = command
     var newCommand by rememberSaveable { mutableStateOf(initialCommand.command) }
     var newLongPressCommand by rememberSaveable { mutableStateOf(initialCommand.longPressCommand ?: "") }
     var repeatCommand by rememberSaveable { mutableStateOf(initialCommand.repeat) }
     val view = LocalView.current
+
+    fun buildCommand() = initialCommand.copy(
+        command = newCommand,
+        longPressCommand = newLongPressCommand.ifBlank { null },
+        repeat = repeatCommand,
+    )
 
     AlertDialog(
         title = { Text(stringResource(R.string.edit_command)) },
@@ -96,6 +104,18 @@ fun EditRemoteCommandDialog(
                         text = stringResource(R.string.repeat_command_while_pressed),
                         onCheckedChange = { repeatCommand = it },
                     )
+                    OutlinedButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            val updatedCommand = buildCommand()
+                            onSave(key, updatedCommand)
+                            onAddToHomeScreen(key)
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.add_to_home_screen))
+                    }
                 }
             }
         },
@@ -105,14 +125,8 @@ fun EditRemoteCommandDialog(
             TextButton(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onSave(
-                        key,
-                        initialCommand.copy(
-                            command = newCommand,
-                            longPressCommand = newLongPressCommand.takeIf { it.isNotBlank() },
-                            repeat = repeatCommand,
-                        ),
-                    )
+                    onSave(key, buildCommand())
+                    onDismiss()
                 },
             ) {
                 Text(stringResource(R.string.save))
@@ -150,6 +164,7 @@ private fun EditRemoteCommandDialogPreview() {
                 command = Pair(key, wtypePreset[key]!!),
                 onDismiss = {},
                 onSave = { _, _ -> },
+                onAddToHomeScreen = {},
             )
         }
     }

@@ -32,7 +32,7 @@ import com.stefansundin.sshremote.data.knownhost.KnownHostDao
 
 @Database(
     entities = [Host::class, KnownHost::class, AdHocCommand::class],
-    version = 12,
+    version = 13,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)

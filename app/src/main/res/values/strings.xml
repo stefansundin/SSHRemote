@@ -42,7 +42,6 @@
     <string name="edit_host_title">Edit Host</string>
     <string name="host_deleted">Host deleted</string>
     <string name="clone">Clone</string>
-    <string name="add_to_home_screen">Add to Home Screen</string>
     <string name="hostname_or_ip">Hostname or IP</string>
     <string name="port">Port</string>
     <string name="user">User</string>
@@ -349,6 +348,15 @@
     <string name="notification_inactive">Remote control inactive</string>
     <string name="notification_open">Open</string>
     <string name="notification_close">Close</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Add to Home Screen</string>
+    <string name="run_command_on_host_short">%1$s on %2$s</string>
+    <string name="run_command_on_host_long">Run %1$s on %2$s</string>
+    <string name="shortcut_host_not_found">Host not found.</string>
+    <string name="shortcut_command_not_found">Command not found.</string>
+    <string name="shortcut_remote_control_key_not_found">Shortcut action is no longer supported.</string>
+    <string name="shortcut_save_changes_before_using">Please save your remote control changes before using shortcuts.</string>
 
     <!-- Share -->
     <string name="sharing">Sharing</string>

@@ -142,6 +142,16 @@ enum class Theme(@StringRes val labelRes: Int) {
     DARK(R.string.theme_dark)
 }
 
+private data class PendingShortcut(
+    val hostId: String,
+    val commandId: String? = null,
+    val remoteControlKey: String? = null,
+    val connectionRequested: Boolean = false,
+) {
+    val hasPayload: Boolean
+        get() = commandId != null || remoteControlKey != null
+}
+
 private fun NavController.safePopBackStack() {
     if (previousBackStackEntry != null) {
         popBackStack()
@@ -197,7 +207,7 @@ class MainActivity : ComponentActivity() {
         AdHocCommandViewModelFactory(app.adHocCommandRepository)
     }
 
-    private var shortcutHostId = mutableStateOf<String?>(null)
+    private var pendingShortcut = mutableStateOf<PendingShortcut?>(null)
     private var sharedText = mutableStateOf<String?>(null)
 
     private fun handleIncomingIntent(intent: Intent?) {
@@ -207,7 +217,12 @@ class MainActivity : ComponentActivity() {
             return
         }
         if (intent.hasExtra("HOST_ID")) {
-            shortcutHostId.value = intent.getStringExtra("HOST_ID")
+            val hostId = intent.getStringExtra("HOST_ID") ?: return
+            pendingShortcut.value = PendingShortcut(
+                hostId = hostId,
+                commandId = intent.getStringExtra("COMMAND_ID"),
+                remoteControlKey = intent.getStringExtra("REMOTE_CONTROL_KEY"),
+            )
         }
     }
 
@@ -270,6 +285,7 @@ class MainActivity : ComponentActivity() {
                     val scope = rememberCoroutineScope()
                     val uiState by hostViewModel.uiState.collectAsState()
                     val navController = rememberNavController()
+                    val currentRoute = navController.currentBackStackEntry?.destination?.route
                     val app = LocalContext.current.applicationContext as SshRemoteApplication
                     var showBackupRestoredDialog by rememberSaveable { mutableStateOf(app.isRestoredFromBackup) }
                     val hosts by hostViewModel.allHosts.collectAsState()
@@ -280,6 +296,92 @@ class MainActivity : ComponentActivity() {
                     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
                     var showShareNotConnectedDialog by rememberSaveable { mutableStateOf(false) }
                     var showMissingShareCommandDialog by rememberSaveable { mutableStateOf(false) }
+
+                    // Auto-run a command after connecting via a home-screen shortcut.
+                    LaunchedEffect(
+                        uiState.connectionStatus,
+                        uiState.hostId,
+                        hosts,
+                        pendingShortcut.value,
+                        currentRoute,
+                    ) {
+                        val shortcut = pendingShortcut.value ?: return@LaunchedEffect
+                        val allHosts = hosts ?: return@LaunchedEffect
+                        if (shortcut.hasPayload && currentRoute?.startsWith("edit_remote_control") == true) {
+                            pendingShortcut.value = null
+                            Toast.makeText(
+                                this@MainActivity,
+                                getString(R.string.shortcut_save_changes_before_using),
+                                Toast.LENGTH_LONG,
+                            ).show()
+                            return@LaunchedEffect
+                        }
+                        if (
+                            !shortcut.hasPayload ||
+                            uiState.connectionStatus != ConnectionStatus.CONNECTED ||
+                            uiState.hostId != shortcut.hostId
+                        ) {
+                            return@LaunchedEffect
+                        }
+
+                        val host = allHosts.find { it.id == shortcut.hostId }
+                        if (host == null) {
+                            pendingShortcut.value = null
+                            Toast.makeText(
+                                this@MainActivity,
+                                getString(R.string.shortcut_host_not_found),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                            return@LaunchedEffect
+                        }
+
+                        when {
+                            shortcut.commandId != null -> {
+                                pendingShortcut.value = null
+                                val command = host.commands.find { it.id == shortcut.commandId }
+                                if (command != null) {
+                                    scope.launch {
+                                        hostViewModel.runCommand(command.command, command.showOutput)
+                                    }
+                                } else {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        getString(R.string.shortcut_command_not_found),
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                }
+                            }
+
+                            shortcut.remoteControlKey != null -> {
+                                pendingShortcut.value = null
+                                try {
+                                    val remoteKey = RemoteControlKey.valueOf(shortcut.remoteControlKey)
+                                    if (host.remoteCommands?.get(remoteKey) != null) {
+                                        scope.launch {
+                                            hostViewModel.runRemoteControlCommand(remoteKey)
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            getString(R.string.shortcut_command_not_found),
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    }
+                                } catch (e: IllegalArgumentException) {
+                                    Log.e(
+                                        "MainActivity",
+                                        "Invalid RemoteControlKey in shortcut: ${shortcut.remoteControlKey}",
+                                        e,
+                                    )
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        getString(R.string.shortcut_remote_control_key_not_found),
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                }
+                            }
+                        }
+                    }
 
                     // Enable/disable the share target activity alias based on setting
                     LaunchedEffect(shareTargetEnabled) {
@@ -373,16 +475,29 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    LaunchedEffect(hosts, shortcutHostId.value) {
-                        if (!hosts.isNullOrEmpty()) {
-                            val shortcutId = shortcutHostId.value
-                            if (shortcutId != null) {
-                                shortcutHostId.value = null
-                                val hostToConnect = hosts?.find { it.id == shortcutId }
-                                if (hostToConnect != null) {
-                                    onConnect(hostToConnect)
-                                }
-                            }
+                    LaunchedEffect(hosts, pendingShortcut.value, uiState.connectionStatus, uiState.hostId) {
+                        val shortcut = pendingShortcut.value ?: return@LaunchedEffect
+                        val allHosts = hosts ?: return@LaunchedEffect
+                        val hostToConnect = allHosts.find { it.id == shortcut.hostId }
+
+                        if (hostToConnect == null) {
+                            pendingShortcut.value = null
+                            Toast.makeText(
+                                this@MainActivity,
+                                getString(R.string.shortcut_host_not_found),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                            return@LaunchedEffect
+                        }
+
+                        val isSameConnectedHost =
+                            uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostToConnect.id
+
+                        if (isSameConnectedHost && !shortcut.hasPayload) {
+                            pendingShortcut.value = null
+                        } else if (!isSameConnectedHost && !shortcut.connectionRequested) {
+                            pendingShortcut.value = shortcut.copy(connectionRequested = true)
+                            onConnect(hostToConnect)
                         }
                     }
 
@@ -558,8 +673,6 @@ class MainActivity : ComponentActivity() {
                                             hostViewModel.upsert(updatedHost)
                                         }
                                     },
-                                    initialPage = initialPage,
-                                    shareTargetEnabled = shareTargetEnabled,
                                     onTestSmartVolumeSettings = {
                                         scope.launch {
                                             val volume = hostViewModel.readVolume()
@@ -576,6 +689,14 @@ class MainActivity : ComponentActivity() {
                                                 .show()
                                         }
                                     },
+                                    onAddCommandShortcut = { shortcutHost, commandId ->
+                                        createCommandShortcut(this@MainActivity, shortcutHost, commandId)
+                                    },
+                                    onAddRemoteCommandShortcut = { shortcutHost, key ->
+                                        createRemoteCommandShortcut(this@MainActivity, shortcutHost, key)
+                                    },
+                                    shareTargetEnabled = shareTargetEnabled,
+                                    initialPage = initialPage,
                                 )
                             } else {
                                 LaunchedEffect(Unit) {
@@ -694,7 +815,8 @@ class MainActivity : ComponentActivity() {
         if (intent.hasExtra("HOST_ID")) {
             val hostId = intent.getStringExtra("HOST_ID")
             val uiState = hostViewModel.uiState.value
-            if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostId) {
+            val hasCommandPayload = intent.hasExtra("COMMAND_ID") || intent.hasExtra("REMOTE_CONTROL_KEY")
+            if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostId && !hasCommandPayload) {
                 return
             }
             handleIncomingIntent(intent)
@@ -716,6 +838,46 @@ class MainActivity : ComponentActivity() {
         val shortcutInfo = ShortcutInfoCompat.Builder(context, "host_${host.id}")
             .setShortLabel(host.name)
             .setLongLabel(getString(R.string.connect_to_host, host.name))
+            .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
+            .setIntent(intent)
+            .build()
+
+        ShortcutManagerCompat.requestPinShortcut(context, shortcutInfo, null)
+    }
+
+    private fun createCommandShortcut(context: Context, host: Host, commandId: String) {
+        val command = host.commands.find { it.id == commandId }
+        val commandLabel = command?.name ?: command?.command ?: getString(R.string.command)
+        val intent = Intent(context, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            putExtra("HOST_ID", host.id)
+            putExtra("COMMAND_ID", commandId)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+
+        val shortcutInfo = ShortcutInfoCompat.Builder(context, "command_${host.id}_$commandId")
+            .setShortLabel(getString(R.string.run_command_on_host_short, commandLabel, host.name))
+            .setLongLabel(getString(R.string.run_command_on_host_long, commandLabel, host.name))
+            .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
+            .setIntent(intent)
+            .build()
+
+        ShortcutManagerCompat.requestPinShortcut(context, shortcutInfo, null)
+    }
+
+    private fun createRemoteCommandShortcut(context: Context, host: Host, key: RemoteControlKey) {
+        val command = host.remoteCommands?.get(key)
+        val commandLabel = command?.name ?: getString(key.titleRes)
+        val intent = Intent(context, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            putExtra("HOST_ID", host.id)
+            putExtra("REMOTE_CONTROL_KEY", key.name)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+
+        val shortcutInfo = ShortcutInfoCompat.Builder(context, "remote_command_${host.id}_${key.name}")
+            .setShortLabel(getString(R.string.run_command_on_host_short, commandLabel, host.name))
+            .setLongLabel(getString(R.string.run_command_on_host_long, commandLabel, host.name))
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(intent)
             .build()
