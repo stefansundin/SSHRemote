@@ -35,10 +35,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
@@ -48,6 +50,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -67,6 +70,7 @@ fun CommandOutputDialog(
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val maxDialogHeight = with(density) { windowInfo.containerSize.height.toDp() * 0.9f }
+    val formattedOutput = remember(output) { expandTabsForDisplay(output.trimEnd()) }
 
     AlertDialog(
         modifier = Modifier
@@ -76,7 +80,10 @@ fun CommandOutputDialog(
         text = {
             SelectionContainer {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(output.trimEnd())
+                    Text(
+                        text = formattedOutput,
+                        style = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace),
+                    )
                 }
             }
         },
@@ -110,6 +117,38 @@ fun CommandOutputDialog(
             }
         },
     )
+}
+
+private fun expandTabsForDisplay(text: String, tabWidth: Int = 8): String {
+    if (!text.contains('\t')) return text
+
+    val expanded = StringBuilder(text.length)
+    var column = 0
+    for (char in text) {
+        when (char) {
+            '\t' -> {
+                val spaces = tabWidth - (column % tabWidth)
+                repeat(spaces) { expanded.append(' ') }
+                column += spaces
+            }
+
+            '\n' -> {
+                expanded.append(char)
+                column = 0
+            }
+
+            '\r' -> {
+                expanded.append(char)
+                column = 0
+            }
+
+            else -> {
+                expanded.append(char)
+                column += 1
+            }
+        }
+    }
+    return expanded.toString()
 }
 
 @Suppress("SpellCheckingInspection")
