@@ -67,6 +67,7 @@ interface IRemoteControlHostViewModel {
     suspend fun runCommand(
         command: String,
         showOutput: Boolean,
+        renderOutputAsMarkdown: Boolean = false,
         isRetry: Boolean = false,
 //        reuseShell: Boolean = true,
     ): Result
@@ -280,6 +281,7 @@ class HostViewModel(
     override suspend fun runCommand(
         command: String,
         showOutput: Boolean,
+        renderOutputAsMarkdown: Boolean,
         isRetry: Boolean,
 //        reuseShell: Boolean,
     ): Result {
@@ -289,7 +291,7 @@ class HostViewModel(
             }
             return Result.Error("Not connected", isConnectionError = true)
         }
-        _uiState.update { it.copy(isLoading = true, commandOutput = null, error = null) }
+        _uiState.update { it.copy(isLoading = true, commandOutput = null, commandOutputIsMarkdown = false, error = null) }
 
         val (result, duration) = try {
             measureTimedValue {
@@ -310,6 +312,7 @@ class HostViewModel(
                 _uiState.update {
                     it.copy(
                         commandOutput = if (showOutput) result.output else null,
+                        commandOutputIsMarkdown = showOutput && renderOutputAsMarkdown,
                         isLoading = false,
                     )
                 }
@@ -327,7 +330,7 @@ class HostViewModel(
                     if (host != null) {
                         handleConnection(host)
                         if (_uiState.value.connectionStatus == ConnectionStatus.CONNECTED) {
-                            return runCommand(command, showOutput, isRetry = true)
+                            return runCommand(command, showOutput, renderOutputAsMarkdown, isRetry = true)
                         }
                     } else {
                         _uiState.update {
@@ -343,6 +346,7 @@ class HostViewModel(
                         if (result.isConnectionError) {
                             it.copy(
                                 commandOutput = null,
+                                commandOutputIsMarkdown = false,
                                 error = "Failed to reconnect.",
                                 connectionStatus = ConnectionStatus.DISCONNECTED,
                                 isLoading = false,
@@ -350,6 +354,7 @@ class HostViewModel(
                         } else {
                             it.copy(
                                 commandOutput = result.message,
+                                commandOutputIsMarkdown = false,
                                 error = null,
                                 isLoading = false,
                             )
@@ -366,7 +371,11 @@ class HostViewModel(
         if (command != null) {
             val oldVolume = uiState.value.volume
             viewModelScope.launch {
-                val result = runCommand(command.command, command.showOutput)
+                val result = runCommand(
+                    command = command.command,
+                    showOutput = command.showOutput,
+                    renderOutputAsMarkdown = command.renderOutputAsMarkdown,
+                )
                 if (result is Result.Success) {
                     when (key) {
                         RemoteControlKey.VOLUME_UP, RemoteControlKey.VOLUME_DOWN -> {
@@ -514,7 +523,7 @@ class HostViewModel(
     }
 
     override fun clearCommandOutput() {
-        _uiState.update { it.copy(commandOutput = null) }
+        _uiState.update { it.copy(commandOutput = null, commandOutputIsMarkdown = false) }
     }
 
     fun clearError() {
@@ -532,6 +541,7 @@ class HostViewModel(
 data class RemoteUiState(
     val hostId: String? = null,
     val commandOutput: String? = null,
+    val commandOutputIsMarkdown: Boolean = false,
     val isLoading: Boolean = false,
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val error: String? = null,

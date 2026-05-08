@@ -59,6 +59,7 @@ fun EditCommandDialog(
     var name by rememberSaveable { mutableStateOf(command?.name ?: "") }
     var commandText by rememberSaveable { mutableStateOf(command?.command ?: "") }
     var showOutput by rememberSaveable { mutableStateOf(command?.showOutput ?: true) }
+    var renderOutputAsMarkdown by rememberSaveable { mutableStateOf(command?.renderOutputAsMarkdown ?: false) }
     val view = LocalView.current
 
     fun buildCommand() = Command(
@@ -66,6 +67,7 @@ fun EditCommandDialog(
         name = name.ifBlank { null },
         command = commandText,
         showOutput = showOutput,
+        renderOutputAsMarkdown = renderOutputAsMarkdown,
     )
 
     AlertDialog(
@@ -94,7 +96,18 @@ fun EditCommandDialog(
                 RowWithCheckbox(
                     checked = showOutput,
                     text = stringResource(R.string.show_output),
-                    onCheckedChange = { showOutput = it },
+                    onCheckedChange = {
+                        showOutput = it
+                        if (!it) {
+                            renderOutputAsMarkdown = false
+                        }
+                    },
+                )
+                RowWithCheckbox(
+                    checked = renderOutputAsMarkdown,
+                    text = stringResource(R.string.render_output_as_markdown),
+                    enabled = showOutput,
+                    onCheckedChange = { renderOutputAsMarkdown = it },
                 )
                 OutlinedButton(
                     onClick = {

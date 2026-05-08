@@ -41,6 +41,7 @@ data class ExportedCommand(
     val command: String,
     val longPressCommand: String? = null,
     val showOutput: Boolean? = null,
+    val renderOutputAsMarkdown: Boolean? = null,
     val repeat: Boolean? = null,
 ) {
     fun toCommand(): Command {
@@ -49,6 +50,7 @@ data class ExportedCommand(
             name = name,
             command = command,
             showOutput = showOutput ?: false,
+            renderOutputAsMarkdown = renderOutputAsMarkdown ?: false,
             repeat = repeat ?: false,
         )
     }

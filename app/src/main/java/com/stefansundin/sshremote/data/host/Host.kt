@@ -77,6 +77,7 @@ data class Host(
                     name = it.name,
                     command = it.command,
                     showOutput = it.showOutput,
+                    renderOutputAsMarkdown = it.renderOutputAsMarkdown,
                 )
             },
             remoteCommands = remoteCommands?.mapValues {
@@ -84,6 +85,7 @@ data class Host(
                     name = it.value.name,
                     command = it.value.command,
                     longPressCommand = it.value.longPressCommand,
+                    renderOutputAsMarkdown = it.value.renderOutputAsMarkdown,
                     repeat = it.value.repeat,
                 )
             },

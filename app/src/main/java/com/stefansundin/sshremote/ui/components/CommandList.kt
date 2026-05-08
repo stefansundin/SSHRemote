@@ -92,7 +92,11 @@ fun CommandList(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
                         scope.launch {
-                            hostViewModel.runCommand(command.command, command.showOutput)
+                            hostViewModel.runCommand(
+                                command = command.command,
+                                showOutput = command.showOutput,
+                                renderOutputAsMarkdown = command.renderOutputAsMarkdown,
+                            )
                         }
                     },
                     enabled = connectionStatus == ConnectionStatus.CONNECTED,
@@ -112,6 +116,7 @@ private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewMode
     override suspend fun runCommand(
         command: String,
         showOutput: Boolean,
+        renderOutputAsMarkdown: Boolean,
         isRetry: Boolean,
 //        reuseShell: Boolean,
     ): Result {

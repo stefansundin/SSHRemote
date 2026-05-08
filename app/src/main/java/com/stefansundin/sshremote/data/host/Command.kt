@@ -30,6 +30,7 @@ data class Command(
     val longPressCommand: String? = null,
     val name: String? = null,
     val showOutput: Boolean = false,
+    val renderOutputAsMarkdown: Boolean = false,
     val repeat: Boolean = false,
     val id: String = UUID.randomUUID().toString(),
 ) : Parcelable

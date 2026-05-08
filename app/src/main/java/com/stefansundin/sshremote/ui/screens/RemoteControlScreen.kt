@@ -273,6 +273,7 @@ fun RemoteControlScreen(
     uiState.commandOutput?.let { output ->
         CommandOutputDialog(
             output = output,
+            renderMarkdown = uiState.commandOutputIsMarkdown,
             onDismiss = { hostViewModel.clearCommandOutput() },
         )
     }
@@ -880,6 +881,7 @@ private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewMode
     override suspend fun runCommand(
         command: String,
         showOutput: Boolean,
+        renderOutputAsMarkdown: Boolean,
         isRetry: Boolean,
 //        reuseShell: Boolean,
     ): Result {

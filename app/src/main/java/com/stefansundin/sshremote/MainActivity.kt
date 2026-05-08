@@ -341,7 +341,11 @@ class MainActivity : ComponentActivity() {
                                 val command = host.commands.find { it.id == shortcut.commandId }
                                 if (command != null) {
                                     scope.launch {
-                                        hostViewModel.runCommand(command.command, command.showOutput)
+                                        hostViewModel.runCommand(
+                                            command = command.command,
+                                            showOutput = command.showOutput,
+                                            renderOutputAsMarkdown = command.renderOutputAsMarkdown,
+                                        )
                                     }
                                 } else {
                                     Toast.makeText(
