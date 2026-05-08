@@ -23,7 +23,9 @@ import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -40,11 +42,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
@@ -55,11 +61,17 @@ fun CommandOutputDialog(
     onDismiss: () -> Unit,
 ) {
     val clipboard = LocalClipboard.current
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
     val view = LocalView.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
+    val maxDialogHeight = with(density) { windowInfo.containerSize.height.toDp() * 0.9f }
 
     AlertDialog(
+        modifier = Modifier
+            .widthIn(max = 560.dp)
+            .heightIn(max = maxDialogHeight),
         title = { Text(stringResource(R.string.command_output)) },
         text = {
             SelectionContainer {
@@ -69,6 +81,7 @@ fun CommandOutputDialog(
             }
         },
         onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
         confirmButton = {
             Button(
                 onClick = {
@@ -101,7 +114,13 @@ fun CommandOutputDialog(
 
 @Suppress("SpellCheckingInspection")
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
-@Preview(showBackground = true, widthDp = 400, heightDp = 600, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
 @Composable
 private fun CommandOutputDialogPreview() {
     SSHRemoteTheme {
