@@ -21,26 +21,14 @@ package com.stefansundin.sshremote.ui.components
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.RectF
-import android.text.Layout
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
-import android.text.method.LinkMovementMethod
-import android.text.style.ForegroundColorSpan
-import android.text.style.LeadingMarginSpan
-import android.text.style.LineBackgroundSpan
-import android.text.style.LineHeightSpan
-import android.text.style.MetricAffectingSpan
 import android.view.SoundEffectConstants
-import android.widget.TextView
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -52,12 +40,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,46 +54,45 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
+import com.mikepenz.markdown.compose.components.CurrentComponentsBridge
+import com.mikepenz.markdown.compose.components.MarkdownComponentModel
+import com.mikepenz.markdown.compose.components.markdownComponents
+import com.mikepenz.markdown.compose.elements.MarkdownCodeBlock
+import com.mikepenz.markdown.compose.elements.MarkdownCodeFence
+import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.model.rememberMarkdownState
 import com.stefansundin.sshremote.R
-import io.noties.markwon.AbstractMarkwonPlugin
-import io.noties.markwon.Markwon
-import io.noties.markwon.MarkwonConfiguration
-import io.noties.markwon.MarkwonSpansFactory
-import io.noties.markwon.MarkwonVisitor
-import io.noties.markwon.RenderProps
-import io.noties.markwon.SpanFactory
-import io.noties.markwon.core.CoreProps
-import io.noties.markwon.core.MarkwonTheme
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
-import io.noties.markwon.ext.tables.TablePlugin
-import io.noties.markwon.ext.tasklist.TaskListPlugin
-import io.noties.markwon.syntax.SyntaxHighlight
 import kotlinx.coroutines.launch
-import org.commonmark.node.Code
-import org.commonmark.node.FencedCodeBlock
-import org.commonmark.node.IndentedCodeBlock
-import org.commonmark.node.Node
+
+enum class MarkdownHorizontalOverflow {
+    Default,
+    Wrap,
+    Scroll,
+}
 
 @Composable
 fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
     selectableText: Boolean = true,
+    codeBlockOverflow: MarkdownHorizontalOverflow = MarkdownHorizontalOverflow.Wrap,
+    tableOverflow: MarkdownHorizontalOverflow = MarkdownHorizontalOverflow.Wrap,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -115,102 +103,72 @@ fun MarkdownText(
     val scope = rememberCoroutineScope()
     var selectedLink by rememberSaveable { mutableStateOf<String?>(null) }
     val maxDialogHeight = with(density) { windowInfo.containerSize.height.toDp() * 0.9f }
-    val codeBlockMarginPx = remember(density) { with(density) { 6.dp.roundToPx() } }
-    val codeBlockVerticalPaddingPx = remember(density) { with(density) { 6.dp.roundToPx() } }
-    val codeBlockCornerRadiusPx = remember(density) { with(density) { 6.dp.toPx() } }
-    val commentColorArgb = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.95f).toArgb()
+    val markdownState = rememberMarkdownState(markdown)
 
-    val markwon = remember(
-        context,
-        codeBlockMarginPx,
-        codeBlockVerticalPaddingPx,
-        codeBlockCornerRadiusPx,
-        commentColorArgb,
-    ) {
-        Markwon.builder(context)
-            .usePlugin(
-                object : AbstractMarkwonPlugin() {
-                    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
-                        builder.linkResolver { _, link -> selectedLink = link }
-                        builder.syntaxHighlight(HashCommentSyntaxHighlight(commentColorArgb))
-                    }
-
-                    override fun configureVisitor(builder: MarkwonVisitor.Builder) {
-                        builder.on(Code::class.java) { visitor, code ->
-                            val length = visitor.length()
-                            // CorePlugin wraps inline code with non-breaking spaces for extra padding
-                            // Render the literal directly to remove that injected side spacing
-                            visitor.builder().append(code.literal)
-                            visitor.setSpansForNodeOptional(code, length)
-                        }
-
-                        builder.on(FencedCodeBlock::class.java) { visitor, codeBlock ->
-                            visitCodeBlockWithoutExtraBlankLines(
-                                visitor = visitor,
-                                info = codeBlock.info,
-                                code = codeBlock.literal,
-                                node = codeBlock,
-                            )
-                        }
-
-                        builder.on(IndentedCodeBlock::class.java) { visitor, codeBlock ->
-                            visitCodeBlockWithoutExtraBlankLines(
-                                visitor = visitor,
-                                info = null,
-                                code = codeBlock.literal,
-                                node = codeBlock,
-                            )
-                        }
-                    }
-
-                    override fun configureTheme(builder: MarkwonTheme.Builder) {
-                        // Remove heading underlines and reduce code block side padding
-                        builder
-                            .headingBreakHeight(0)
-                            .codeBlockMargin(codeBlockMarginPx)
-                    }
-
-                    override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
-                        val roundedFactory = RoundedCodeBlockSpanFactory(
-                            cornerRadiusPx = codeBlockCornerRadiusPx,
-                            verticalPaddingPx = codeBlockVerticalPaddingPx,
-                        )
-                        builder
-                            .setFactory(FencedCodeBlock::class.java, roundedFactory)
-                            .setFactory(IndentedCodeBlock::class.java, roundedFactory)
-                    }
-                },
-            )
-            .usePlugin(TablePlugin.create(context))
-            .usePlugin(TaskListPlugin.create(context))
-            .usePlugin(StrikethroughPlugin.create())
-            .build()
+    val interceptingUriHandler = remember {
+        object : UriHandler {
+            override fun openUri(uri: String) {
+                selectedLink = uri
+            }
+        }
     }
 
-    val textColor = LocalContentColor.current
-    val textSizeSp = LocalTextStyle.current.fontSize
-    val linkColor = MaterialTheme.colorScheme.primary
+    val components = remember(codeBlockOverflow, tableOverflow) {
+        when {
+            codeBlockOverflow == MarkdownHorizontalOverflow.Default && tableOverflow == MarkdownHorizontalOverflow.Default -> null
+            codeBlockOverflow == MarkdownHorizontalOverflow.Default -> {
+                markdownComponents(
+                    table = { model: MarkdownComponentModel ->
+                        Box(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                            CurrentComponentsBridge.table(model)
+                        }
+                    },
+                )
+            }
+            tableOverflow != MarkdownHorizontalOverflow.Scroll -> {
+                markdownComponents(
+                    codeFence = { model: MarkdownComponentModel ->
+                        MarkdownCodeComponent(model = model, overflow = codeBlockOverflow, fenced = true)
+                    },
+                    codeBlock = { model: MarkdownComponentModel ->
+                        MarkdownCodeComponent(model = model, overflow = codeBlockOverflow, fenced = false)
+                    },
+                )
+            }
+            else -> {
+                markdownComponents(
+                    codeFence = { model: MarkdownComponentModel ->
+                        MarkdownCodeComponent(model = model, overflow = codeBlockOverflow, fenced = true)
+                    },
+                    codeBlock = { model: MarkdownComponentModel ->
+                        MarkdownCodeComponent(model = model, overflow = codeBlockOverflow, fenced = false)
+                    },
+                    table = { model: MarkdownComponentModel ->
+                        Box(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                            CurrentComponentsBridge.table(model)
+                        }
+                    },
+                )
+            }
+        }
+    }
 
-    AndroidView(
-        modifier = modifier,
-        factory = { viewContext ->
-            TextView(viewContext).apply {
-                setTextIsSelectable(selectableText)
-                linksClickable = true
-                isClickable = true
-                movementMethod = LinkMovementMethod.getInstance()
+    CompositionLocalProvider(LocalUriHandler provides interceptingUriHandler) {
+        OptionalSelectionContainer(selectableText = selectableText) {
+            if (components == null) {
+                Markdown(
+                    markdownState,
+                    modifier = modifier,
+                )
+            } else {
+                Markdown(
+                    markdownState,
+                    modifier = modifier,
+                    components = components,
+                )
             }
-        },
-        update = { textView ->
-            textView.setTextColor(textColor.toArgb())
-            textView.setLinkTextColor(linkColor.toArgb())
-            textView.movementMethod = LinkMovementMethod.getInstance()
-            if (textSizeSp.isSp) {
-                textView.textSize = textSizeSp.value
-            }
-            markwon.setMarkdown(textView, markdown)
-        },
-    )
+        }
+    }
 
     selectedLink?.let { url ->
         MarkdownLinkDialog(
@@ -232,189 +190,91 @@ fun MarkdownText(
     }
 }
 
-private fun visitCodeBlockWithoutExtraBlankLines(
-    visitor: MarkwonVisitor,
-    info: String?,
-    code: String,
-    node: Node,
+@Composable
+private fun MarkdownCodeComponent(
+    model: MarkdownComponentModel,
+    overflow: MarkdownHorizontalOverflow,
+    fenced: Boolean,
 ) {
-    visitor.blockStart(node)
-
-    val length = visitor.length()
-    visitor.builder().append(visitor.configuration().syntaxHighlight().highlight(info, code))
-    visitor.ensureNewLine()
-
-    CoreProps.CODE_BLOCK_INFO.set(visitor.renderProps(), info)
-    visitor.setSpansForNodeOptional(node, length)
-
-    visitor.blockEnd(node)
+    if (fenced) {
+        MarkdownCodeFence(
+            content = model.content,
+            node = model.node,
+            style = model.typography.code,
+        ) { code, language, style ->
+            MarkdownCodeContent(
+                code = code,
+                language = language,
+                style = style,
+                overflow = overflow,
+            )
+        }
+    } else {
+        MarkdownCodeBlock(
+            content = model.content,
+            node = model.node,
+            style = model.typography.code,
+        ) { code, language, style ->
+            MarkdownCodeContent(
+                code = code,
+                language = language,
+                style = style,
+                overflow = overflow,
+            )
+        }
+    }
 }
 
-private class HashCommentSyntaxHighlight(
-    private val commentColor: Int,
-) : SyntaxHighlight {
-    override fun highlight(info: String?, code: String): CharSequence {
-        if (code.indexOf('#') == -1) return code
+@Composable
+private fun OptionalSelectionContainer(
+    selectableText: Boolean,
+    content: @Composable () -> Unit,
+) {
+    if (selectableText) {
+        SelectionContainer(content = content)
+    } else {
+        content()
+    }
+}
 
-        val out = SpannableString(code)
-        var lineStart = 0
-        while (lineStart < code.length) {
-            val lineEnd = code.indexOf('\n', lineStart).let { if (it == -1) code.length else it }
-            val hashIndex = code.indexOf('#', lineStart)
-            if (hashIndex in lineStart until lineEnd) {
-                out.setSpan(
-                    ForegroundColorSpan(commentColor),
-                    hashIndex,
-                    lineEnd,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+@Composable
+private fun MarkdownCodeContent(
+    code: String,
+    language: String?,
+    style: androidx.compose.ui.text.TextStyle,
+    overflow: MarkdownHorizontalOverflow,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = MaterialTheme.shapes.small,
+    ) {
+        Column {
+            if (!language.isNullOrBlank()) {
+                Text(
+                    text = language,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
-            lineStart = lineEnd + 1
-        }
-        return out
-    }
-}
 
-private class RoundedCodeBlockSpanFactory(
-    private val cornerRadiusPx: Float,
-    private val verticalPaddingPx: Int,
-) : SpanFactory {
-    override fun getSpans(
-        configuration: MarkwonConfiguration,
-        props: RenderProps,
-    ): Any = RoundedCodeBlockSpan(
-        theme = configuration.theme(),
-        cornerRadiusPx = cornerRadiusPx,
-        verticalPaddingPx = verticalPaddingPx,
-    )
-}
-
-private class RoundedCodeBlockSpan(
-    private val theme: MarkwonTheme,
-    private val cornerRadiusPx: Float,
-    private val verticalPaddingPx: Int,
-) : MetricAffectingSpan(), LeadingMarginSpan, LineBackgroundSpan, LineHeightSpan.WithDensity {
-
-    private val rect = RectF()
-    private val path = Path()
-    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-    override fun updateMeasureState(p: TextPaint) {
-        theme.applyCodeBlockTextStyle(p)
-    }
-
-    override fun updateDrawState(ds: TextPaint) {
-        theme.applyCodeBlockTextStyle(ds)
-    }
-
-    override fun getLeadingMargin(first: Boolean): Int = theme.getCodeBlockMargin()
-
-    override fun drawLeadingMargin(
-        c: Canvas,
-        p: Paint,
-        x: Int,
-        dir: Int,
-        top: Int,
-        baseline: Int,
-        bottom: Int,
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        first: Boolean,
-        layout: Layout,
-    ) {
-        // Background is drawn in drawBackground, so no-op here.
-    }
-
-    override fun drawBackground(
-        c: Canvas,
-        p: Paint,
-        left: Int,
-        right: Int,
-        top: Int,
-        baseline: Int,
-        bottom: Int,
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        lnum: Int,
-    ) {
-        val spanned = text as? Spanned ?: return
-        val spanStart = spanned.getSpanStart(this)
-        val spanEnd = spanned.getSpanEnd(this)
-        val isFirstLine = start <= spanStart
-        val isLastLine = end >= spanEnd
-
-        backgroundPaint.style = Paint.Style.FILL
-        backgroundPaint.color = theme.getCodeBlockBackgroundColor(p)
-
-        val l = minOf(left, right).toFloat()
-        val r = maxOf(left, right).toFloat()
-        val t = top.toFloat()
-        val b = bottom.toFloat()
-
-        rect.set(l, t, r, b)
-
-        if (isFirstLine && isLastLine) {
-            c.drawRoundRect(rect, cornerRadiusPx, cornerRadiusPx, backgroundPaint)
-            return
-        }
-
-        if (isFirstLine || isLastLine) {
-            path.reset()
-            val radii = if (isFirstLine) {
-                floatArrayOf(cornerRadiusPx, cornerRadiusPx, cornerRadiusPx, cornerRadiusPx, 0f, 0f, 0f, 0f)
-            } else {
-                floatArrayOf(0f, 0f, 0f, 0f, cornerRadiusPx, cornerRadiusPx, cornerRadiusPx, cornerRadiusPx)
+            val contentModifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            val textContent: @Composable () -> Unit = {
+                Text(
+                    text = code,
+                    style = style,
+                    softWrap = overflow != MarkdownHorizontalOverflow.Scroll,
+                    overflow = TextOverflow.Clip,
+                    modifier = contentModifier,
+                )
             }
-            path.addRoundRect(rect, radii, Path.Direction.CW)
-            c.drawPath(path, backgroundPaint)
-            return
-        }
 
-        c.drawRect(rect, backgroundPaint)
-    }
-
-    override fun chooseHeight(
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        spanstartv: Int,
-        v: Int,
-        fm: Paint.FontMetricsInt,
-    ) {
-        applyVerticalPadding(text, start, end, fm)
-    }
-
-    override fun chooseHeight(
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        spanstartv: Int,
-        v: Int,
-        fm: Paint.FontMetricsInt,
-        paint: TextPaint?,
-    ) {
-        applyVerticalPadding(text, start, end, fm)
-    }
-
-    private fun applyVerticalPadding(
-        text: CharSequence,
-        start: Int,
-        end: Int,
-        fm: Paint.FontMetricsInt,
-    ) {
-        if (verticalPaddingPx <= 0) return
-        val spanned = text as? Spanned ?: return
-        val spanStart = spanned.getSpanStart(this)
-        val spanEnd = spanned.getSpanEnd(this)
-        if (start <= spanStart) {
-            fm.top -= verticalPaddingPx
-            fm.ascent -= verticalPaddingPx
-        }
-        if (end >= spanEnd) {
-            fm.bottom += verticalPaddingPx
-            fm.descent += verticalPaddingPx
+            if (overflow == MarkdownHorizontalOverflow.Scroll) {
+                Box(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    textContent()
+                }
+            } else {
+                textContent()
+            }
         }
     }
 }

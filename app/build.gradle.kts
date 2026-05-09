@@ -100,10 +100,8 @@ dependencies {
     implementation(libs.zxing)
 
     // --- Markdown ---
-    implementation(libs.markwon)
-    implementation(libs.markwonTables)
-    implementation(libs.markwonTasklist)
-    implementation(libs.markwonStrikethrough)
+    implementation(libs.multiplatform.markdown.renderer)
+    implementation(libs.markdown.renderer.m3)
 
     // --- Testing Dependencies ---
     testImplementation(libs.junit)
