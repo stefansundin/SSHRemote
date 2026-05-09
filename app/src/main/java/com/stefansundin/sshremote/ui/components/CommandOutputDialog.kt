@@ -55,7 +55,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.boswelja.markdown.material3.MarkdownDocument
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
@@ -75,7 +74,6 @@ fun CommandOutputDialog(
     val maxDialogHeight = with(density) { windowInfo.containerSize.height.toDp() * 0.9f }
     val trimmedOutput = remember(output) { output.trimEnd() }
     val formattedOutput = remember(trimmedOutput) { expandTabsForDisplay(trimmedOutput) }
-    val markdownOutput = remember(trimmedOutput) { sanitizeMarkdownForRenderer(trimmedOutput) }
 
     AlertDialog(
         modifier = Modifier
@@ -85,8 +83,8 @@ fun CommandOutputDialog(
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 if (renderMarkdown) {
-                    MarkdownDocument(
-                        markdownOutput,
+                    MarkdownText(
+                        markdown = trimmedOutput,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 } else {
@@ -124,26 +122,6 @@ fun CommandOutputDialog(
             }
         },
     )
-}
-
-private fun sanitizeMarkdownForRenderer(text: String): String {
-    // The Markdown renderer currently crashes on checkboxes
-    val withoutTaskListCheckboxes = Regex("""^(\s*(?:[-*+]|\d+\.)\s+)\[([ xX])]\s+""", RegexOption.MULTILINE)
-        .replace(text) { match ->
-            val prefix = match.groupValues[1]
-            val marker = if (match.groupValues[2].equals("x", ignoreCase = true)) "☑ " else "☐ "
-            prefix + marker
-        }
-
-    // It also crashes on links
-    return Regex("""\[(.+?)]\(([^)\n]*)\)""")
-        .replace(withoutTaskListCheckboxes) { match ->
-            val label = match.groupValues[1]
-            val destination = match.groupValues[2].trim()
-            if (destination.isEmpty()) label else "$label ($destination)"
-        }
-        .replace("[", "\\[")
-        .replace("]", "\\]")
 }
 
 @Composable
@@ -226,7 +204,12 @@ private fun CommandOutputDialogPreview_Markdown() {
                 output = """
                     # Heading
                     
+                    [Example Link](https://example.com)
+                    
+                    Example URL: <https://example.com>
+                    
                     - Item 1
+                      - Subitem
                     - Item 2
                     
                     1. Item 3
@@ -235,9 +218,26 @@ private fun CommandOutputDialogPreview_Markdown() {
                     **BOLD**
                     
                     _Emphasis_
+
+                    ~~Strikethrough~~
                     
+                    Inline code: `apt-get update`
+                    
+                    ```
+                    # this is a code block
+                    sudo apt install -y ydotool
+                    ```
+                    
+                    > Blockquote
+                    > > Nested
+
                     - [ ] Checkbox
                     - [x] Checked checkbox
+
+                    | Name | Value | 
+                    | --- | --- |
+                    | Alpha | 1 |
+                    | Beta | 2 |
                 """.trimIndent(),
                 renderMarkdown = true,
                 onDismiss = {},

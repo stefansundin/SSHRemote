@@ -7,8 +7,8 @@ androidxJunit = "1.3.0"
 espressoCore = "3.7.0"
 activityCompose = "1.13.0"
 navigationCompose = "2.9.8"
-composeBom = "2026.04.01"
-composeMarkdown = "1.1.5"
+composeBom = "2026.05.00"
+markwon = "4.6.2"
 datastorePreferences = "1.2.1"
 room = "2.8.4"
 lifecycle = "2.10.0"
@@ -43,8 +43,10 @@ androidx-compose-material-icons-extended-android = { module = "androidx.compose.
 
 # Other UI
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
-boswelja-compose-core = { module = "io.github.boswelja.markdown:core", version.ref = "composeMarkdown" }
-boswelja-compose-markdown = { module = "io.github.boswelja.markdown:material3", version.ref = "composeMarkdown" }
+markwon = { module = "io.noties.markwon:core", version.ref = "markwon" }
+markwonTables = { module = "io.noties.markwon:ext-tables", version.ref = "markwon" }
+markwonTasklist = { module = "io.noties.markwon:ext-tasklist", version.ref = "markwon" }
+markwonStrikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
 
 # Room
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }

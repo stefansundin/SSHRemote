@@ -89,8 +89,10 @@
     <string name="execute">Execute</string>
     <string name="command_output">Command Output</string>
     <string name="command_output_label">Command output</string>
+    <string name="link_destination">Link Destination</string>
+    <string name="open_in_browser">Open in browser</string>
     <string name="show_output">Show output</string>
-    <string name="render_output_as_markdown">Render output as Markdown (EXPERIMENTAL)</string>
+    <string name="render_output_as_markdown">Render output as Markdown</string>
     <string name="clear_history">Clear history</string>
     <string name="no_commands_added">No commands have been added.</string>
     <string name="add_command">Add Command</string>

@@ -54,7 +54,7 @@ systemctl enable --user ydotool
 
 Please make sure you are installing a recent enough version of `ydotool`. Ubuntu versions before 26.04 provide versions that are too old. See the discussion thread for a workaround.
 
-Please discuss `ydotool` in this discussion thread: https://github.com/stefansundin/SSHRemote/discussions/5
+Please discuss `ydotool` in this discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/5>
 
 ### xdotool
 
@@ -76,35 +76,35 @@ xhost +local:$USER
 
 You will need to run the `xhost` command after every boot. You can automate this by creating a bash script and configure it to autostart on login.
 
-Please discuss `xdotool` in this discussion thread: https://github.com/stefansundin/SSHRemote/discussions/3
+Please discuss `xdotool` in this discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/3>
 
 ### wtype
 
 `wtype` is like `xdotool`, but for Wayland.
 
-Normally, it does not support mouse control, but I have created a modified version that adds mouse support. Please install it if you need mouse support: https://github.com/stefansundin/wtype
+Normally, it does not support mouse control, but I have created a modified version that adds mouse support. Please install it if you need mouse support: <https://github.com/stefansundin/wtype>
 
 If you get the error `Compositor does not support the virtual keyboard protocol` then I suggest that you try another tool, like `ydotool`.
 
-Please discuss `wtype` in this discussion thread: https://github.com/stefansundin/SSHRemote/discussions/4
+Please discuss `wtype` in this discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/4>
 
 ### dotool
 
 `dotool` should work with any window manager, similar to `ydotool`. In my limited testing it was much slower than `ydotool`.
 
-Please discuss `dotool` in this discussion thread: https://github.com/stefansundin/SSHRemote/discussions/6
+Please discuss `dotool` in this discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/6>
 
 ### cec-client
 
 This preset is experimental as I have not been able to verify it on my own hardware. Feedback is welcome.
 
-Please discuss `cec-client` in this discussion thread: https://github.com/stefansundin/SSHRemote/discussions/7
+Please discuss `cec-client` in this discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/7>
 
 ### macOS
 
 There is a preset for controlling VLC on macOS, using AppleScript commands. I am not aware of a tool that supports sending keyboard or mouse events.
 
-Please discuss macOS in this discussion thread: https://github.com/stefansundin/SSHRemote/discussions/8
+Please discuss macOS in this discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/8>
 
 ### Android
 
@@ -112,7 +112,7 @@ If your Android device comes with an SSH server, then you may be able to connect
 
 I have not figured out how to get mouse support working.
 
-Please discuss Android in this discussion thread: https://github.com/stefansundin/SSHRemote/discussions/9
+Please discuss Android in this discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Smart volume control
 
@@ -152,7 +152,7 @@ There is no crash reporting software in this app. There is no telemetry. There a
 
 The security of this app has not been audited. If you are experienced with Android security or SSH security, please take a look at the source code and report your findings in this GitHub issue:
 
-https://github.com/stefansundin/SSHRemote/issues/1
+<https://github.com/stefansundin/SSHRemote/issues/1>
 
 ## Feature requests
 
@@ -168,13 +168,13 @@ You are always welcome to fork the app to implement your own features. That's a 
 
 The source code is licensed under GNU GPLv3. If you distribute modified versions of this app then you must also make the source code available.
 
-https://github.com/stefansundin/SSHRemote
+<https://github.com/stefansundin/SSHRemote>
 
 ## Donations
 
 If you wish to show your gratitude and appreciation, donations are accepted.
 
-https://stefansundin.github.io/donate/
+<https://stefansundin.github.io/donate/>
 
 If you have donated then I will try my best to answer any question you may have.
 

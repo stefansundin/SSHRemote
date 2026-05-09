@@ -100,8 +100,10 @@ dependencies {
     implementation(libs.zxing)
 
     // --- Markdown ---
-    implementation(libs.boswelja.compose.core)
-    implementation(libs.boswelja.compose.markdown)
+    implementation(libs.markwon)
+    implementation(libs.markwonTables)
+    implementation(libs.markwonTasklist)
+    implementation(libs.markwonStrikethrough)
 
     // --- Testing Dependencies ---
     testImplementation(libs.junit)
