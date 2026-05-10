@@ -100,8 +100,10 @@ dependencies {
     implementation(libs.zxing)
 
     // --- Markdown ---
-    implementation(libs.multiplatform.markdown.renderer)
-    implementation(libs.markdown.renderer.m3)
+    implementation(libs.commonmark)
+    implementation(libs.commonmark.gfm.tables)
+    implementation(libs.commonmark.gfm.strikethrough)
+    implementation(libs.commonmark.task.list.items)
 
     // --- Testing Dependencies ---
     testImplementation(libs.junit)

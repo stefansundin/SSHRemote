@@ -31,6 +31,9 @@
     <string name="reset_to_default">Reset to default</string>
     <string name="discard_and_leave">Discard and leave</string>
     <string name="please_wait">Please wait…</string>
+    <string name="link_destination">Link Destination</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="toggle_word_wrap">Toggle word wrap</string>
 
     <!-- Hosts -->
     <string name="hosts_title">Hosts</string>
@@ -89,8 +92,6 @@
     <string name="execute">Execute</string>
     <string name="command_output">Command Output</string>
     <string name="command_output_label">Command output</string>
-    <string name="link_destination">Link Destination</string>
-    <string name="open_in_browser">Open in browser</string>
     <string name="show_output">Show output</string>
     <string name="render_output_as_markdown">Render output as Markdown</string>
     <string name="clear_history">Clear history</string>

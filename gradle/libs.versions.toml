@@ -8,7 +8,7 @@ espressoCore = "3.7.0"
 activityCompose = "1.13.0"
 navigationCompose = "2.9.8"
 composeBom = "2026.05.00"
-markdown = "0.40.2"
+commonmark = "0.28.0"
 datastorePreferences = "1.2.1"
 room = "2.8.4"
 lifecycle = "2.10.0"
@@ -42,8 +42,10 @@ androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android" }
 
 # Markdown
-multiplatform-markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdown" }
-markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown" }
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+commonmark-gfm-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
+commonmark-gfm-strikethrough = { module = "org.commonmark:commonmark-ext-gfm-strikethrough", version.ref = "commonmark" }
+commonmark-task-list-items = { module = "org.commonmark:commonmark-ext-task-list-items", version.ref = "commonmark" }
 
 # Other UI
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
