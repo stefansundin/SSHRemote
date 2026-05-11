@@ -535,7 +535,7 @@ private fun openLinkInBrowser(context: Context, url: String): Boolean {
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun RenderedBlockComposable(block: RenderedBlock) {
+private fun RenderedBlockComposable(block: RenderedBlock, isInsideList: Boolean = false) {
     val startNs = System.nanoTime()
 
     when (block) {
@@ -562,7 +562,7 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
             Text(
                 text = block.text,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = if (isInsideList) 0.dp else 8.dp),
             )
         }
 
@@ -619,7 +619,7 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                 ),
             ) {
                 for (item in block.items) {
-                    Row(modifier = Modifier.padding(bottom = 8.dp)) {
+                    Row(modifier = Modifier.padding(bottom = 0.dp)) {
                         if (item.taskChecked != null) {
                             Icon(
                                 imageVector = if (item.taskChecked) Icons.Outlined.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
@@ -638,7 +638,7 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             for (child in item.blocks) {
-                                RenderedBlockComposable(child)
+                                RenderedBlockComposable(child, isInsideList = true)
                             }
                         }
                     }
@@ -653,7 +653,7 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                 ),
             ) {
                 block.items.forEachIndexed { index, item ->
-                    Row(modifier = Modifier.padding(bottom = 8.dp)) {
+                    Row(modifier = Modifier.padding(bottom = 0.dp)) {
                         if (item.taskChecked != null) {
                             Icon(
                                 imageVector = if (item.taskChecked) Icons.Outlined.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
@@ -672,7 +672,7 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             for (child in item.blocks) {
-                                RenderedBlockComposable(child)
+                                RenderedBlockComposable(child, isInsideList = true)
                             }
                         }
                     }
