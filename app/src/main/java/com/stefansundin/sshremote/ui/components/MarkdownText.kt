@@ -121,6 +121,9 @@ import org.commonmark.node.Emphasis
 import org.commonmark.node.FencedCodeBlock
 import org.commonmark.node.HardLineBreak
 import org.commonmark.node.Heading
+import org.commonmark.node.HtmlBlock
+import org.commonmark.node.HtmlInline
+import org.commonmark.node.Image
 import org.commonmark.node.IndentedCodeBlock
 import org.commonmark.node.Link
 import org.commonmark.node.ListItem
@@ -191,6 +194,8 @@ private sealed interface MdInline {
     data class MdStrikethrough(val children: List<MdInline>) : MdInline
     data class MdInlineCode(val code: String) : MdInline
     data class MdLink(val url: String, val children: List<MdInline>) : MdInline
+    data class MdImage(val alt: List<MdInline>) : MdInline
+    data class MdHtmlTag(val literal: String) : MdInline
     object MdSoftBreak : MdInline
     object MdHardBreak : MdInline
 }
@@ -210,6 +215,8 @@ private fun parseInlines(node: Node): List<MdInline> {
             is Strikethrough -> result.add(MdInline.MdStrikethrough(parseInlines(child)))
             is Code -> result.add(MdInline.MdInlineCode(child.literal))
             is Link -> result.add(MdInline.MdLink(child.destination, parseInlines(child)))
+            is Image -> result.add(MdInline.MdImage(parseInlines(child)))
+            is HtmlInline -> result.add(MdInline.MdHtmlTag(child.literal))
             is SoftLineBreak -> result.add(MdInline.MdSoftBreak)
             is HardLineBreak -> result.add(MdInline.MdHardBreak)
             else -> result.addAll(parseInlines(child)) // fallback: recurse into unknown inline
@@ -318,6 +325,13 @@ private fun parseBlocks(node: Node, listDepth: Int = 0, parseState: ParseState =
                 }
             }
 
+            is HtmlBlock -> {
+                val htmlWithoutComments = stripHtmlComments(child.literal).trimEnd()
+                if (htmlWithoutComments.isNotBlank()) {
+                    result.add(MdBlock.MdCode(code = htmlWithoutComments, language = "html"))
+                }
+            }
+
             // Ignore HTML blocks etc. for now
             else -> Unit
         }
@@ -341,6 +355,55 @@ private fun logMarkdownTiming(parseMs: Long, renderMs: Long, totalMs: Long, tota
 }
 
 // ---------------------------------------------------------------------------
+// Inline HTML helpers (runs on IO thread)
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimal mutable state for inline HTML formatting tags.
+ * Depth counters allow balanced open/close pairs to nest correctly.
+ */
+private data class MdInlineHtmlState(
+    var boldDepth: Int = 0,
+    var italicDepth: Int = 0,
+    var strikethroughDepth: Int = 0,
+)
+
+/** Regex that matches simple HTML tags we support inline. */
+private val supportedInlineTagRegex =
+    Regex("""^<\s*(/?)\s*(br|strong|b|em|i|s|strike|del)\s*(/?)>$""", RegexOption.IGNORE_CASE)
+
+/**
+ * Applies a supported inline HTML tag to [state] and returns the action to take:
+ * - `null` → tag consumed, nothing to append
+ * - `"\n"` → line break should be appended
+ */
+private fun applyInlineHtmlTag(literal: String, state: MdInlineHtmlState): String? {
+    val match = supportedInlineTagRegex.matchEntire(literal.trim()) ?: return null
+    val isClosing = match.groupValues[1].isNotEmpty()
+    val tagName = match.groupValues[2].lowercase()
+    val isSelfClosing = match.groupValues[3].isNotEmpty()
+
+    when (tagName) {
+        "br" -> return "\n"
+        "strong", "b" -> if (!isSelfClosing) {
+            if (isClosing) state.boldDepth = (state.boldDepth - 1).coerceAtLeast(0)
+            else state.boldDepth++
+        }
+
+        "em", "i" -> if (!isSelfClosing) {
+            if (isClosing) state.italicDepth = (state.italicDepth - 1).coerceAtLeast(0)
+            else state.italicDepth++
+        }
+
+        "s", "strike", "del" -> if (!isSelfClosing) {
+            if (isClosing) state.strikethroughDepth = (state.strikethroughDepth - 1).coerceAtLeast(0)
+            else state.strikethroughDepth++
+        }
+    }
+    return null
+}
+
+// ---------------------------------------------------------------------------
 // AnnotatedString builder (runs on IO thread)
 // ---------------------------------------------------------------------------
 
@@ -350,10 +413,38 @@ private fun buildInlineAnnotatedString(
     linkColor: Color,
     codeBackground: Color,
 ): AnnotatedString = buildAnnotatedString {
+    val htmlState = MdInlineHtmlState()
+
+    fun appendWithHtmlStyles(text: String, codeStyle: SpanStyle? = null) {
+        val boldStyle = if (htmlState.boldDepth > 0) FontWeight.Bold else null
+        val italicStyle = if (htmlState.italicDepth > 0) FontStyle.Italic else null
+        val strikeStyle = if (htmlState.strikethroughDepth > 0) TextDecoration.LineThrough else null
+
+        val htmlSpan = if (boldStyle != null || italicStyle != null || strikeStyle != null) {
+            SpanStyle(fontWeight = boldStyle, fontStyle = italicStyle, textDecoration = strikeStyle)
+        } else null
+
+        val combined = when {
+            codeStyle != null && htmlSpan != null -> SpanStyle(
+                fontFamily = codeStyle.fontFamily,
+                background = codeStyle.background,
+                fontWeight = htmlSpan.fontWeight,
+                fontStyle = htmlSpan.fontStyle,
+                textDecoration = htmlSpan.textDecoration,
+            )
+
+            codeStyle != null -> codeStyle
+            htmlSpan != null -> htmlSpan
+            else -> null
+        }
+
+        if (combined != null) withStyle(combined) { append(text) } else append(text)
+    }
+
     fun appendInlines(list: List<MdInline>) {
         for (inline in list) {
             when (inline) {
-                is MdInline.MdText -> append(inline.text)
+                is MdInline.MdText -> appendWithHtmlStyles(inline.text)
                 is MdInline.MdBold -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                     appendInlines(inline.children)
                 }
@@ -366,11 +457,10 @@ private fun buildInlineAnnotatedString(
                     appendInlines(inline.children)
                 }
 
-                is MdInline.MdInlineCode -> withStyle(
+                is MdInline.MdInlineCode -> appendWithHtmlStyles(
+                    inline.code,
                     SpanStyle(fontFamily = FontFamily.Monospace, background = codeBackground),
-                ) {
-                    append(inline.code)
-                }
+                )
 
                 is MdInline.MdLink -> withLink(
                     LinkAnnotation.Clickable(
@@ -385,6 +475,18 @@ private fun buildInlineAnnotatedString(
                     ),
                 ) {
                     appendInlines(inline.children)
+                }
+
+                is MdInline.MdImage -> {
+                    val altText = buildInlineAnnotatedString(inline.alt, onLinkClick, linkColor, codeBackground).text
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append(if (altText.isNotBlank()) "[$altText]" else "[image]")
+                    }
+                }
+
+                is MdInline.MdHtmlTag -> {
+                    val action = applyInlineHtmlTag(inline.literal, htmlState)
+                    if (action != null) append(action)
                 }
 
                 MdInline.MdSoftBreak -> append(" ")
@@ -1088,4 +1190,10 @@ private fun RenderedTableComposable(table: RenderedBlock.RenderedTable) {
             }
         }
     }
+}
+
+private val mdHtmlCommentRegex = Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL)
+
+private fun stripHtmlComments(html: String): String {
+    return html.replace(mdHtmlCommentRegex, "")
 }

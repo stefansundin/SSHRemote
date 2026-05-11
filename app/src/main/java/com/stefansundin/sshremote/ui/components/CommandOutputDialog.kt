@@ -235,6 +235,14 @@ private fun CommandOutputDialogPreview_Markdown() {
                     | --- | --- |
                     | Alpha | 1 |
                     | Beta | 2 |
+                    
+                    Some HTML tags are also supported: <b>bold</b>, <i>italic</i>, <s>strike<br>through</s>, <del>del</del>.
+                    
+                    <div>Unsupported HTML is rendered as a code block</div>
+                    
+                    Images are not supported:
+                    
+                    <img src="https://example.com/image.png" alt="Example Image">
                 """.trimIndent(),
                 renderMarkdown = true,
                 onDismiss = {},
