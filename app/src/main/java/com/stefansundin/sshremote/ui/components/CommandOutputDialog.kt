@@ -45,10 +45,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -66,28 +65,28 @@ fun CommandOutputDialog(
     onDismiss: () -> Unit,
 ) {
     val clipboard = LocalClipboard.current
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
+    val configuration = LocalConfiguration.current
     val view = LocalView.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
-    val maxDialogHeight = with(density) { windowInfo.containerSize.height.toDp() * 0.9f }
+    val maxDialogWidth = (configuration.screenWidthDp.dp * 0.95f).coerceAtMost(560.dp)
+    val maxDialogHeight = configuration.screenHeightDp.dp * 0.9f
     val trimmedOutput = remember(output) { output.trimEnd() }
     val formattedOutput = remember(trimmedOutput) { expandTabsForDisplay(trimmedOutput) }
 
     AlertDialog(
         modifier = Modifier
-            .widthIn(max = 560.dp)
+            .widthIn(max = maxDialogWidth)
             .heightIn(max = maxDialogHeight),
         title = { Text(stringResource(R.string.command_output)) },
         text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                if (renderMarkdown) {
-                    MarkdownText(
-                        markdown = trimmedOutput,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                } else {
+            if (renderMarkdown) {
+                MarkdownText(
+                    markdown = trimmedOutput,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     PlainTextOutput(formattedOutput)
                 }
             }

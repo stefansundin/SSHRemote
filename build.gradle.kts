@@ -5,5 +5,5 @@ plugins {
     alias(libs.plugins.kotlin.parcelize) apply false
 
     // https://github.com/google/ksp/releases
-    id("com.google.devtools.ksp") version "2.3.5" apply false
+    id("com.google.devtools.ksp") version "2.3.7" apply false
 }
