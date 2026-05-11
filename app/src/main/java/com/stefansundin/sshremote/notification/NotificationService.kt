@@ -35,6 +35,8 @@ import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 class NotificationService : Service() {
+    private var currentHost: NotificationHost? = null
+    private var isCommandLoading = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
@@ -47,13 +49,35 @@ class NotificationService : Service() {
                 }
 
                 if (host != null) {
-                    val notification = createNotification(host)
+                    currentHost = host
+                    isCommandLoading = false
+                    val notification = createNotification(host, isCommandLoading)
                     startForeground(NOTIFICATION_ID, notification)
                 }
                 return START_STICKY
             }
 
+            ACTION_COMMAND_STARTED -> {
+                val hostId = intent.getStringExtra(EXTRA_HOST_ID)
+                if (hostId != null && currentHost?.id == hostId) {
+                    isCommandLoading = true
+                    updateNotification()
+                }
+                return START_STICKY
+            }
+
+            ACTION_COMMAND_FINISHED -> {
+                val hostId = intent.getStringExtra(EXTRA_HOST_ID)
+                if (hostId != null && currentHost?.id == hostId) {
+                    isCommandLoading = false
+                    updateNotification()
+                }
+                return START_STICKY
+            }
+
             ACTION_STOP -> {
+                currentHost = null
+                isCommandLoading = false
                 stopSelf()
                 return START_NOT_STICKY
             }
@@ -64,7 +88,7 @@ class NotificationService : Service() {
         }
     }
 
-    private fun createNotification(host: NotificationHost): Notification {
+    private fun createNotification(host: NotificationHost, isCommandLoading: Boolean): Notification {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
@@ -111,19 +135,23 @@ class NotificationService : Service() {
                 NotificationCompat.Action.Builder(
                     null,
                     getString(R.string.notification_open),
-                    pendingIntent
-                ).build()
+                    pendingIntent,
+                ).build(),
             )
             .addAction(
                 NotificationCompat.Action.Builder(
                     null,
                     getString(R.string.notification_close),
-                    closePendingIntent
-                ).build()
+                    closePendingIntent,
+                ).build(),
             )
 
         if (host.status == ConnectionStatus.CONNECTED) {
             val remoteViews = RemoteViews(packageName, R.layout.notification_remote_control).apply {
+                setViewVisibility(
+                    R.id.command_loading_indicator,
+                    if (isCommandLoading) android.view.View.VISIBLE else android.view.View.GONE,
+                )
                 setOnClickPendingIntent(R.id.button_up, createPendingIntent(host, RemoteControlKey.UP))
                 setOnClickPendingIntent(R.id.button_down, createPendingIntent(host, RemoteControlKey.DOWN))
                 setOnClickPendingIntent(R.id.button_left, createPendingIntent(host, RemoteControlKey.LEFT))
@@ -133,7 +161,10 @@ class NotificationService : Service() {
                 setOnClickPendingIntent(R.id.button_home, createPendingIntent(host, RemoteControlKey.HOME))
                 setOnClickPendingIntent(R.id.button_play_pause, createPendingIntent(host, RemoteControlKey.PLAY_PAUSE))
                 setOnClickPendingIntent(R.id.button_volume_up, createPendingIntent(host, RemoteControlKey.VOLUME_UP))
-                setOnClickPendingIntent(R.id.button_volume_down, createPendingIntent(host, RemoteControlKey.VOLUME_DOWN))
+                setOnClickPendingIntent(
+                    R.id.button_volume_down,
+                    createPendingIntent(host, RemoteControlKey.VOLUME_DOWN),
+                )
                 setOnClickPendingIntent(R.id.button_mute, createPendingIntent(host, RemoteControlKey.MUTE))
             }
             builder
@@ -142,6 +173,13 @@ class NotificationService : Service() {
         }
 
         return builder.build()
+    }
+
+    private fun updateNotification() {
+        val host = currentHost ?: return
+        val notification = createNotification(host, isCommandLoading)
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun createPendingIntent(host: NotificationHost, key: RemoteControlKey): PendingIntent {
@@ -169,6 +207,8 @@ class NotificationService : Service() {
         const val ACTION_START = "com.stefansundin.sshremote.notification.ACTION_START"
         const val ACTION_STOP = "com.stefansundin.sshremote.notification.ACTION_STOP"
         const val ACTION_EXECUTE_COMMAND = "com.stefansundin.sshremote.notification.ACTION_EXECUTE_COMMAND"
+        const val ACTION_COMMAND_STARTED = "com.stefansundin.sshremote.notification.ACTION_COMMAND_STARTED"
+        const val ACTION_COMMAND_FINISHED = "com.stefansundin.sshremote.notification.ACTION_COMMAND_FINISHED"
         private const val CHANNEL_ID = "NotificationServiceChannel"
         private const val NOTIFICATION_ID = 1
 
@@ -187,6 +227,22 @@ class NotificationService : Service() {
         fun stop(context: Context) {
             val intent = Intent(context, NotificationService::class.java).apply {
                 action = ACTION_STOP
+            }
+            context.startService(intent)
+        }
+
+        fun commandStarted(context: Context, hostId: String) {
+            val intent = Intent(context, NotificationService::class.java).apply {
+                action = ACTION_COMMAND_STARTED
+                putExtra(EXTRA_HOST_ID, hostId)
+            }
+            context.startService(intent)
+        }
+
+        fun commandFinished(context: Context, hostId: String) {
+            val intent = Intent(context, NotificationService::class.java).apply {
+                action = ACTION_COMMAND_FINISHED
+                putExtra(EXTRA_HOST_ID, hostId)
             }
             context.startService(intent)
         }

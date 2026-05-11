@@ -25,8 +25,6 @@ import android.os.Build
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 
 // TODO: Check if MainActivity is still running.
-// Longer term, NotificationService should be able to connect to the host on its own without having to pass messages via MainActivity.
-// You can test this by enabling "Don't keep activities" in the developer options.
 
 class NotificationBroadcastReceiver : BroadcastReceiver() {
 
@@ -46,6 +44,8 @@ class NotificationBroadcastReceiver : BroadcastReceiver() {
                 }
 
                 if (hostId != null && remoteControlKey != null) {
+                    NotificationService.commandStarted(context, hostId)
+
                     // Send the intent to MainActivity
                     val executeIntent = Intent(NotificationService.ACTION_EXECUTE_COMMAND).apply {
                         putExtra(NotificationService.EXTRA_HOST_ID, hostId)

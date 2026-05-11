@@ -374,6 +374,10 @@ class HostViewModel(
     }
 
     override fun runRemoteControlCommand(key: RemoteControlKey) {
+        runRemoteControlCommandWithResult(key)
+    }
+
+    fun runRemoteControlCommandWithResult(key: RemoteControlKey, onComplete: ((Result) -> Unit)? = null) {
         val command = activeHost.value?.remoteCommands?.get(key)
         if (command != null) {
             val oldVolume = uiState.value.volume
@@ -400,9 +404,11 @@ class HostViewModel(
                         else -> Unit
                     }
                 }
+                onComplete?.invoke(result)
             }
         } else {
             Log.e("HostViewModel", "No command found for key: $key")
+            onComplete?.invoke(Result.Error("No command found for key: $key"))
         }
     }
 

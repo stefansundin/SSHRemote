@@ -970,6 +970,7 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
                         try {
                             remoteControlKey = RemoteControlKey.valueOf(remoteControlKeyString)
                         } catch (e: IllegalArgumentException) {
+                            NotificationService.commandFinished(context, hostId)
                             Log.e(
                                 "CommandBroadcastReceiver",
                                 "Invalid RemoteControlKey received: $remoteControlKeyString",
@@ -982,9 +983,12 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
                         val targetHost = allHosts?.find { it.id == hostId }
 
                         if (targetHost != null) {
-                            hostViewModel.runRemoteControlCommand(remoteControlKey)
+                            hostViewModel.runRemoteControlCommandWithResult(remoteControlKey) {
+                                NotificationService.commandFinished(context, hostId)
+                            }
                             Log.d("CommandBroadcastReceiver", "Executing command on host: ${targetHost.name}")
                         } else {
+                            NotificationService.commandFinished(context, hostId)
                             Log.w("CommandBroadcastReceiver", "Host with ID $hostId not found.")
                         }
                     }
