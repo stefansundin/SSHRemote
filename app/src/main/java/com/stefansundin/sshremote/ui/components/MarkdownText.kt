@@ -87,6 +87,10 @@ import com.stefansundin.sshremote.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.commonmark.ext.gfm.strikethrough.Strikethrough
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.task.list.items.TaskListItemMarker
+import org.commonmark.ext.task.list.items.TaskListItemsExtension
 import org.commonmark.node.BlockQuote
 import org.commonmark.node.BulletList
 import org.commonmark.node.Code
@@ -114,7 +118,14 @@ private const val SLOW_RENDER_THRESHOLD_MS = 16L
 private const val SLOW_MARKDOWN_TOTAL_THRESHOLD_MS = 32L
 
 // Lightweight parser — no table/HTML extensions to keep it fast
-private val markdownParser: Parser = Parser.builder().build()
+private val markdownParser: Parser = Parser.builder()
+    .extensions(
+        listOf(
+            StrikethroughExtension.create(),
+            TaskListItemsExtension.create(),
+        ),
+    )
+    .build()
 
 // ---------------------------------------------------------------------------
 // Sealed IR (intermediate representation) built off the UI thread
@@ -124,16 +135,22 @@ private sealed interface MdBlock {
     data class MdHeading(val level: Int, val inline: List<MdInline>) : MdBlock
     data class MdParagraph(val inline: List<MdInline>) : MdBlock
     data class MdCode(val code: String, val language: String?) : MdBlock
-    data class MdBulletList(val items: List<List<MdBlock>>, val depth: Int) : MdBlock
-    data class MdOrderedList(val items: List<List<MdBlock>>, val startNumber: Int, val depth: Int) : MdBlock
+    data class MdBulletList(val items: List<MdListItem>, val depth: Int) : MdBlock
+    data class MdOrderedList(val items: List<MdListItem>, val startNumber: Int, val depth: Int) : MdBlock
     data class MdBlockQuote(val children: List<MdBlock>) : MdBlock
     object MdThematicBreak : MdBlock
 }
+
+private data class MdListItem(
+    val blocks: List<MdBlock>,
+    val taskChecked: Boolean? = null,
+)
 
 private sealed interface MdInline {
     data class MdText(val text: String) : MdInline
     data class MdBold(val children: List<MdInline>) : MdInline
     data class MdItalic(val children: List<MdInline>) : MdInline
+    data class MdStrikethrough(val children: List<MdInline>) : MdInline
     data class MdInlineCode(val code: String) : MdInline
     data class MdLink(val url: String, val children: List<MdInline>) : MdInline
     object MdSoftBreak : MdInline
@@ -152,6 +169,7 @@ private fun parseInlines(node: Node): List<MdInline> {
             is CmText -> result.add(MdInline.MdText(child.literal))
             is StrongEmphasis -> result.add(MdInline.MdBold(parseInlines(child)))
             is Emphasis -> result.add(MdInline.MdItalic(parseInlines(child)))
+            is Strikethrough -> result.add(MdInline.MdStrikethrough(parseInlines(child)))
             is Code -> result.add(MdInline.MdInlineCode(child.literal))
             is Link -> result.add(MdInline.MdLink(child.destination, parseInlines(child)))
             is SoftLineBreak -> result.add(MdInline.MdSoftBreak)
@@ -161,6 +179,13 @@ private fun parseInlines(node: Node): List<MdInline> {
         child = child.next
     }
     return result
+}
+
+private fun parseListItem(item: ListItem, listDepth: Int): MdListItem {
+    val marker = item.firstChild as? TaskListItemMarker
+    val blocks = parseBlocks(item, listDepth + 1)
+
+    return MdListItem(blocks = blocks, taskChecked = marker?.isChecked)
 }
 
 private fun parseBlocks(node: Node, listDepth: Int = 0): List<MdBlock> {
@@ -178,25 +203,26 @@ private fun parseBlocks(node: Node, listDepth: Int = 0): List<MdBlock> {
             is ThematicBreak -> result.add(MdBlock.MdThematicBreak)
             is BlockQuote -> result.add(MdBlock.MdBlockQuote(parseBlocks(child, listDepth)))
             is BulletList -> {
-                val items = mutableListOf<List<MdBlock>>()
+                val items = mutableListOf<MdListItem>()
                 var item = child.firstChild
                 while (item != null) {
-                    if (item is ListItem) items.add(parseBlocks(item, listDepth + 1))
+                    if (item is ListItem) items.add(parseListItem(item, listDepth))
                     item = item.next
                 }
                 result.add(MdBlock.MdBulletList(items, listDepth))
             }
 
             is OrderedList -> {
-                val items = mutableListOf<List<MdBlock>>()
+                val items = mutableListOf<MdListItem>()
                 var item = child.firstChild
                 while (item != null) {
-                    if (item is ListItem) items.add(parseBlocks(item, listDepth + 1))
+                    if (item is ListItem) items.add(parseListItem(item, listDepth))
                     item = item.next
                 }
                 result.add(MdBlock.MdOrderedList(items, child.markerStartNumber, listDepth))
             }
             // Ignore HTML blocks, tables etc. for now
+            else -> Unit
         }
         child = child.next
     }
@@ -239,6 +265,10 @@ private fun buildInlineAnnotatedString(
                     appendInlines(inline.children)
                 }
 
+                is MdInline.MdStrikethrough -> withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                    appendInlines(inline.children)
+                }
+
                 is MdInline.MdInlineCode -> withStyle(
                     SpanStyle(fontFamily = FontFamily.Monospace, background = codeBackground),
                 ) {
@@ -276,13 +306,18 @@ private sealed interface RenderedBlock {
     data class RenderedHeading(val level: Int, val text: AnnotatedString) : RenderedBlock
     data class RenderedParagraph(val text: AnnotatedString) : RenderedBlock
     data class RenderedCode(val code: String, val language: String?) : RenderedBlock
-    data class RenderedBulletList(val items: List<List<RenderedBlock>>, val depth: Int) : RenderedBlock
-    data class RenderedOrderedList(val items: List<List<RenderedBlock>>, val startNumber: Int, val depth: Int) :
+    data class RenderedBulletList(val items: List<RenderedListItem>, val depth: Int) : RenderedBlock
+    data class RenderedOrderedList(val items: List<RenderedListItem>, val startNumber: Int, val depth: Int) :
         RenderedBlock
 
     data class RenderedBlockQuote(val children: List<RenderedBlock>) : RenderedBlock
     object RenderedThematicBreak : RenderedBlock
 }
+
+private data class RenderedListItem(
+    val blocks: List<RenderedBlock>,
+    val taskChecked: Boolean? = null,
+)
 
 private fun renderBlocks(
     blocks: List<MdBlock>,
@@ -307,12 +342,22 @@ private fun renderBlocks(
         )
 
         is MdBlock.MdBulletList -> RenderedBlock.RenderedBulletList(
-            block.items.map { renderBlocks(it, onLinkClick, linkColor, codeBackground) },
+            block.items.map { item ->
+                RenderedListItem(
+                    blocks = renderBlocks(item.blocks, onLinkClick, linkColor, codeBackground),
+                    taskChecked = item.taskChecked,
+                )
+            },
             block.depth,
         )
 
         is MdBlock.MdOrderedList -> RenderedBlock.RenderedOrderedList(
-            block.items.map { renderBlocks(it, onLinkClick, linkColor, codeBackground) },
+            block.items.map { item ->
+                RenderedListItem(
+                    blocks = renderBlocks(item.blocks, onLinkClick, linkColor, codeBackground),
+                    taskChecked = item.taskChecked,
+                )
+            },
             block.startNumber,
             block.depth,
         )
@@ -566,15 +611,19 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                     bottom = if (block.depth == 0) 8.dp else 0.dp,
                 ),
             ) {
-                for (itemBlocks in block.items) {
+                for (item in block.items) {
                     Row {
                         Text(
-                            text = "• ",
+                            text = when (item.taskChecked) {
+                                true -> "☑ "
+                                false -> "☐ "
+                                null -> "• "
+                            },
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = (block.depth * 12).dp),
                         )
                         Column(modifier = Modifier.weight(1f)) {
-                            for (child in itemBlocks) {
+                            for (child in item.blocks) {
                                 RenderedBlockComposable(child)
                             }
                         }
@@ -589,15 +638,19 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                     bottom = if (block.depth == 0) 8.dp else 0.dp,
                 ),
             ) {
-                block.items.forEachIndexed { index, itemBlocks ->
+                block.items.forEachIndexed { index, item ->
                     Row {
                         Text(
-                            text = "${block.startNumber + index}. ",
+                            text = if (item.taskChecked == null) {
+                                "${block.startNumber + index}. "
+                            } else {
+                                if (item.taskChecked) "☑ " else "☐ "
+                            },
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = (block.depth * 12).dp),
                         )
                         Column(modifier = Modifier.weight(1f)) {
-                            for (child in itemBlocks) {
+                            for (child in item.blocks) {
                                 RenderedBlockComposable(child)
                             }
                         }
