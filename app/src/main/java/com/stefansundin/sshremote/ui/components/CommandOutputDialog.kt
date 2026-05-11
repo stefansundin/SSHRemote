@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -65,12 +66,12 @@ fun CommandOutputDialog(
     onDismiss: () -> Unit,
 ) {
     val clipboard = LocalClipboard.current
-    val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
     val view = LocalView.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
-    val maxDialogWidth = (configuration.screenWidthDp.dp * 0.95f).coerceAtMost(560.dp)
-    val maxDialogHeight = configuration.screenHeightDp.dp * 0.9f
+    val maxDialogWidth = (windowInfo.containerSize.width.dp * 0.95f).coerceAtMost(560.dp)
+    val maxDialogHeight = windowInfo.containerSize.height.dp * 0.9f
     val trimmedOutput = remember(output) { output.trimEnd() }
     val formattedOutput = remember(trimmedOutput) { expandTabsForDisplay(trimmedOutput) }
 

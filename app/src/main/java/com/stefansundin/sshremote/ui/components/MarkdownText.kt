@@ -39,6 +39,8 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.CheckBox
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -612,16 +614,23 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                 ),
             ) {
                 for (item in block.items) {
-                    Row {
-                        Text(
-                            text = when (item.taskChecked) {
-                                true -> "☑ "
-                                false -> "☐ "
-                                null -> "• "
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = (block.depth * 12).dp),
-                        )
+                    Row(modifier = Modifier.padding(bottom = 8.dp)) {
+                        if (item.taskChecked != null) {
+                            Icon(
+                                imageVector = if (item.taskChecked) Icons.Outlined.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                                contentDescription = if (item.taskChecked) "Checked" else "Unchecked",
+                                modifier = Modifier
+                                    .padding(start = (block.depth * 12).dp, end = 8.dp)
+                                    .size(20.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            Text(
+                                text = "• ",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(start = (block.depth * 12).dp),
+                            )
+                        }
                         Column(modifier = Modifier.weight(1f)) {
                             for (child in item.blocks) {
                                 RenderedBlockComposable(child)
@@ -639,16 +648,23 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
                 ),
             ) {
                 block.items.forEachIndexed { index, item ->
-                    Row {
-                        Text(
-                            text = if (item.taskChecked == null) {
-                                "${block.startNumber + index}. "
-                            } else {
-                                if (item.taskChecked) "☑ " else "☐ "
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = (block.depth * 12).dp),
-                        )
+                    Row(modifier = Modifier.padding(bottom = 8.dp)) {
+                        if (item.taskChecked != null) {
+                            Icon(
+                                imageVector = if (item.taskChecked) Icons.Outlined.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                                contentDescription = if (item.taskChecked) "Checked" else "Unchecked",
+                                modifier = Modifier
+                                    .padding(start = (block.depth * 12).dp, end = 8.dp)
+                                    .size(20.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            Text(
+                                text = "${block.startNumber + index}. ",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(start = (block.depth * 12).dp),
+                            )
+                        }
                         Column(modifier = Modifier.weight(1f)) {
                             for (child in item.blocks) {
                                 RenderedBlockComposable(child)
