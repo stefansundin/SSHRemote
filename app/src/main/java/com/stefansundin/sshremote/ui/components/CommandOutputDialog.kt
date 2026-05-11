@@ -21,6 +21,7 @@ package com.stefansundin.sshremote.ui.components
 import android.content.ClipData
 import android.content.res.Configuration
 import android.view.SoundEffectConstants
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,15 +46,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -66,62 +64,61 @@ fun CommandOutputDialog(
     onDismiss: () -> Unit,
 ) {
     val clipboard = LocalClipboard.current
-    val windowInfo = LocalWindowInfo.current
     val view = LocalView.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
-    val maxDialogWidth = (windowInfo.containerSize.width.dp * 0.95f).coerceAtMost(560.dp)
-    val maxDialogHeight = windowInfo.containerSize.height.dp * 0.9f
     val trimmedOutput = remember(output) { output.trimEnd() }
     val formattedOutput = remember(trimmedOutput) { expandTabsForDisplay(trimmedOutput) }
 
-    AlertDialog(
-        modifier = Modifier
-            .widthIn(max = maxDialogWidth)
-            .heightIn(max = maxDialogHeight),
-        title = { Text(stringResource(R.string.command_output)) },
-        text = {
-            if (renderMarkdown) {
-                MarkdownText(
-                    markdown = trimmedOutput,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            } else {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    PlainTextOutput(formattedOutput)
+    BoxWithConstraints {
+        AlertDialog(
+            modifier = Modifier
+                .widthIn(max = maxWidth * 0.95f)
+                .heightIn(max = maxHeight * 0.9f),
+            title = { Text(stringResource(R.string.command_output)) },
+            text = {
+                if (renderMarkdown) {
+                    MarkdownText(
+                        markdown = trimmedOutput,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        PlainTextOutput(formattedOutput)
+                    }
                 }
-            }
-        },
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
-        confirmButton = {
-            Button(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onDismiss()
-                },
-            ) {
-                Text(stringResource(R.string.close))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    val clipData = ClipData.newPlainText(resources.getString(R.string.command_output), output)
-                    scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
-                },
-            ) {
-                Icon(
-                    Icons.Outlined.ContentCopy,
-                    contentDescription = stringResource(R.string.copy),
-                    modifier = Modifier.size(ButtonDefaults.IconSize),
-                )
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.copy))
-            }
-        },
-    )
+            },
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+            confirmButton = {
+                Button(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        onDismiss()
+                    },
+                ) {
+                    Text(stringResource(R.string.close))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        val clipData = ClipData.newPlainText(resources.getString(R.string.command_output), output)
+                        scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
+                    },
+                ) {
+                    Icon(
+                        Icons.Outlined.ContentCopy,
+                        contentDescription = stringResource(R.string.copy),
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                    )
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text(stringResource(R.string.copy))
+                }
+            },
+        )
+    }
 }
 
 @Composable
