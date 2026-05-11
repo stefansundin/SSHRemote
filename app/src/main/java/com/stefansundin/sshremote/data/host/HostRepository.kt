@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.data.host
 
+import com.stefansundin.sshremote.data.Converters
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -73,4 +74,13 @@ class HostRepository(private val hostDao: HostDao) {
      * Returns the number of hosts in the database.
      */
     suspend fun count(): Int = hostDao.count()
+
+    /**
+     * Updates only the knownHosts column for a specific host by ID.
+     */
+    suspend fun updateKnownHosts(id: String, knownHosts: List<String>) {
+        val converters = Converters()
+        val serialized = converters.fromStringList(knownHosts)
+        hostDao.updateKnownHosts(id, serialized ?: "{}")
+    }
 }

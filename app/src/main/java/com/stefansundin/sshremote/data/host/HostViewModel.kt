@@ -249,8 +249,8 @@ class HostViewModel(
                     "${hostKeyUsed.marker.orEmpty()} ${hostKeyUsed.host} ${hostKeyUsed.type} ${hostKeyUsed.key} ${hostKeyUsed.comment.orEmpty()}".trim()
                 if (!host.knownHosts.contains(knownHostsLine)) {
                     Log.d("HostViewModel", "New host key: $knownHostsLine")
-                    val updatedHost = host.copy(knownHosts = host.knownHosts + knownHostsLine)
-                    repository.upsert(updatedHost)
+                    val updatedKnownHosts = host.knownHosts + knownHostsLine
+                    repository.updateKnownHosts(host.id, updatedKnownHosts)
                 }
             }
 
@@ -291,7 +291,14 @@ class HostViewModel(
             }
             return Result.Error("Not connected", isConnectionError = true)
         }
-        _uiState.update { it.copy(isLoading = true, commandOutput = null, commandOutputIsMarkdown = false, error = null) }
+        _uiState.update {
+            it.copy(
+                isLoading = true,
+                commandOutput = null,
+                commandOutputIsMarkdown = false,
+                error = null,
+            )
+        }
 
         val (result, duration) = try {
             measureTimedValue {

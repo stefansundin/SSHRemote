@@ -50,4 +50,7 @@ interface HostDao {
 
     @Query("SELECT COUNT(*) FROM hosts")
     suspend fun count(): Int
+
+    @Query("UPDATE hosts SET knownHosts = :knownHosts WHERE id = :id")
+    suspend fun updateKnownHosts(id: String, knownHosts: String)
 }
