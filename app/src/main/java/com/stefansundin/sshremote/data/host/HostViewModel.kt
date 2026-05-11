@@ -537,10 +537,15 @@ class HostViewModel(
         _uiState.update { it.copy(error = null) }
     }
 
-    fun updateRemoteCommands(host: Host, remoteCommands: Map<RemoteControlKey, Command>) {
+    fun updateRemoteCommands(hostId: String, remoteCommands: Map<RemoteControlKey, Command>) {
         viewModelScope.launch {
-            val updatedHost = host.copy(remoteCommands = remoteCommands)
-            repository.upsert(updatedHost)
+            repository.updateRemoteCommands(hostId, remoteCommands)
+        }
+    }
+
+    fun updateStartScreen(hostId: String, startScreen: RemoteControlScreen) {
+        viewModelScope.launch {
+            repository.updateStartScreen(hostId, startScreen)
         }
     }
 }

@@ -83,4 +83,20 @@ class HostRepository(private val hostDao: HostDao) {
         val serialized = converters.fromStringList(knownHosts)
         hostDao.updateKnownHosts(id, serialized ?: "{}")
     }
+
+    /**
+     * Updates only the remoteCommands column for a specific host by ID.
+     */
+    suspend fun updateRemoteCommands(id: String, remoteCommands: Map<RemoteControlKey, Command>) {
+        val converters = Converters()
+        val serialized = converters.fromRemoteControlKeyMap(remoteCommands)
+        hostDao.updateRemoteCommands(id, serialized ?: "{}")
+    }
+
+    /**
+     * Updates only the startScreen column for a specific host by ID.
+     */
+    suspend fun updateStartScreen(id: String, startScreen: RemoteControlScreen) {
+        hostDao.updateStartScreen(id, startScreen.name)
+    }
 }

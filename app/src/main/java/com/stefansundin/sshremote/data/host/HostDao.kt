@@ -53,4 +53,10 @@ interface HostDao {
 
     @Query("UPDATE hosts SET knownHosts = :knownHosts WHERE id = :id")
     suspend fun updateKnownHosts(id: String, knownHosts: String)
+
+    @Query("UPDATE hosts SET remoteCommands = :remoteCommands WHERE id = :id")
+    suspend fun updateRemoteCommands(id: String, remoteCommands: String)
+
+    @Query("UPDATE hosts SET startScreen = :startScreen WHERE id = :id")
+    suspend fun updateStartScreen(id: String, startScreen: String)
 }

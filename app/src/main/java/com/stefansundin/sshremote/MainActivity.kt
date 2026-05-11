@@ -469,7 +469,7 @@ class MainActivity : ComponentActivity() {
                             onPresetSelected = { presetMap ->
                                 hostForPresetSelection?.let { host ->
                                     if (presetMap != null) {
-                                        hostViewModel.updateRemoteCommands(host, presetMap)
+                                        hostViewModel.updateRemoteCommands(host.id, presetMap)
                                     }
                                     val initialPage = host.startScreen.tabIndex
                                     navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
@@ -673,8 +673,7 @@ class MainActivity : ComponentActivity() {
                                     onNavigateBack = { navController.safePopBackStack() },
                                     onSetAsDefaultScreen = { startScreen ->
                                         scope.launch {
-                                            val updatedHost = host.copy(startScreen = startScreen)
-                                            hostViewModel.upsert(updatedHost)
+                                            hostViewModel.updateStartScreen(host.id, startScreen)
                                         }
                                     },
                                     onTestSmartVolumeSettings = {
