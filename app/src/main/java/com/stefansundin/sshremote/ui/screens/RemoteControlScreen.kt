@@ -231,11 +231,12 @@ fun RemoteControlScreen(
         }
     }
 
-    LaunchedEffect(isFullscreen) {
+    LaunchedEffect(isFullscreen, uiState.commandOutput) {
         val window = (view.context as? Activity)?.window
         if (window != null) {
             val insetsController = WindowCompat.getInsetsController(window, view)
             if (isFullscreen) {
+                // Some dialogs like CommandOutputDialog can make system bars visible on Android 7 and earlier; reapply immersive mode when that happens.
                 insetsController.hide(WindowInsetsCompat.Type.systemBars())
                 insetsController.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
