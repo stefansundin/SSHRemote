@@ -8,6 +8,7 @@
     <string name="error">Error</string>
     <string name="error_format">Error: %s</string>
     <string name="copy">Copy</string>
+    <string name="share">Share</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="undo">Undo</string>
