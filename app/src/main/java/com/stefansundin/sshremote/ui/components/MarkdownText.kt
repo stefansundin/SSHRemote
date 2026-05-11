@@ -24,9 +24,13 @@ import android.content.Intent
 import android.util.Log
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -39,6 +43,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -55,6 +60,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -66,6 +72,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -78,10 +85,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
@@ -95,6 +105,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.commonmark.ext.gfm.strikethrough.Strikethrough
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.TableBlock
+import org.commonmark.ext.gfm.tables.TableBody
+import org.commonmark.ext.gfm.tables.TableCell
+import org.commonmark.ext.gfm.tables.TableHead
+import org.commonmark.ext.gfm.tables.TableRow
+import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.ext.task.list.items.TaskListItemMarker
 import org.commonmark.ext.task.list.items.TaskListItemsExtension
 import org.commonmark.node.BlockQuote
@@ -123,10 +139,15 @@ private const val TAG = "MarkdownText"
 private const val SLOW_RENDER_THRESHOLD_MS = 16L
 private const val SLOW_MARKDOWN_TOTAL_THRESHOLD_MS = 32L
 
-// Lightweight parser — no table/HTML extensions to keep it fast
+private enum class MarkdownTableOverflowMode {
+    Wrap,
+    Scroll,
+}
+
 private val markdownParser: Parser = Parser.builder()
     .extensions(
         listOf(
+            TablesExtension.create(),
             StrikethroughExtension.create(),
             TaskListItemsExtension.create(),
         ),
@@ -144,12 +165,23 @@ private sealed interface MdBlock {
     data class MdBulletList(val items: List<MdListItem>, val depth: Int) : MdBlock
     data class MdOrderedList(val items: List<MdListItem>, val startNumber: Int, val depth: Int) : MdBlock
     data class MdBlockQuote(val children: List<MdBlock>) : MdBlock
+    data class MdTable(val id: Int, val rows: List<MdTableRow>) : MdBlock
     object MdThematicBreak : MdBlock
 }
+
+private data class MdTableRow(
+    val isHeader: Boolean,
+    val cells: List<List<MdInline>>,
+    val bodyIndex: Int,
+)
 
 private data class MdListItem(
     val blocks: List<MdBlock>,
     val taskChecked: Boolean? = null,
+)
+
+private data class ParseState(
+    var nextTableId: Int = 0,
 )
 
 private sealed interface MdInline {
@@ -187,14 +219,65 @@ private fun parseInlines(node: Node): List<MdInline> {
     return result
 }
 
-private fun parseListItem(item: ListItem, listDepth: Int): MdListItem {
+private fun parseListItem(item: ListItem, listDepth: Int, parseState: ParseState): MdListItem {
     val marker = item.firstChild as? TaskListItemMarker
-    val blocks = parseBlocks(item, listDepth + 1)
+    val blocks = parseBlocks(item, listDepth + 1, parseState)
 
     return MdListItem(blocks = blocks, taskChecked = marker?.isChecked)
 }
 
-private fun parseBlocks(node: Node, listDepth: Int = 0): List<MdBlock> {
+private fun parseTableCells(row: TableRow): List<List<MdInline>> {
+    val cells = mutableListOf<List<MdInline>>()
+    var cell = row.firstChild
+    while (cell != null) {
+        if (cell is TableCell) {
+            cells.add(parseInlines(cell))
+        }
+        cell = cell.next
+    }
+    return cells
+}
+
+private fun parseTableRows(table: TableBlock): List<MdTableRow> {
+    val rows = mutableListOf<MdTableRow>()
+    var bodyRowIndex = 0
+
+    var section = table.firstChild
+    while (section != null) {
+        when (section) {
+            is TableHead -> {
+                var row = section.firstChild
+                while (row != null) {
+                    if (row is TableRow) {
+                        rows.add(MdTableRow(isHeader = true, cells = parseTableCells(row), bodyIndex = -1))
+                    }
+                    row = row.next
+                }
+            }
+
+            is TableBody -> {
+                var row = section.firstChild
+                while (row != null) {
+                    if (row is TableRow) {
+                        rows.add(
+                            MdTableRow(
+                                isHeader = false,
+                                cells = parseTableCells(row),
+                                bodyIndex = bodyRowIndex++,
+                            ),
+                        )
+                    }
+                    row = row.next
+                }
+            }
+        }
+        section = section.next
+    }
+
+    return rows
+}
+
+private fun parseBlocks(node: Node, listDepth: Int = 0, parseState: ParseState = ParseState()): List<MdBlock> {
     val result = mutableListOf<MdBlock>()
     var child = node.firstChild
     while (child != null) {
@@ -207,12 +290,12 @@ private fun parseBlocks(node: Node, listDepth: Int = 0): List<MdBlock> {
 
             is IndentedCodeBlock -> result.add(MdBlock.MdCode(child.literal.trimEnd(), null))
             is ThematicBreak -> result.add(MdBlock.MdThematicBreak)
-            is BlockQuote -> result.add(MdBlock.MdBlockQuote(parseBlocks(child, listDepth)))
+            is BlockQuote -> result.add(MdBlock.MdBlockQuote(parseBlocks(child, listDepth, parseState)))
             is BulletList -> {
                 val items = mutableListOf<MdListItem>()
                 var item = child.firstChild
                 while (item != null) {
-                    if (item is ListItem) items.add(parseListItem(item, listDepth))
+                    if (item is ListItem) items.add(parseListItem(item, listDepth, parseState))
                     item = item.next
                 }
                 result.add(MdBlock.MdBulletList(items, listDepth))
@@ -222,12 +305,20 @@ private fun parseBlocks(node: Node, listDepth: Int = 0): List<MdBlock> {
                 val items = mutableListOf<MdListItem>()
                 var item = child.firstChild
                 while (item != null) {
-                    if (item is ListItem) items.add(parseListItem(item, listDepth))
+                    if (item is ListItem) items.add(parseListItem(item, listDepth, parseState))
                     item = item.next
                 }
                 result.add(MdBlock.MdOrderedList(items, child.markerStartNumber, listDepth))
             }
-            // Ignore HTML blocks, tables etc. for now
+
+            is TableBlock -> {
+                val rows = parseTableRows(child)
+                if (rows.isNotEmpty()) {
+                    result.add(MdBlock.MdTable(id = parseState.nextTableId++, rows = rows))
+                }
+            }
+
+            // Ignore HTML blocks etc. for now
             else -> Unit
         }
         child = child.next
@@ -237,7 +328,7 @@ private fun parseBlocks(node: Node, listDepth: Int = 0): List<MdBlock> {
 
 private fun parseMarkdown(markdown: String): List<MdBlock> {
     val document = markdownParser.parse(markdown) as Document
-    return parseBlocks(document)
+    return parseBlocks(document, parseState = ParseState())
 }
 
 private fun logMarkdownTiming(parseMs: Long, renderMs: Long, totalMs: Long, totalBlocks: Int) {
@@ -256,8 +347,8 @@ private fun logMarkdownTiming(parseMs: Long, renderMs: Long, totalMs: Long, tota
 private fun buildInlineAnnotatedString(
     inlines: List<MdInline>,
     onLinkClick: (String) -> Unit,
-    linkColor: androidx.compose.ui.graphics.Color,
-    codeBackground: androidx.compose.ui.graphics.Color,
+    linkColor: Color,
+    codeBackground: Color,
 ): AnnotatedString = buildAnnotatedString {
     fun appendInlines(list: List<MdInline>) {
         for (inline in list) {
@@ -317,8 +408,15 @@ private sealed interface RenderedBlock {
         RenderedBlock
 
     data class RenderedBlockQuote(val children: List<RenderedBlock>) : RenderedBlock
+    data class RenderedTable(val id: Int, val rows: List<RenderedTableRow>) : RenderedBlock
     object RenderedThematicBreak : RenderedBlock
 }
+
+private data class RenderedTableRow(
+    val isHeader: Boolean,
+    val cells: List<AnnotatedString>,
+    val bodyIndex: Int,
+)
 
 private data class RenderedListItem(
     val blocks: List<RenderedBlock>,
@@ -328,8 +426,8 @@ private data class RenderedListItem(
 private fun renderBlocks(
     blocks: List<MdBlock>,
     onLinkClick: (String) -> Unit,
-    linkColor: androidx.compose.ui.graphics.Color,
-    codeBackground: androidx.compose.ui.graphics.Color,
+    linkColor: Color,
+    codeBackground: Color,
 ): List<RenderedBlock> = blocks.map { block ->
     when (block) {
         is MdBlock.MdHeading -> RenderedBlock.RenderedHeading(
@@ -345,6 +443,19 @@ private fun renderBlocks(
         is MdBlock.MdThematicBreak -> RenderedBlock.RenderedThematicBreak
         is MdBlock.MdBlockQuote -> RenderedBlock.RenderedBlockQuote(
             renderBlocks(block.children, onLinkClick, linkColor, codeBackground),
+        )
+
+        is MdBlock.MdTable -> RenderedBlock.RenderedTable(
+            id = block.id,
+            rows = block.rows.map { row ->
+                RenderedTableRow(
+                    isHeader = row.isHeader,
+                    cells = row.cells.map { cell ->
+                        buildInlineAnnotatedString(cell, onLinkClick, linkColor, codeBackground)
+                    },
+                    bodyIndex = row.bodyIndex,
+                )
+            },
         )
 
         is MdBlock.MdBulletList -> RenderedBlock.RenderedBulletList(
@@ -587,6 +698,10 @@ private fun RenderedBlockComposable(block: RenderedBlock, isInsideList: Boolean 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         }
 
+        is RenderedBlock.RenderedTable -> {
+            RenderedTableComposable(table = block)
+        }
+
         is RenderedBlock.RenderedBlockQuote -> {
             val quoteBarColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
             Row(
@@ -687,5 +802,290 @@ private fun RenderedBlockComposable(block: RenderedBlock, isInsideList: Boolean 
             TAG,
             "Slow block render (${block::class.simpleName}): ${elapsedMs}ms (threshold: ${SLOW_RENDER_THRESHOLD_MS}ms)",
         )
+    }
+}
+
+private data class MarkdownTableLayoutMetrics(
+    val availableColumnsWidth: Dp,
+    val columnWidths: List<Dp>,
+    val measuredTableWidth: Dp,
+    val tableContentWidth: Dp,
+) {
+    val shouldShowToggle: Boolean get() = measuredTableWidth > availableColumnsWidth
+}
+
+private fun measureTableColumnContentWidths(
+    rows: List<RenderedTableRow>,
+    textMeasurer: TextMeasurer,
+    bodyStyle: TextStyle,
+    headerStyle: TextStyle,
+): List<Float> {
+    val columnCount = rows.maxOfOrNull { it.cells.size } ?: return emptyList()
+    val maxWidthsPxByColumn = FloatArray(columnCount)
+    rows.forEach { row ->
+        for (index in 0 until columnCount) {
+            val text = row.cells.getOrNull(index) ?: AnnotatedString("")
+            val measuredWidth = textMeasurer.measure(
+                text = text,
+                style = if (row.isHeader) headerStyle else bodyStyle,
+                softWrap = false,
+            ).size.width.toFloat()
+            maxWidthsPxByColumn[index] = maxOf(maxWidthsPxByColumn[index], measuredWidth)
+        }
+    }
+    return maxWidthsPxByColumn.toList()
+}
+
+private fun calculatePreferredColumnWidthsFromPx(
+    measuredColumnContentWidthsPx: List<Float>,
+    overflow: MarkdownTableOverflowMode,
+    densityScale: Float,
+): List<Dp> {
+    if (measuredColumnContentWidthsPx.isEmpty()) return emptyList()
+
+    val minColumnWidthPx = 56.dp.value * densityScale
+    val cellHorizontalPaddingPx = 16.dp.value * densityScale
+    val glyphOverhangBufferPx = 2.dp.value * densityScale
+    val maxWrapColumnContentWidthPx = 480.dp.value * densityScale
+
+    return measuredColumnContentWidthsPx.map { measuredWidthPx ->
+        val measuredContentWidth = measuredWidthPx.coerceAtLeast(0f)
+        val contentWidth = when (overflow) {
+            MarkdownTableOverflowMode.Wrap -> measuredContentWidth.coerceAtMost(maxWrapColumnContentWidthPx)
+            MarkdownTableOverflowMode.Scroll -> measuredContentWidth
+        }
+        val widthPx = (contentWidth + cellHorizontalPaddingPx + glyphOverhangBufferPx)
+            .coerceAtLeast(minColumnWidthPx)
+        (widthPx / densityScale).dp
+    }
+}
+
+private fun fitColumnWidthsToAvailable(
+    preferred: List<Dp>,
+    available: Dp,
+    allowShrink: Boolean,
+): List<Dp> {
+    if (preferred.isEmpty()) return preferred
+    if (available <= 0.dp) return preferred
+
+    val totalPreferred = preferred.sumDp().value
+    if (totalPreferred <= 0f) return preferred
+
+    val scale = available.value / totalPreferred
+    if (scale >= 1f) {
+        return preferred.map { width -> width * scale }
+    }
+
+    if (!allowShrink) return preferred
+
+    val minColumnWidth = 48.dp
+    return preferred.map { width ->
+        (width * scale).coerceAtLeast(minColumnWidth)
+    }
+}
+
+private fun calculateTableLayoutMetrics(
+    maxWidth: Dp,
+    preferredColumnWidths: List<Dp>,
+    overflow: MarkdownTableOverflowMode,
+    rowPadding: Dp,
+    verticalDividerThickness: Dp,
+    outerBorderThickness: Dp,
+): MarkdownTableLayoutMetrics {
+    val preferredDividerWidth = verticalDividerThickness *
+            (preferredColumnWidths.size - 1).coerceAtLeast(0).toFloat()
+    val availableColumnsWidth = (
+            maxWidth - rowPadding - preferredDividerWidth - (outerBorderThickness * 2)
+            ).coerceAtLeast(0.dp)
+    val columnWidths = fitColumnWidthsToAvailable(
+        preferred = preferredColumnWidths,
+        available = availableColumnsWidth,
+        allowShrink = overflow == MarkdownTableOverflowMode.Wrap,
+    )
+    val columnDividerWidth = verticalDividerThickness * (columnWidths.size - 1).coerceAtLeast(0).toFloat()
+    val measuredTableWidth = preferredColumnWidths.sumDp() + preferredDividerWidth
+    val tableContentWidth = when (overflow) {
+        MarkdownTableOverflowMode.Scroll ->
+            columnWidths.sumDp() + columnDividerWidth + rowPadding + (outerBorderThickness * 2)
+
+        MarkdownTableOverflowMode.Wrap -> maxWidth
+    }
+    return MarkdownTableLayoutMetrics(
+        availableColumnsWidth = availableColumnsWidth,
+        columnWidths = columnWidths,
+        measuredTableWidth = measuredTableWidth,
+        tableContentWidth = tableContentWidth,
+    )
+}
+
+private fun List<Dp>.sumDp(): Dp = fold(0.dp) { acc, width -> acc + width }
+
+@Composable
+private fun RenderTableRow(
+    rowData: RenderedTableRow,
+    columnWidths: List<Dp>,
+    borderColor: Color,
+    rowBackground: Color,
+    softWrap: Boolean,
+    verticalDividerThickness: Dp,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .background(rowBackground),
+    ) {
+        columnWidths.forEachIndexed { index, columnWidth ->
+            val cellText = rowData.cells.getOrNull(index) ?: AnnotatedString("")
+
+            Text(
+                text = cellText,
+                style = if (rowData.isHeader) {
+                    MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                } else {
+                    MaterialTheme.typography.bodySmall
+                },
+                softWrap = softWrap,
+                modifier = Modifier
+                    .width(columnWidth)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+            )
+
+            if (index < columnWidths.lastIndex) {
+                VerticalDivider(
+                    modifier = Modifier.fillMaxHeight(),
+                    thickness = verticalDividerThickness,
+                    color = borderColor,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RenderedTableComposable(table: RenderedBlock.RenderedTable) {
+    if (table.rows.isEmpty()) return
+
+    val tableStateKey = "table-overflow-${table.id}"
+    var overflow by rememberSaveable(tableStateKey) { mutableStateOf(MarkdownTableOverflowMode.Wrap) }
+
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
+    val bodyCellStyle = MaterialTheme.typography.bodySmall
+    val headerCellStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+
+    // Cache column measurement per table/style to keep recompositions cheap.
+    val measuredColumnContentWidthsPx = remember(
+        table.rows,
+        textMeasurer,
+        bodyCellStyle,
+        headerCellStyle,
+    ) {
+        measureTableColumnContentWidths(
+            rows = table.rows,
+            textMeasurer = textMeasurer,
+            bodyStyle = bodyCellStyle,
+            headerStyle = headerCellStyle,
+        )
+    }
+
+    val preferredColumnWidths = remember(
+        measuredColumnContentWidthsPx,
+        overflow,
+        density.density,
+    ) {
+        calculatePreferredColumnWidthsFromPx(
+            measuredColumnContentWidthsPx = measuredColumnContentWidthsPx,
+            overflow = overflow,
+            densityScale = density.density,
+        )
+    }
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+    ) {
+        val rowPadding = 8.dp
+        val verticalDividerThickness = 1.dp
+        val outerBorderThickness = 1.dp
+        val tableLayout = calculateTableLayoutMetrics(
+            maxWidth = maxWidth,
+            preferredColumnWidths = preferredColumnWidths,
+            overflow = overflow,
+            rowPadding = rowPadding,
+            verticalDividerThickness = verticalDividerThickness,
+            outerBorderThickness = outerBorderThickness,
+        )
+
+        val borderColor = MaterialTheme.colorScheme.outlineVariant
+        val zebraColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        val headerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+        val tableShape = MaterialTheme.shapes.small
+
+        val tableContainerModifier = Modifier
+            .width(tableLayout.tableContentWidth)
+            .clip(tableShape)
+            .border(width = outerBorderThickness, color = borderColor, shape = tableShape)
+
+        val tableGrid: @Composable () -> Unit = {
+            Column(modifier = tableContainerModifier) {
+                table.rows.forEachIndexed { index, rowData ->
+                    RenderTableRow(
+                        rowData = rowData,
+                        columnWidths = tableLayout.columnWidths,
+                        borderColor = borderColor,
+                        rowBackground = when {
+                            rowData.isHeader -> headerColor
+                            rowData.bodyIndex % 2 == 0 -> Color.Transparent
+                            else -> zebraColor
+                        },
+                        softWrap = overflow == MarkdownTableOverflowMode.Wrap,
+                        verticalDividerThickness = verticalDividerThickness,
+                    )
+
+                    if (index < table.rows.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth(),
+                            thickness = 1.dp,
+                            color = borderColor,
+                        )
+                    }
+                }
+            }
+        }
+
+        Column {
+            if (tableLayout.shouldShowToggle) {
+                DisableSelection {
+                    TextButton(
+                        onClick = {
+                            overflow = when (overflow) {
+                                MarkdownTableOverflowMode.Wrap -> MarkdownTableOverflowMode.Scroll
+                                MarkdownTableOverflowMode.Scroll -> MarkdownTableOverflowMode.Wrap
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp)
+                            .padding(horizontal = 6.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.toggle_word_wrap),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+
+            if (overflow == MarkdownTableOverflowMode.Scroll) {
+                Box(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    tableGrid()
+                }
+            } else {
+                tableGrid()
+            }
+        }
     }
 }
