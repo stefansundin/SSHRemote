@@ -26,21 +26,25 @@ import android.view.SoundEffectConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -584,22 +588,23 @@ private fun RenderedBlockComposable(block: RenderedBlock) {
         }
 
         is RenderedBlock.RenderedBlockQuote -> {
-            val quoteBarColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-            Row(modifier = Modifier.padding(bottom = 8.dp)) {
+            val quoteBarColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            Row(
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .height(IntrinsicSize.Max),
+            ) {
                 Box(
                     modifier = Modifier
-                        .padding(end = 8.dp)
-                        .background(quoteBarColor)
-                        .padding(horizontal = 2.dp)
-                        .fillMaxWidth(0f), // zero-width spacer painted by the background
+                        .width(4.dp)
+                        .fillMaxHeight()
+                        .background(quoteBarColor),
                 )
-                Box(
+                Column(
                     modifier = Modifier
-                        .padding(start = 4.dp)
-                        .background(quoteBarColor, RoundedCornerShape(2.dp))
-                        .padding(start = 4.dp, end = 0.dp, top = 0.dp, bottom = 0.dp),
-                )
-                Column(modifier = Modifier.weight(1f)) {
+                        .weight(1f)
+                        .padding(start = 12.dp),
+                ) {
                     for (child in block.children) {
                         RenderedBlockComposable(child)
                     }
