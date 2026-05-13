@@ -19,8 +19,10 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.content.ClipData
+import android.content.Intent
 import android.content.res.Configuration
 import android.view.SoundEffectConstants
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,10 +30,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,6 +49,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
@@ -60,8 +66,15 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun PublicKeyDialog(publicKey: String, qrCodeExportTitle: Int? = null, onDismiss: () -> Unit) {
+fun PublicKeyDialog(
+    publicKey: String,
+    qrCodeExportTitle: Int? = null,
+    showShareButton: Boolean = false,
+    onDismiss: () -> Unit,
+) {
     val clipboard = LocalClipboard.current
+    val context = LocalContext.current
+    val resources = LocalResources.current
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     var showQrDialog by rememberSaveable { mutableStateOf(false) }
@@ -96,11 +109,12 @@ fun PublicKeyDialog(publicKey: String, qrCodeExportTitle: Int? = null, onDismiss
                 )
 
                 if (qrCodeExportTitle != null) {
-                    TextButton(
+                    OutlinedButton(
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             showQrDialog = true
                         },
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(stringResource(R.string.export_to_qr_code))
                     }
@@ -119,21 +133,45 @@ fun PublicKeyDialog(publicKey: String, qrCodeExportTitle: Int? = null, onDismiss
             }
         },
         dismissButton = {
-            val label = stringResource(R.string.public_ssh_key_label)
-            TextButton(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    val clipData = ClipData.newPlainText(label, publicKey)
-                    scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
-                },
-            ) {
-                Icon(
-                    Icons.Outlined.ContentCopy,
-                    contentDescription = stringResource(R.string.copy),
-                    modifier = Modifier.size(ButtonDefaults.IconSize),
-                )
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.copy))
+            val keyLabel = stringResource(R.string.public_ssh_key_label)
+            Row {
+                if (showShareButton) {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            val shareIntent = Intent(Intent.ACTION_SEND)
+                                .setType("text/plain")
+                                .putExtra(Intent.EXTRA_TEXT, publicKey)
+                            val chooserIntent =
+                                Intent.createChooser(shareIntent, resources.getString(R.string.share))
+                            runCatching { context.startActivity(chooserIntent) }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Outlined.Share,
+                            contentDescription = stringResource(R.string.share),
+                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(R.string.share))
+                    }
+                    Spacer(Modifier.size(8.dp))
+                }
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        val clipData = ClipData.newPlainText(keyLabel, publicKey)
+                        scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
+                    },
+                ) {
+                    Icon(
+                        Icons.Outlined.ContentCopy,
+                        contentDescription = stringResource(R.string.copy),
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                    )
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text(stringResource(R.string.copy))
+                }
             }
         },
     )
@@ -195,6 +233,8 @@ private fun PublicKeyDialogPreview() {
         Surface {
             PublicKeyDialog(
                 publicKey = "ssh-ed25519 AAAA... Comment",
+                qrCodeExportTitle = R.string.export_to_qr_code,
+                showShareButton = true,
                 onDismiss = {},
             )
         }

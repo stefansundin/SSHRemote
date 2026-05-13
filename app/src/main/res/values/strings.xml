@@ -208,7 +208,7 @@
     <string name="please_wait_generating">Please wait while the key is being generated…</string>
     <string name="key_name_optional">Key name (optional)</string>
     <string name="key_name_default_hint">My SSH Key</string>
-    <string name="select_key_file_prompt">Select an SSH private key file</string>
+    <string name="import_key_file_prompt">Import an SSH private key file</string>
     <string name="zip_keys_detected_title">Keys detected</string>
     <plurals name="zip_keys_detected_in_zip">
         <item quantity="one">Detected %d SSH key in zip file.</item>
@@ -291,7 +291,7 @@
     <string name="export_to_file_subtitle">Export settings and hosts to a file.</string>
     <string name="import_from_file">Import from file</string>
     <string name="import_from_file_subtitle">Import settings and hosts from a file.</string>
-    <string name="select_file">Select File</string>
+    <string name="select_file">Select file</string>
     <string name="export_to_qr_code">Export to QR code</string>
     <string name="export_to_qr_code_subtitle">Export settings and hosts to a QR code.</string>
     <string name="export_host_title">Export Host</string>

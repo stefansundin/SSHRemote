@@ -674,7 +674,7 @@ fun ImportTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(stringResource(R.string.select_key_file_prompt))
+        Text(stringResource(R.string.import_key_file_prompt))
         Button(
             onClick = {
                 view.playSoundEffect(SoundEffectConstants.CLICK)

@@ -351,7 +351,7 @@ fun EditHostScreen(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    TextButton(
+                    Button(
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             sshConfig = currentConfig

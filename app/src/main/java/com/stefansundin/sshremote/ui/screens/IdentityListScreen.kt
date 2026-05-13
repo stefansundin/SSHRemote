@@ -58,6 +58,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -261,6 +262,7 @@ fun IdentityListScreen(
         PublicKeyDialog(
             publicKey = publicKeyToShow,
             qrCodeExportTitle = R.string.scan_qr_code_public_key_prompt,
+            showShareButton = true,
             onDismiss = { showPublicKeyDialog = false },
         )
     }
@@ -410,13 +412,14 @@ fun IdentityItem(
     var showAttachCertDialog by rememberSaveable { mutableStateOf(false) }
     var certInput by rememberSaveable { mutableStateOf("") }
     var scanQrCode by rememberSaveable { mutableStateOf(false) }
+    var importMenuExpanded by rememberSaveable { mutableStateOf(false) }
     val view = LocalView.current
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
     val resources = LocalResources.current
     val coroutineScope = rememberCoroutineScope()
 
-    val certFilePicker = rememberLauncherForActivityResult(
+    val filePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
             uri?.let {
@@ -627,47 +630,55 @@ fun IdentityItem(
                             .fillMaxWidth()
                             .height(160.dp),
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        TextButton(
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        FilledTonalButton(
                             onClick = {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
-                                certFilePicker.launch("*/*")
+                                importMenuExpanded = true
                             },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text(stringResource(R.string.select_file))
+                            Text(stringResource(R.string.tab_import))
                         }
-                        TextButton(
-                            onClick = {
-                                view.playSoundEffect(SoundEffectConstants.CLICK)
-                                coroutineScope.launch {
-                                    val clipEntry = clipboard.getClipEntry() ?: return@launch
-                                    val text = getClipEntryText(clipEntry.clipData) ?: return@launch
-                                    certInput = text.trim()
-                                }
-                            },
-                            modifier = Modifier.weight(1f),
+                        DropdownMenu(
+                            expanded = importMenuExpanded,
+                            onDismissRequest = { importMenuExpanded = false },
                         ) {
-                            Text(stringResource(R.string.paste_from_clipboard))
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.select_file)) },
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    importMenuExpanded = false
+                                    filePicker.launch("*/*")
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.paste_from_clipboard)) },
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    importMenuExpanded = false
+                                    coroutineScope.launch {
+                                        val clipEntry = clipboard.getClipEntry() ?: return@launch
+                                        val text = getClipEntryText(clipEntry.clipData) ?: return@launch
+                                        certInput = text.trim()
+                                    }
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.scan_qr_code)) },
+                                onClick = {
+                                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                                    importMenuExpanded = false
+                                    scanQrCode = true
+                                },
+                            )
                         }
-                    }
-                    TextButton(
-                        onClick = {
-                            view.playSoundEffect(SoundEffectConstants.CLICK)
-                            scanQrCode = true
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(stringResource(R.string.scan_qr_code))
                     }
                 }
             },
             onDismissRequest = { showAttachCertDialog = false },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
                         onAttachCertificate(trimmedCertInput)

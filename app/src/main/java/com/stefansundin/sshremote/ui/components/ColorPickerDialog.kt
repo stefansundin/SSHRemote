@@ -36,6 +36,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Slider
@@ -224,7 +225,7 @@ fun ColorPickerDialog(
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
                     onConfirm()
@@ -286,7 +287,13 @@ private fun FocusableSlider(
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f, widthDp = 400, heightDp = 600)
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+    widthDp = 400,
+    heightDp = 600,
+)
 @Composable
 private fun ColorPickerDialogPreview() {
     SSHRemoteTheme {

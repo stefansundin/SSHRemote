@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,9 +44,11 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -398,6 +399,7 @@ private fun AddKnownHostDialog(
 ) {
     var lineInput by rememberSaveable { mutableStateOf("") }
     var scanQrCode by rememberSaveable { mutableStateOf(scanQrCodeOnStart) }
+    var importMenuExpanded by rememberSaveable { mutableStateOf(false) }
     val view = LocalView.current
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
@@ -462,47 +464,55 @@ private fun AddKnownHostDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TextButton(
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    FilledTonalButton(
                         onClick = {
                             view.playSoundEffect(SoundEffectConstants.CLICK)
-                            filePicker.launch("*/*")
+                            importMenuExpanded = true
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(stringResource(R.string.select_file))
+                        Text(stringResource(R.string.tab_import))
                     }
-                    TextButton(
-                        onClick = {
-                            view.playSoundEffect(SoundEffectConstants.CLICK)
-                            coroutineScope.launch {
-                                val clipEntry = clipboard.getClipEntry() ?: return@launch
-                                val text = getClipEntryText(clipEntry.clipData) ?: return@launch
-                                lineInput = text.trim()
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
+                    DropdownMenu(
+                        expanded = importMenuExpanded,
+                        onDismissRequest = { importMenuExpanded = false },
                     ) {
-                        Text(stringResource(R.string.paste_from_clipboard))
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.select_file)) },
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                importMenuExpanded = false
+                                filePicker.launch("*/*")
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.paste_from_clipboard)) },
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                importMenuExpanded = false
+                                coroutineScope.launch {
+                                    val clipEntry = clipboard.getClipEntry() ?: return@launch
+                                    val text = getClipEntryText(clipEntry.clipData) ?: return@launch
+                                    lineInput = text.trim()
+                                }
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.scan_qr_code)) },
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                importMenuExpanded = false
+                                scanQrCode = true
+                            },
+                        )
                     }
-                }
-                TextButton(
-                    onClick = {
-                        view.playSoundEffect(SoundEffectConstants.CLICK)
-                        scanQrCode = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(stringResource(R.string.scan_qr_code))
                 }
             }
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
                     onAdd(parsedKnownHostLines)
