@@ -35,6 +35,7 @@
     <string name="link_destination">Link Destination</string>
     <string name="open_in_browser">Open in browser</string>
     <string name="toggle_word_wrap">Toggle word wrap</string>
+    <string name="custom">Custom</string>
 
     <!-- Hosts -->
     <string name="hosts_title">Hosts</string>
@@ -242,11 +243,13 @@
     <string name="theme_dark">Dark</string>
     <string name="dynamic_colors">Dynamic colors</string>
     <string name="haptic_feedback">Haptic feedback</string>
+    <string name="haptic_vibration_duration_label">Vibration duration in milliseconds</string>
     <string name="haptic_off">Off</string>
     <string name="haptic_short">Short (%d ms)</string>
     <string name="haptic_medium">Medium (%d ms)</string>
     <string name="haptic_long">Long (%d ms)</string>
     <string name="haptic_custom">Custom (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
     <string name="show_notification">Show notification</string>
     <string name="keep_screen_on">Keep screen on</string>
     <string name="security">Security</string>

@@ -58,6 +58,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.stefansundin.sshremote.HapticFeedback
+import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.getVibrator
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
@@ -111,13 +112,13 @@ fun HapticFeedbackSettingDialog(
     }
 
     AlertDialog(
-        title = { Text("Haptic feedback") },
+        title = { Text(stringResource(R.string.haptic_feedback)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 Text(
-                    text = "Vibration duration in milliseconds",
+                    text = stringResource(R.string.haptic_vibration_duration_label),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp),
                 )
@@ -171,7 +172,7 @@ fun HapticFeedbackSettingDialog(
                             onClick = null,
                         )
                         Text(
-                            text = "Custom",
+                            text = stringResource(R.string.custom),
                             modifier = Modifier.padding(start = 16.dp),
                         )
                     }
@@ -189,7 +190,7 @@ fun HapticFeedbackSettingDialog(
                             .weight(1f)
                             .padding(start = 16.dp)
                             .dpadFocusable(),
-                        label = { Text("ms") },
+                        label = { Text(stringResource(R.string.milliseconds_abbreviation)) },
                         singleLine = true,
                     )
                 }
@@ -204,7 +205,7 @@ fun HapticFeedbackSettingDialog(
                     onConfirm()
                 },
             ) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {
@@ -214,7 +215,7 @@ fun HapticFeedbackSettingDialog(
                     onDismiss()
                 },
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
