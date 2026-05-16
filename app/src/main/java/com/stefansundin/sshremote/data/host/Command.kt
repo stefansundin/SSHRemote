@@ -32,5 +32,13 @@ data class Command(
     val showOutput: Boolean = false,
     val renderOutputAsMarkdown: Boolean = false,
     val repeat: Boolean = false,
+    val runInBackground: Boolean = false,
     val id: String = UUID.randomUUID().toString(),
-) : Parcelable
+) : Parcelable {
+    fun formatCommand(text: String): String {
+        // Escape single quotes in the text to avoid breaking the command.
+        // This may not be foolproof for all shell injection cases, so you should still be careful about what you're feeding this app.
+        val escapedText = text.replace("'", "'\\''")
+        return command.format(escapedText)
+    }
+}

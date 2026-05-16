@@ -68,10 +68,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
 
-        <!-- Share target activity alias -->
+        <activity
+            android:name=".RouterActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:configChanges="orientation|keyboardHidden|keyboard|navigation|screenSize|smallestScreenSize|screenLayout|uiMode|density|fontScale"
+            android:theme="@style/Theme.SSHRemote.ShareTarget" />
+
         <activity-alias
             android:name=".ShareTargetActivity"
-            android:targetActivity=".MainActivity"
+            android:targetActivity=".RouterActivity"
             android:enabled="false"
             android:exported="true">
             <intent-filter>

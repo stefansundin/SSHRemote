@@ -60,6 +60,7 @@ fun ShareTargetSettingsDialog(
     val keyboardTypeCommand = keyboardTypeTemplate?.command.orEmpty()
     val initialShareTargetTemplate = initialRemoteCommands[RemoteControlKey.SHARE_TEXT]
     val initialShareTargetCommand = initialShareTargetTemplate?.command
+    val initialRunInBackground = initialShareTargetTemplate?.runInBackground ?: keyboardTypeTemplate?.runInBackground ?: false
 
     var useKeyboardTypeCommand by rememberSaveable { mutableStateOf(initialShareTargetCommand == null) }
     var customShareTargetCommand by rememberSaveable {
@@ -68,6 +69,7 @@ fun ShareTargetSettingsDialog(
     var customShareTargetShowOutput by rememberSaveable {
         mutableStateOf(initialShareTargetTemplate?.showOutput ?: false)
     }
+    var runInBackground by rememberSaveable { mutableStateOf(initialRunInBackground) }
 
     AlertDialog(
         title = { Text(stringResource(R.string.share_target_settings)) },
@@ -85,6 +87,7 @@ fun ShareTargetSettingsDialog(
                 )
                 TextField(
                     label = { Text(stringResource(R.string.custom_share_command)) },
+                    placeholder = { Text(stringResource(R.string.share_command_placeholder)) },
                     value = if (useKeyboardTypeCommand) keyboardTypeCommand else customShareTargetCommand,
                     onValueChange = { value ->
                         customShareTargetCommand = value
@@ -102,6 +105,13 @@ fun ShareTargetSettingsDialog(
                         customShareTargetShowOutput = checked
                     },
                 )
+                RowWithCheckbox(
+                    checked = runInBackground,
+                    text = stringResource(R.string.run_command_in_background),
+                    onCheckedChange = { checked ->
+                        runInBackground = checked
+                    },
+                )
             }
         },
         properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
@@ -112,11 +122,18 @@ fun ShareTargetSettingsDialog(
                     view.playSoundEffect(SoundEffectConstants.CLICK)
                     val updated = initialRemoteCommands.toMutableMap()
                     if (useKeyboardTypeCommand) {
+                        keyboardTypeTemplate?.let {
+                            updated[RemoteControlKey.KEYBOARD_TYPE_INPUT] = it.copy(runInBackground = runInBackground)
+                        }
                         updated.remove(RemoteControlKey.SHARE_TEXT)
                     } else {
                         updated[RemoteControlKey.SHARE_TEXT] =
                             (updated[RemoteControlKey.SHARE_TEXT] ?: Command(""))
-                                .copy(command = customShareTargetCommand, showOutput = customShareTargetShowOutput)
+                                .copy(
+                                    command = customShareTargetCommand,
+                                    showOutput = customShareTargetShowOutput,
+                                    runInBackground = runInBackground,
+                                )
                     }
                     onSave(updated)
                 },

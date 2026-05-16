@@ -18,6 +18,15 @@
 
 package com.stefansundin.sshremote.data.host
 
+import com.stefansundin.sshremote.data.CryptoManager
+import com.stefansundin.sshremote.data.identity.IdentityRepository
+import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
+import com.stefansundin.sshremote.data.password.PasswordDao
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
+
 /**
  * A simple data holder for the information needed to establish an SSH connection.
  */
@@ -34,5 +43,39 @@ data class HostConnectionDetails(
         val name: String,
         val privateKey: String,
         val certificate: String?,
+    )
+}
+
+suspend fun Host.toConnectionDetails(
+    identityRepository: IdentityRepository,
+    knownHostRepository: KnownHostRepository,
+    passwordDao: PasswordDao,
+    cryptoManager: CryptoManager,
+): HostConnectionDetails {
+    val identities = coroutineScope {
+        identityIds?.map { id ->
+            async { identityRepository.get(id).first() }
+        }?.awaitAll()?.filterNotNull() ?: identityRepository.getAll().first()
+    }.map { identity ->
+        HostConnectionDetails.Identity(
+            name = identity.name,
+            privateKey = cryptoManager.decryptToString(identity.encryptedPrivateKey),
+            certificate = identity.encryptedCertificate?.let { cryptoManager.decryptToString(it) },
+        )
+    }
+    val password = passwordId?.let { id ->
+        passwordDao.getPassword(id)?.let { password ->
+            cryptoManager.decryptToString(password.encryptedPassword)
+        }
+    }
+    val knownHosts = knownHosts + knownHostRepository.getAll().first().map { it.line }
+    return HostConnectionDetails(
+        hostname = hostname,
+        port = port,
+        user = user,
+        password = password,
+        identities = identities,
+        knownHosts = knownHosts,
+        sshConfig = sshConfig ?: Host.DEFAULT_SSH_CONFIG,
     )
 }

@@ -109,6 +109,11 @@
     <string name="disconnect">Disconnect</string>
     <string name="configure_remote_commands_prompt">Please configure the remote control commands by entering edit mode via the menu.</string>
     <string name="tap_to_edit_button_command">Tap a button to edit its command</string>
+    <string name="run_command_in_background">Run command in background</string>
+    <string name="connecting">Connecting…</string>
+    <string name="executing_command">Executing command…</string>
+    <string name="executing_on">Executing on %1$s</string>
+    <string name="sharing_to">Sharing to %1$s</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Back</string>
@@ -375,9 +380,10 @@
     <string name="share_not_connected_title">Not connected</string>
     <string name="share_not_connected_text">To use the share feature, first connect to a host.</string>
     <string name="share_missing_share_command_title">Share command not configured</string>
-    <string name="share_missing_share_command_text">This host does not have the share command configured. Edit the host remote control settings and set a command for sharing text.</string>
+    <string name="share_missing_share_command_text">This host does not have a share command configured. Edit the host remote control settings and set a command for sharing text.</string>
     <string name="share_text">Share Text</string>
     <string name="share_target_settings">Share target settings</string>
     <string name="use_keyboard_type_command">Use keyboard type command</string>
     <string name="custom_share_command">Custom share command</string>
+    <string name="share_command_placeholder">%s will be replaced with the shared text</string>
 </resources>

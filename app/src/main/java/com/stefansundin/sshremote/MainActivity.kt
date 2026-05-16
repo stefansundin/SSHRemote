@@ -142,11 +142,17 @@ enum class Theme(@StringRes val labelRes: Int) {
     DARK(R.string.theme_dark)
 }
 
+private enum class PendingShortcutConnectionState {
+    NOT_REQUESTED,
+    REQUESTED,
+    STARTED,
+}
+
 private data class PendingShortcut(
     val hostId: String,
     val commandId: String? = null,
     val remoteControlKey: String? = null,
-    val connectionRequested: Boolean = false,
+    val connectionState: PendingShortcutConnectionState = PendingShortcutConnectionState.NOT_REQUESTED,
 ) {
     val hasPayload: Boolean
         get() = commandId != null || remoteControlKey != null
@@ -163,7 +169,7 @@ class MainActivity : ComponentActivity() {
 
     private val sshRepository: SshRepository by lazy {
         val app = (application as SshRemoteApplication)
-        SshRepository(app.settingsRepository)
+        app.sshRepository
     }
 
     private val hostViewModel: HostViewModel by viewModels {
@@ -210,7 +216,7 @@ class MainActivity : ComponentActivity() {
     private var pendingShortcut = mutableStateOf<PendingShortcut?>(null)
     private var sharedText = mutableStateOf<String?>(null)
 
-    private fun handleIncomingIntent(intent: Intent?) {
+    private fun handleIntent(intent: Intent?) {
         if (intent == null) return
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             sharedText.value = intent.getStringExtra(Intent.EXTRA_TEXT)
@@ -233,7 +239,7 @@ class MainActivity : ComponentActivity() {
             Log.w("MainActivity", "Activity recreated!")
         }
         enableEdgeToEdge()
-        handleIncomingIntent(intent)
+        handleIntent(intent)
 
         setContent {
             val theme by settingsViewModel.theme.collectAsState()
@@ -291,6 +297,14 @@ class MainActivity : ComponentActivity() {
                     val hosts by hostViewModel.allHosts.collectAsState()
                     val shareTargetEnabled by settingsViewModel.shareTargetEnabled.collectAsState()
 
+                    LaunchedEffect(uiState.hostId, uiState.connectionStatus, currentRoute) {
+                        app.activeConnectionTracker.update(
+                            hostId = uiState.hostId,
+                            connectionStatus = uiState.connectionStatus,
+                            isEditingRemoteControl = currentRoute?.startsWith("edit_remote_control") == true,
+                        )
+                    }
+
                     var hostForPresetSelection by remember { mutableStateOf<Host?>(null) }
                     var showGettingStartedDialog by rememberSaveable { mutableStateOf(false) }
                     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
@@ -341,6 +355,11 @@ class MainActivity : ComponentActivity() {
                                 val command = host.commands.find { it.id == shortcut.commandId }
                                 if (command != null) {
                                     scope.launch {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            R.string.executing_command,
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
                                         hostViewModel.runCommand(
                                             command = command.command,
                                             showOutput = command.showOutput,
@@ -387,7 +406,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // Enable/disable the share target activity alias based on setting
+                    // Enable/disable the share target alias based on setting
                     LaunchedEffect(shareTargetEnabled) {
                         val componentName =
                             android.content.ComponentName(this@MainActivity, "${packageName}.ShareTargetActivity")
@@ -404,12 +423,10 @@ class MainActivity : ComponentActivity() {
                         val text = sharedText.value ?: return@LaunchedEffect
                         if (uiState.connectionStatus == ConnectionStatus.CONNECTED) {
                             val host = hosts?.find { it.id == uiState.hostId }
-                            val commandTemplate = host?.remoteCommands?.get(RemoteControlKey.SHARE_TEXT)
-                                ?: host?.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
+                            val commandTemplate = host?.resolveShareCommandTemplate()
                             if (commandTemplate?.command?.isNotEmpty() == true) {
                                 sharedText.value = null
-                                val escapedText = text.replace("'", "'\\''")
-                                val command = commandTemplate.command.format(escapedText)
+                                val command = commandTemplate.formatCommand(text)
                                 // Run in a stable scope so this work is not canceled when sharedText changes
                                 scope.launch {
                                     hostViewModel.runCommand(command, commandTemplate.showOutput)
@@ -499,9 +516,30 @@ class MainActivity : ComponentActivity() {
 
                         if (isSameConnectedHost && !shortcut.hasPayload) {
                             pendingShortcut.value = null
-                        } else if (!isSameConnectedHost && !shortcut.connectionRequested) {
-                            pendingShortcut.value = shortcut.copy(connectionRequested = true)
+                        } else if (!isSameConnectedHost && shortcut.connectionState == PendingShortcutConnectionState.NOT_REQUESTED) {
+                            pendingShortcut.value = shortcut.copy(connectionState = PendingShortcutConnectionState.REQUESTED)
                             onConnect(hostToConnect)
+                        }
+                    }
+
+                    // Clear the pending shortcut after connection is started to avoid accidentally running a command when the user manually connects later
+                    LaunchedEffect(pendingShortcut.value, uiState.connectionStatus, uiState.hostId) {
+                        val shortcut = pendingShortcut.value ?: return@LaunchedEffect
+                        if (
+                            shortcut.connectionState == PendingShortcutConnectionState.REQUESTED &&
+                            uiState.hostId == shortcut.hostId &&
+                            uiState.connectionStatus == ConnectionStatus.CONNECTING
+                        ) {
+                            pendingShortcut.value = shortcut.copy(connectionState = PendingShortcutConnectionState.STARTED)
+                            return@LaunchedEffect
+                        }
+                        if (
+                            shortcut.connectionState == PendingShortcutConnectionState.STARTED &&
+                            shortcut.hasPayload &&
+                            uiState.hostId == shortcut.hostId &&
+                            uiState.connectionStatus == ConnectionStatus.DISCONNECTED
+                        ) {
+                            pendingShortcut.value = null
                         }
                     }
 
@@ -812,7 +850,7 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            handleIncomingIntent(intent)
+            handleIntent(intent)
             return
         }
         if (intent.hasExtra("HOST_ID")) {
@@ -822,7 +860,7 @@ class MainActivity : ComponentActivity() {
             if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostId && !hasCommandPayload) {
                 return
             }
-            handleIncomingIntent(intent)
+            handleIntent(intent)
         }
     }
 
@@ -851,8 +889,8 @@ class MainActivity : ComponentActivity() {
     private fun createCommandShortcut(context: Context, host: Host, commandId: String) {
         val command = host.commands.find { it.id == commandId }
         val commandLabel = command?.name ?: command?.command ?: getString(R.string.command)
-        val intent = Intent(context, MainActivity::class.java).apply {
-            action = Intent.ACTION_MAIN
+        val intent = Intent(context, RouterActivity::class.java).apply {
+            action = "com.stefansundin.sshremote.action.RUN_COMMAND_SHORTCUT"
             putExtra("HOST_ID", host.id)
             putExtra("COMMAND_ID", commandId)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)

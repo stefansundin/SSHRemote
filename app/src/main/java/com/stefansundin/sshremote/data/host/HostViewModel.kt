@@ -34,9 +34,6 @@ import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,7 +42,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -216,43 +212,15 @@ class HostViewModel(
             )
         }
         try {
-            val identities = coroutineScope {
-                host.identityIds?.map { id ->
-                    async { identityRepository.get(id).first() }
-                }?.awaitAll()?.filterNotNull() ?: identityRepository.getAll().first()
-            }.map { identity ->
-                HostConnectionDetails.Identity(
-                    name = identity.name,
-                    privateKey = cryptoManager.decryptToString(identity.encryptedPrivateKey),
-                    certificate = identity.encryptedCertificate?.let { cryptoManager.decryptToString(it) },
-                )
-            }
-            val password = host.passwordId?.let {
-                passwordDao.getPassword(it)?.let { password ->
-                    cryptoManager.decryptToString(password.encryptedPassword)
-                }
-            }
-            val knownHosts = host.knownHosts + knownHostRepository.getAll().first().map { it.line }
-            val connectionDetails = HostConnectionDetails(
-                hostname = host.hostname,
-                port = host.port,
-                user = host.user,
-                password = password,
-                identities = identities,
-                knownHosts = knownHosts,
-                sshConfig = host.sshConfig ?: Host.DEFAULT_SSH_CONFIG,
+            val connectionDetails = host.toConnectionDetails(
+                identityRepository = identityRepository,
+                knownHostRepository = knownHostRepository,
+                passwordDao = passwordDao,
+                cryptoManager = cryptoManager,
             )
 
             val hostKeyUsed = sshRepository.connect(connectionDetails)
-            if (hostKeyUsed != null) {
-                val knownHostsLine =
-                    "${hostKeyUsed.marker.orEmpty()} ${hostKeyUsed.host} ${hostKeyUsed.type} ${hostKeyUsed.key} ${hostKeyUsed.comment.orEmpty()}".trim()
-                if (!host.knownHosts.contains(knownHostsLine)) {
-                    Log.d("HostViewModel", "New host key: $knownHostsLine")
-                    val updatedKnownHosts = host.knownHosts + knownHostsLine
-                    repository.updateKnownHosts(host.id, updatedKnownHosts)
-                }
-            }
+            persistAcceptedHostKey(repository, host, hostKeyUsed)
 
             _uiState.update {
                 it.copy(connectionStatus = ConnectionStatus.CONNECTED)

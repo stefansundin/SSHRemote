@@ -819,8 +819,7 @@ fun RemoteControlScreen(
                                     onType = { text ->
                                         host.remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
                                             ?.let { commandTemplate ->
-                                                val escapedText = text.replace("'", "'\\''")
-                                                val command = commandTemplate.command.format(escapedText)
+                                                val command = commandTemplate.formatCommand(text)
                                                 coroutineScope.launch {
                                                     hostViewModel.runCommand(
                                                         command,

@@ -62,6 +62,11 @@ data class Host(
         const val DEFAULT_SSH_CONFIG = "ServerAliveInterval 60\n"
     }
 
+    fun resolveShareCommandTemplate(): Command? {
+        return remoteCommands?.get(RemoteControlKey.SHARE_TEXT)
+            ?: remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)
+    }
+
     fun toExportedHost(): ExportedHost {
         return ExportedHost(
             id = id,
@@ -78,6 +83,7 @@ data class Host(
                     command = it.command,
                     showOutput = it.showOutput,
                     renderOutputAsMarkdown = it.renderOutputAsMarkdown,
+                    runInBackground = it.runInBackground,
                 )
             },
             remoteCommands = remoteCommands?.mapValues {

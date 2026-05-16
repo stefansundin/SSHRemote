@@ -29,6 +29,7 @@ import com.stefansundin.sshremote.data.settings.SettingsRepository
 import com.stefansundin.sshremote.notification.NotificationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.i2p.crypto.eddsa.EdDSASecurityProvider
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -44,6 +45,9 @@ class SshRemoteApplication : Application() {
     val passwordDao by lazy { encryptedDatabase.passwordDao() }
     val adHocCommandRepository by lazy { AdHocCommandRepository(database.adHocCommandDao()) }
     val settingsRepository by lazy { SettingsRepository(this) }
+    val sshRepository by lazy { SshRepository(settingsRepository) }
+    val activeConnectionTracker by lazy { ActiveConnectionTracker() }
+    val applicationScope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main) }
 
     var isRestoredFromBackup: Boolean = false
         private set

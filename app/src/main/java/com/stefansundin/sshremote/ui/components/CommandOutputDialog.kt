@@ -247,7 +247,7 @@ private fun CommandOutputDialogPreview_Markdown() {
                     **BOLD**
                     
                     _Emphasis_
-
+                    
                     ~~Strikethrough~~
                     
                     Inline code: `apt-get update`
@@ -259,11 +259,11 @@ private fun CommandOutputDialogPreview_Markdown() {
                     
                     > Blockquote
                     > > Nested
-
+                    
                     - [ ] Checkbox
                     - [x] Checked checkbox
-
-                    | Name | Value | 
+                    
+                    | Name | Value |
                     | --- | --- |
                     | Alpha | 1 |
                     | Beta | 2 |
