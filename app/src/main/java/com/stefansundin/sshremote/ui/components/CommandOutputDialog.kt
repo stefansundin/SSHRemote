@@ -22,6 +22,7 @@ import android.content.ClipData
 import android.content.Intent
 import android.content.res.Configuration
 import android.view.SoundEffectConstants
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,16 +46,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -90,9 +94,7 @@ fun CommandOutputDialog(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 } else {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        PlainTextOutput(formattedOutput)
-                    }
+                    PlainTextOutput(formattedOutput)
                 }
             },
             onDismissRequest = onDismiss,
@@ -155,11 +157,58 @@ fun CommandOutputDialog(
 
 @Composable
 private fun PlainTextOutput(output: String) {
-    SelectionContainer {
-        Text(
-            text = output,
-            style = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace),
-        )
+    val horizontalScrollState = rememberScrollState()
+    val textMeasurer = rememberTextMeasurer()
+    val view = LocalView.current
+    val density = LocalDensity.current
+    val textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace)
+    val wordWrapEnabled = remember { mutableStateOf(true) }
+    val showWordWrapToggle = remember { mutableStateOf(false) }
+
+    BoxWithConstraints {
+        remember(output, maxWidth, textStyle, density) {
+            val lines = output.split('\n')
+            val maxLineWidth = lines.maxOfOrNull { line ->
+                textMeasurer.measure(line, style = textStyle).size.width
+            } ?: 0
+            val availableWidthPx = with(density) {
+                maxWidth.toPx()
+            }
+            val needsHorizontalScroll = maxLineWidth > availableWidthPx
+            showWordWrapToggle.value = needsHorizontalScroll
+            needsHorizontalScroll
+        }
+
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            if (showWordWrapToggle.value) {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        wordWrapEnabled.value = !wordWrapEnabled.value
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = stringResource(R.string.toggle_word_wrap))
+                }
+            }
+
+            SelectionContainer {
+                if (wordWrapEnabled.value) {
+                    Text(
+                        text = output,
+                        style = textStyle,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    Text(
+                        text = output,
+                        style = textStyle,
+                        modifier = Modifier.horizontalScroll(horizontalScrollState),
+                        softWrap = false,
+                    )
+                }
+            }
+        }
     }
 }
 
