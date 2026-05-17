@@ -34,6 +34,7 @@ data class ExportedHost(
     val user: String?,
     val allowIdentities: Boolean?,
     val knownHosts: List<String>?,
+    val shareInBackground: Boolean?,
     val commands: List<ExportedCommand>?,
     val remoteCommands: Map<RemoteControlKey?, ExportedCommand>?,
     val startScreen: RemoteControlScreen?,

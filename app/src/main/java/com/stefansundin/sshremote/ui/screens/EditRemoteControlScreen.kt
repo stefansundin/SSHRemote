@@ -73,6 +73,7 @@ import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.data.host.presets
 import com.stefansundin.sshremote.ui.KeyEvent
+import com.stefansundin.sshremote.ui.components.AddCommandShortcutDialog
 import com.stefansundin.sshremote.ui.components.EditCommandDialog
 import com.stefansundin.sshremote.ui.components.EditCommandsTab
 import com.stefansundin.sshremote.ui.components.EditKeyboardCommandDialog
@@ -90,11 +91,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditRemoteControlScreen(
     host: Host,
-    onSave: (Map<RemoteControlKey, Command>, List<Command>, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
+    onSave: (Map<RemoteControlKey, Command>, List<Command>, Boolean, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
     onTestSmartVolumeSettings: () -> Unit,
-    onAddCommandShortcut: (Host, String) -> Unit,
+    onAddCommandShortcut: (Host, String, String, Boolean) -> Unit,
     onAddRemoteCommandShortcut: (Host, RemoteControlKey) -> Unit,
     shareTargetEnabled: Boolean,
     initialPage: Int = 0,
@@ -109,12 +110,15 @@ fun EditRemoteControlScreen(
     var editingCommand by remember(host.id) { mutableStateOf<Pair<RemoteControlKey, Command>?>(null) }
     var editedRemoteCommands by remember(host.id) { mutableStateOf(host.remoteCommands ?: emptyMap()) }
     var editedCommands by remember(host.id) { mutableStateOf(host.commands) }
+    var editedShareInBackground by remember(host.id) { mutableStateOf(host.shareInBackground) }
     var editedSmartVolumeSettings by remember(host.id) { mutableStateOf(host.smartVolume) }
     var editingCommandInList by remember(host.id) { mutableStateOf<Command?>(null) }
+    var pendingCommandShortcutId by rememberSaveable(host.id) { mutableStateOf<String?>(null) }
 
     val hasUnsavedChanges =
         editedRemoteCommands != (host.remoteCommands
-            ?: emptyMap<RemoteControlKey, Command>()) || editedCommands != host.commands || editedSmartVolumeSettings != host.smartVolume
+            ?: emptyMap<RemoteControlKey, Command>()) || editedCommands != host.commands ||
+                editedShareInBackground != host.shareInBackground || editedSmartVolumeSettings != host.smartVolume
     var showUnsavedBackDialog by rememberSaveable(host.id) { mutableStateOf(false) }
     var showMenu by rememberSaveable(host.id) { mutableStateOf(false) }
     var resetToPresetKey by rememberSaveable(host.id) { mutableStateOf("") }
@@ -139,7 +143,13 @@ fun EditRemoteControlScreen(
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
+                        onSave(
+                            editedRemoteCommands,
+                            editedCommands,
+                            editedShareInBackground,
+                            editedSmartVolumeSettings,
+                            true,
+                        )
                     },
                 ) {
                     Text(stringResource(R.string.save_and_leave))
@@ -322,7 +332,13 @@ fun EditRemoteControlScreen(
                     icon = { Icon(Icons.Default.Save, contentDescription = stringResource(R.string.save)) },
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onSave(editedRemoteCommands, editedCommands, editedSmartVolumeSettings, true)
+                        onSave(
+                            editedRemoteCommands,
+                            editedCommands,
+                            editedShareInBackground,
+                            editedSmartVolumeSettings,
+                            true,
+                        )
                     },
                 )
             }
@@ -441,14 +457,33 @@ fun EditRemoteControlScreen(
                 }
             },
             onAddToHomeScreen = { commandId ->
+                pendingCommandShortcutId = commandId
+            },
+        )
+    }
+
+    pendingCommandShortcutId?.let { commandId ->
+        val commandLabel = editedCommands.find { it.id == commandId }?.let { it.name ?: it.command }
+            ?: stringResource(R.string.command)
+
+        AddCommandShortcutDialog(
+            initialShortcutLabel = stringResource(R.string.run_command_on_host_short, commandLabel, host.name),
+            onDismiss = {
+                pendingCommandShortcutId = null
+            },
+            onConfirm = { shortcutLabel, runInBackground ->
                 onAddCommandShortcut(
                     host.copy(
                         commands = editedCommands,
                         remoteCommands = editedRemoteCommands,
+                        shareInBackground = editedShareInBackground,
                         smartVolume = editedSmartVolumeSettings,
                     ),
                     commandId,
+                    shortcutLabel,
+                    runInBackground,
                 )
+                pendingCommandShortcutId = null
             },
         )
     }
@@ -479,9 +514,11 @@ fun EditRemoteControlScreen(
         if (shareTargetEnabled) {
             ShareTargetSettingsDialog(
                 initialRemoteCommands = editedRemoteCommands,
+                initialShareInBackground = editedShareInBackground,
                 onDismiss = { showShareTargetSettingsDialog = false },
-                onSave = {
-                    editedRemoteCommands = it
+                onSave = { remoteCommands, shareInBackground ->
+                    editedRemoteCommands = remoteCommands
+                    editedShareInBackground = shareInBackground
                     showShareTargetSettingsDialog = false
                 },
             )
@@ -530,6 +567,7 @@ fun EditRemoteControlScreen(
                     host.copy(
                         commands = editedCommands,
                         remoteCommands = editedRemoteCommands,
+                        shareInBackground = editedShareInBackground,
                         smartVolume = editedSmartVolumeSettings,
                     ),
                     key,
@@ -546,11 +584,11 @@ private fun EditRemoteControlScreenPreview_RemoteTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _ -> },
+            onSave = { _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            onAddCommandShortcut = { _, _ -> },
+            onAddCommandShortcut = { _, _, _, _ -> },
             onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 0,
@@ -565,11 +603,11 @@ private fun EditRemoteControlScreenPreview_MouseTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _ -> },
+            onSave = { _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            onAddCommandShortcut = { _, _ -> },
+            onAddCommandShortcut = { _, _, _, _ -> },
             onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 1,
@@ -584,11 +622,11 @@ private fun EditRemoteControlScreenPreview_KeyboardTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _ -> },
+            onSave = { _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            onAddCommandShortcut = { _, _ -> },
+            onAddCommandShortcut = { _, _, _, _ -> },
             onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 2,
@@ -603,11 +641,11 @@ private fun EditRemoteControlScreenPreview_CommandsTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _ -> },
+            onSave = { _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
-            onAddCommandShortcut = { _, _ -> },
+            onAddCommandShortcut = { _, _, _, _ -> },
             onAddRemoteCommandShortcut = { _, _ -> },
             shareTargetEnabled = true,
             initialPage = 3,

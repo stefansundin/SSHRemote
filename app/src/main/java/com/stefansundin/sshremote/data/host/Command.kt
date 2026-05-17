@@ -32,7 +32,6 @@ data class Command(
     val showOutput: Boolean = false,
     val renderOutputAsMarkdown: Boolean = false,
     val repeat: Boolean = false,
-    val runInBackground: Boolean = false,
     val id: String = UUID.randomUUID().toString(),
 ) : Parcelable {
     fun formatCommand(text: String): String {

@@ -110,6 +110,7 @@
     <string name="configure_remote_commands_prompt">Please configure the remote control commands by entering edit mode via the menu.</string>
     <string name="tap_to_edit_button_command">Tap a button to edit its command</string>
     <string name="run_command_in_background">Run command in background</string>
+    <string name="shortcut_label">Shortcut label</string>
     <string name="connecting">Connecting…</string>
     <string name="executing_command">Executing command…</string>
     <string name="executing_on">Executing on %1$s</string>

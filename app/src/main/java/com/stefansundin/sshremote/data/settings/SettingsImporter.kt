@@ -168,6 +168,7 @@ class SettingsImporter(
                     passwordId = null,
                     identityIds = if (exportedHost.allowIdentities == true) null else emptyList(),
                     knownHosts = exportedHost.knownHosts ?: emptyList(),
+                    shareInBackground = exportedHost.shareInBackground ?: false,
                     commands = exportedHost.commands?.map { it.toCommand() } ?: emptyList(),
                     remoteCommands = (exportedHost.remoteCommands?.filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>?)?.mapValues { it.value.toCommand() }
                         ?: emptyMap(),

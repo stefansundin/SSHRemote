@@ -52,15 +52,15 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 @Composable
 fun ShareTargetSettingsDialog(
     initialRemoteCommands: Map<RemoteControlKey, Command>,
+    initialShareInBackground: Boolean,
     onDismiss: () -> Unit,
-    onSave: (Map<RemoteControlKey, Command>) -> Unit,
+    onSave: (Map<RemoteControlKey, Command>, Boolean) -> Unit,
 ) {
     val view = LocalView.current
     val keyboardTypeTemplate = initialRemoteCommands[RemoteControlKey.KEYBOARD_TYPE_INPUT]
     val keyboardTypeCommand = keyboardTypeTemplate?.command.orEmpty()
     val initialShareTargetTemplate = initialRemoteCommands[RemoteControlKey.SHARE_TEXT]
     val initialShareTargetCommand = initialShareTargetTemplate?.command
-    val initialRunInBackground = initialShareTargetTemplate?.runInBackground ?: keyboardTypeTemplate?.runInBackground ?: false
 
     var useKeyboardTypeCommand by rememberSaveable { mutableStateOf(initialShareTargetCommand == null) }
     var customShareTargetCommand by rememberSaveable {
@@ -69,7 +69,7 @@ fun ShareTargetSettingsDialog(
     var customShareTargetShowOutput by rememberSaveable {
         mutableStateOf(initialShareTargetTemplate?.showOutput ?: false)
     }
-    var runInBackground by rememberSaveable { mutableStateOf(initialRunInBackground) }
+    var shareInBackground by rememberSaveable { mutableStateOf(initialShareInBackground) }
 
     AlertDialog(
         title = { Text(stringResource(R.string.share_target_settings)) },
@@ -106,10 +106,10 @@ fun ShareTargetSettingsDialog(
                     },
                 )
                 RowWithCheckbox(
-                    checked = runInBackground,
+                    checked = shareInBackground,
                     text = stringResource(R.string.run_command_in_background),
                     onCheckedChange = { checked ->
-                        runInBackground = checked
+                        shareInBackground = checked
                     },
                 )
             }
@@ -122,9 +122,6 @@ fun ShareTargetSettingsDialog(
                     view.playSoundEffect(SoundEffectConstants.CLICK)
                     val updated = initialRemoteCommands.toMutableMap()
                     if (useKeyboardTypeCommand) {
-                        keyboardTypeTemplate?.let {
-                            updated[RemoteControlKey.KEYBOARD_TYPE_INPUT] = it.copy(runInBackground = runInBackground)
-                        }
                         updated.remove(RemoteControlKey.SHARE_TEXT)
                     } else {
                         updated[RemoteControlKey.SHARE_TEXT] =
@@ -132,10 +129,9 @@ fun ShareTargetSettingsDialog(
                                 .copy(
                                     command = customShareTargetCommand,
                                     showOutput = customShareTargetShowOutput,
-                                    runInBackground = runInBackground,
                                 )
                     }
-                    onSave(updated)
+                    onSave(updated, shareInBackground)
                 },
             ) {
                 Text(stringResource(R.string.save))
@@ -169,8 +165,9 @@ private fun ShareTargetSettingsDialogPreview() {
         Surface {
             ShareTargetSettingsDialog(
                 initialRemoteCommands = wtypePreset,
+                initialShareInBackground = false,
                 onDismiss = {},
-                onSave = {},
+                onSave = { _, _ -> },
             )
         }
     }

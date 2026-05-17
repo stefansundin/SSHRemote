@@ -53,6 +53,7 @@ data class Host(
     val knownHosts: List<String> = emptyList(),
     val commands: List<Command> = DEFAULT_COMMANDS,
     val remoteCommands: Map<RemoteControlKey, Command>? = null,
+    val shareInBackground: Boolean = false,
     val startScreen: RemoteControlScreen = RemoteControlScreen.Default,
     val smartVolume: SmartVolumeSettings? = null,
     val sshConfig: String? = null,
@@ -76,6 +77,7 @@ data class Host(
             user = user,
             allowIdentities = identityIds?.isNotEmpty() ?: true,
             knownHosts = knownHosts,
+            shareInBackground = shareInBackground,
             commands = commands.map {
                 ExportedCommand(
                     id = it.id,
@@ -83,7 +85,6 @@ data class Host(
                     command = it.command,
                     showOutput = it.showOutput,
                     renderOutputAsMarkdown = it.renderOutputAsMarkdown,
-                    runInBackground = it.runInBackground,
                 )
             },
             remoteCommands = remoteCommands?.mapValues {

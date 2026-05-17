@@ -146,7 +146,7 @@ class RouterActivity : ComponentActivity() {
                 handleShareIntent(intent)
             }
 
-            intent.hasExtra("HOST_ID") && intent.hasExtra("COMMAND_ID") -> {
+            intent.hasExtra(EXTRA_HOST_ID) && intent.hasExtra(EXTRA_COMMAND_ID) -> {
                 handleCommandShortcutIntent(intent)
             }
 
@@ -171,7 +171,7 @@ class RouterActivity : ComponentActivity() {
                 forwardToMainActivity(intent)
                 return@launch
             }
-            if (commandTemplate.runInBackground) {
+            if (host.shareInBackground) {
                 executeShortcutCommand(
                     host = host,
                     commandTemplate = commandTemplate,
@@ -185,12 +185,13 @@ class RouterActivity : ComponentActivity() {
     }
 
     private fun handleCommandShortcutIntent(intent: Intent) {
-        val hostId = intent.getStringExtra("HOST_ID")
-        val commandId = intent.getStringExtra("COMMAND_ID")
+        val hostId = intent.getStringExtra(EXTRA_HOST_ID)
+        val commandId = intent.getStringExtra(EXTRA_COMMAND_ID)
         if (hostId.isNullOrEmpty() || commandId.isNullOrEmpty()) {
             forwardToMainActivity(intent)
             return
         }
+        val runInBackground = intent.getBooleanExtra(EXTRA_RUN_IN_BACKGROUND, false)
 
         if (app.activeConnectionTracker.state.value.isEditingRemoteControl) {
             Toast.makeText(
@@ -198,6 +199,11 @@ class RouterActivity : ComponentActivity() {
                 getString(R.string.shortcut_save_changes_before_using),
                 Toast.LENGTH_LONG,
             ).show()
+            startActivity(
+                Intent(this, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                },
+            )
             finishImmediately()
             return
         }
@@ -217,7 +223,7 @@ class RouterActivity : ComponentActivity() {
                 return@launch
             }
 
-            if (!commandTemplate.runInBackground) {
+            if (!runInBackground) {
                 forwardToMainActivity(intent)
                 return@launch
             }

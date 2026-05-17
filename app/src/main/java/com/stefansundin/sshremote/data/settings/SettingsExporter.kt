@@ -43,7 +43,6 @@ data class ExportedCommand(
     val showOutput: Boolean? = null,
     val renderOutputAsMarkdown: Boolean? = null,
     val repeat: Boolean? = null,
-    val runInBackground: Boolean? = null,
 ) {
     fun toCommand(): Command {
         return Command(
@@ -54,7 +53,6 @@ data class ExportedCommand(
             showOutput = showOutput ?: false,
             renderOutputAsMarkdown = renderOutputAsMarkdown ?: false,
             repeat = repeat ?: false,
-            runInBackground = runInBackground ?: false,
         )
     }
 }

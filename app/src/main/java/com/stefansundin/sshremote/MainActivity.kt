@@ -79,6 +79,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stefansundin.sshremote.data.CryptoManager
@@ -222,12 +223,12 @@ class MainActivity : ComponentActivity() {
             sharedText.value = intent.getStringExtra(Intent.EXTRA_TEXT)
             return
         }
-        if (intent.hasExtra("HOST_ID")) {
-            val hostId = intent.getStringExtra("HOST_ID") ?: return
+        if (intent.hasExtra(EXTRA_HOST_ID)) {
+            val hostId = intent.getStringExtra(EXTRA_HOST_ID) ?: return
             pendingShortcut.value = PendingShortcut(
                 hostId = hostId,
-                commandId = intent.getStringExtra("COMMAND_ID"),
-                remoteControlKey = intent.getStringExtra("REMOTE_CONTROL_KEY"),
+                commandId = intent.getStringExtra(EXTRA_COMMAND_ID),
+                remoteControlKey = intent.getStringExtra(EXTRA_REMOTE_CONTROL_KEY),
             )
         }
     }
@@ -291,7 +292,8 @@ class MainActivity : ComponentActivity() {
                     val scope = rememberCoroutineScope()
                     val uiState by hostViewModel.uiState.collectAsState()
                     val navController = rememberNavController()
-                    val currentRoute = navController.currentBackStackEntry?.destination?.route
+                    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = currentBackStackEntry?.destination?.route
                     val app = LocalContext.current.applicationContext as SshRemoteApplication
                     var showBackupRestoredDialog by rememberSaveable { mutableStateOf(app.isRestoredFromBackup) }
                     val hosts by hostViewModel.allHosts.collectAsState()
@@ -695,11 +697,12 @@ class MainActivity : ComponentActivity() {
                             if (host != null) {
                                 EditRemoteControlScreen(
                                     host = host,
-                                    onSave = { remoteCommands, commands, smartVolume, navigateBack ->
+                                    onSave = { remoteCommands, commands, shareInBackground, smartVolume, navigateBack ->
                                         scope.launch {
                                             val updatedHost = host.copy(
                                                 remoteCommands = remoteCommands,
                                                 commands = commands,
+                                                shareInBackground = shareInBackground,
                                                 smartVolume = smartVolume,
                                             )
                                             hostViewModel.upsert(updatedHost)
@@ -730,8 +733,14 @@ class MainActivity : ComponentActivity() {
                                                 .show()
                                         }
                                     },
-                                    onAddCommandShortcut = { shortcutHost, commandId ->
-                                        createCommandShortcut(this@MainActivity, shortcutHost, commandId)
+                                    onAddCommandShortcut = { shortcutHost, commandId, shortcutLabel, runInBackground ->
+                                        createCommandShortcut(
+                                            this@MainActivity,
+                                            shortcutHost,
+                                            commandId,
+                                            shortcutLabel,
+                                            runInBackground,
+                                        )
                                     },
                                     onAddRemoteCommandShortcut = { shortcutHost, key ->
                                         createRemoteCommandShortcut(this@MainActivity, shortcutHost, key)
@@ -853,10 +862,10 @@ class MainActivity : ComponentActivity() {
             handleIntent(intent)
             return
         }
-        if (intent.hasExtra("HOST_ID")) {
-            val hostId = intent.getStringExtra("HOST_ID")
+        if (intent.hasExtra(EXTRA_HOST_ID)) {
+            val hostId = intent.getStringExtra(EXTRA_HOST_ID)
             val uiState = hostViewModel.uiState.value
-            val hasCommandPayload = intent.hasExtra("COMMAND_ID") || intent.hasExtra("REMOTE_CONTROL_KEY")
+            val hasCommandPayload = intent.hasExtra(EXTRA_COMMAND_ID) || intent.hasExtra(EXTRA_REMOTE_CONTROL_KEY)
             if (uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostId && !hasCommandPayload) {
                 return
             }
@@ -872,7 +881,7 @@ class MainActivity : ComponentActivity() {
     private fun createShortcut(context: Context, host: Host) {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_MAIN
-            putExtra("HOST_ID", host.id)
+            putExtra(EXTRA_HOST_ID, host.id)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 
@@ -886,19 +895,24 @@ class MainActivity : ComponentActivity() {
         ShortcutManagerCompat.requestPinShortcut(context, shortcutInfo, null)
     }
 
-    private fun createCommandShortcut(context: Context, host: Host, commandId: String) {
-        val command = host.commands.find { it.id == commandId }
-        val commandLabel = command?.name ?: command?.command ?: getString(R.string.command)
+    private fun createCommandShortcut(
+        context: Context,
+        host: Host,
+        commandId: String,
+        shortcutLabel: String,
+        runInBackground: Boolean,
+    ) {
         val intent = Intent(context, RouterActivity::class.java).apply {
             action = "com.stefansundin.sshremote.action.RUN_COMMAND_SHORTCUT"
-            putExtra("HOST_ID", host.id)
-            putExtra("COMMAND_ID", commandId)
+            putExtra(EXTRA_HOST_ID, host.id)
+            putExtra(EXTRA_COMMAND_ID, commandId)
+            putExtra(EXTRA_RUN_IN_BACKGROUND, runInBackground)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 
         val shortcutInfo = ShortcutInfoCompat.Builder(context, "command_${host.id}_$commandId")
-            .setShortLabel(getString(R.string.run_command_on_host_short, commandLabel, host.name))
-            .setLongLabel(getString(R.string.run_command_on_host_long, commandLabel, host.name))
+            .setShortLabel(shortcutLabel)
+            .setLongLabel(shortcutLabel)
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(intent)
             .build()
@@ -911,8 +925,8 @@ class MainActivity : ComponentActivity() {
         val commandLabel = command?.name ?: getString(key.titleRes)
         val intent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_MAIN
-            putExtra("HOST_ID", host.id)
-            putExtra("REMOTE_CONTROL_KEY", key.name)
+            putExtra(EXTRA_HOST_ID, host.id)
+            putExtra(EXTRA_REMOTE_CONTROL_KEY, key.name)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 

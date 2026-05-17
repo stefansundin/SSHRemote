@@ -141,6 +141,7 @@ fun EditHostScreen(
     var scanQrCode by rememberSaveable { mutableStateOf(scanQrCodeOnStart) }
     var commands by rememberSaveable(host) { mutableStateOf(host?.commands) }
     var remoteCommands by rememberSaveable(host) { mutableStateOf(host?.remoteCommands) }
+    var shareInBackground by rememberSaveable(host) { mutableStateOf(host?.shareInBackground ?: false) }
     var startScreen by rememberSaveable(host) { mutableStateOf(host?.startScreen ?: RemoteControlScreen.Default) }
 
     var passwordState by rememberSaveable { mutableStateOf(PasswordState.SET) }
@@ -204,6 +205,7 @@ fun EditHostScreen(
             passwordChanged ||
             (selectedIdentityIds != host?.identityIds) ||
             (knownHosts != (host?.knownHosts ?: emptyList<String>())) ||
+            (shareInBackground != (host?.shareInBackground ?: false)) ||
             (sshConfig != host?.sshConfig)
 
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
@@ -224,6 +226,7 @@ fun EditHostScreen(
                 user = user,
                 identityIds = selectedIdentityIds,
                 knownHosts = knownHosts,
+                shareInBackground = shareInBackground,
                 sshConfig = sshConfig,
             )
                 ?: Host(
@@ -233,6 +236,7 @@ fun EditHostScreen(
                     user = user,
                     identityIds = selectedIdentityIds,
                     knownHosts = knownHosts,
+                    shareInBackground = shareInBackground,
                     sshConfig = sshConfig,
                     commands = commands ?: Host.DEFAULT_COMMANDS,
                     remoteCommands = remoteCommands,
@@ -437,6 +441,7 @@ fun EditHostScreen(
                     hostData.knownHosts?.let { knownHosts = it }
                     hostData.sshConfig?.let { sshConfig = it }
                     hostData.allowIdentities?.let { selectedIdentityIds = if (it) null else emptyList() }
+                    hostData.shareInBackground?.let { shareInBackground = it }
                     hostData.commands?.let { it -> commands = it.map { it.toCommand() } }
                     @Suppress("UNCHECKED_CAST")
                     hostData.remoteCommands?.let { it ->
