@@ -159,6 +159,12 @@ private data class PendingShortcut(
         get() = commandId != null || remoteControlKey != null
 }
 
+private data class PendingShare(
+    val text: String,
+    val hostId: String,
+    val connectionState: PendingShortcutConnectionState = PendingShortcutConnectionState.NOT_REQUESTED,
+)
+
 private fun NavController.safePopBackStack() {
     if (previousBackStackEntry != null) {
         popBackStack()
@@ -215,12 +221,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private var pendingShortcut = mutableStateOf<PendingShortcut?>(null)
-    private var sharedText = mutableStateOf<String?>(null)
+    private var pendingShare = mutableStateOf<PendingShare?>(null)
 
     private fun handleIntent(intent: Intent?) {
         if (intent == null) return
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            sharedText.value = intent.getStringExtra(Intent.EXTRA_TEXT)
+            val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
+            val hostId = intent.getStringExtra(EXTRA_HOST_ID) ?: return
+            pendingShare.value = PendingShare(text = text, hostId = hostId)
             return
         }
         if (intent.hasExtra(EXTRA_HOST_ID)) {
@@ -310,8 +318,6 @@ class MainActivity : ComponentActivity() {
                     var hostForPresetSelection by remember { mutableStateOf<Host?>(null) }
                     var showGettingStartedDialog by rememberSaveable { mutableStateOf(false) }
                     var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
-                    var showShareNotConnectedDialog by rememberSaveable { mutableStateOf(false) }
-                    var showMissingShareCommandDialog by rememberSaveable { mutableStateOf(false) }
 
                     // Auto-run a command after connecting via a home-screen shortcut.
                     LaunchedEffect(
@@ -420,40 +426,6 @@ class MainActivity : ComponentActivity() {
                         packageManager.setComponentEnabledSetting(componentName, newState, PackageManager.DONT_KILL_APP)
                     }
 
-                    // Handle incoming shared text
-                    LaunchedEffect(sharedText.value, uiState.connectionStatus, uiState.hostId, hosts) {
-                        val text = sharedText.value ?: return@LaunchedEffect
-                        if (uiState.connectionStatus == ConnectionStatus.CONNECTED) {
-                            val host = hosts?.find { it.id == uiState.hostId }
-                            val commandTemplate = host?.resolveShareCommandTemplate()
-                            if (commandTemplate?.command?.isNotEmpty() == true) {
-                                sharedText.value = null
-                                val command = commandTemplate.formatCommand(text)
-                                // Run in a stable scope so this work is not canceled when sharedText changes
-                                scope.launch {
-                                    hostViewModel.runCommand(command, commandTemplate.showOutput)
-                                }
-                            } else {
-                                sharedText.value = null
-                                showMissingShareCommandDialog = true
-                            }
-                        } else {
-                            sharedText.value = null
-                            showShareNotConnectedDialog = true
-                        }
-                    }
-
-                    if (showShareNotConnectedDialog) {
-                        ShareNotConnectedDialog(
-                            onDismiss = { showShareNotConnectedDialog = false },
-                        )
-                    }
-
-                    if (showMissingShareCommandDialog) {
-                        ShareMissingShareCommandDialog(
-                            onDismiss = { showMissingShareCommandDialog = false },
-                        )
-                    }
 
                     val onConnect = { host: Host ->
                         if (host.remoteCommands == null) {
@@ -542,6 +514,63 @@ class MainActivity : ComponentActivity() {
                             uiState.connectionStatus == ConnectionStatus.DISCONNECTED
                         ) {
                             pendingShortcut.value = null
+                        }
+                    }
+
+                    // Handle incoming shared text – connect to target host if needed, then run share command.
+                    LaunchedEffect(hosts, pendingShare.value, uiState.connectionStatus, uiState.hostId) {
+                        val share = pendingShare.value ?: return@LaunchedEffect
+                        val allHosts = hosts ?: return@LaunchedEffect
+                        val hostToConnect = allHosts.find { it.id == share.hostId }
+                        if (hostToConnect == null) {
+                            pendingShare.value = null
+                            Toast.makeText(
+                                this@MainActivity,
+                                getString(R.string.shortcut_host_not_found),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                            return@LaunchedEffect
+                        }
+                        val isSameConnectedHost =
+                            uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == hostToConnect.id
+                        if (!isSameConnectedHost && share.connectionState == PendingShortcutConnectionState.NOT_REQUESTED) {
+                            pendingShare.value = share.copy(connectionState = PendingShortcutConnectionState.REQUESTED)
+                            onConnect(hostToConnect)
+                        }
+                    }
+
+                    LaunchedEffect(pendingShare.value, uiState.connectionStatus, uiState.hostId, hosts) {
+                        val share = pendingShare.value ?: return@LaunchedEffect
+                        if (uiState.connectionStatus != ConnectionStatus.CONNECTED || uiState.hostId != share.hostId) {
+                            return@LaunchedEffect
+                        }
+                        val host = hosts?.find { it.id == share.hostId } ?: return@LaunchedEffect
+                        val commandTemplate = host.resolveShareCommandTemplate()
+                        pendingShare.value = null
+                        if (commandTemplate?.command?.isNotEmpty() == true) {
+                            val command = commandTemplate.formatCommand(share.text)
+                            scope.launch {
+                                hostViewModel.runCommand(command, commandTemplate.showOutput)
+                            }
+                        }
+                    }
+
+                    LaunchedEffect(pendingShare.value, uiState.connectionStatus, uiState.hostId) {
+                        val share = pendingShare.value ?: return@LaunchedEffect
+                        if (
+                            share.connectionState == PendingShortcutConnectionState.REQUESTED &&
+                            uiState.hostId == share.hostId &&
+                            uiState.connectionStatus == ConnectionStatus.CONNECTING
+                        ) {
+                            pendingShare.value = share.copy(connectionState = PendingShortcutConnectionState.STARTED)
+                            return@LaunchedEffect
+                        }
+                        if (
+                            share.connectionState == PendingShortcutConnectionState.STARTED &&
+                            uiState.hostId == share.hostId &&
+                            uiState.connectionStatus == ConnectionStatus.DISCONNECTED
+                        ) {
+                            pendingShare.value = null
                         }
                     }
 
@@ -876,6 +905,8 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         NotificationService.stop(this)
+        val app = (application as SshRemoteApplication)
+        app.activeConnectionTracker.reset()
     }
 
     private fun createShortcut(context: Context, host: Host) {
@@ -1063,55 +1094,7 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
     }
 }
 
-@Composable
-private fun ShareNotConnectedDialog(onDismiss: () -> Unit) {
-    val view = LocalView.current
 
-    AlertDialog(
-        title = { Text(stringResource(R.string.share_not_connected_title)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.share_not_connected_text))
-            }
-        },
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onDismiss()
-                },
-            ) {
-                Text(stringResource(R.string.ok))
-            }
-        },
-    )
-}
-
-@Composable
-private fun ShareMissingShareCommandDialog(onDismiss: () -> Unit) {
-    val view = LocalView.current
-
-    AlertDialog(
-        title = { Text(stringResource(R.string.share_missing_share_command_title)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.share_missing_share_command_text))
-            }
-        },
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onDismiss()
-                },
-            ) {
-                Text(stringResource(R.string.ok))
-            }
-        },
-    )
-}
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
 @Preview(
@@ -1143,23 +1126,6 @@ private fun SelectPresetDialogPreview() {
     SSHRemoteTheme {
         Surface {
             SelectPresetDialog(onDismiss = {}, onPresetSelected = {})
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 600)
-@Preview(
-    showBackground = true,
-    widthDp = 400,
-    heightDp = 600,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    fontScale = 2.0f,
-)
-@Composable
-private fun ShareNotConnectedDialogPreview() {
-    SSHRemoteTheme {
-        Surface {
-            ShareNotConnectedDialog(onDismiss = {})
         }
     }
 }

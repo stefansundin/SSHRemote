@@ -402,15 +402,15 @@ fun HostItem(
     }
 }
 
+val sampleHosts = listOf(
+    sampleHost,
+    Host("2", "Example Host", "example.com", 2222, "admin", null),
+)
+
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, fontScale = 2.0f)
 @Composable
 private fun HostListScreenPreview() {
-    val sampleHosts = listOf(
-        sampleHost,
-        Host("2", "Example Host", "example.com", 2222, "admin", null),
-    )
-
     SSHRemoteTheme {
         HostListScreen(
             hosts = sampleHosts,

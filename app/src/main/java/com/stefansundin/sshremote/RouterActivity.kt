@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.view.SoundEffectConstants
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -52,6 +53,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -66,6 +68,7 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.persistAcceptedHostKey
 import com.stefansundin.sshremote.data.host.toConnectionDetails
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
+import com.stefansundin.sshremote.ui.components.SelectHostDialog
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.CancellationException
@@ -164,11 +167,35 @@ class RouterActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch {
-            val host = resolveShareHost()
-            val commandTemplate = host?.resolveShareCommandTemplate()
+            val host =
+                if (intent.hasExtra(EXTRA_HOST_ID)) {
+                    intent.getStringExtra(EXTRA_HOST_ID)?.let { hostId ->
+                        app.hostRepository.getOnce(hostId)
+                    }
+                } else {
+                    resolveShareHost()
+                } ?: run {
+                    val hosts = app.hostRepository.getAll().first()
+                    val selectedHostDeferred = CompletableDeferred<Host?>()
+                    uiState = RouterUiState.SelectHostDialog(
+                        hosts = hosts,
+                        onHostSelected = { selectedHostDeferred.complete(it) },
+                        onDismiss = { selectedHostDeferred.complete(null) },
+                    )
+                    selectedHostDeferred.await()
+                }
+            if (host == null) {
+                finishImmediately()
+                return@launch
+            }
 
+            if (!intent.hasExtra(EXTRA_HOST_ID)) {
+                intent.putExtra(EXTRA_HOST_ID, host.id)
+            }
+
+            val commandTemplate = host.resolveShareCommandTemplate()
             if (commandTemplate?.command.isNullOrEmpty()) {
-                forwardToMainActivity(intent)
+                uiState = RouterUiState.MissingShareCommand
                 return@launch
             }
             if (host.shareInBackground) {
@@ -409,6 +436,7 @@ class RouterActivity : ComponentActivity() {
 
 private sealed interface RouterUiState {
     data object Idle : RouterUiState
+    data object MissingShareCommand : RouterUiState
     data class Loading(
         val title: String,
         @StringRes val statusRes: Int,
@@ -417,6 +445,12 @@ private sealed interface RouterUiState {
     data class Output(
         val output: String,
         val renderMarkdown: Boolean,
+    ) : RouterUiState
+
+    data class SelectHostDialog(
+        val hosts: List<Host>,
+        val onHostSelected: (Host?) -> Unit,
+        val onDismiss: () -> Unit,
     ) : RouterUiState
 }
 
@@ -465,12 +499,25 @@ private fun RouterContent(
     }
     when (uiState) {
         RouterUiState.Idle -> Unit
+        RouterUiState.MissingShareCommand -> ShareMissingShareCommandDialog(onDismiss = onDismissOutput)
         is RouterUiState.Loading -> RouterLoadingDialog(title = uiState.title, statusRes = uiState.statusRes)
         is RouterUiState.Output -> {
             CommandOutputDialog(
                 output = uiState.output,
                 renderMarkdown = uiState.renderMarkdown,
                 onDismiss = onDismissOutput,
+            )
+        }
+
+        is RouterUiState.SelectHostDialog -> {
+            SelectHostDialog(
+                hosts = uiState.hosts,
+                onHostSelected = { host ->
+                    uiState.onHostSelected(host)
+                },
+                onDismiss = {
+                    uiState.onDismiss()
+                },
             )
         }
     }
@@ -651,6 +698,30 @@ private fun RouterLoadingDialog(
     )
 }
 
+@Composable
+fun ShareMissingShareCommandDialog(onDismiss: () -> Unit) {
+    val view = LocalView.current
+
+    AlertDialog(
+        title = { Text(stringResource(R.string.share_missing_share_command_title)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(stringResource(R.string.share_missing_share_command_text))
+            }
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+    )
+}
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 600, name = "Router loading")
 @Preview(
@@ -687,6 +758,7 @@ private fun RouterContentPreview_Loading() {
     }
 }
 
+@Suppress("SpellCheckingInspection")
 @Preview(showBackground = true, widthDp = 400, heightDp = 600, name = "Router output")
 @Preview(
     showBackground = true,

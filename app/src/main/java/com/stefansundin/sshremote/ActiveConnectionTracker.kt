@@ -44,4 +44,8 @@ class ActiveConnectionTracker {
             isEditingRemoteControl = isEditingRemoteControl,
         )
     }
+
+    fun reset() {
+        _state.value = ActiveConnectionState()
+    }
 }
