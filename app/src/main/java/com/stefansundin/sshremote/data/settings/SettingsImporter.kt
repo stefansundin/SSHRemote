@@ -173,6 +173,7 @@ class SettingsImporter(
                     remoteCommands = (exportedHost.remoteCommands?.filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>?)?.mapValues { it.value.toCommand() }
                         ?: emptyMap(),
                     startScreen = exportedHost.startScreen ?: RemoteControlScreen.Default,
+                    smartVolume = exportedHost.smartVolume,
                     sshConfig = exportedHost.sshConfig,
                 )
                 hostRepository.upsert(host)
