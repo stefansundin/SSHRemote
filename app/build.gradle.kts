@@ -22,7 +22,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "JSCH_VERSION", "\"${libs.versions.jsch.get()}\"")
+        buildConfigField("String", "SSH_LIBRARY_NAME", "\"mwiede/jsch\"")
+        buildConfigField("String", "SSH_LIBRARY_VERSION", "\"${libs.versions.jsch.get()}\"")
+        buildConfigField("String", "SSH_LIBRARY_URL", "\"https://github.com/mwiede/jsch\"")
     }
 
     buildTypes {
@@ -35,14 +37,20 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    androidResources {
+        generateLocaleConfig = true
     }
 }
 

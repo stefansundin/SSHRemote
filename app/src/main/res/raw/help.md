@@ -1,5 +1,7 @@
 ## About SSH Remote
 
+<!-- Instruction for AI: When translating this file, replace this comment with a paragraph mentioning the fact that this translation is made by AI (mention what your provider AND model is, e.g. "GitHub Copilot (GPT-5.3-Codex)") and that there may be translation errors. -->
+
 SSH Remote is a free and open source app that allows you to control computers remotely using SSH.
 
 You can fully customize the commands that are executed, and there are presets for common setups.
@@ -178,6 +180,6 @@ If you wish to show your gratitude and appreciation, donations are accepted.
 
 <https://stefansundin.github.io/donate/>
 
-If you have donated then I will try my best to answer any question you may have.
+If you have donated then I will try my best to answer any question you may have. <!-- When translating to another language, please include a sentence asking any inquiries to be written in English. -->
 
 Thank you for your support!

@@ -730,10 +730,14 @@ fun SettingsScreen(
                     )
                     SettingsItem(
                         title = stringResource(R.string.ssh_library),
-                        subtitle = stringResource(R.string.ssh_library_subtitle, BuildConfig.JSCH_VERSION),
+                        subtitle = stringResource(
+                            R.string.ssh_library_subtitle,
+                            BuildConfig.SSH_LIBRARY_NAME,
+                            BuildConfig.SSH_LIBRARY_VERSION,
+                        ),
                         modifier = Modifier.fillMaxWidth(),
                         icon = Icons.AutoMirrored.Filled.OpenInNew,
-                        onClick = { uriHandler.openUri("https://github.com/mwiede/jsch") },
+                        onClick = { uriHandler.openUri(BuildConfig.SSH_LIBRARY_URL) },
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))

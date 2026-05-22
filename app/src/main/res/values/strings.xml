@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">OK</string>
@@ -119,8 +120,8 @@
     <string name="shortcut_label">Shortcut label</string>
     <string name="connecting">Connecting…</string>
     <string name="executing_command">Executing command…</string>
-    <string name="executing_on">Executing on %1$s</string>
-    <string name="sharing_to">Sharing to %1$s</string>
+    <string name="executing_on">Executing on %s</string>
+    <string name="sharing_to">Sharing to %s</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Back</string>
@@ -274,7 +275,7 @@
     <string name="known_host_add_title">Add Known Host Entries</string>
     <string name="known_host_input_label">Paste one entry per line</string>
     <string name="add_entries">Add entries</string>
-    <string name="known_host_import_summary">Valid entries: %1$d</string>
+    <string name="known_host_import_summary">Valid entries: %d</string>
     <string name="known_host_deleted">Known host entry deleted</string>
     <string name="view_host_key">View host key</string>
     <string name="scan_qr_code_known_host_prompt">Scan QR code to import known host entries</string>
@@ -343,7 +344,7 @@
     <string name="source_code">Source code</string>
     <string name="view_on_github">View on GitHub</string>
     <string name="ssh_library">SSH library</string>
-    <string name="ssh_library_subtitle">Using mwiede/jsch %s</string>
+    <string name="ssh_library_subtitle">Using %1$s %2$s</string>
 
     <!-- Help & Volume -->
     <string name="help">Help</string>
@@ -352,7 +353,7 @@
     <string name="getting_started_text">The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.\n\nPlease read the Help page if this is the first time you are using this app.</string>
     <string name="error_reading_volume">Error reading volume. Please install pactl.</string>
     <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %1$s (muted)</string>
+    <string name="volume_muted_format">Volume: %s (muted)</string>
     <string name="smart_volume_settings">Smart volume settings</string>
     <string name="read_current_volume">Read current volume</string>
     <string name="show_volume_slider">Show volume slider</string>
@@ -392,4 +393,5 @@
     <string name="use_keyboard_type_command">Use keyboard type command</string>
     <string name="custom_share_command">Custom share command</string>
     <string name="share_command_placeholder">%s will be replaced with the shared text</string>
+
 </resources>
