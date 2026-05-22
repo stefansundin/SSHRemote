@@ -361,8 +361,7 @@ class HostViewModel(
                     when (key) {
                         RemoteControlKey.VOLUME_UP, RemoteControlKey.VOLUME_DOWN -> {
                             updateVolume()
-                            if (uiState.value.volume == "0%" || oldVolume == "0%") {
-                                // Maybe unnecessary? Maybe we can assume it is muted if volume is "0%"?
+                            if (uiState.value.muted == true) {
                                 updateMuted()
                             }
                         }
