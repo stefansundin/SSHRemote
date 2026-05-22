@@ -26,5 +26,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SmartVolumeSettings(
     val readCurrentVolume: Boolean = false,
+    val showSlider: Boolean = false,
     val controlVolumeWithHardwareButtons: Boolean = false,
 ) : Parcelable

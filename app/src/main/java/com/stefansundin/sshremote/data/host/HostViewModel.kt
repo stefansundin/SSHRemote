@@ -67,6 +67,8 @@ interface IRemoteControlHostViewModel {
         isRetry: Boolean = false,
 //        reuseShell: Boolean = true,
     ): Result
+
+    fun setVolume(percent: Int)
 }
 
 class HostViewModel(
@@ -377,6 +379,17 @@ class HostViewModel(
         } else {
             Log.e("HostViewModel", "No command found for key: $key")
             onComplete?.invoke(Result.Error("No command found for key: $key"))
+        }
+    }
+
+    override fun setVolume(percent: Int) {
+        viewModelScope.launch {
+            runCommand(
+                command = "pactl set-sink-volume @DEFAULT_SINK@ $percent%",
+                showOutput = false,
+            )
+            updateVolume()
+            updateMuted()
         }
     }
 

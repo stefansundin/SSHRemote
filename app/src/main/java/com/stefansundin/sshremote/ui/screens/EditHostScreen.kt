@@ -95,6 +95,7 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.IEditHostViewModel
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
+import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ExportedCommand
@@ -907,6 +908,7 @@ val sampleHost = Host(
     emptyList(),
     listOf(""),
     remoteCommands = wtypePreset,
+    smartVolume = SmartVolumeSettings(readCurrentVolume = true, showSlider = true)
 )
 
 private val fakeEditHostViewModel = object : IEditHostViewModel {

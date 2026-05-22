@@ -350,7 +350,8 @@
     <string name="volume_format">Volume: %s</string>
     <string name="volume_muted_format">Volume: %1$s (muted)</string>
     <string name="smart_volume_settings">Smart volume settings</string>
-    <string name="read_current_volume">Read Current Volume</string>
+    <string name="read_current_volume">Read current volume</string>
+    <string name="show_volume_slider">Show volume slider</string>
     <string name="control_volume_with_hardware_buttons">Control volume with hardware buttons</string>
     <string name="test_pactl">Test pactl</string>
     <string name="pactl_installation_requirement">Requires that pactl is installed.</string>

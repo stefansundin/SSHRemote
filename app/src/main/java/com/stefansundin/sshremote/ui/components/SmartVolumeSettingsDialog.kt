@@ -21,8 +21,6 @@ package com.stefansundin.sshremote.ui.components
 import android.content.res.Configuration
 import android.view.SoundEffectConstants
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -54,6 +52,7 @@ fun SmartVolumeSettingsDialog(
     onTest: () -> Unit,
 ) {
     var readCurrentVolume by rememberSaveable { mutableStateOf(settings?.readCurrentVolume ?: false) }
+    var showSlider by rememberSaveable { mutableStateOf(settings?.showSlider ?: false) }
     var controlVolumeWithHardwareButtons by rememberSaveable {
         mutableStateOf(
             settings?.controlVolumeWithHardwareButtons ?: false,
@@ -75,7 +74,12 @@ fun SmartVolumeSettingsDialog(
                     text = stringResource(R.string.read_current_volume),
                     onCheckedChange = { readCurrentVolume = it },
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                RowWithCheckbox(
+                    enabled = readCurrentVolume,
+                    checked = readCurrentVolume && showSlider,
+                    text = stringResource(R.string.show_volume_slider),
+                    onCheckedChange = { showSlider = it },
+                )
                 RowWithCheckbox(
                     checked = controlVolumeWithHardwareButtons,
                     text = stringResource(R.string.control_volume_with_hardware_buttons),
@@ -98,12 +102,13 @@ fun SmartVolumeSettingsDialog(
         properties = DialogProperties(dismissOnClickOutside = false, decorFitsSystemWindows = false),
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
                     view.playSoundEffect(SoundEffectConstants.CLICK)
                     onSave(
                         SmartVolumeSettings(
                             readCurrentVolume = readCurrentVolume,
+                            showSlider = showSlider,
                             controlVolumeWithHardwareButtons = controlVolumeWithHardwareButtons,
                         ),
                     )

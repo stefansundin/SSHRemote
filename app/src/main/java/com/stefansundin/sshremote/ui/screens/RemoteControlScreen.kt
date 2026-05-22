@@ -749,6 +749,9 @@ fun RemoteControlScreen(
                                 connectionStatus = uiState.connectionStatus,
                                 volume = uiState.volume,
                                 muted = uiState.muted,
+                                onVolumeSet = { percent ->
+                                    hostViewModel.setVolume(percent)
+                                },
                             )
                         }
 
@@ -887,6 +890,8 @@ private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewMode
     ): Result {
         return Result.Success("")
     }
+
+    override fun setVolume(percent: Int) {}
 }
 
 private val fakeSshRepository = object : ISshRepository {
@@ -915,7 +920,7 @@ fun RemoteControlScreenPreview(
         error = null,
         commandOutput = null,
         volume = "75%",
-        muted = false,
+        muted = true,
         hapticFeedback = HapticFeedback.Medium,
     ),
     identityViewModel: IRemoteControlIdentityViewModel = fakeRemoteControlIdentityViewModel,

@@ -27,12 +27,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -54,10 +57,15 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -66,6 +74,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -83,6 +92,7 @@ import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.screens.sampleHost
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
+import kotlin.math.roundToInt
 
 private val MinDimensionForActionButtons = 400.dp
 
@@ -95,6 +105,7 @@ fun RemoteControl(
     connectionStatus: ConnectionStatus? = null,
     volume: String? = null,
     muted: Boolean? = null,
+    onVolumeSet: (Int) -> Unit,
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isLandscape = maxWidth > maxHeight
@@ -111,7 +122,7 @@ fun RemoteControl(
             RemoteLayoutMode.Portrait
         }
 
-        RemoteControlLayout(layoutMode, onKeyEvent, host, editing, connectionStatus, volume, muted)
+        RemoteControlLayout(layoutMode, onKeyEvent, host, editing, connectionStatus, volume, muted, onVolumeSet)
     }
 }
 
@@ -131,6 +142,7 @@ private fun RemoteControlLayout(
     connectionStatus: ConnectionStatus? = null,
     volume: String? = null,
     muted: Boolean? = null,
+    onVolumeSet: (Int) -> Unit,
 ) {
     val context = LocalContext.current
     val isConnected = editing || connectionStatus == ConnectionStatus.CONNECTED
@@ -141,6 +153,9 @@ private fun RemoteControlLayout(
             Toast.makeText(context, tapToEditButtonCommand, Toast.LENGTH_SHORT).show()
         }
     }
+
+    val showSlider = !editing && host?.smartVolume?.showSlider == true && connectionStatus == ConnectionStatus.CONNECTED
+    val volumeThrottle = remember(onVolumeSet) { VolumeSetThrottle(onVolumeSet) }
 
     when (layoutMode) {
         RemoteLayoutMode.Compact -> {
@@ -161,6 +176,9 @@ private fun RemoteControlLayout(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Dpad(onKeyEvent, host, editing, isConnected)
+                if (showSlider) {
+                    VerticalVolumeSlider(volume, volumeThrottle)
+                }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
@@ -181,6 +199,9 @@ private fun RemoteControlLayout(
             ) {
                 StatusText(host, editing, volume, muted)
                 Dpad(onKeyEvent, host, editing, isConnected)
+                if (showSlider) {
+                    HorizontalVolumeSlider(volume, volumeThrottle)
+                }
                 ActionButtons(onKeyEvent, host, editing, isConnected, muted)
             }
         }
@@ -222,6 +243,83 @@ private fun VolumeStatus(smartVolumeSettings: SmartVolumeSettings?, volume: Stri
     }
 }
 
+private fun parseVolumePercent(volume: String?): Float? {
+    if (volume == null) return null
+    return volume.trimEnd('%').trim().toFloatOrNull()
+}
+
+private class VolumeSetThrottle(private val onVolumeSet: (Int) -> Unit) {
+    private var lastSentValue: Int? = null
+    private var lastCallTime: Long = 0L
+
+    fun onDrag(value: Float) {
+        val now = System.currentTimeMillis()
+        if (now - lastCallTime >= 500L) {
+            lastCallTime = now
+            val intValue = value.roundToInt()
+            lastSentValue = intValue
+            onVolumeSet(intValue)
+        }
+    }
+
+    fun onFinished(value: Float) {
+        val intValue = value.roundToInt()
+        if (intValue != lastSentValue) {
+            lastSentValue = intValue
+            onVolumeSet(intValue)
+        }
+    }
+}
+
+@Composable
+private fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) {
+    val committedValue = parseVolumePercent(volume)
+    var sliderValue by remember(committedValue) { mutableFloatStateOf(committedValue ?: 0f) }
+
+    Slider(
+        enabled = volume != null,
+        value = sliderValue,
+        onValueChange = {
+            sliderValue = it
+            throttle.onDrag(it)
+        },
+        onValueChangeFinished = { throttle.onFinished(sliderValue) },
+        valueRange = 0f..100f,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) {
+    // I tried using VerticalSlider in material3 1.5.0-alpha20 but could not get it working completely
+    // For now it is better to just rotate a regular slider
+    val committedValue = parseVolumePercent(volume)
+    var sliderValue by remember(committedValue) { mutableFloatStateOf(committedValue ?: 0f) }
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .width(56.dp)
+            .fillMaxHeight(),
+        contentAlignment = Alignment.Center,
+    ) {
+        val sliderLength = (maxHeight - 32.dp).coerceAtLeast(120.dp)
+        Slider(
+            enabled = volume != null,
+            value = sliderValue,
+            onValueChange = {
+                sliderValue = it
+                throttle.onDrag(it)
+            },
+            onValueChangeFinished = { throttle.onFinished(sliderValue) },
+            valueRange = 0f..100f,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .requiredWidth(sliderLength)
+                .graphicsLayer { rotationZ = -90f },
+        )
+    }
+}
+
 @Composable
 private fun ActionButtons(
     onKeyEvent: (KeyEvent) -> Unit,
@@ -260,7 +358,7 @@ private fun ActionButtons(
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
                 } else {
                     ButtonDefaults.buttonColors()
-                }
+                },
             ) {
                 Icon(Icons.AutoMirrored.Filled.VolumeOff, contentDescription = stringResource(R.string.key_mute))
             }
@@ -491,6 +589,7 @@ private fun RemoteControlPreview_Portrait() {
                 volume = "42%",
                 muted = true,
                 connectionStatus = ConnectionStatus.CONNECTED,
+                onVolumeSet = {},
             )
         }
     }
@@ -509,6 +608,7 @@ private fun RemoteControlPreview_Portrait_NoPreset() {
                 volume = "42%",
                 muted = true,
                 connectionStatus = ConnectionStatus.CONNECTED,
+                onVolumeSet = {},
             )
         }
     }
@@ -531,6 +631,7 @@ private fun RemoteControlPreview_Portrait_VLC() {
                 {},
                 host = sampleHost.copy(remoteCommands = macosVlcPreset),
                 connectionStatus = ConnectionStatus.CONNECTED,
+                onVolumeSet = {},
             )
         }
     }
@@ -552,7 +653,9 @@ private fun RemoteControlPreview_Landscape() {
                 RemoteLayoutMode.Landscape,
                 {},
                 host = sampleHost,
+                volume = "42%",
                 connectionStatus = ConnectionStatus.CONNECTED,
+                onVolumeSet = {},
             )
         }
     }
@@ -575,6 +678,7 @@ private fun RemoteControlPreview_Compact() {
                 {},
                 host = sampleHost,
                 connectionStatus = ConnectionStatus.CONNECTED,
+                onVolumeSet = {},
             )
         }
     }
@@ -597,6 +701,7 @@ private fun RemoteControlPreview_Compact_WithoutSelect() {
                 {},
                 host = sampleHost.copy(remoteCommands = wtypePreset - RemoteControlKey.SELECT),
                 connectionStatus = ConnectionStatus.CONNECTED,
+                onVolumeSet = {},
             )
         }
     }

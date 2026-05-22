@@ -116,7 +116,9 @@ Please discuss Android in this discussion thread: <https://github.com/stefansund
 
 ## Smart volume control
 
-When editing the remote control, you can find "smart" volume control settings in the menu. This can display the computer's current volume in the app, and let you use your device's hardware buttons to quickly send volume down/up commands. Reading the volume is currently hard-coded to use `pactl`.
+When editing the remote control, you can find "smart" volume control settings in the menu. This can display the computer's current volume in the app and let you quickly set the volume using a slider. You can also use your device's hardware buttons to quickly send volume up/down commands.
+
+Reading the current volume and setting a new volume using the slider is currently hard-coded to use `pactl`.
 
 The package containing `pactl` is usually called `pulseaudio-utils` or `libpulse`.
 

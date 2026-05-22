@@ -396,6 +396,7 @@ fun EditRemoteControlScreen(
                                 },
                                 editing = true,
                                 host = null,
+                                onVolumeSet = {},
                             )
                         }
                     }

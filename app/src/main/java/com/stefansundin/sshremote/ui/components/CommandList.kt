@@ -122,6 +122,8 @@ private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewMode
     ): Result {
         return Result.Success("")
     }
+
+    override fun setVolume(percent: Int) {}
 }
 
 @Preview(showBackground = true)
