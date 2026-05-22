@@ -91,8 +91,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditRemoteControlScreen(
     host: Host,
-    onSave: (Map<RemoteControlKey, Command>, List<Command>, Boolean, SmartVolumeSettings?, navigateBack: Boolean) -> Unit,
-    onNavigateBack: () -> Unit,
+    onSave: (Map<RemoteControlKey, Command>, List<Command>, Boolean, SmartVolumeSettings?, navigateBack: Boolean, currentPage: Int) -> Unit,
+    onNavigateBack: (currentPage: Int) -> Unit,
     onSetAsDefaultScreen: (RemoteControlScreen) -> Unit,
     onTestSmartVolumeSettings: () -> Unit,
     onAddCommandShortcut: (Host, String, String, Boolean) -> Unit,
@@ -149,6 +149,7 @@ fun EditRemoteControlScreen(
                             editedShareInBackground,
                             editedSmartVolumeSettings,
                             true,
+                            pagerState.currentPage,
                         )
                     },
                 ) {
@@ -159,7 +160,7 @@ fun EditRemoteControlScreen(
                 TextButton(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onNavigateBack()
+                        onNavigateBack(pagerState.currentPage)
                     },
                 ) {
                     Text(stringResource(R.string.discard_and_leave))
@@ -245,7 +246,7 @@ fun EditRemoteControlScreen(
                             if (hasUnsavedChanges) {
                                 showUnsavedBackDialog = true
                             } else {
-                                onNavigateBack()
+                                onNavigateBack(pagerState.currentPage)
                             }
                         },
                     ) {
@@ -338,6 +339,7 @@ fun EditRemoteControlScreen(
                             editedShareInBackground,
                             editedSmartVolumeSettings,
                             true,
+                            pagerState.currentPage,
                         )
                     },
                 )
@@ -585,7 +587,7 @@ private fun EditRemoteControlScreenPreview_RemoteTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _, _ -> },
+            onSave = { _, _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
@@ -604,7 +606,7 @@ private fun EditRemoteControlScreenPreview_MouseTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _, _ -> },
+            onSave = { _, _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
@@ -623,7 +625,7 @@ private fun EditRemoteControlScreenPreview_KeyboardTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _, _ -> },
+            onSave = { _, _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},
@@ -642,7 +644,7 @@ private fun EditRemoteControlScreenPreview_CommandsTab() {
     SSHRemoteTheme {
         EditRemoteControlScreen(
             host = sampleHost,
-            onSave = { _, _, _, _, _ -> },
+            onSave = { _, _, _, _, _, _ -> },
             onNavigateBack = {},
             onSetAsDefaultScreen = {},
             onTestSmartVolumeSettings = {},

@@ -491,7 +491,8 @@ class MainActivity : ComponentActivity() {
                         if (isSameConnectedHost && !shortcut.hasPayload) {
                             pendingShortcut.value = null
                         } else if (!isSameConnectedHost && shortcut.connectionState == PendingShortcutConnectionState.NOT_REQUESTED) {
-                            pendingShortcut.value = shortcut.copy(connectionState = PendingShortcutConnectionState.REQUESTED)
+                            pendingShortcut.value =
+                                shortcut.copy(connectionState = PendingShortcutConnectionState.REQUESTED)
                             onConnect(hostToConnect)
                         }
                     }
@@ -504,7 +505,8 @@ class MainActivity : ComponentActivity() {
                             uiState.hostId == shortcut.hostId &&
                             uiState.connectionStatus == ConnectionStatus.CONNECTING
                         ) {
-                            pendingShortcut.value = shortcut.copy(connectionState = PendingShortcutConnectionState.STARTED)
+                            pendingShortcut.value =
+                                shortcut.copy(connectionState = PendingShortcutConnectionState.STARTED)
                             return@LaunchedEffect
                         }
                         if (
@@ -726,7 +728,7 @@ class MainActivity : ComponentActivity() {
                             if (host != null) {
                                 EditRemoteControlScreen(
                                     host = host,
-                                    onSave = { remoteCommands, commands, shareInBackground, smartVolume, navigateBack ->
+                                    onSave = { remoteCommands, commands, shareInBackground, smartVolume, navigateBack, currentPage ->
                                         scope.launch {
                                             val updatedHost = host.copy(
                                                 remoteCommands = remoteCommands,
@@ -736,11 +738,22 @@ class MainActivity : ComponentActivity() {
                                             )
                                             hostViewModel.upsert(updatedHost)
                                             if (navigateBack) {
-                                                navController.safePopBackStack()
+                                                navController.navigate(
+                                                    Screen.RemoteControl.createRoute(
+                                                        host.id,
+                                                        currentPage,
+                                                    ),
+                                                ) {
+                                                    popUpTo(Screen.RemoteControl.route) { inclusive = true }
+                                                }
                                             }
                                         }
                                     },
-                                    onNavigateBack = { navController.safePopBackStack() },
+                                    onNavigateBack = { currentPage ->
+                                        navController.navigate(Screen.RemoteControl.createRoute(host.id, currentPage)) {
+                                            popUpTo(Screen.RemoteControl.route) { inclusive = true }
+                                        }
+                                    },
                                     onSetAsDefaultScreen = { startScreen ->
                                         scope.launch {
                                             hostViewModel.updateStartScreen(host.id, startScreen)
@@ -1093,7 +1106,6 @@ fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
         }
     }
 }
-
 
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
