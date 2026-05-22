@@ -33,10 +33,12 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -64,6 +66,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -73,6 +76,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -134,6 +140,7 @@ import org.commonmark.node.SoftLineBreak
 import org.commonmark.node.StrongEmphasis
 import org.commonmark.node.ThematicBreak
 import org.commonmark.parser.Parser
+import kotlin.math.roundToInt
 import org.commonmark.node.Text as CmText
 
 private const val TAG = "MarkdownText"
@@ -404,6 +411,18 @@ private fun applyInlineHtmlTag(literal: String, state: MdInlineHtmlState): Strin
 }
 
 // ---------------------------------------------------------------------------
+// Search state
+// ---------------------------------------------------------------------------
+
+private data class SearchRenderState(
+    val regex: Regex,
+    val currentMatchIndex: Int,
+    val normalHighlightBackground: Color,
+    val currentHighlightBackground: Color,
+    var nextMatchIndex: Int = 0,
+)
+
+// ---------------------------------------------------------------------------
 // AnnotatedString builder (runs on IO thread)
 // ---------------------------------------------------------------------------
 
@@ -412,8 +431,43 @@ private fun buildInlineAnnotatedString(
     onLinkClick: (String) -> Unit,
     linkColor: Color,
     codeBackground: Color,
+    searchState: SearchRenderState?,
 ): AnnotatedString = buildAnnotatedString {
     val htmlState = MdInlineHtmlState()
+
+    fun appendStyledText(text: String, style: SpanStyle?) {
+        if (style != null) withStyle(style) { append(text) } else append(text)
+    }
+
+    fun appendSearchHighlightedText(text: String, baseStyle: SpanStyle?) {
+        if (searchState == null || text.isEmpty()) {
+            appendStyledText(text, baseStyle)
+            return
+        }
+
+        var index = 0
+        for (match in searchState.regex.findAll(text)) {
+            if (match.range.first > index) {
+                appendStyledText(text.substring(index, match.range.first), baseStyle)
+            }
+
+            val isCurrentMatch = searchState.nextMatchIndex == searchState.currentMatchIndex
+            val highlightBackground = if (isCurrentMatch) {
+                searchState.currentHighlightBackground
+            } else {
+                searchState.normalHighlightBackground
+            }
+            val highlightedStyle = (baseStyle ?: SpanStyle()).merge(SpanStyle(background = highlightBackground))
+            appendStyledText(match.value, highlightedStyle)
+
+            searchState.nextMatchIndex++
+            index = match.range.last + 1
+        }
+
+        if (index < text.length) {
+            appendStyledText(text.substring(index), baseStyle)
+        }
+    }
 
     fun appendWithHtmlStyles(text: String, codeStyle: SpanStyle? = null) {
         val boldStyle = if (htmlState.boldDepth > 0) FontWeight.Bold else null
@@ -438,7 +492,7 @@ private fun buildInlineAnnotatedString(
             else -> null
         }
 
-        if (combined != null) withStyle(combined) { append(text) } else append(text)
+        appendSearchHighlightedText(text, combined)
     }
 
     fun appendInlines(list: List<MdInline>) {
@@ -478,7 +532,13 @@ private fun buildInlineAnnotatedString(
                 }
 
                 is MdInline.MdImage -> {
-                    val altText = buildInlineAnnotatedString(inline.alt, onLinkClick, linkColor, codeBackground).text
+                    val altText = buildInlineAnnotatedString(
+                        inline.alt,
+                        onLinkClick,
+                        linkColor,
+                        codeBackground,
+                        searchState,
+                    ).text
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(if (altText.isNotBlank()) "[$altText]" else "[image]")
                     }
@@ -504,7 +564,7 @@ private fun buildInlineAnnotatedString(
 private sealed interface RenderedBlock {
     data class RenderedHeading(val level: Int, val text: AnnotatedString) : RenderedBlock
     data class RenderedParagraph(val text: AnnotatedString) : RenderedBlock
-    data class RenderedCode(val code: String, val language: String?) : RenderedBlock
+    data class RenderedCode(val code: AnnotatedString, val language: String?) : RenderedBlock
     data class RenderedBulletList(val items: List<RenderedListItem>, val depth: Int) : RenderedBlock
     data class RenderedOrderedList(val items: List<RenderedListItem>, val startNumber: Int, val depth: Int) :
         RenderedBlock
@@ -530,21 +590,47 @@ private fun renderBlocks(
     onLinkClick: (String) -> Unit,
     linkColor: Color,
     codeBackground: Color,
+    searchState: SearchRenderState?,
 ): List<RenderedBlock> = blocks.map { block ->
     when (block) {
         is MdBlock.MdHeading -> RenderedBlock.RenderedHeading(
             block.level,
-            buildInlineAnnotatedString(block.inline, onLinkClick, linkColor, codeBackground),
+            buildInlineAnnotatedString(
+                block.inline,
+                onLinkClick,
+                linkColor,
+                codeBackground,
+                searchState,
+            ),
         )
 
         is MdBlock.MdParagraph -> RenderedBlock.RenderedParagraph(
-            buildInlineAnnotatedString(block.inline, onLinkClick, linkColor, codeBackground),
+            buildInlineAnnotatedString(
+                block.inline,
+                onLinkClick,
+                linkColor,
+                codeBackground,
+                searchState,
+            ),
         )
 
-        is MdBlock.MdCode -> RenderedBlock.RenderedCode(block.code, block.language)
+        is MdBlock.MdCode -> RenderedBlock.RenderedCode(
+            code = highlightSearchMatchesInText(
+                text = block.code,
+                searchState = searchState,
+            ),
+            language = block.language,
+        )
+
         is MdBlock.MdThematicBreak -> RenderedBlock.RenderedThematicBreak
         is MdBlock.MdBlockQuote -> RenderedBlock.RenderedBlockQuote(
-            renderBlocks(block.children, onLinkClick, linkColor, codeBackground),
+            renderBlocks(
+                block.children,
+                onLinkClick,
+                linkColor,
+                codeBackground,
+                searchState,
+            ),
         )
 
         is MdBlock.MdTable -> RenderedBlock.RenderedTable(
@@ -553,7 +639,13 @@ private fun renderBlocks(
                 RenderedTableRow(
                     isHeader = row.isHeader,
                     cells = row.cells.map { cell ->
-                        buildInlineAnnotatedString(cell, onLinkClick, linkColor, codeBackground)
+                        buildInlineAnnotatedString(
+                            cell,
+                            onLinkClick,
+                            linkColor,
+                            codeBackground,
+                            searchState,
+                        )
                     },
                     bodyIndex = row.bodyIndex,
                 )
@@ -563,7 +655,13 @@ private fun renderBlocks(
         is MdBlock.MdBulletList -> RenderedBlock.RenderedBulletList(
             block.items.map { item ->
                 RenderedListItem(
-                    blocks = renderBlocks(item.blocks, onLinkClick, linkColor, codeBackground),
+                    blocks = renderBlocks(
+                        item.blocks,
+                        onLinkClick,
+                        linkColor,
+                        codeBackground,
+                        searchState,
+                    ),
                     taskChecked = item.taskChecked,
                 )
             },
@@ -573,13 +671,51 @@ private fun renderBlocks(
         is MdBlock.MdOrderedList -> RenderedBlock.RenderedOrderedList(
             block.items.map { item ->
                 RenderedListItem(
-                    blocks = renderBlocks(item.blocks, onLinkClick, linkColor, codeBackground),
+                    blocks = renderBlocks(
+                        item.blocks,
+                        onLinkClick,
+                        linkColor,
+                        codeBackground,
+                        searchState,
+                    ),
                     taskChecked = item.taskChecked,
                 )
             },
             block.startNumber,
             block.depth,
         )
+    }
+}
+
+private fun highlightSearchMatchesInText(
+    text: String,
+    searchState: SearchRenderState?,
+): AnnotatedString {
+    if (searchState == null || text.isEmpty()) return AnnotatedString(text)
+
+    return buildAnnotatedString {
+        var index = 0
+        for (match in searchState.regex.findAll(text)) {
+            if (match.range.first > index) {
+                append(text.substring(index, match.range.first))
+            }
+
+            val isCurrentMatch = searchState.nextMatchIndex == searchState.currentMatchIndex
+            val highlightBackground = if (isCurrentMatch) {
+                searchState.currentHighlightBackground
+            } else {
+                searchState.normalHighlightBackground
+            }
+            withStyle(SpanStyle(background = highlightBackground)) {
+                append(match.value)
+            }
+            searchState.nextMatchIndex++
+            index = match.range.last + 1
+        }
+
+        if (index < text.length) {
+            append(text.substring(index))
+        }
     }
 }
 
@@ -591,6 +727,9 @@ private fun renderBlocks(
 fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
+    searchQuery: String = "",
+    searchNextRequest: Int = 0,
+    onSearchPositionChanged: ((current: Int, total: Int) -> Unit)? = null,
 ) {
     val clipboard = LocalClipboard.current
     val density = LocalDensity.current
@@ -602,26 +741,56 @@ fun MarkdownText(
 
     val linkColor = MaterialTheme.colorScheme.primary
     val codeBackground = MaterialTheme.colorScheme.surfaceVariant
+    val searchHighlightBackground = MaterialTheme.colorScheme.tertiaryContainer
+    val currentSearchHighlightBackground = MaterialTheme.colorScheme.primaryContainer
+    val trimmedSearchQuery = remember(searchQuery) { searchQuery.trim() }
+    val searchRegex = remember(trimmedSearchQuery) {
+        trimmedSearchQuery.takeIf { it.isNotEmpty() }?.let {
+            Regex(Regex.escape(it), RegexOption.IGNORE_CASE)
+        }
+    }
+    var currentSearchMatchIndex by rememberSaveable(trimmedSearchQuery) { mutableIntStateOf(0) }
+    var handledSearchNextRequest by rememberSaveable(trimmedSearchQuery) { mutableIntStateOf(searchNextRequest) }
     var selectedLink by rememberSaveable { mutableStateOf<String?>(null) }
     val onLinkClick = remember<(String) -> Unit> { { url -> selectedLink = url } }
 
     var renderedBlocks by remember(markdown) { mutableStateOf<List<RenderedBlock>?>(null) }
 
-    LaunchedEffect(markdown, linkColor, codeBackground, onLinkClick) {
-        renderedBlocks = null
-
-        val totalStartNs = System.nanoTime()
-        val parseStartNs = totalStartNs
+    LaunchedEffect(
+        markdown,
+        linkColor,
+        codeBackground,
+        searchRegex,
+        currentSearchMatchIndex,
+        searchHighlightBackground,
+        currentSearchHighlightBackground,
+        onLinkClick,
+    ) {
+        val startNs = System.nanoTime()
         val parsedBlocks = withContext(Dispatchers.Default) { parseMarkdown(markdown) }
-        val parseElapsedMs = (System.nanoTime() - parseStartNs) / 1_000_000L
+        val parseElapsedMs = (System.nanoTime() - startNs) / 1_000_000L
 
         val renderStartNs = System.nanoTime()
         val rendered = withContext(Dispatchers.Default) {
-            renderBlocks(parsedBlocks, onLinkClick, linkColor, codeBackground)
+            val searchState = searchRegex?.let {
+                SearchRenderState(
+                    regex = it,
+                    currentMatchIndex = currentSearchMatchIndex,
+                    normalHighlightBackground = searchHighlightBackground,
+                    currentHighlightBackground = currentSearchHighlightBackground,
+                )
+            }
+            renderBlocks(
+                parsedBlocks,
+                onLinkClick,
+                linkColor,
+                codeBackground,
+                searchState,
+            )
         }
 
         val renderElapsedMs = (System.nanoTime() - renderStartNs) / 1_000_000L
-        val totalElapsedMs = (System.nanoTime() - totalStartNs) / 1_000_000L
+        val totalElapsedMs = (System.nanoTime() - startNs) / 1_000_000L
         logMarkdownTiming(
             parseMs = parseElapsedMs,
             renderMs = renderElapsedMs,
@@ -640,10 +809,98 @@ fun MarkdownText(
             CircularProgressIndicator()
         }
     } else {
+        val totalSearchMatches = remember(blocks, searchRegex) {
+            calculateTotalSearchMatches(blocks, searchRegex)
+        }
+        val verticalScrollState = rememberScrollState()
+        val blockPositions = remember(blocks) { MutableList(blocks.size) { 0f } }
+        val blockHeights = remember(blocks) { IntArray(blocks.size) }
+        var layoutVersion by remember(blocks) { mutableIntStateOf(0) }
+        var viewportHeightPx by remember { mutableIntStateOf(0) }
+        val imeBottomPx = WindowInsets.ime.getBottom(density)
+
+        fun scrollToCurrentMatch(topLevelBlockIndex: Int) {
+            if (topLevelBlockIndex !in blockPositions.indices) return
+            val blockTop = blockPositions[topLevelBlockIndex]
+            val blockHeight = blockHeights[topLevelBlockIndex]
+            val visibleViewportPx = (viewportHeightPx - imeBottomPx).coerceAtLeast(1)
+            if (visibleViewportPx <= 0 || blockHeight <= 0) return
+
+            val centeredTarget = (blockTop - ((visibleViewportPx - blockHeight) / 2f)).roundToInt()
+                .coerceIn(0, verticalScrollState.maxValue)
+            if (verticalScrollState.value != centeredTarget) {
+                // Keep behavior close to browser find by centering the matched section when possible.
+                scope.launch { verticalScrollState.animateScrollTo(centeredTarget) }
+            }
+        }
+
+        LaunchedEffect(trimmedSearchQuery) {
+            currentSearchMatchIndex = 0
+            handledSearchNextRequest = searchNextRequest
+        }
+
+        LaunchedEffect(searchNextRequest, totalSearchMatches) {
+            if (searchNextRequest <= 0 || totalSearchMatches <= 0) return@LaunchedEffect
+            if (searchNextRequest == handledSearchNextRequest) return@LaunchedEffect
+            handledSearchNextRequest = searchNextRequest
+            currentSearchMatchIndex = (currentSearchMatchIndex + 1) % totalSearchMatches
+        }
+
+        LaunchedEffect(currentSearchMatchIndex, totalSearchMatches) {
+            if (totalSearchMatches <= 0) {
+                if (currentSearchMatchIndex != 0) currentSearchMatchIndex = 0
+                onSearchPositionChanged?.invoke(0, 0)
+                return@LaunchedEffect
+            }
+
+            if (currentSearchMatchIndex >= totalSearchMatches) {
+                currentSearchMatchIndex = 0
+                return@LaunchedEffect
+            }
+
+            onSearchPositionChanged?.invoke(currentSearchMatchIndex + 1, totalSearchMatches)
+        }
+
+        LaunchedEffect(
+            currentSearchMatchIndex,
+            totalSearchMatches,
+            blocks,
+            searchRegex,
+            layoutVersion,
+            viewportHeightPx,
+        ) {
+            if (totalSearchMatches <= 0 || searchRegex == null) return@LaunchedEffect
+            val topLevelBlockIndex = findTopLevelBlockIndexForMatch(
+                blocks = blocks,
+                regex = searchRegex,
+                globalMatchIndex = currentSearchMatchIndex,
+            )
+            scrollToCurrentMatch(topLevelBlockIndex)
+        }
+
         SelectionContainer {
-            Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-                for (block in blocks) {
-                    RenderedBlockComposable(block)
+            Column(
+                modifier = modifier
+                    .onSizeChanged { viewportHeightPx = it.height }
+                    .verticalScroll(verticalScrollState),
+            ) {
+                for ((index, block) in blocks.withIndex()) {
+                    Box(
+                        modifier = Modifier
+                            .onGloballyPositioned { coordinates ->
+                                val top = coordinates.positionInParent().y
+                                val height = coordinates.size.height
+                                if (index in blockPositions.indices) {
+                                    if (blockPositions[index] != top || blockHeights[index] != height) {
+                                        blockPositions[index] = top
+                                        blockHeights[index] = height
+                                        layoutVersion++
+                                    }
+                                }
+                            },
+                    ) {
+                        RenderedBlockComposable(block)
+                    }
                 }
             }
         }
@@ -664,6 +921,48 @@ fun MarkdownText(
             },
         )
     }
+}
+
+private fun calculateTotalSearchMatches(blocks: List<RenderedBlock>, regex: Regex?): Int {
+    if (regex == null) return 0
+    return blocks.sumOf { countMatchesInRenderedBlock(it, regex) }
+}
+
+private fun countMatchesInRenderedBlock(block: RenderedBlock, regex: Regex): Int {
+    return when (block) {
+        is RenderedBlock.RenderedHeading -> regex.findAll(block.text.text).count()
+        is RenderedBlock.RenderedParagraph -> regex.findAll(block.text.text).count()
+        is RenderedBlock.RenderedCode -> regex.findAll(block.code.text).count()
+        is RenderedBlock.RenderedThematicBreak -> 0
+        is RenderedBlock.RenderedBlockQuote -> block.children.sumOf { countMatchesInRenderedBlock(it, regex) }
+        is RenderedBlock.RenderedTable -> block.rows.sumOf { row ->
+            row.cells.sumOf { cell -> regex.findAll(cell.text).count() }
+        }
+
+        is RenderedBlock.RenderedBulletList -> block.items.sumOf { item ->
+            item.blocks.sumOf { countMatchesInRenderedBlock(it, regex) }
+        }
+
+        is RenderedBlock.RenderedOrderedList -> block.items.sumOf { item ->
+            item.blocks.sumOf { countMatchesInRenderedBlock(it, regex) }
+        }
+    }
+}
+
+private fun findTopLevelBlockIndexForMatch(
+    blocks: List<RenderedBlock>,
+    regex: Regex,
+    globalMatchIndex: Int,
+): Int {
+    var consumed = 0
+    for ((index, block) in blocks.withIndex()) {
+        val count = countMatchesInRenderedBlock(block, regex)
+        if (globalMatchIndex < consumed + count) {
+            return index
+        }
+        consumed += count
+    }
+    return 0
 }
 
 @Composable
