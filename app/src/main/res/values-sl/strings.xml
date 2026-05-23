@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Vnesite novo geslo ali pustite prazno, da ga počistite</string>
     <string name="optional_password_prompt">Neobvezno; če ni podano, boste pozvani k vnosu</string>
     <string name="optional">Neobvezno</string>
-    <string name="re_enter">Ponovno vnesi</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Ponovno vnesi</string>
     <string name="change_or_clear">Spremeni ali počisti</string>
     <string name="unsaved_changes_title">Neshranjene spremembe</string>
     <string name="unsaved_changes_text">Ali želite gostitelja shraniti, preden zapustite stran?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Izvajanje ukaza…</string>
     <string name="executing_on">Izvajanje na %s</string>
     <string name="sharing_to">Deljenje z %s</string>
+    <string name="smart_volume_settings">Nastavitve pametne glasnosti</string>
+    <string name="read_current_volume">Preberi trenutno glasnost</string>
+    <string name="show_volume_slider">Pokaži drsnik glasnosti</string>
+    <string name="control_volume_with_hardware_buttons">Upravljaj glasnost s fizičnimi gumbi</string>
+    <string name="test_pactl">Preizkusi pactl</string>
+    <string name="pactl_installation_requirement">Zahteva nameščen pactl.</string>
+    <string name="error_reading_volume">Napaka pri branju glasnosti. Namestite pactl.</string>
+    <string name="volume_format">Glasnost: %s</string>
+    <string name="volume_muted_format">Glasnost: %s (utišano)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Nazaj</string>
@@ -340,7 +349,7 @@
     <string name="about_app">O aplikaciji SSH Remote</string>
     <string name="app_version">Različica aplikacije</string>
     <string name="author">Avtor</string>
-    <string name="author_name">Razvil Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Razvil Stefan Sundin</string>
     <string name="donate">Doniraj</string>
     <string name="support_developer">Podprite razvijalca</string>
     <string name="license">Licenca</string>
@@ -350,20 +359,11 @@
     <string name="ssh_library">Knjižnica SSH</string>
     <string name="ssh_library_subtitle">Uporablja %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Pomoč</string>
     <string name="tap_the_help_button_for_help">Za pomoč tapnite gumb ?.</string>
     <string name="getting_started_title">Začetek uporabe</string>
     <string name="getting_started_text">Gumbi na daljincu so preslikani na določene ukaze, ki se izvajajo na gostitelju.\n\nNa gostitelju morate namestiti ustrezno orodje; katero je potrebno, je odvisno od tega, kateri upravljalnik oken uporablja gostitelj (X11 ali Wayland).\n\nZa začetek izberite prednastavitev. Pozneje jo lahko vedno znova ponastavite z urejanjem daljinca.\n\nČe aplikacijo uporabljate prvič, preberite stran Pomoč.</string>
-    <string name="error_reading_volume">Napaka pri branju glasnosti. Namestite pactl.</string>
-    <string name="volume_format">Glasnost: %s</string>
-    <string name="volume_muted_format">Glasnost: %s (utišano)</string>
-    <string name="smart_volume_settings">Nastavitve pametne glasnosti</string>
-    <string name="read_current_volume">Preberi trenutno glasnost</string>
-    <string name="show_volume_slider">Pokaži drsnik glasnosti</string>
-    <string name="control_volume_with_hardware_buttons">Upravljaj glasnost s fizičnimi gumbi</string>
-    <string name="test_pactl">Preizkusi pactl</string>
-    <string name="pactl_installation_requirement">Zahteva nameščen pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Daljinec</string>

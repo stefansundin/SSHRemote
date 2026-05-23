@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Yeni parol daxil edin və ya təmizləmək üçün boş buraxın</string>
     <string name="optional_password_prompt">İstəyə görə, verilməzsə soruşulacaq</string>
     <string name="optional">İstəyə görə</string>
-    <string name="re_enter">Yenidən daxil et</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Yenidən daxil et</string>
     <string name="change_or_clear">Dəyiş və ya Təmizlə</string>
     <string name="unsaved_changes_title">Yadda saxlanmamış dəyişikliklər</string>
     <string name="unsaved_changes_text">Çıxmadan əvvəl hostu yadda saxlamaq istəyirsiniz?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Əmr icra olunur…</string>
     <string name="executing_on">%s üzərində icra olunur</string>
     <string name="sharing_to">%s ilə paylaşılır</string>
+    <string name="smart_volume_settings">Ağıllı səs ayarları</string>
+    <string name="read_current_volume">Cari səsi oxu</string>
+    <string name="show_volume_slider">Səs sürüşdürgəcini göstər</string>
+    <string name="control_volume_with_hardware_buttons">Səsi cihazın fiziki düymələri ilə idarə et</string>
+    <string name="test_pactl">pactl yoxla</string>
+    <string name="pactl_installation_requirement">pactl quraşdırılmış olmalıdır.</string>
+    <string name="error_reading_volume">Səs oxunarkən xəta baş verdi. Zəhmət olmasa pactl quraşdırın.</string>
+    <string name="volume_format">Səs: %s</string>
+    <string name="volume_muted_format">Səs: %s (səssiz)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Geri</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote haqqında</string>
     <string name="app_version">Tətbiq versiyası</string>
     <string name="author">Müəllif</string>
-    <string name="author_name">Stefan Sundin tərəfindən hazırlanıb</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Stefan Sundin tərəfindən hazırlanıb</string>
     <string name="donate">Dəstək ol</string>
     <string name="support_developer">Tərtibatçını dəstəklə</string>
     <string name="license">Lisenziya</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH kitabxanası</string>
     <string name="ssh_library_subtitle">İstifadə olunur: %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Kömək</string>
     <string name="tap_the_help_button_for_help">Kömək üçün ? düyməsinə toxunun.</string>
     <string name="getting_started_title">Başlanğıc</string>
     <string name="getting_started_text">Pultdakı düymələr hostda icra olunan konkret əmrlərə uyğunlaşdırılıb.\n\nHostda uyğun utiliti quraşdırmalısınız, hansının lazım olması hostun hansı pəncərə menecerindən istifadə etməsindən asılıdır (X11 və ya Wayland).\n\nBaşlamaq üçün hazır ayar seçin. Sonradan pultu redaktə edərək hazır ayara yenidən sıfırlaya bilərsiniz.\n\nBu tətbiqdən ilk dəfə istifadə edirsinizsə, Kömək səhifəsini oxuyun.</string>
-    <string name="error_reading_volume">Səs oxunarkən xəta baş verdi. Zəhmət olmasa pactl quraşdırın.</string>
-    <string name="volume_format">Səs: %s</string>
-    <string name="volume_muted_format">Səs: %s (səssiz)</string>
-    <string name="smart_volume_settings">Ağıllı səs ayarları</string>
-    <string name="read_current_volume">Cari səsi oxu</string>
-    <string name="show_volume_slider">Səs sürüşdürgəcini göstər</string>
-    <string name="control_volume_with_hardware_buttons">Səsi cihazın fiziki düymələri ilə idarə et</string>
-    <string name="test_pactl">pactl yoxla</string>
-    <string name="pactl_installation_requirement">pactl quraşdırılmış olmalıdır.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Pult</string>

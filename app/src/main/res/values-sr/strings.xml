@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Unesite novu lozinku ili ostavite prazno da biste je obrisali</string>
     <string name="optional_password_prompt">Opciono, bićete upitani za nju ako nije uneta</string>
     <string name="optional">Opciono</string>
-    <string name="re_enter">Unesi ponovo</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Unesi ponovo</string>
     <string name="change_or_clear">Promeni ili obriši</string>
     <string name="unsaved_changes_title">Nesačuvane izmene</string>
     <string name="unsaved_changes_text">Da li želite da sačuvate host pre nego što odete?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Izvršavanje komande…</string>
     <string name="executing_on">Izvršava se na %s</string>
     <string name="sharing_to">Deli se sa %s</string>
+    <string name="smart_volume_settings">Pametna podešavanja jačine zvuka</string>
+    <string name="read_current_volume">Pročitaj trenutnu jačinu zvuka</string>
+    <string name="show_volume_slider">Prikaži klizač jačine zvuka</string>
+    <string name="control_volume_with_hardware_buttons">Upravljaj jačinom zvuka pomoću hardverskih dugmadi</string>
+    <string name="test_pactl">Testiraj pactl</string>
+    <string name="pactl_installation_requirement">Zahteva da je pactl instaliran.</string>
+    <string name="error_reading_volume">Greška pri čitanju jačine zvuka. Instalirajte pactl.</string>
+    <string name="volume_format">Jačina zvuka: %s</string>
+    <string name="volume_muted_format">Jačina zvuka: %s (zvuk je isključen)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Nazad</string>
@@ -338,7 +347,7 @@
     <string name="about_app">O aplikaciji SSH Remote</string>
     <string name="app_version">Verzija aplikacije</string>
     <string name="author">Autor</string>
-    <string name="author_name">Razvio Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Razvio Stefan Sundin</string>
     <string name="donate">Doniraj</string>
     <string name="support_developer">Podržite programera</string>
     <string name="license">Licenca</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">SSH biblioteka</string>
     <string name="ssh_library_subtitle">Koristi %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Pomoć</string>
     <string name="tap_the_help_button_for_help">Dodirnite dugme ? za pomoć.</string>
     <string name="getting_started_title">Početak</string>
     <string name="getting_started_text">Dugmad na daljinskom upravljaču su mapirana na određene komande koje se izvršavaju na hostu.\n\nMorate da instalirate odgovarajući alat na hostu, a koji alat zavisi od toga koji upravljač prozorima host koristi (X11 ili Wayland).\n\nZa početak, izaberite preset. Uvek kasnije možete da vratite preset tako što ćete urediti daljinski upravljač.\n\nPročitajte stranicu Pomoć ako prvi put koristite ovu aplikaciju.</string>
-    <string name="error_reading_volume">Greška pri čitanju jačine zvuka. Instalirajte pactl.</string>
-    <string name="volume_format">Jačina zvuka: %s</string>
-    <string name="volume_muted_format">Jačina zvuka: %s (zvuk je isključen)</string>
-    <string name="smart_volume_settings">Pametna podešavanja jačine zvuka</string>
-    <string name="read_current_volume">Pročitaj trenutnu jačinu zvuka</string>
-    <string name="show_volume_slider">Prikaži klizač jačine zvuka</string>
-    <string name="control_volume_with_hardware_buttons">Upravljaj jačinom zvuka pomoću hardverskih dugmadi</string>
-    <string name="test_pactl">Testiraj pactl</string>
-    <string name="pactl_installation_requirement">Zahteva da je pactl instaliran.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Daljinski upravljač</string>

@@ -122,6 +122,15 @@
     <string name="executing_command">ఆదేశం అమలవుతోంది…</string>
     <string name="executing_on">%s పై అమలవుతోంది</string>
     <string name="sharing_to">%s కు షేర్ చేస్తోంది</string>
+    <string name="smart_volume_settings">స్మార్ట్ వాల్యూమ్ సెట్టింగ్‌లు</string>
+    <string name="read_current_volume">ప్రస్తుత వాల్యూమ్‌ను చదవండి</string>
+    <string name="show_volume_slider">వాల్యూమ్ స్లైడర్‌ను చూపు</string>
+    <string name="control_volume_with_hardware_buttons">హార్డ్‌వేర్ బటన్‌లతో వాల్యూమ్‌ను నియంత్రించు</string>
+    <string name="test_pactl">pactl ను పరీక్షించు</string>
+    <string name="pactl_installation_requirement">pactl ఇన్‌స్టాల్ చేయబడివుండాలి.</string>
+    <string name="error_reading_volume">వాల్యూమ్ చదవడంలో లోపం. దయచేసి pactl ను ఇన్‌స్టాల్ చేయండి.</string>
+    <string name="volume_format">వాల్యూమ్: %s</string>
+    <string name="volume_muted_format">వాల్యూమ్: %s (మ్యూట్ చేయబడింది)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">వెనుకకు</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH లైబ్రరీ</string>
     <string name="ssh_library_subtitle">%1$s %2$s ఉపయోగిస్తోంది</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">సహాయం</string>
     <string name="tap_the_help_button_for_help">సహాయం కోసం ? బటన్‌ను తట్టండి.</string>
     <string name="getting_started_title">ప్రారంభించడం</string>
     <string name="getting_started_text">రిమోట్ నియంత్రణలోని బటన్‌లు హోస్ట్‌పై అమలయ్యే నిర్దిష్ట ఆదేశాలకు మ్యాప్ చేయబడ్డాయి.\n\nహోస్ట్ ఏ విండో మేనేజర్‌ను ఉపయోగిస్తుందో దానిపై ఆధారపడి సరైన యుటిలిటీని హోస్ట్‌లో ఇన్‌స్టాల్ చేయాలి (X11 లేదా Wayland).\n\nప్రారంభించడానికి, దయచేసి ఒక ప్రీసెట్‌ను ఎంచుకోండి. మీరు తరువాత ఎప్పుడైనా రిమోట్ నియంత్రణను సవరించి మళ్లీ ఒక ప్రీసెట్‌కు రీసెట్ చేయవచ్చు.\n\nఈ యాప్‌ను మీరు మొదటిసారి ఉపయోగిస్తుంటే దయచేసి Help పేజీని చదవండి.</string>
-    <string name="error_reading_volume">వాల్యూమ్ చదవడంలో లోపం. దయచేసి pactl ను ఇన్‌స్టాల్ చేయండి.</string>
-    <string name="volume_format">వాల్యూమ్: %s</string>
-    <string name="volume_muted_format">వాల్యూమ్: %s (మ్యూట్ చేయబడింది)</string>
-    <string name="smart_volume_settings">స్మార్ట్ వాల్యూమ్ సెట్టింగ్‌లు</string>
-    <string name="read_current_volume">ప్రస్తుత వాల్యూమ్‌ను చదవండి</string>
-    <string name="show_volume_slider">వాల్యూమ్ స్లైడర్‌ను చూపు</string>
-    <string name="control_volume_with_hardware_buttons">హార్డ్‌వేర్ బటన్‌లతో వాల్యూమ్‌ను నియంత్రించు</string>
-    <string name="test_pactl">pactl ను పరీక్షించు</string>
-    <string name="pactl_installation_requirement">pactl ఇన్‌స్టాల్ చేయబడివుండాలి.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">రిమోట్ నియంత్రణ</string>

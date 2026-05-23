@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">ປ້ອນລະຫັດຜ່ານໃໝ່ ຫຼືປ່ອຍຫວ່າງເພື່ອລ້າງ</string>
     <string name="optional_password_prompt">ບໍ່ບັງຄັບ, ຖ້າບໍ່ລະບຸຈະຖືກຖາມພາຍຫຼັງ</string>
     <string name="optional">ບໍ່ບັງຄັບ</string>
-    <string name="re_enter">ປ້ອນອີກຄັ້ງ</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">ປ້ອນອີກຄັ້ງ</string>
     <string name="change_or_clear">ປ່ຽນ ຫຼື ລ້າງ</string>
     <string name="unsaved_changes_title">ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ</string>
     <string name="unsaved_changes_text">ທ່ານຕ້ອງການບັນທຶກໂຮສກ່ອນອອກບໍ?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">ກໍາລັງດໍາເນີນຄໍາສັ່ງ…</string>
     <string name="executing_on">ກໍາລັງດໍາເນີນເທິງ %s</string>
     <string name="sharing_to">ກໍາລັງແບ່ງປັນໄປຫາ %s</string>
+    <string name="smart_volume_settings">ການຕັ້ງຄ່າສຽງອັດສະລິຍະ</string>
+    <string name="read_current_volume">ອ່ານຄ່າສຽງປັດຈຸບັນ</string>
+    <string name="show_volume_slider">ສະແດງແຖບເລື່ອນລະດັບສຽງ</string>
+    <string name="control_volume_with_hardware_buttons">ຄວບຄຸມສຽງດ້ວຍປຸ່ມຮາດແວ</string>
+    <string name="test_pactl">ທົດສອບ pactl</string>
+    <string name="pactl_installation_requirement">ຕ້ອງມີການຕິດຕັ້ງ pactl.</string>
+    <string name="error_reading_volume">ອ່ານຄ່າສຽງບໍ່ໄດ້. ກະລຸນາຕິດຕັ້ງ pactl.</string>
+    <string name="volume_format">ລະດັບສຽງ: %s</string>
+    <string name="volume_muted_format">ລະດັບສຽງ: %s (ປິດສຽງ)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">ກັບຄືນ</string>
@@ -225,7 +234,6 @@
     <string name="import_key_file_prompt">ນໍາເຂົ້າໄຟລ໌ກະແຈສ່ວນຕົວ SSH</string>
     <string name="zip_keys_detected_title">ພົບກະແຈ</string>
     <plurals name="zip_keys_detected_in_zip">
-        <item quantity="one">ພົບກະແຈ SSH %d ອັນໃນໄຟລ໌ zip.</item>
         <item quantity="other">ພົບກະແຈ SSH %d ອັນໃນໄຟລ໌ zip.</item>
     </plurals>
     <string name="zip_no_valid_keys">ບໍ່ພົບກະແຈສ່ວນຕົວ SSH ທີ່ໃຊ້ໄດ້ໃນໄຟລ໌ zip.</string>
@@ -271,15 +279,7 @@
     <string name="known_hosts_subtitle">ຈັດການກະແຈໂຮສ ແລະໃບຮັບຮອງທີ່ໄວ້ໃຈ</string>
     <string name="no_known_hosts_added_yet">ຍັງບໍ່ມີລາຍການ known host ທີ່ຖືກເພີ່ມ.</string>
     <string name="known_host_help_title">ຮູບແບບລາຍການ</string>
-    <string name="known_host_help_text">ລາຍການທີ່ເພີ່ມຢູ່ນີ້ຈະຖືກໃຊ້ໂດຍອັດຕະໂນມັດສໍາລັບທຸກໂຮສ. ໂຮສແຕ່ລະອັນກໍຍັງເກັບລາຍຊື່ກະແຈໂຮສທີ່ຍອມຮັບໄວ້ຂອງຕົນເອງ.
-
-ການໃຊ້ງານຫຼັກຂອງສ່ວນນີ້ແມ່ນເພື່ອໄວ້ໃຈໃບຮັບຮອງໂຮສ, ຕົວຢ່າງ:
-
-@cert-authority host.example.com ssh-ed25519 AAA…
-
-ລາຍການປົກກະຕິກໍຮອງຮັບເຊັ່ນກັນ:
-
-host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_help_text">ລາຍການທີ່ເພີ່ມຢູ່ນີ້ຈະຖືກໃຊ້ໂດຍອັດຕະໂນມັດສໍາລັບທຸກໂຮສ. ໂຮສແຕ່ລະອັນກໍຍັງເກັບລາຍຊື່ກະແຈໂຮສທີ່ຍອມຮັບໄວ້ຂອງຕົນເອງ.\n\nການໃຊ້ງານຫຼັກຂອງສ່ວນນີ້ແມ່ນເພື່ອໄວ້ໃຈໃບຮັບຮອງໂຮສ, ຕົວຢ່າງ:\n\n@cert-authority host.example.com ssh-ed25519 AAA…\n\nລາຍການປົກກະຕິກໍຮອງຮັບເຊັ່ນກັນ:\n\nhost.example.com ssh-ed25519 AAA…</string>
     <string name="known_host_add_title">ເພີ່ມລາຍການ Known Host</string>
     <string name="known_host_input_label">ວາງໜຶ່ງລາຍການຕໍ່ໜຶ່ງແຖວ</string>
     <string name="add_entries">ເພີ່ມລາຍການ</string>
@@ -310,9 +310,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <!-- Data Management -->
     <string name="data">ຂໍ້ມູນ</string>
     <string name="restored_from_backup_title">ກູ້ຄືນຈາກການສໍາຮອງຂໍ້ມູນ</string>
-    <string name="restored_from_backup_text">ຂໍ້ມູນແອັບຖືກກູ້ຄືນຈາກການສໍາຮອງຂໍ້ມູນ. ດ້ວຍເຫດຜົນດ້ານຄວາມປອດໄພ, ຂໍ້ມູນທີ່ເຂົ້າລະຫັດເຊັ່ນກະແຈ SSH ແລະລະຫັດຜ່ານຈະບໍ່ຖືກລວມຢູ່ໃນການສໍາຮອງຂໍ້ມູນ.
-
-ກະລຸນາຕັ້ງຄ່າສິ່ງເຫຼົ່ານີ້ອີກຄັ້ງ.</string>
+    <string name="restored_from_backup_text">ຂໍ້ມູນແອັບຖືກກູ້ຄືນຈາກການສໍາຮອງຂໍ້ມູນ. ດ້ວຍເຫດຜົນດ້ານຄວາມປອດໄພ, ຂໍ້ມູນທີ່ເຂົ້າລະຫັດເຊັ່ນກະແຈ SSH ແລະລະຫັດຜ່ານຈະບໍ່ຖືກລວມຢູ່ໃນການສໍາຮອງຂໍ້ມູນ.\n\nກະລຸນາຕັ້ງຄ່າສິ່ງເຫຼົ່ານີ້ອີກຄັ້ງ.</string>
     <string name="export_to_file">ສົ່ງອອກໄປຫາໄຟລ໌</string>
     <string name="export_to_file_subtitle">ສົ່ງອອກການຕັ້ງຄ່າ ແລະ ໂຮສໄປຫາໄຟລ໌.</string>
     <string name="import_from_file">ນໍາເຂົ້າຈາກໄຟລ໌</string>
@@ -336,11 +334,8 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="scan_qr_code_certificate_prompt">ສະແກນ QR code ເພື່ອນໍາເຂົ້າໃບຮັບຮອງ SSH</string>
     <string name="qr_code_content_description">QR Code</string>
     <string name="import_settings_title">ນໍາເຂົ້າການຕັ້ງຄ່າ</string>
-    <string name="import_settings_text">ໃນກໍລະນີທີ່ຂັດແຍ້ງກັບໂຮສທີ່ມີຢູ່, ທ່ານຕ້ອງການອັບເດດ ຫຼື ສໍາເນົາ?
-
-ທ່ານຍັງສາມາດເລືອກ ແທນທີ່ ເຊິ່ງຈະລຶບໂຮສທີ່ມີຢູ່ທັງໝົດ.</string>
+    <string name="import_settings_text">ໃນກໍລະນີທີ່ຂັດແຍ້ງກັບໂຮສທີ່ມີຢູ່, ທ່ານຕ້ອງການອັບເດດ ຫຼື ສໍາເນົາ?\n\nທ່ານຍັງສາມາດເລືອກ ແທນທີ່ ເຊິ່ງຈະລຶບໂຮສທີ່ມີຢູ່ທັງໝົດ.</string>
     <plurals name="successfully_imported_hosts">
-        <item quantity="one">ນໍາເຂົ້າໂຮສ %d ລາຍການສໍາເລັດ.</item>
         <item quantity="other">ນໍາເຂົ້າໂຮສ %d ລາຍການສໍາເລັດ.</item>
     </plurals>
 
@@ -348,7 +343,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="about_app">ກ່ຽວກັບ SSH Remote</string>
     <string name="app_version">ເວີຊັນແອັບ</string>
     <string name="author">ຜູ້ພັດທະນາ</string>
-    <string name="author_name">ພັດທະນາໂດຍ Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">ພັດທະນາໂດຍ Stefan Sundin</string>
     <string name="donate">ບໍລິຈາກ</string>
     <string name="support_developer">ສະໜັບສະໜູນຜູ້ພັດທະນາ</string>
     <string name="license">ໃບອະນຸຍາດ</string>
@@ -358,26 +353,11 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="ssh_library">ໄລບຣາຣີ SSH</string>
     <string name="ssh_library_subtitle">ໃຊ້ %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">ຊ່ວຍເຫຼືອ</string>
     <string name="tap_the_help_button_for_help">ແຕະປຸ່ມ ? ເພື່ອຂໍຄວາມຊ່ວຍເຫຼືອ.</string>
     <string name="getting_started_title">ເລີ່ມຕົ້ນ</string>
-    <string name="getting_started_text">ປຸ່ມຕ່າງໆໃນການຄວບຄຸມຣີໂມດຖືກຈັບຄູ່ກັບຄໍາສັ່ງສະເພາະທີ່ຈະຖືກດໍາເນີນໃນໂຮສ.
-
-ທ່ານຕ້ອງຕິດຕັ້ງເຄື່ອງມືທີ່ເໝາະສົມໃນໂຮສ, ວ່າຈະເປັນຕົວໃດຂຶ້ນກັບວ່າໂຮສໃຊ້ window manager ແບບໃດ (X11 ຫຼື Wayland).
-
-ເພື່ອເລີ່ມຕົ້ນ, ກະລຸນາເລືອກຄ່າຕັ້ງສໍາເລັດຮູບ. ທ່ານສາມາດຣີເຊັດກັບໄປຫາຄ່າຕັ້ງສໍາເລັດຮູບໄດ້ພາຍຫຼັງໂດຍການແກ້ໄຂການຄວບຄຸມຣີໂມດ.
-
-ກະລຸນາອ່ານໜ້າຊ່ວຍເຫຼືອຖ້ານີ້ເປັນຄັ້ງທໍາອິດທີ່ທ່ານໃຊ້ແອັບນີ້.</string>
-    <string name="error_reading_volume">ອ່ານຄ່າສຽງບໍ່ໄດ້. ກະລຸນາຕິດຕັ້ງ pactl.</string>
-    <string name="volume_format">ລະດັບສຽງ: %s</string>
-    <string name="volume_muted_format">ລະດັບສຽງ: %s (ປິດສຽງ)</string>
-    <string name="smart_volume_settings">ການຕັ້ງຄ່າສຽງອັດສະລິຍະ</string>
-    <string name="read_current_volume">ອ່ານຄ່າສຽງປັດຈຸບັນ</string>
-    <string name="show_volume_slider">ສະແດງແຖບເລື່ອນລະດັບສຽງ</string>
-    <string name="control_volume_with_hardware_buttons">ຄວບຄຸມສຽງດ້ວຍປຸ່ມຮາດແວ</string>
-    <string name="test_pactl">ທົດສອບ pactl</string>
-    <string name="pactl_installation_requirement">ຕ້ອງມີການຕິດຕັ້ງ pactl.</string>
+    <string name="getting_started_text">ປຸ່ມຕ່າງໆໃນການຄວບຄຸມຣີໂມດຖືກຈັບຄູ່ກັບຄໍາສັ່ງສະເພາະທີ່ຈະຖືກດໍາເນີນໃນໂຮສ.\n\nທ່ານຕ້ອງຕິດຕັ້ງເຄື່ອງມືທີ່ເໝາະສົມໃນໂຮສ, ວ່າຈະເປັນຕົວໃດຂຶ້ນກັບວ່າໂຮສໃຊ້ window manager ແບບໃດ (X11 ຫຼື Wayland).\n\nເພື່ອເລີ່ມຕົ້ນ, ກະລຸນາເລືອກຄ່າຕັ້ງສໍາເລັດຮູບ. ທ່ານສາມາດຣີເຊັດກັບໄປຫາຄ່າຕັ້ງສໍາເລັດຮູບໄດ້ພາຍຫຼັງໂດຍການແກ້ໄຂການຄວບຄຸມຣີໂມດ.\n\nກະລຸນາອ່ານໜ້າຊ່ວຍເຫຼືອຖ້ານີ້ເປັນຄັ້ງທໍາອິດທີ່ທ່ານໃຊ້ແອັບນີ້.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">ການຄວບຄຸມຣີໂມດ</string>

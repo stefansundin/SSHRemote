@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Kawaida -->
+    <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">SAWA</string>
     <string name="cancel">Ghairi</string>
@@ -42,7 +42,7 @@
     <string name="search_match_position">Matokeo %1$d ya %2$d</string>
     <string name="search_next_match">Matokeo yanayofuata</string>
 
-    <!-- Hosti -->
+    <!-- Hosts -->
     <string name="hosts_title">Hosti</string>
     <string name="no_ssh_hosts_added_yet">Bado hakuna hosti za SSH zilizoongezwa.</string>
     <string name="empty_list_add_prompt">Gusa kitufe cha + ili kuongeza moja.</string>
@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Weka nenosiri jipya, au acha tupu ili kuliondoa</string>
     <string name="optional_password_prompt">Si lazima, utaombwa baadaye kama halijatolewa</string>
     <string name="optional">Si lazima</string>
-    <string name="re_enter">Weka tena</string> <!-- muktadha: kuweka tena nenosiri lililopotea -->
+    <string name="re_enter">Weka tena</string>
     <string name="change_or_clear">Badilisha au Ondoa</string>
     <string name="unsaved_changes_title">Mabadiliko ambayo hayajahifadhiwa</string>
     <string name="unsaved_changes_text">Unataka kuhifadhi hosti kabla ya kuondoka?</string>
@@ -80,7 +80,7 @@
     <string name="select_host">Chagua hosti</string>
     <string name="no_hosts_found">Hakuna hosti zilizopatikana</string>
 
-    <!-- Kidhibiti cha Mbali -->
+    <!-- Remote Control -->
     <string name="tab_remote">Kidhibiti</string>
     <string name="tab_mouse">Kipanya</string>
     <string name="tab_keyboard">Kibodi</string>
@@ -122,8 +122,17 @@
     <string name="executing_command">Inatekeleza amri…</string>
     <string name="executing_on">Inatekeleza kwenye %s</string>
     <string name="sharing_to">Inashiriki kwa %s</string>
+    <string name="smart_volume_settings">Mipangilio mahiri ya sauti</string>
+    <string name="read_current_volume">Soma sauti ya sasa</string>
+    <string name="show_volume_slider">Onyesha kitelezi cha sauti</string>
+    <string name="control_volume_with_hardware_buttons">Dhibiti sauti kwa vitufe vya kifaa</string>
+    <string name="test_pactl">Jaribu pactl</string>
+    <string name="pactl_installation_requirement">Inahitaji pactl kuwa imesakinishwa.</string>
+    <string name="error_reading_volume">Hitilafu ya kusoma sauti. Tafadhali sakinisha pactl.</string>
+    <string name="volume_format">Sauti: %s</string>
+    <string name="volume_muted_format">Sauti: %s (imenyamazishwa)</string>
 
-    <!-- Vitufe / Funguo -->
+    <!-- Buttons / Keys -->
     <string name="key_back">Rudi</string>
     <string name="key_home">Nyumbani</string>
     <string name="key_menu">Menyu</string>
@@ -139,7 +148,7 @@
     <string name="key_mute">Nyamazisha</string>
     <string name="key_volume_up">Ongeza Sauti</string>
 
-    <!-- Kipanya -->
+    <!-- Mouse -->
     <string name="mouse_pad">Eneo la Kipanya</string>
     <string name="mouse_pad_disabled">Eneo la Kipanya Limezimwa</string>
     <string name="mouse_commands_not_configured">Amri za kipanya hazijasanidiwa</string>
@@ -161,7 +170,7 @@
     <string name="key_mouse_pan_left">Sogeza kwa Vidole Viwili Kushoto</string>
     <string name="key_mouse_pan_right">Sogeza kwa Vidole Viwili Kulia</string>
 
-    <!-- Kibodi -->
+    <!-- Keyboard -->
     <string name="keyboard_commands_not_configured">Amri za kibodi hazijasanidiwa</string>
     <string name="edit_keyboard_commands">Hariri Amri za Kibodi</string>
     <string name="key_esc">Esc</string>
@@ -180,7 +189,7 @@
     <string name="key_keyboard_key_down">Kibodi Kitufe Chini</string>
     <string name="key_keyboard_key_up">Kibodi Kitufe Juu</string>
 
-    <!-- Usanidi wa SSH -->
+    <!-- SSH Configuration -->
     <string name="advanced_ssh_config">Usanidi wa Juu wa SSH</string>
     <string name="advanced_users_only">Kwa Watumiaji wa Juu Pekee</string>
     <string name="advanced_users_warning">Kubadilisha thamani za usanidi wa SSH kunakusudiwa kwa watumiaji wa juu. Mipangilio isiyo sahihi inaweza kuzuia muunganisho.</string>
@@ -190,7 +199,7 @@
     <string name="strict_host_key_checking">Ukaguzi mkali wa ufunguo wa hosti</string>
     <string name="allow_password_prompting">Ruhusu kuombwa nenosiri</string>
 
-    <!-- Funguo za SSH -->
+    <!-- SSH Keys -->
     <string name="ssh_keys">Funguo za SSH</string>
     <string name="ssh_key">Ufunguo wa SSH</string>
     <string name="add_ssh_key">Ongeza Ufunguo wa SSH</string>
@@ -247,7 +256,7 @@
     <string name="delete_certificate">Futa cheti</string>
     <string name="certificate">Cheti</string>
 
-    <!-- Mipangilio -->
+    <!-- Settings -->
     <string name="settings">Mipangilio</string>
     <string name="appearance">Mwonekano</string>
     <string name="theme">Mandhari</string>
@@ -299,7 +308,7 @@
     <string name="green_format">Green: %d</string>
     <string name="blue_format">Blue: %d</string>
 
-    <!-- Usimamizi wa Data -->
+    <!-- Data Management -->
     <string name="data">Data</string>
     <string name="restored_from_backup_title">Imerejeshwa kutoka kwenye chelezo</string>
     <string name="restored_from_backup_text">Data ya programu imerejeshwa kutoka kwenye chelezo. Kwa sababu za usalama, data iliyosimbwa kama funguo za SSH na manenosiri haijumuishwi kwenye chelezo.\n\nTafadhali sanidi haya tena.</string>
@@ -332,11 +341,11 @@
         <item quantity="other">Hosti %d zimeingizwa kwa mafanikio.</item>
     </plurals>
 
-    <!-- Kuhusu -->
+    <!-- About -->
     <string name="about_app">Kuhusu SSH Remote</string>
     <string name="app_version">Toleo la programu</string>
     <string name="author">Mwandishi</string>
-    <string name="author_name">Imetengenezwa na Stefan Sundin</string> <!-- tafsiri jina langu tu kama ina maana -->
+    <string name="author_name">Imetengenezwa na Stefan Sundin</string>
     <string name="donate">Changia</string>
     <string name="support_developer">Muunge mkono msanidi</string>
     <string name="license">Leseni</string>
@@ -346,22 +355,13 @@
     <string name="ssh_library">Maktaba ya SSH</string>
     <string name="ssh_library_subtitle">Inatumia %1$s %2$s</string>
 
-    <!-- Msaada na Sauti -->
+    <!-- Help -->
     <string name="help">Msaada</string>
     <string name="tap_the_help_button_for_help">Gusa kitufe cha ? kwa msaada.</string>
     <string name="getting_started_title">Kuanza</string>
     <string name="getting_started_text">Vitufe kwenye kidhibiti cha mbali vimeunganishwa na amri maalum zinazotekelezwa kwenye hosti.\n\nLazima usakinishe zana inayofaa kwenye hosti; ipi inahitajika inategemea ni meneja gani wa madirisha hosti inatumia (X11 au Wayland).\n\nIli kuanza, tafadhali chagua mpangilio wa awali. Unaweza kila wakati kurudi kwenye mpangilio wa awali baadaye kwa kuhariri kidhibiti cha mbali.\n\nTafadhali soma ukurasa wa Msaada ikiwa hii ni mara yako ya kwanza kutumia programu hii.</string>
-    <string name="error_reading_volume">Hitilafu ya kusoma sauti. Tafadhali sakinisha pactl.</string>
-    <string name="volume_format">Sauti: %s</string>
-    <string name="volume_muted_format">Sauti: %s (imenyamazishwa)</string>
-    <string name="smart_volume_settings">Mipangilio mahiri ya sauti</string>
-    <string name="read_current_volume">Soma sauti ya sasa</string>
-    <string name="show_volume_slider">Onyesha kitelezi cha sauti</string>
-    <string name="control_volume_with_hardware_buttons">Dhibiti sauti kwa vitufe vya kifaa</string>
-    <string name="test_pactl">Jaribu pactl</string>
-    <string name="pactl_installation_requirement">Inahitaji pactl kuwa imesakinishwa.</string>
 
-    <!-- Arifa -->
+    <!-- Notifications -->
     <string name="notification_channel_name">Kidhibiti cha Mbali</string>
     <string name="notification_connected_to">Imeunganishwa kwa %s</string>
     <string name="notification_connecting_to">Inaunganisha kwa %s</string>
@@ -371,7 +371,7 @@
     <string name="notification_open">Fungua</string>
     <string name="notification_close">Funga</string>
 
-    <!-- Njia za mkato -->
+    <!-- Shortcuts -->
     <string name="add_to_home_screen">Ongeza kwenye Skrini ya Mwanzo</string>
     <string name="run_command_on_host_short">%1$s kwenye %2$s</string>
     <string name="run_command_on_host_long">Endesha %1$s kwenye %2$s</string>
@@ -380,7 +380,7 @@
     <string name="shortcut_remote_control_key_not_found">Kitendo cha njia ya mkato hakitumiki tena.</string>
     <string name="shortcut_save_changes_before_using">Tafadhali hifadhi mabadiliko ya kidhibiti cha mbali kabla ya kutumia njia za mkato.</string>
 
-    <!-- Kushiriki -->
+    <!-- Share -->
     <string name="sharing">Kushiriki</string>
     <string name="share_target_enabled">Washa lengwa la kushiriki</string>
     <string name="share_target_enabled_subtitle">Programu hii itaonekana kwenye menyu ya kushiriki kwa maudhui ya maandishi ya kawaida. Kwa chaguomsingi, maandishi yaliyoshirikiwa yataandikwa kwenye hosti iliyounganishwa kwa kutumia amri ya kibodi ya kuandika maandishi, lakini hili linaweza kubinafsishwa kwa kila hosti.</string>

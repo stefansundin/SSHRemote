@@ -122,6 +122,15 @@
     <string name="executing_command">အမိန့်ကို လုပ်ဆောင်နေသည်…</string>
     <string name="executing_on">%s ပေါ်တွင် လုပ်ဆောင်နေသည်</string>
     <string name="sharing_to">%s သို့ မျှဝေနေသည်</string>
+    <string name="smart_volume_settings">စမတ် အသံဆက်တင်များ</string>
+    <string name="read_current_volume">လက်ရှိ အသံပမာဏကို ဖတ်မည်</string>
+    <string name="show_volume_slider">အသံ slider ပြ</string>
+    <string name="control_volume_with_hardware_buttons">ဟာ့ဒ်ဝဲခလုတ်များဖြင့် အသံကို ထိန်းမည်</string>
+    <string name="test_pactl">pactl စမ်းသပ်မည်</string>
+    <string name="pactl_installation_requirement">pactl ကို install လုပ်ထားရပါမည်။</string>
+    <string name="error_reading_volume">အသံပမာဏ ဖတ်ရာတွင် အမှား ဖြစ်ပွားသည်။ pactl ကို install လုပ်ပါ။</string>
+    <string name="volume_format">အသံပမာဏ: %s</string>
+    <string name="volume_muted_format">အသံပမာဏ: %s (ပိတ်ထားသည်)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">နောက်သို့</string>
@@ -344,20 +353,11 @@
     <string name="ssh_library">SSH စာကြည့်တိုက်</string>
     <string name="ssh_library_subtitle">%1$s %2$s ကို အသုံးပြုထားသည်</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">အကူအညီ</string>
     <string name="tap_the_help_button_for_help">အကူအညီအတွက် ? ခလုတ်ကို နှိပ်ပါ။</string>
     <string name="getting_started_title">စတင်အသုံးပြုခြင်း</string>
     <string name="getting_started_text">ရီမုတ်ထိန်းချုပ်မှုရှိ ခလုတ်များကို ဟော့စ်ပေါ်တွင် လုပ်ဆောင်မည့် သီးသန့်အမိန့်များနှင့် map လုပ်ထားသည်။\n\nသင့်ဟော့စ်အသုံးပြုသော window manager (X11 သို့မဟုတ် Wayland) အပေါ် မူတည်၍ သင့်လျော်သော utility ကို ဟော့စ်တွင် install လုပ်ရန် လိုအပ်သည်။\n\nစတင်ရန် preset တစ်ခု ရွေးပါ။ နောက်ပိုင်းတွင် ရီမုတ်ထိန်းချုပ်မှုကို တည်းဖြတ်ပြီး preset သို့ အမြဲပြန်ထားနိုင်သည်။\n\nဒီအက်ပ်ကို ပထမဆုံးအသုံးပြုခြင်းဖြစ်ပါက Help စာမျက်နှာကို ဖတ်ရှုပါ။</string>
-    <string name="error_reading_volume">အသံပမာဏ ဖတ်ရာတွင် အမှား ဖြစ်ပွားသည်။ pactl ကို install လုပ်ပါ။</string>
-    <string name="volume_format">အသံပမာဏ: %s</string>
-    <string name="volume_muted_format">အသံပမာဏ: %s (ပိတ်ထားသည်)</string>
-    <string name="smart_volume_settings">စမတ် အသံဆက်တင်များ</string>
-    <string name="read_current_volume">လက်ရှိ အသံပမာဏကို ဖတ်မည်</string>
-    <string name="show_volume_slider">အသံ slider ပြ</string>
-    <string name="control_volume_with_hardware_buttons">ဟာ့ဒ်ဝဲခလုတ်များဖြင့် အသံကို ထိန်းမည်</string>
-    <string name="test_pactl">pactl စမ်းသပ်မည်</string>
-    <string name="pactl_installation_requirement">pactl ကို install လုပ်ထားရပါမည်။</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">ရီမုတ် ထိန်းချုပ်မှု</string>

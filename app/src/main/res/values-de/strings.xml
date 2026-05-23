@@ -122,6 +122,15 @@
     <string name="executing_command">Befehl wird ausgeführt…</string>
     <string name="executing_on">Wird auf %s ausgeführt</string>
     <string name="sharing_to">Teilen an %s</string>
+    <string name="smart_volume_settings">Intelligente Lautstärkeeinstellungen</string>
+    <string name="read_current_volume">Aktuelle Lautstärke lesen</string>
+    <string name="show_volume_slider">Lautstärkeregler anzeigen</string>
+    <string name="control_volume_with_hardware_buttons">Lautstärke mit Hardwaretasten steuern</string>
+    <string name="test_pactl">pactl testen</string>
+    <string name="pactl_installation_requirement">Erfordert, dass pactl installiert ist.</string>
+    <string name="error_reading_volume">Fehler beim Lesen der Lautstärke. Bitte installiere pactl.</string>
+    <string name="volume_format">Lautstärke: %s</string>
+    <string name="volume_muted_format">Lautstärke: %s (stumm)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Zurück</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH-Bibliothek</string>
     <string name="ssh_library_subtitle">Verwendet %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Hilfe</string>
     <string name="tap_the_help_button_for_help">Tippe auf die ?-Schaltfläche für Hilfe.</string>
     <string name="getting_started_title">Erste Schritte</string>
     <string name="getting_started_text">Die Schaltflächen auf der Fernbedienung sind bestimmten Befehlen zugeordnet, die auf dem Host ausgeführt werden.\n\nDu musst das passende Hilfsprogramm auf dem Host installieren; welches das ist, hängt davon ab, welchen Fenstermanager der Host verwendet (X11 oder Wayland).\n\nWähle zum Einstieg bitte eine Voreinstellung aus. Du kannst später jederzeit wieder auf eine Voreinstellung zurücksetzen, indem du die Fernbedienung bearbeitest.\n\nBitte lies die Hilfeseite, wenn du diese App zum ersten Mal verwendest.</string>
-    <string name="error_reading_volume">Fehler beim Lesen der Lautstärke. Bitte installiere pactl.</string>
-    <string name="volume_format">Lautstärke: %s</string>
-    <string name="volume_muted_format">Lautstärke: %s (stumm)</string>
-    <string name="smart_volume_settings">Intelligente Lautstärkeeinstellungen</string>
-    <string name="read_current_volume">Aktuelle Lautstärke lesen</string>
-    <string name="show_volume_slider">Lautstärkeregler anzeigen</string>
-    <string name="control_volume_with_hardware_buttons">Lautstärke mit Hardwaretasten steuern</string>
-    <string name="test_pactl">pactl testen</string>
-    <string name="pactl_installation_requirement">Erfordert, dass pactl installiert ist.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Fernbedienung</string>

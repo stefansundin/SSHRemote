@@ -122,6 +122,15 @@
     <string name="executing_command">આદેશ ચલાવવામાં આવી રહ્યો છે…</string>
     <string name="executing_on">%s પર ચાલી રહ્યું છે</string>
     <string name="sharing_to">%s સાથે શેર થઈ રહ્યું છે</string>
+    <string name="smart_volume_settings">સ્માર્ટ વોલ્યુમ સેટિંગ્સ</string>
+    <string name="read_current_volume">હાલનો વોલ્યુમ વાંચો</string>
+    <string name="show_volume_slider">વોલ્યુમ સ્લાઇડર બતાવો</string>
+    <string name="control_volume_with_hardware_buttons">હાર્ડવેર બટનો વડે વોલ્યુમ નિયંત્રિત કરો</string>
+    <string name="test_pactl">pactl ચકાસો</string>
+    <string name="pactl_installation_requirement">pactl ઇન્સ્ટોલ થયેલું હોવું જરૂરી છે.</string>
+    <string name="error_reading_volume">વોલ્યુમ વાંચવામાં ભૂલ. કૃપા કરીને pactl ઇન્સ્ટોલ કરો.</string>
+    <string name="volume_format">વોલ્યુમ: %s</string>
+    <string name="volume_muted_format">વોલ્યુમ: %s (મ્યૂટ)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">પાછળ</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH લાઇબ્રેરી</string>
     <string name="ssh_library_subtitle">%1$s %2$s નો ઉપયોગ કરે છે</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">મદદ</string>
     <string name="tap_the_help_button_for_help">મદદ માટે ? બટન પર ટૅપ કરો.</string>
     <string name="getting_started_title">શરૂઆત</string>
     <string name="getting_started_text">રિમોટ કંટ્રોલ પરના બટનો હોસ્ટ પર ચલાવવામાં આવતા ચોક્કસ આદેશો સાથે મેપ થયેલા છે.\n\nતમારે હોસ્ટ પર યોગ્ય utility ઇન્સ્ટોલ કરવી પડશે, અને કઈ utility જોઈએ તે હોસ્ટ કયો window manager વાપરે છે (X11 અથવા Wayland) તેના પર આધાર રાખે છે.\n\nશરૂ કરવા માટે કૃપા કરીને એક પ્રિસેટ પસંદ કરો. પછીથી તમે રિમોટ કંટ્રોલ સંપાદિત કરીને હંમેશા પ્રિસેટ પર રીસેટ કરી શકો છો.\n\nજો તમે આ એપ પહેલી વાર વાપરી રહ્યા હો, તો કૃપા કરીને Help પાનું વાંચો.</string>
-    <string name="error_reading_volume">વોલ્યુમ વાંચવામાં ભૂલ. કૃપા કરીને pactl ઇન્સ્ટોલ કરો.</string>
-    <string name="volume_format">વોલ્યુમ: %s</string>
-    <string name="volume_muted_format">વોલ્યુમ: %s (મ્યૂટ)</string>
-    <string name="smart_volume_settings">સ્માર્ટ વોલ્યુમ સેટિંગ્સ</string>
-    <string name="read_current_volume">હાલનો વોલ્યુમ વાંચો</string>
-    <string name="show_volume_slider">વોલ્યુમ સ્લાઇડર બતાવો</string>
-    <string name="control_volume_with_hardware_buttons">હાર્ડવેર બટનો વડે વોલ્યુમ નિયંત્રિત કરો</string>
-    <string name="test_pactl">pactl ચકાસો</string>
-    <string name="pactl_installation_requirement">pactl ઇન્સ્ટોલ થયેલું હોવું જરૂરી છે.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">રિમોટ કંટ્રોલ</string>

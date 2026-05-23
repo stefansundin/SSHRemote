@@ -122,6 +122,15 @@
     <string name="executing_command">Menjalankan perintah…</string>
     <string name="executing_on">Menjalankan di %s</string>
     <string name="sharing_to">Membagikan ke %s</string>
+    <string name="smart_volume_settings">Pengaturan volume pintar</string>
+    <string name="read_current_volume">Baca volume saat ini</string>
+    <string name="show_volume_slider">Tampilkan penggeser volume</string>
+    <string name="control_volume_with_hardware_buttons">Kontrol volume dengan tombol perangkat keras</string>
+    <string name="test_pactl">Uji pactl</string>
+    <string name="pactl_installation_requirement">Memerlukan pactl yang sudah terinstal.</string>
+    <string name="error_reading_volume">Kesalahan saat membaca volume. Silakan instal pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (dibisukan)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Kembali</string>
@@ -270,15 +279,7 @@
     <string name="known_hosts_subtitle">Kelola kunci host dan sertifikat tepercaya</string>
     <string name="no_known_hosts_added_yet">Belum ada entri host dikenal yang ditambahkan.</string>
     <string name="known_host_help_title">Format Entri</string>
-    <string name="known_host_help_text">Entri yang ditambahkan di sini otomatis digunakan untuk semua host. Host juga menyimpan daftar kunci host yang diterima sendiri.
-
-Kasus penggunaan utama bagian ini adalah untuk memercayai sertifikat host, contohnya:
-
-@cert-authority host.example.com ssh-ed25519 AAA…
-
-Entri biasa juga didukung:
-
-host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_help_text">Entri yang ditambahkan di sini otomatis digunakan untuk semua host. Host juga menyimpan daftar kunci host yang diterima sendiri.\n\nKasus penggunaan utama bagian ini adalah untuk memercayai sertifikat host, contohnya:\n\n@cert-authority host.example.com ssh-ed25519 AAA…\n\nEntri biasa juga didukung:\n\nhost.example.com ssh-ed25519 AAA…</string>
     <string name="known_host_add_title">Tambah Entri Host Dikenal</string>
     <string name="known_host_input_label">Tempel satu entri per baris</string>
     <string name="add_entries">Tambah entri</string>
@@ -309,9 +310,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <!-- Data Management -->
     <string name="data">Data</string>
     <string name="restored_from_backup_title">Dipulihkan dari cadangan</string>
-    <string name="restored_from_backup_text">Data aplikasi dipulihkan dari cadangan. Demi alasan keamanan, data terenkripsi seperti kunci SSH dan kata sandi tidak disertakan dalam cadangan.
-
-Silakan konfigurasi ulang data tersebut.</string>
+    <string name="restored_from_backup_text">Data aplikasi dipulihkan dari cadangan. Demi alasan keamanan, data terenkripsi seperti kunci SSH dan kata sandi tidak disertakan dalam cadangan.\n\nSilakan konfigurasi ulang data tersebut.</string>
     <string name="export_to_file">Ekspor ke file</string>
     <string name="export_to_file_subtitle">Ekspor pengaturan dan host ke file.</string>
     <string name="import_from_file">Impor dari file</string>
@@ -335,9 +334,7 @@ Silakan konfigurasi ulang data tersebut.</string>
     <string name="scan_qr_code_certificate_prompt">Pindai kode QR untuk mengimpor sertifikat SSH</string>
     <string name="qr_code_content_description">Kode QR</string>
     <string name="import_settings_title">Impor pengaturan</string>
-    <string name="import_settings_text">Jika terjadi konflik dengan host yang ada, apakah Anda ingin memperbarui atau menduplikasi?
-
-Anda juga dapat memilih Ganti yang akan menghapus semua host yang ada.</string>
+    <string name="import_settings_text">Jika terjadi konflik dengan host yang ada, apakah Anda ingin memperbarui atau menduplikasi?\n\nAnda juga dapat memilih Ganti yang akan menghapus semua host yang ada.</string>
     <plurals name="successfully_imported_hosts">
         <item quantity="other">Berhasil mengimpor %d host.</item>
     </plurals>
@@ -356,26 +353,11 @@ Anda juga dapat memilih Ganti yang akan menghapus semua host yang ada.</string>
     <string name="ssh_library">Pustaka SSH</string>
     <string name="ssh_library_subtitle">Menggunakan %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Bantuan</string>
     <string name="tap_the_help_button_for_help">Ketuk tombol ? untuk bantuan.</string>
     <string name="getting_started_title">Memulai</string>
-    <string name="getting_started_text">Tombol pada kendali jarak jauh dipetakan ke perintah tertentu yang dijalankan pada host.
-
-Anda harus memasang utilitas yang sesuai pada host, dan utilitas yang dibutuhkan bergantung pada window manager yang digunakan host (X11 atau Wayland).
-
-Untuk memulai, silakan pilih preset. Anda selalu dapat menyetel ulang ke preset nanti dengan mengedit kendali jarak jauh.
-
-Silakan baca halaman Bantuan jika ini pertama kalinya Anda menggunakan aplikasi ini.</string>
-    <string name="error_reading_volume">Kesalahan saat membaca volume. Silakan instal pactl.</string>
-    <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %s (dibisukan)</string>
-    <string name="smart_volume_settings">Pengaturan volume pintar</string>
-    <string name="read_current_volume">Baca volume saat ini</string>
-    <string name="show_volume_slider">Tampilkan penggeser volume</string>
-    <string name="control_volume_with_hardware_buttons">Kontrol volume dengan tombol perangkat keras</string>
-    <string name="test_pactl">Uji pactl</string>
-    <string name="pactl_installation_requirement">Memerlukan pactl yang sudah terinstal.</string>
+    <string name="getting_started_text">Tombol pada kendali jarak jauh dipetakan ke perintah tertentu yang dijalankan pada host.\n\nAnda harus memasang utilitas yang sesuai pada host, dan utilitas yang dibutuhkan bergantung pada window manager yang digunakan host (X11 atau Wayland).\n\nUntuk memulai, silakan pilih preset. Anda selalu dapat menyetel ulang ke preset nanti dengan mengedit kendali jarak jauh.\n\nSilakan baca halaman Bantuan jika ini pertama kalinya Anda menggunakan aplikasi ini.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Kendali Jarak Jauh</string>

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Загальні -->
+    <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">OK</string>
     <string name="cancel">Скасувати</string>
@@ -42,7 +42,7 @@
     <string name="search_match_position">Збіг %1$d із %2$d</string>
     <string name="search_next_match">Наступний збіг</string>
 
-    <!-- Хости -->
+    <!-- Hosts -->
     <string name="hosts_title">Хости</string>
     <string name="no_ssh_hosts_added_yet">Ще не додано жодного SSH-хоста.</string>
     <string name="empty_list_add_prompt">Натисніть кнопку +, щоб додати хост.</string>
@@ -80,7 +80,7 @@
     <string name="select_host">Виберіть хост</string>
     <string name="no_hosts_found">Хостів не знайдено</string>
 
-    <!-- Дистанційне керування -->
+    <!-- Remote Control -->
     <string name="tab_remote">Пульт</string>
     <string name="tab_mouse">Миша</string>
     <string name="tab_keyboard">Клавіатура</string>
@@ -122,8 +122,17 @@
     <string name="executing_command">Виконання команди…</string>
     <string name="executing_on">Виконується на %s</string>
     <string name="sharing_to">Надсилання до %s</string>
+    <string name="smart_volume_settings">Розумні налаштування гучності</string>
+    <string name="read_current_volume">Зчитувати поточну гучність</string>
+    <string name="show_volume_slider">Показувати повзунок гучності</string>
+    <string name="control_volume_with_hardware_buttons">Керувати гучністю апаратними кнопками</string>
+    <string name="test_pactl">Перевірити pactl</string>
+    <string name="pactl_installation_requirement">Потрібно, щоб було встановлено pactl.</string>
+    <string name="error_reading_volume">Помилка читання гучності. Будь ласка, встановіть pactl.</string>
+    <string name="volume_format">Гучність: %s</string>
+    <string name="volume_muted_format">Гучність: %s (вимкнено)</string>
 
-    <!-- Кнопки / клавіші -->
+    <!-- Buttons / Keys -->
     <string name="key_back">Назад</string>
     <string name="key_home">Головний екран</string>
     <string name="key_menu">Меню</string>
@@ -139,7 +148,7 @@
     <string name="key_mute">Без звуку</string>
     <string name="key_volume_up">Збільшити гучність</string>
 
-    <!-- Миша -->
+    <!-- Mouse -->
     <string name="mouse_pad">Сенсорна панель</string>
     <string name="mouse_pad_disabled">Сенсорну панель вимкнено</string>
     <string name="mouse_commands_not_configured">Команди миші не налаштовано</string>
@@ -161,7 +170,7 @@
     <string name="key_mouse_pan_left">Прокрутка двома пальцями ліворуч</string>
     <string name="key_mouse_pan_right">Прокрутка двома пальцями праворуч</string>
 
-    <!-- Клавіатура -->
+    <!-- Keyboard -->
     <string name="keyboard_commands_not_configured">Команди клавіатури не налаштовано</string>
     <string name="edit_keyboard_commands">Редагувати команди клавіатури</string>
     <string name="key_esc">Esc</string>
@@ -180,7 +189,7 @@
     <string name="key_keyboard_key_down">Натискання клавіші вниз</string>
     <string name="key_keyboard_key_up">Відпускання клавіші</string>
 
-    <!-- Конфігурація SSH -->
+    <!-- SSH Configuration -->
     <string name="advanced_ssh_config">Розширена конфігурація SSH</string>
     <string name="advanced_users_only">Лише для досвідчених користувачів</string>
     <string name="advanced_users_warning">Змінювати параметри конфігурації SSH слід лише досвідченим користувачам. Неправильні налаштування можуть завадити підключенню.</string>
@@ -190,7 +199,7 @@
     <string name="strict_host_key_checking">Сувора перевірка ключа хоста</string>
     <string name="allow_password_prompting">Дозволити запит пароля</string>
 
-    <!-- SSH-ключі -->
+    <!-- SSH Keys -->
     <string name="ssh_keys">SSH-ключі</string>
     <string name="ssh_key">SSH-ключ</string>
     <string name="add_ssh_key">Додати SSH-ключ</string>
@@ -249,7 +258,7 @@
     <string name="delete_certificate">Видалити сертифікат</string>
     <string name="certificate">Сертифікат</string>
 
-    <!-- Налаштування -->
+    <!-- Settings -->
     <string name="settings">Налаштування</string>
     <string name="appearance">Зовнішній вигляд</string>
     <string name="theme">Тема</string>
@@ -301,7 +310,7 @@
     <string name="green_format">Зелений: %d</string>
     <string name="blue_format">Синій: %d</string>
 
-    <!-- Керування даними -->
+    <!-- Data Management -->
     <string name="data">Дані</string>
     <string name="restored_from_backup_title">Відновлено з резервної копії</string>
     <string name="restored_from_backup_text">Дані застосунку було відновлено з резервної копії. З міркувань безпеки зашифровані дані, такі як SSH-ключі та паролі, не входять до резервних копій.\n\nБудь ласка, налаштуйте їх знову.</string>
@@ -336,7 +345,7 @@
         <item quantity="other">Успішно імпортовано %d хоста.</item>
     </plurals>
 
-    <!-- Про застосунок -->
+    <!-- About -->
     <string name="about_app">Про SSH Remote</string>
     <string name="app_version">Версія застосунку</string>
     <string name="author">Автор</string>
@@ -350,22 +359,13 @@
     <string name="ssh_library">SSH-бібліотека</string>
     <string name="ssh_library_subtitle">Використовується %1$s %2$s</string>
 
-    <!-- Довідка й гучність -->
+    <!-- Help -->
     <string name="help">Довідка</string>
     <string name="tap_the_help_button_for_help">Натисніть кнопку ?, щоб відкрити довідку.</string>
     <string name="getting_started_title">Початок роботи</string>
     <string name="getting_started_text">Кнопки на пульті зіставлені з певними командами, які виконуються на хості.\n\nНа хості потрібно встановити відповідну утиліту; яка саме потрібна, залежить від того, який менеджер вікон використовує хост (X11 чи Wayland).\n\nЩоб почати, виберіть пресет. Пізніше ви завжди зможете знову скинути налаштування до пресета, редагуючи пульт.\n\nЯкщо ви вперше користуєтеся цим застосунком, будь ласка, прочитайте сторінку довідки.</string>
-    <string name="error_reading_volume">Помилка читання гучності. Будь ласка, встановіть pactl.</string>
-    <string name="volume_format">Гучність: %s</string>
-    <string name="volume_muted_format">Гучність: %s (вимкнено)</string>
-    <string name="smart_volume_settings">Розумні налаштування гучності</string>
-    <string name="read_current_volume">Зчитувати поточну гучність</string>
-    <string name="show_volume_slider">Показувати повзунок гучності</string>
-    <string name="control_volume_with_hardware_buttons">Керувати гучністю апаратними кнопками</string>
-    <string name="test_pactl">Перевірити pactl</string>
-    <string name="pactl_installation_requirement">Потрібно, щоб було встановлено pactl.</string>
 
-    <!-- Сповіщення -->
+    <!-- Notifications -->
     <string name="notification_channel_name">Пульт керування</string>
     <string name="notification_connected_to">Підключено до %s</string>
     <string name="notification_connecting_to">Підключення до %s</string>
@@ -375,7 +375,7 @@
     <string name="notification_open">Відкрити</string>
     <string name="notification_close">Закрити</string>
 
-    <!-- Ярлики -->
+    <!-- Shortcuts -->
     <string name="add_to_home_screen">Додати на головний екран</string>
     <string name="run_command_on_host_short">%1$s на %2$s</string>
     <string name="run_command_on_host_long">Виконати %1$s на %2$s</string>
@@ -384,7 +384,7 @@
     <string name="shortcut_remote_control_key_not_found">Дію ярлика більше не підтримується.</string>
     <string name="shortcut_save_changes_before_using">Будь ласка, збережіть зміни пульта перед використанням ярликів.</string>
 
-    <!-- Надсилання -->
+    <!-- Share -->
     <string name="sharing">Надсилання</string>
     <string name="share_target_enabled">Увімкнути ціль надсилання</string>
     <string name="share_target_enabled_subtitle">Цей застосунок з’являтиметься в меню надсилання для простого тексту. Типово спільний текст буде введено на підключеному хості за допомогою команди введення з клавіатури, але це можна налаштувати окремо для кожного хоста.</string>

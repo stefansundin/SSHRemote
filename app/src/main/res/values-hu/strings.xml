@@ -122,6 +122,15 @@
     <string name="executing_command">Parancs végrehajtása…</string>
     <string name="executing_on">Végrehajtás ezen: %s</string>
     <string name="sharing_to">Megosztás ide: %s</string>
+    <string name="smart_volume_settings">Intelligens hangerőbeállítások</string>
+    <string name="read_current_volume">Jelenlegi hangerő beolvasása</string>
+    <string name="show_volume_slider">Hangerőcsúszka megjelenítése</string>
+    <string name="control_volume_with_hardware_buttons">Hangerő vezérlése a hardvergombokkal</string>
+    <string name="test_pactl">pactl tesztelése</string>
+    <string name="pactl_installation_requirement">A pactl telepítését igényli.</string>
+    <string name="error_reading_volume">Hiba a hangerő olvasásakor. Kérjük, telepítse a pactl programot.</string>
+    <string name="volume_format">Hangerő: %s</string>
+    <string name="volume_muted_format">Hangerő: %s (némítva)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Vissza</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH könyvtár</string>
     <string name="ssh_library_subtitle">%1$s %2$s használata</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Súgó</string>
     <string name="tap_the_help_button_for_help">Súgóért érintse meg a ? gombot.</string>
     <string name="getting_started_title">Első lépések</string>
     <string name="getting_started_text">A távirányító gombjai meghatározott parancsokhoz vannak rendelve, amelyek a hoszton futnak le.\n\nA hosztra telepítenie kell a megfelelő segédprogramot; hogy melyiket, az attól függ, milyen ablakkezelőt használ a hoszt (X11 vagy Wayland).\n\nA kezdéshez válasszon egy előbeállítást. Később bármikor visszaállhat egy előbeállításra a távirányító szerkesztésével.\n\nHa most használja először ezt az alkalmazást, kérjük, olvassa el a Súgó oldalt.</string>
-    <string name="error_reading_volume">Hiba a hangerő olvasásakor. Kérjük, telepítse a pactl programot.</string>
-    <string name="volume_format">Hangerő: %s</string>
-    <string name="volume_muted_format">Hangerő: %s (némítva)</string>
-    <string name="smart_volume_settings">Intelligens hangerőbeállítások</string>
-    <string name="read_current_volume">Jelenlegi hangerő beolvasása</string>
-    <string name="show_volume_slider">Hangerőcsúszka megjelenítése</string>
-    <string name="control_volume_with_hardware_buttons">Hangerő vezérlése a hardvergombokkal</string>
-    <string name="test_pactl">pactl tesztelése</string>
-    <string name="pactl_installation_requirement">A pactl telepítését igényli.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Távirányító</string>

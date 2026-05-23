@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Endatescha in nov pled-clav, u lascha vid per al svidar</string>
     <string name="optional_password_prompt">Facultativ, vegn dumandà sche betg inditgà</string>
     <string name="optional">Facultativ</string>
-    <string name="re_enter">Endateschar danovamain</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Endateschar danovamain</string>
     <string name="change_or_clear">Midar u svidar</string>
     <string name="unsaved_changes_title">Midadas betg memorisadas</string>
     <string name="unsaved_changes_text">Vuls ti memorisar il host avant che bandunar?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Exequir il cumond…</string>
     <string name="executing_on">Exequir sin %s</string>
     <string name="sharing_to">Partir cun %s</string>
+    <string name="smart_volume_settings">Parameters da volumen intelligents</string>
+    <string name="read_current_volume">Leger il volumen actual</string>
+    <string name="show_volume_slider">Mussar il regulader dal volumen</string>
+    <string name="control_volume_with_hardware_buttons">Controllar il volumen cun ils buttuns da hardware</string>
+    <string name="test_pactl">Testar pactl</string>
+    <string name="pactl_installation_requirement">Pretenda che pactl saja installà.</string>
+    <string name="error_reading_volume">Errur tar leger il volumen. Per plaschair installescha pactl.</string>
+    <string name="volume_format">Volumen: %s</string>
+    <string name="volume_muted_format">Volumen: %s (silenzià)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Enavos</string>
@@ -336,7 +345,7 @@
     <string name="about_app">Davart SSH Remote</string>
     <string name="app_version">Versiun da l\'app</string>
     <string name="author">Autur</string>
-    <string name="author_name">Sviluppà da Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Sviluppà da Stefan Sundin</string>
     <string name="donate">Far ina donaziun</string>
     <string name="support_developer">Sustegnair il sviluppader</string>
     <string name="license">Licenza</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">Biblioteca SSH</string>
     <string name="ssh_library_subtitle">Utilisescha %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Agid</string>
     <string name="tap_the_help_button_for_help">Tocca il buttun ? per agid.</string>
     <string name="getting_started_title">Cumenzar</string>
     <string name="getting_started_text">Ils buttuns da la telecomonda èn attribuids a cumonds specifics che vegnan exequids sin il host.\n\nTi stos installar l\'utilitari adattà sin il host; tge utilitari che quai è dependa da tge manager da fanestra che il host utilisescha (X11 u Wayland).\n\nPer cumenzar, per plaschair tscherna in preset. Ti pos adina redefinir pli tard ad in preset modifitgond la telecomonda.\n\nPer plaschair legia la pagina d\'agid, sche quai è l\'emprima giada che ti dovras questa app.</string>
-    <string name="error_reading_volume">Errur tar leger il volumen. Per plaschair installescha pactl.</string>
-    <string name="volume_format">Volumen: %s</string>
-    <string name="volume_muted_format">Volumen: %s (silenzià)</string>
-    <string name="smart_volume_settings">Parameters da volumen intelligents</string>
-    <string name="read_current_volume">Leger il volumen actual</string>
-    <string name="show_volume_slider">Mussar il regulader dal volumen</string>
-    <string name="control_volume_with_hardware_buttons">Controllar il volumen cun ils buttuns da hardware</string>
-    <string name="test_pactl">Testar pactl</string>
-    <string name="pactl_installation_requirement">Pretenda che pactl saja installà.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Telecomonda</string>

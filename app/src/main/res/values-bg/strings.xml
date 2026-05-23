@@ -122,6 +122,15 @@
     <string name="executing_command">Изпълнение на команда…</string>
     <string name="executing_on">Изпълнение на %s</string>
     <string name="sharing_to">Споделяне към %s</string>
+    <string name="smart_volume_settings">Интелигентни настройки за звука</string>
+    <string name="read_current_volume">Прочитане на текущата сила на звука</string>
+    <string name="show_volume_slider">Показване на плъзгач за звука</string>
+    <string name="control_volume_with_hardware_buttons">Управление на звука с хардуерните бутони</string>
+    <string name="test_pactl">Тестване на pactl</string>
+    <string name="pactl_installation_requirement">Изисква инсталиран pactl.</string>
+    <string name="error_reading_volume">Грешка при четене на звука. Моля, инсталирайте pactl.</string>
+    <string name="volume_format">Звук: %s</string>
+    <string name="volume_muted_format">Звук: %s (заглушен)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Назад</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH библиотека</string>
     <string name="ssh_library_subtitle">Използва %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Помощ</string>
     <string name="tap_the_help_button_for_help">Натиснете бутона ?, за да получите помощ.</string>
     <string name="getting_started_title">Първи стъпки</string>
     <string name="getting_started_text">Бутоните на дистанционното управление са свързани с конкретни команди, които се изпълняват на хоста.\n\nТрябва да инсталирате подходящата помощна програма на хоста; коя точно зависи от това кой мениджър на прозорци използва хостът (X11 или Wayland).\n\nЗа да започнете, моля, изберете готова настройка. Винаги можете по-късно да върнете готова настройка, като редактирате дистанционното управление.\n\nМоля, прочетете страницата Помощ, ако използвате това приложение за първи път.</string>
-    <string name="error_reading_volume">Грешка при четене на звука. Моля, инсталирайте pactl.</string>
-    <string name="volume_format">Звук: %s</string>
-    <string name="volume_muted_format">Звук: %s (заглушен)</string>
-    <string name="smart_volume_settings">Интелигентни настройки за звука</string>
-    <string name="read_current_volume">Прочитане на текущата сила на звука</string>
-    <string name="show_volume_slider">Показване на плъзгач за звука</string>
-    <string name="control_volume_with_hardware_buttons">Управление на звука с хардуерните бутони</string>
-    <string name="test_pactl">Тестване на pactl</string>
-    <string name="pactl_installation_requirement">Изисква инсталиран pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Дистанционно управление</string>

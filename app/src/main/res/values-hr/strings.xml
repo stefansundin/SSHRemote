@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">U redu</string>
@@ -121,6 +122,15 @@
     <string name="executing_command">Izvršavanje naredbe…</string>
     <string name="executing_on">Izvršavanje na %s</string>
     <string name="sharing_to">Dijeljenje na %s</string>
+    <string name="smart_volume_settings">Pametne postavke glasnoće</string>
+    <string name="read_current_volume">Pročitaj trenutnu glasnoću</string>
+    <string name="show_volume_slider">Prikaži klizač glasnoće</string>
+    <string name="control_volume_with_hardware_buttons">Upravljaj glasnoćom hardverskim gumbima</string>
+    <string name="test_pactl">Testiraj pactl</string>
+    <string name="pactl_installation_requirement">Zahtijeva da je pactl instaliran.</string>
+    <string name="error_reading_volume">Pogreška pri čitanju glasnoće. Instalirajte pactl.</string>
+    <string name="volume_format">Glasnoća: %s</string>
+    <string name="volume_muted_format">Glasnoća: %s (isključeno)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Natrag</string>
@@ -347,20 +357,11 @@
     <string name="ssh_library">SSH knjižnica</string>
     <string name="ssh_library_subtitle">Koristi %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Pomoć</string>
     <string name="tap_the_help_button_for_help">Dodirnite gumb ? za pomoć.</string>
     <string name="getting_started_title">Početak rada</string>
     <string name="getting_started_text">Gumbi na daljinskom upravljaču mapirani su na određene naredbe koje se izvršavaju na hostu.\n\nNa host morate instalirati odgovarajući alat, a koji je potreban ovisi o upravitelju prozora koji host koristi (X11 ili Wayland).\n\nZa početak odaberite unaprijed postavljeno. Uvijek se kasnije možete vratiti na unaprijed postavljeno uređivanjem daljinskog upravljanja.\n\nMolimo pročitajte stranicu Pomoć ako prvi put koristite ovu aplikaciju.</string>
-    <string name="error_reading_volume">Pogreška pri čitanju glasnoće. Instalirajte pactl.</string>
-    <string name="volume_format">Glasnoća: %s</string>
-    <string name="volume_muted_format">Glasnoća: %s (isključeno)</string>
-    <string name="smart_volume_settings">Pametne postavke glasnoće</string>
-    <string name="read_current_volume">Pročitaj trenutnu glasnoću</string>
-    <string name="show_volume_slider">Prikaži klizač glasnoće</string>
-    <string name="control_volume_with_hardware_buttons">Upravljaj glasnoćom hardverskim gumbima</string>
-    <string name="test_pactl">Testiraj pactl</string>
-    <string name="pactl_installation_requirement">Zahtijeva da je pactl instaliran.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Daljinsko upravljanje</string>

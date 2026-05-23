@@ -122,6 +122,15 @@
     <string name="executing_command">Køyrer kommando…</string>
     <string name="executing_on">Køyrer på %s</string>
     <string name="sharing_to">Deler til %s</string>
+    <string name="smart_volume_settings">Smarte voluminnstillingar</string>
+    <string name="read_current_volume">Les gjeldande volum</string>
+    <string name="show_volume_slider">Vis volumskyvar</string>
+    <string name="control_volume_with_hardware_buttons">Styr volum med maskinvareknappane</string>
+    <string name="test_pactl">Test pactl</string>
+    <string name="pactl_installation_requirement">Krev at pactl er installert.</string>
+    <string name="error_reading_volume">Feil ved lesing av volum. Installer pactl.</string>
+    <string name="volume_format">Volum: %s</string>
+    <string name="volume_muted_format">Volum: %s (dempet)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Tilbake</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH-bibliotek</string>
     <string name="ssh_library_subtitle">Brukar %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Hjelp</string>
     <string name="tap_the_help_button_for_help">Trykk på ?-knappen for hjelp.</string>
     <string name="getting_started_title">Kom i gang</string>
     <string name="getting_started_text">Knappane på fjernkontrollen er knytte til bestemte kommandoar som blir køyrde på verten.\n\nDu må installere det rette verktøyet på verten; kva som trengst kjem an på kva for vindaugshandsamar verten bruker (X11 eller Wayland).\n\nFor å komma i gang, vel ei førehandsinnstilling. Du kan alltid tilbakestille til ei førehandsinnstilling seinare ved å redigere fjernkontrollen.\n\nLes hjelpesida dersom dette er første gongen du bruker appen.</string>
-    <string name="error_reading_volume">Feil ved lesing av volum. Installer pactl.</string>
-    <string name="volume_format">Volum: %s</string>
-    <string name="volume_muted_format">Volum: %s (dempet)</string>
-    <string name="smart_volume_settings">Smarte voluminnstillingar</string>
-    <string name="read_current_volume">Les gjeldande volum</string>
-    <string name="show_volume_slider">Vis volumskyvar</string>
-    <string name="control_volume_with_hardware_buttons">Styr volum med maskinvareknappane</string>
-    <string name="test_pactl">Test pactl</string>
-    <string name="pactl_installation_requirement">Krev at pactl er installert.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Fjernkontroll</string>

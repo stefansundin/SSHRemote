@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Introduïu una contrasenya nova, o deixeu-ho buit per esborrar-la</string>
     <string name="optional_password_prompt">Opcional; se us demanarà si no es proporciona</string>
     <string name="optional">Opcional</string>
-    <string name="re_enter">Torna a introduir</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Torna a introduir</string>
     <string name="change_or_clear">Canvia o esborra</string>
     <string name="unsaved_changes_title">Canvis sense desar</string>
     <string name="unsaved_changes_text">Voleu desar l\'host abans de sortir?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">S\'està executant l\'ordre…</string>
     <string name="executing_on">S\'està executant a %s</string>
     <string name="sharing_to">S\'està compartint amb %s</string>
+    <string name="smart_volume_settings">Configuració intel·ligent del volum</string>
+    <string name="read_current_volume">Llegeix el volum actual</string>
+    <string name="show_volume_slider">Mostra el control lliscant de volum</string>
+    <string name="control_volume_with_hardware_buttons">Controla el volum amb els botons físics</string>
+    <string name="test_pactl">Prova pactl</string>
+    <string name="pactl_installation_requirement">Requereix que pactl estigui instal·lat.</string>
+    <string name="error_reading_volume">Error en llegir el volum. Instal·leu pactl.</string>
+    <string name="volume_format">Volum: %s</string>
+    <string name="volume_muted_format">Volum: %s (silenciat)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Enrere</string>
@@ -338,7 +347,7 @@
     <string name="about_app">Quant a SSH Remote</string>
     <string name="app_version">Versió de l\'aplicació</string>
     <string name="author">Autor</string>
-    <string name="author_name">Desenvolupat per Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Desenvolupat per Stefan Sundin</string>
     <string name="donate">Dona</string>
     <string name="support_developer">Dona suport al desenvolupador</string>
     <string name="license">Llicència</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">Biblioteca SSH</string>
     <string name="ssh_library_subtitle">Fent servir %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Ajuda</string>
     <string name="tap_the_help_button_for_help">Toqueu el botó ? per obtenir ajuda.</string>
     <string name="getting_started_title">Primers passos</string>
     <string name="getting_started_text">Els botons del comandament remot estan assignats a ordres específiques que s\'executen a l\'host.\n\nHeu d\'instal·lar la utilitat adequada a l\'host; quina és depèn del gestor de finestres que utilitzi l\'host (X11 o Wayland).\n\nPer començar, seleccioneu un preajust. Sempre podeu tornar a un preajust més tard editant el comandament remot.\n\nLlegiu la pàgina d\'ajuda si és la primera vegada que feu servir aquesta aplicació.</string>
-    <string name="error_reading_volume">Error en llegir el volum. Instal·leu pactl.</string>
-    <string name="volume_format">Volum: %s</string>
-    <string name="volume_muted_format">Volum: %s (silenciat)</string>
-    <string name="smart_volume_settings">Configuració intel·ligent del volum</string>
-    <string name="read_current_volume">Llegeix el volum actual</string>
-    <string name="show_volume_slider">Mostra el control lliscant de volum</string>
-    <string name="control_volume_with_hardware_buttons">Controla el volum amb els botons físics</string>
-    <string name="test_pactl">Prova pactl</string>
-    <string name="pactl_installation_requirement">Requereix que pactl estigui instal·lat.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Comandament remot</string>

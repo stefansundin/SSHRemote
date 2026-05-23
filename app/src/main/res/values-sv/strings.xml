@@ -122,6 +122,15 @@
     <string name="executing_command">Kör kommando…</string>
     <string name="executing_on">Kör på %s</string>
     <string name="sharing_to">Delar till %s</string>
+    <string name="smart_volume_settings">Smarta volyminställningar</string>
+    <string name="read_current_volume">Läs aktuell volym</string>
+    <string name="show_volume_slider">Visa volymreglage</string>
+    <string name="control_volume_with_hardware_buttons">Styr volymen med hårdvaruknapparna</string>
+    <string name="test_pactl">Testa pactl</string>
+    <string name="pactl_installation_requirement">Kräver att pactl är installerat.</string>
+    <string name="error_reading_volume">Fel vid läsning av volym. Installera pactl.</string>
+    <string name="volume_format">Volym: %s</string>
+    <string name="volume_muted_format">Volym: %s (avstängd)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Bakåt</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH-bibliotek</string>
     <string name="ssh_library_subtitle">Använder %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Hjälp</string>
     <string name="tap_the_help_button_for_help">Tryck på ?-knappen för hjälp.</string>
     <string name="getting_started_title">Komma igång</string>
     <string name="getting_started_text">Knapparna på fjärrkontrollen är kopplade till specifika kommandon som körs på värden.\n\nDu måste installera rätt verktyg på värden, vilket beror på vilken fönsterhanterare värden använder (X11 eller Wayland).\n\nFör att komma igång, välj en förinställning. Du kan alltid återställa till en förinställning senare genom att redigera fjärrkontrollen.\n\nLäs hjälpsidan om det här är första gången du använder appen.</string>
-    <string name="error_reading_volume">Fel vid läsning av volym. Installera pactl.</string>
-    <string name="volume_format">Volym: %s</string>
-    <string name="volume_muted_format">Volym: %s (avstängd)</string>
-    <string name="smart_volume_settings">Smarta volyminställningar</string>
-    <string name="read_current_volume">Läs aktuell volym</string>
-    <string name="show_volume_slider">Visa volymreglage</string>
-    <string name="control_volume_with_hardware_buttons">Styr volymen med hårdvaruknapparna</string>
-    <string name="test_pactl">Testa pactl</string>
-    <string name="pactl_installation_requirement">Kräver att pactl är installerat.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Fjärrkontroll</string>

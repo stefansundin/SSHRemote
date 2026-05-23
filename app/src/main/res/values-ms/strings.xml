@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Masukkan kata laluan baharu, atau biarkan kosong untuk mengosongkannya</string>
     <string name="optional_password_prompt">Pilihan, anda akan diminta jika tidak disediakan</string>
     <string name="optional">Pilihan</string>
-    <string name="re_enter">Masukkan semula</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Masukkan semula</string>
     <string name="change_or_clear">Ubah atau Kosongkan</string>
     <string name="unsaved_changes_title">Perubahan belum disimpan</string>
     <string name="unsaved_changes_text">Adakah anda mahu menyimpan hos sebelum keluar?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Melaksanakan arahan…</string>
     <string name="executing_on">Melaksanakan pada %s</string>
     <string name="sharing_to">Berkongsi ke %s</string>
+    <string name="smart_volume_settings">Tetapan kelantangan pintar</string>
+    <string name="read_current_volume">Baca kelantangan semasa</string>
+    <string name="show_volume_slider">Tunjukkan peluncur kelantangan</string>
+    <string name="control_volume_with_hardware_buttons">Kawal kelantangan dengan butang perkakasan</string>
+    <string name="test_pactl">Uji pactl</string>
+    <string name="pactl_installation_requirement">Memerlukan pactl dipasang.</string>
+    <string name="error_reading_volume">Ralat membaca kelantangan. Sila pasang pactl.</string>
+    <string name="volume_format">Kelantangan: %s</string>
+    <string name="volume_muted_format">Kelantangan: %s (dibisukan)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Kembali</string>
@@ -334,7 +343,7 @@
     <string name="about_app">Perihal SSH Remote</string>
     <string name="app_version">Versi aplikasi</string>
     <string name="author">Pengarang</string>
-    <string name="author_name">Dibangunkan oleh Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Dibangunkan oleh Stefan Sundin</string>
     <string name="donate">Derma</string>
     <string name="support_developer">Sokong pembangun</string>
     <string name="license">Lesen</string>
@@ -344,20 +353,11 @@
     <string name="ssh_library">Pustaka SSH</string>
     <string name="ssh_library_subtitle">Menggunakan %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Bantuan</string>
     <string name="tap_the_help_button_for_help">Ketik butang ? untuk bantuan.</string>
     <string name="getting_started_title">Bermula</string>
     <string name="getting_started_text">Butang pada kawalan jauh dipetakan kepada arahan tertentu yang dilaksanakan pada hos.\n\nAnda perlu memasang utiliti yang sesuai pada hos, yang bergantung pada pengurus tetingkap yang digunakan hos (X11 atau Wayland).\n\nUntuk bermula, sila pilih pratetap. Anda sentiasa boleh menetapkan semula kepada pratetap kemudian dengan mengedit kawalan jauh.\n\nSila baca halaman Bantuan jika ini kali pertama anda menggunakan aplikasi ini.</string>
-    <string name="error_reading_volume">Ralat membaca kelantangan. Sila pasang pactl.</string>
-    <string name="volume_format">Kelantangan: %s</string>
-    <string name="volume_muted_format">Kelantangan: %s (dibisukan)</string>
-    <string name="smart_volume_settings">Tetapan kelantangan pintar</string>
-    <string name="read_current_volume">Baca kelantangan semasa</string>
-    <string name="show_volume_slider">Tunjukkan peluncur kelantangan</string>
-    <string name="control_volume_with_hardware_buttons">Kawal kelantangan dengan butang perkakasan</string>
-    <string name="test_pactl">Uji pactl</string>
-    <string name="pactl_installation_requirement">Memerlukan pactl dipasang.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Kawalan Jauh</string>

@@ -122,6 +122,15 @@
     <string name="executing_command">கட்டளை இயங்குகிறது…</string>
     <string name="executing_on">%s-ல் இயங்குகிறது</string>
     <string name="sharing_to">%s-க்கு பகிரப்படுகிறது</string>
+    <string name="smart_volume_settings">ஸ்மார்ட் ஒலி அளவு அமைப்புகள்</string>
+    <string name="read_current_volume">தற்போதைய ஒலி அளவைப் படி</string>
+    <string name="show_volume_slider">ஒலி அளவு ஸ்லைடரை காட்டு</string>
+    <string name="control_volume_with_hardware_buttons">ஹார்ட்வேர் பொத்தான்கள் மூலம் ஒலி அளவை கட்டுப்படுத்து</string>
+    <string name="test_pactl">pactl-ஐச் சோதிக்க</string>
+    <string name="pactl_installation_requirement">pactl நிறுவப்பட்டிருக்க வேண்டும்.</string>
+    <string name="error_reading_volume">ஒலி அளவைப் படிப்பதில் பிழை. தயவு செய்து pactl-ஐ நிறுவவும்.</string>
+    <string name="volume_format">ஒலி அளவு: %s</string>
+    <string name="volume_muted_format">ஒலி அளவு: %s (ஒலியற்று)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">பின்</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH நூலகம்</string>
     <string name="ssh_library_subtitle">%1$s %2$s பயன்படுத்தப்படுகிறது</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">உதவி</string>
     <string name="tap_the_help_button_for_help">உதவிக்கு ? பொத்தானைத் தட்டவும்.</string>
     <string name="getting_started_title">தொடங்குவது எப்படி</string>
     <string name="getting_started_text">ரிமோட் கட்டுப்பாட்டிலுள்ள பொத்தான்கள் ஹோஸ்டில் இயக்கப்படும் குறிப்பிட்ட கட்டளைகளுக்கு இணைக்கப்பட்டுள்ளன.\n\nஹோஸ்டில் பொருத்தமான கருவியை நிறுவ வேண்டும்; எது தேவை என்பது ஹோஸ்ட் பயன்படுத்தும் window manager-ஐ (X11 அல்லது Wayland) பொறுத்தது.\n\nதொடங்க, ஒரு முன்னமைப்பைத் தேர்வு செய்யவும். பின்னர் ரிமோட் கட்டுப்பாட்டைத் திருத்தி எப்போதும் வேறு முன்னமைப்புக்கு மீட்டமைக்கலாம்.\n\nஇந்த பயன்பாட்டை முதன்முறையாகப் பயன்படுத்துகிறீர்கள் என்றால் Help பக்கத்தைப் படிக்கவும்.</string>
-    <string name="error_reading_volume">ஒலி அளவைப் படிப்பதில் பிழை. தயவு செய்து pactl-ஐ நிறுவவும்.</string>
-    <string name="volume_format">ஒலி அளவு: %s</string>
-    <string name="volume_muted_format">ஒலி அளவு: %s (ஒலியற்று)</string>
-    <string name="smart_volume_settings">ஸ்மார்ட் ஒலி அளவு அமைப்புகள்</string>
-    <string name="read_current_volume">தற்போதைய ஒலி அளவைப் படி</string>
-    <string name="show_volume_slider">ஒலி அளவு ஸ்லைடரை காட்டு</string>
-    <string name="control_volume_with_hardware_buttons">ஹார்ட்வேர் பொத்தான்கள் மூலம் ஒலி அளவை கட்டுப்படுத்து</string>
-    <string name="test_pactl">pactl-ஐச் சோதிக்க</string>
-    <string name="pactl_installation_requirement">pactl நிறுவப்பட்டிருக்க வேண்டும்.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">ரிமோட் கட்டுப்பாடு</string>

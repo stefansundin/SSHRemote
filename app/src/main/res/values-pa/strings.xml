@@ -122,6 +122,15 @@
     <string name="executing_command">ਕਮਾਂਡ ਚਲਾਈ ਜਾ ਰਹੀ ਹੈ…</string>
     <string name="executing_on">%s ਤੇ ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ</string>
     <string name="sharing_to">%s ਨਾਲ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ</string>
+    <string name="smart_volume_settings">ਸਮਾਰਟ ਆਵਾਜ਼ ਸੈਟਿੰਗਾਂ</string>
+    <string name="read_current_volume">ਮੌਜੂਦਾ ਆਵਾਜ਼ ਪੜ੍ਹੋ</string>
+    <string name="show_volume_slider">ਆਵਾਜ਼ ਸਲਾਈਡਰ ਦਿਖਾਓ</string>
+    <string name="control_volume_with_hardware_buttons">ਹਾਰਡਵੇਅਰ ਬਟਨਾਂ ਨਾਲ ਆਵਾਜ਼ ਕੰਟਰੋਲ ਕਰੋ</string>
+    <string name="test_pactl">pactl ਦੀ ਜਾਂਚ ਕਰੋ</string>
+    <string name="pactl_installation_requirement">ਇਸ ਲਈ pactl ਇੰਸਟਾਲ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ।</string>
+    <string name="error_reading_volume">ਆਵਾਜ਼ ਪੜ੍ਹਣ ਵਿੱਚ ਗਲਤੀ। ਕਿਰਪਾ ਕਰਕੇ pactl ਇੰਸਟਾਲ ਕਰੋ।</string>
+    <string name="volume_format">ਆਵਾਜ਼: %s</string>
+    <string name="volume_muted_format">ਆਵਾਜ਼: %s (ਮਿਊਟ)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">ਪਿੱਛੇ</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH ਲਾਇਬ੍ਰੇਰੀ</string>
     <string name="ssh_library_subtitle">%1$s %2$s ਵਰਤੀ ਜਾ ਰਹੀ ਹੈ</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">ਮਦਦ</string>
     <string name="tap_the_help_button_for_help">ਮਦਦ ਲਈ ? ਬਟਨ ਦਬਾਓ।</string>
     <string name="getting_started_title">ਸ਼ੁਰੂਆਤ</string>
     <string name="getting_started_text">ਰਿਮੋਟ ਕੰਟਰੋਲ ਉੱਤੇ ਬਟਨ ਖਾਸ ਕਮਾਂਡਾਂ ਨਾਲ ਮੈਪ ਕੀਤੇ ਹੋਏ ਹਨ ਜੋ ਹੋਸਟ ਉੱਤੇ ਚਲਦੀਆਂ ਹਨ।\n\nਤੁਹਾਨੂੰ ਹੋਸਟ ਉੱਤੇ ਠੀਕ ਯੂਟਿਲਿਟੀ ਇੰਸਟਾਲ ਕਰਨੀ ਪਵੇਗੀ, ਜੋ ਇਸ ਗੱਲ ਤੇ ਨਿਰਭਰ ਕਰਦੀ ਹੈ ਕਿ ਹੋਸਟ ਕਿਹੜਾ ਵਿੰਡੋ ਮੈਨੇਜਰ ਵਰਤਦਾ ਹੈ (X11 ਜਾਂ Wayland)।\n\nਸ਼ੁਰੂ ਕਰਨ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਪ੍ਰੀਸੈਟ ਚੁਣੋ। ਤੁਸੀਂ ਬਾਅਦ ਵਿੱਚ ਰਿਮੋਟ ਕੰਟਰੋਲ ਸੋਧ ਕੇ ਹਮੇਸ਼ਾਂ ਕਿਸੇ ਪ੍ਰੀਸੈਟ ਤੇ ਰੀਸੈਟ ਕਰ ਸਕਦੇ ਹੋ।\n\nਜੇ ਤੁਸੀਂ ਇਹ ਐਪ ਪਹਿਲੀ ਵਾਰ ਵਰਤ ਰਹੇ ਹੋ ਤਾਂ ਕਿਰਪਾ ਕਰਕੇ Help ਪੇਜ ਪੜ੍ਹੋ।</string>
-    <string name="error_reading_volume">ਆਵਾਜ਼ ਪੜ੍ਹਣ ਵਿੱਚ ਗਲਤੀ। ਕਿਰਪਾ ਕਰਕੇ pactl ਇੰਸਟਾਲ ਕਰੋ।</string>
-    <string name="volume_format">ਆਵਾਜ਼: %s</string>
-    <string name="volume_muted_format">ਆਵਾਜ਼: %s (ਮਿਊਟ)</string>
-    <string name="smart_volume_settings">ਸਮਾਰਟ ਆਵਾਜ਼ ਸੈਟਿੰਗਾਂ</string>
-    <string name="read_current_volume">ਮੌਜੂਦਾ ਆਵਾਜ਼ ਪੜ੍ਹੋ</string>
-    <string name="show_volume_slider">ਆਵਾਜ਼ ਸਲਾਈਡਰ ਦਿਖਾਓ</string>
-    <string name="control_volume_with_hardware_buttons">ਹਾਰਡਵੇਅਰ ਬਟਨਾਂ ਨਾਲ ਆਵਾਜ਼ ਕੰਟਰੋਲ ਕਰੋ</string>
-    <string name="test_pactl">pactl ਦੀ ਜਾਂਚ ਕਰੋ</string>
-    <string name="pactl_installation_requirement">ਇਸ ਲਈ pactl ਇੰਸਟਾਲ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ।</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">ਰਿਮੋਟ ਕੰਟਰੋਲ</string>

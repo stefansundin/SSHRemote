@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Algemeen -->
+    <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">OK</string>
     <string name="cancel">Annuleren</string>
@@ -80,7 +80,7 @@
     <string name="select_host">Selecteer een host</string>
     <string name="no_hosts_found">Geen hosts gevonden</string>
 
-    <!-- Afstandsbediening -->
+    <!-- Remote Control -->
     <string name="tab_remote">Afstandsbediening</string>
     <string name="tab_mouse">Muis</string>
     <string name="tab_keyboard">Toetsenbord</string>
@@ -122,8 +122,17 @@
     <string name="executing_command">Commando uitvoeren…</string>
     <string name="executing_on">Uitvoeren op %s</string>
     <string name="sharing_to">Delen naar %s</string>
+    <string name="smart_volume_settings">Slimme volume-instellingen</string>
+    <string name="read_current_volume">Huidig volume lezen</string>
+    <string name="show_volume_slider">Volumeschuifregelaar tonen</string>
+    <string name="control_volume_with_hardware_buttons">Volume bedienen met hardwareknoppen</string>
+    <string name="test_pactl">pactl testen</string>
+    <string name="pactl_installation_requirement">Vereist dat pactl is geïnstalleerd.</string>
+    <string name="error_reading_volume">Fout bij het lezen van het volume. Installeer pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (gedempt)</string>
 
-    <!-- Knoppen / Toetsen -->
+    <!-- Buttons / Keys -->
     <string name="key_back">Terug</string>
     <string name="key_home">Home</string>
     <string name="key_menu">Menu</string>
@@ -139,7 +148,7 @@
     <string name="key_mute">Dempen</string>
     <string name="key_volume_up">Volume hoger</string>
 
-    <!-- Muis -->
+    <!-- Mouse -->
     <string name="mouse_pad">Touchpad</string>
     <string name="mouse_pad_disabled">Touchpad uitgeschakeld</string>
     <string name="mouse_commands_not_configured">Muiscommando\'s niet geconfigureerd</string>
@@ -161,7 +170,7 @@
     <string name="key_mouse_pan_left">Tweevinger-pan naar links</string>
     <string name="key_mouse_pan_right">Tweevinger-pan naar rechts</string>
 
-    <!-- Toetsenbord -->
+    <!-- Keyboard -->
     <string name="keyboard_commands_not_configured">Toetsenbordcommando\'s niet geconfigureerd</string>
     <string name="edit_keyboard_commands">Toetsenbordcommando\'s bewerken</string>
     <string name="key_esc">Esc</string>
@@ -180,7 +189,7 @@
     <string name="key_keyboard_key_down">Toets indrukken en vasthouden</string>
     <string name="key_keyboard_key_up">Toets loslaten</string>
 
-    <!-- SSH-configuratie -->
+    <!-- SSH Configuration -->
     <string name="advanced_ssh_config">Geavanceerde SSH-configuratie</string>
     <string name="advanced_users_only">Alleen voor gevorderde gebruikers</string>
     <string name="advanced_users_warning">Het wijzigen van SSH-configuratiewaarden is bedoeld voor gevorderde gebruikers. Onjuiste instellingen kunnen verbinding verhinderen.</string>
@@ -190,7 +199,7 @@
     <string name="strict_host_key_checking">Strikte controle van hostsleutels</string>
     <string name="allow_password_prompting">Wachtwoordprompt toestaan</string>
 
-    <!-- SSH-sleutels -->
+    <!-- SSH Keys -->
     <string name="ssh_keys">SSH-sleutels</string>
     <string name="ssh_key">SSH-sleutel</string>
     <string name="add_ssh_key">SSH-sleutel toevoegen</string>
@@ -247,7 +256,7 @@
     <string name="delete_certificate">Certificaat verwijderen</string>
     <string name="certificate">Certificaat</string>
 
-    <!-- Instellingen -->
+    <!-- Settings -->
     <string name="settings">Instellingen</string>
     <string name="appearance">Weergave</string>
     <string name="theme">Thema</string>
@@ -299,7 +308,7 @@
     <string name="green_format">Groen: %d</string>
     <string name="blue_format">Blauw: %d</string>
 
-    <!-- Gegevensbeheer -->
+    <!-- Data Management -->
     <string name="data">Gegevens</string>
     <string name="restored_from_backup_title">Hersteld uit back-up</string>
     <string name="restored_from_backup_text">De appgegevens zijn hersteld uit een back-up. Om veiligheidsredenen worden versleutelde gegevens zoals SSH-sleutels en wachtwoorden niet opgenomen in back-ups.\n\nConfigureer deze opnieuw.</string>
@@ -332,7 +341,7 @@
         <item quantity="other">%d hosts succesvol geïmporteerd.</item>
     </plurals>
 
-    <!-- Over -->
+    <!-- About -->
     <string name="about_app">Over SSH Remote</string>
     <string name="app_version">Appversie</string>
     <string name="author">Auteur</string>
@@ -346,22 +355,13 @@
     <string name="ssh_library">SSH-bibliotheek</string>
     <string name="ssh_library_subtitle">Gebruikt %1$s %2$s</string>
 
-    <!-- Help en volume -->
+    <!-- Help -->
     <string name="help">Help</string>
     <string name="tap_the_help_button_for_help">Tik op de ?-knop voor hulp.</string>
     <string name="getting_started_title">Aan de slag</string>
     <string name="getting_started_text">De knoppen op de afstandsbediening zijn gekoppeld aan specifieke commando\'s die op de host worden uitgevoerd.\n\nJe moet het juiste hulpprogramma op de host installeren; welk programma dat is, hangt af van de windowmanager van de host (X11 of Wayland).\n\nSelecteer om te beginnen een voorinstelling. Je kunt later altijd terugzetten naar een voorinstelling door de afstandsbediening te bewerken.\n\nLees de helppagina als dit de eerste keer is dat je deze app gebruikt.</string>
-    <string name="error_reading_volume">Fout bij het lezen van het volume. Installeer pactl.</string>
-    <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %s (gedempt)</string>
-    <string name="smart_volume_settings">Slimme volume-instellingen</string>
-    <string name="read_current_volume">Huidig volume lezen</string>
-    <string name="show_volume_slider">Volumeschuifregelaar tonen</string>
-    <string name="control_volume_with_hardware_buttons">Volume bedienen met hardwareknoppen</string>
-    <string name="test_pactl">pactl testen</string>
-    <string name="pactl_installation_requirement">Vereist dat pactl is geïnstalleerd.</string>
 
-    <!-- Meldingen -->
+    <!-- Notifications -->
     <string name="notification_channel_name">Afstandsbediening</string>
     <string name="notification_connected_to">Verbonden met %s</string>
     <string name="notification_connecting_to">Verbinden met %s</string>
@@ -371,7 +371,7 @@
     <string name="notification_open">Openen</string>
     <string name="notification_close">Sluiten</string>
 
-    <!-- Snelkoppelingen -->
+    <!-- Shortcuts -->
     <string name="add_to_home_screen">Aan beginscherm toevoegen</string>
     <string name="run_command_on_host_short">%1$s op %2$s</string>
     <string name="run_command_on_host_long">Voer %1$s uit op %2$s</string>
@@ -380,7 +380,7 @@
     <string name="shortcut_remote_control_key_not_found">Snelkoppelingsactie wordt niet meer ondersteund.</string>
     <string name="shortcut_save_changes_before_using">Sla eerst je wijzigingen aan de afstandsbediening op voordat je snelkoppelingen gebruikt.</string>
 
-    <!-- Delen -->
+    <!-- Share -->
     <string name="sharing">Delen</string>
     <string name="share_target_enabled">Deeldoel inschakelen</string>
     <string name="share_target_enabled_subtitle">Deze app verschijnt in het deelmenu voor platte tekst. Standaard wordt gedeelde tekst op de verbonden host getypt met het commando voor tekst typen, maar dit kan per host worden aangepast.</string>

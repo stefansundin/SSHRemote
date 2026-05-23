@@ -122,6 +122,15 @@
     <string name="executing_command">Po ekzekutohet komanda…</string>
     <string name="executing_on">Po ekzekutohet në %s</string>
     <string name="sharing_to">Po ndahet me %s</string>
+    <string name="smart_volume_settings">Cilësimet inteligjente të volumit</string>
+    <string name="read_current_volume">Lexo volumin aktual</string>
+    <string name="show_volume_slider">Shfaq rrëshqitësin e volumit</string>
+    <string name="control_volume_with_hardware_buttons">Kontrollo volumin me butonat fizikë</string>
+    <string name="test_pactl">Testo pactl</string>
+    <string name="pactl_installation_requirement">Kërkon që pactl të jetë i instaluar.</string>
+    <string name="error_reading_volume">Gabim gjatë leximit të volumit. Ju lutemi instaloni pactl.</string>
+    <string name="volume_format">Volumi: %s</string>
+    <string name="volume_muted_format">Volumi: %s (i heshtur)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Mbrapa</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">Biblioteka SSH</string>
     <string name="ssh_library_subtitle">Duke përdorur %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Ndihmë</string>
     <string name="tap_the_help_button_for_help">Prek butonin ? për ndihmë.</string>
     <string name="getting_started_title">Fillimi</string>
     <string name="getting_started_text">Butonat në telekomandë janë të lidhur me komanda specifike që ekzekutohen në host.\n\nDuhet të instaloni mjetin e duhur në host; cili mjet varet nga menaxheri i dritareve që përdor hosti (X11 ose Wayland).\n\nPër të filluar, ju lutemi zgjidhni një paracaktim. Mund ta rivendosni gjithmonë te një paracaktim më vonë duke ndryshuar telekomandën.\n\nJu lutemi lexoni faqen e Ndihmës nëse kjo është hera e parë që përdorni këtë aplikacion.</string>
-    <string name="error_reading_volume">Gabim gjatë leximit të volumit. Ju lutemi instaloni pactl.</string>
-    <string name="volume_format">Volumi: %s</string>
-    <string name="volume_muted_format">Volumi: %s (i heshtur)</string>
-    <string name="smart_volume_settings">Cilësimet inteligjente të volumit</string>
-    <string name="read_current_volume">Lexo volumin aktual</string>
-    <string name="show_volume_slider">Shfaq rrëshqitësin e volumit</string>
-    <string name="control_volume_with_hardware_buttons">Kontrollo volumin me butonat fizikë</string>
-    <string name="test_pactl">Testo pactl</string>
-    <string name="pactl_installation_requirement">Kërkon që pactl të jetë i instaluar.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Telekomanda</string>

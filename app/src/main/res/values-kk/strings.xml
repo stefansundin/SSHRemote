@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Жаңа құпиясөз енгізіңіз немесе өшіру үшін бос қалдырыңыз</string>
     <string name="optional_password_prompt">Міндетті емес, берілмесе кейін сұралады</string>
     <string name="optional">Міндетті емес</string>
-    <string name="re_enter">Қайта енгізу</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Қайта енгізу</string>
     <string name="change_or_clear">Өзгерту немесе тазалау</string>
     <string name="unsaved_changes_title">Сақталмаған өзгерістер</string>
     <string name="unsaved_changes_text">Шығу алдында хостты сақтағыңыз келе ме?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Команда орындалуда…</string>
     <string name="executing_on">%s хостында орындалуда</string>
     <string name="sharing_to">%s хостымен бөлісу</string>
+    <string name="smart_volume_settings">Ақылды дыбыс деңгейі баптаулары</string>
+    <string name="read_current_volume">Ағымдағы дыбыс деңгейін оқу</string>
+    <string name="show_volume_slider">Дыбыс деңгейі жүгірткісін көрсету</string>
+    <string name="control_volume_with_hardware_buttons">Дыбыс деңгейін құрылғының аппараттық түймелерімен басқару</string>
+    <string name="test_pactl">pactl тексеру</string>
+    <string name="pactl_installation_requirement">pactl орнатылған болуы керек.</string>
+    <string name="error_reading_volume">Дыбыс деңгейін оқу қатесі. pactl орнатыңыз.</string>
+    <string name="volume_format">Дыбыс деңгейі: %s</string>
+    <string name="volume_muted_format">Дыбыс деңгейі: %s (өшірілген)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Артқа</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote туралы</string>
     <string name="app_version">Қолданба нұсқасы</string>
     <string name="author">Автор</string>
-    <string name="author_name">Stefan Sundin әзірлеген</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Stefan Sundin әзірлеген</string>
     <string name="donate">Қайырымдылық жасау</string>
     <string name="support_developer">Әзірлеушіні қолдау</string>
     <string name="license">Лицензия</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH кітапханасы</string>
     <string name="ssh_library_subtitle">%1$s %2$s қолданылуда</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Анықтама</string>
     <string name="tap_the_help_button_for_help">Анықтама үшін ? түймесін түртіңіз.</string>
     <string name="getting_started_title">Бастау</string>
     <string name="getting_started_text">Қашықтан басқарудағы түймелер хостта орындалатын нақты командаларға сәйкестендірілген.\n\nХостқа тиісті утилитаны орнатуыңыз керек, ол хост қолданатын терезе менеджеріне (X11 немесе Wayland) байланысты.\n\nБастау үшін алдын ала баптауды таңдаңыз. Қажет болса, кейін қашықтан басқаруды өңдеп, алдын ала баптауға қайта орала аласыз.\n\nЕгер бұл қолданбаны алғаш рет пайдаланып отырсаңыз, Help бетін оқып шығыңыз.</string>
-    <string name="error_reading_volume">Дыбыс деңгейін оқу қатесі. pactl орнатыңыз.</string>
-    <string name="volume_format">Дыбыс деңгейі: %s</string>
-    <string name="volume_muted_format">Дыбыс деңгейі: %s (өшірілген)</string>
-    <string name="smart_volume_settings">Ақылды дыбыс деңгейі баптаулары</string>
-    <string name="read_current_volume">Ағымдағы дыбыс деңгейін оқу</string>
-    <string name="show_volume_slider">Дыбыс деңгейі жүгірткісін көрсету</string>
-    <string name="control_volume_with_hardware_buttons">Дыбыс деңгейін құрылғының аппараттық түймелерімен басқару</string>
-    <string name="test_pactl">pactl тексеру</string>
-    <string name="pactl_installation_requirement">pactl орнатылған болуы керек.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Қашықтан басқару</string>

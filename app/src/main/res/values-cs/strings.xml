@@ -122,6 +122,15 @@
     <string name="executing_command">Spouštění příkazu…</string>
     <string name="executing_on">Spouští se na %s</string>
     <string name="sharing_to">Sdílení do %s</string>
+    <string name="smart_volume_settings">Chytré nastavení hlasitosti</string>
+    <string name="read_current_volume">Zjistit aktuální hlasitost</string>
+    <string name="show_volume_slider">Zobrazit posuvník hlasitosti</string>
+    <string name="control_volume_with_hardware_buttons">Ovládat hlasitost hardwarovými tlačítky</string>
+    <string name="test_pactl">Otestovat pactl</string>
+    <string name="pactl_installation_requirement">Vyžaduje nainstalovaný pactl.</string>
+    <string name="error_reading_volume">Chyba při čtení hlasitosti. Nainstalujte prosím pactl.</string>
+    <string name="volume_format">Hlasitost: %s</string>
+    <string name="volume_muted_format">Hlasitost: %s (ztlumeno)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Zpět</string>
@@ -350,20 +359,11 @@
     <string name="ssh_library">SSH knihovna</string>
     <string name="ssh_library_subtitle">Používá %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Nápověda</string>
     <string name="tap_the_help_button_for_help">Klepněte na tlačítko ? pro nápovědu.</string>
     <string name="getting_started_title">Začínáme</string>
     <string name="getting_started_text">Tlačítka na dálkovém ovládání jsou namapována na konkrétní příkazy, které se spouštějí na hostiteli.\n\nNa hostiteli musíte nainstalovat příslušný nástroj; který to bude, závisí na tom, jaký správce oken hostitel používá (X11 nebo Wayland).\n\nPro začátek vyberte předvolbu. K předvolbě se můžete kdykoli později vrátit úpravou dálkového ovládání.\n\nPokud tuto aplikaci používáte poprvé, přečtěte si prosím stránku Nápověda.</string>
-    <string name="error_reading_volume">Chyba při čtení hlasitosti. Nainstalujte prosím pactl.</string>
-    <string name="volume_format">Hlasitost: %s</string>
-    <string name="volume_muted_format">Hlasitost: %s (ztlumeno)</string>
-    <string name="smart_volume_settings">Chytré nastavení hlasitosti</string>
-    <string name="read_current_volume">Zjistit aktuální hlasitost</string>
-    <string name="show_volume_slider">Zobrazit posuvník hlasitosti</string>
-    <string name="control_volume_with_hardware_buttons">Ovládat hlasitost hardwarovými tlačítky</string>
-    <string name="test_pactl">Otestovat pactl</string>
-    <string name="pactl_installation_requirement">Vyžaduje nainstalovaný pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Dálkové ovládání</string>

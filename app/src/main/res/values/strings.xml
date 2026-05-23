@@ -122,6 +122,15 @@
     <string name="executing_command">Executing command…</string>
     <string name="executing_on">Executing on %s</string>
     <string name="sharing_to">Sharing to %s</string>
+    <string name="smart_volume_settings">Smart volume settings</string>
+    <string name="read_current_volume">Read current volume</string>
+    <string name="show_volume_slider">Show volume slider</string>
+    <string name="control_volume_with_hardware_buttons">Control volume with hardware buttons</string>
+    <string name="test_pactl">Test pactl</string>
+    <string name="pactl_installation_requirement">Requires that pactl is installed.</string>
+    <string name="error_reading_volume">Error reading volume. Please install pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (muted)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Back</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH library</string>
     <string name="ssh_library_subtitle">Using %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Help</string>
     <string name="tap_the_help_button_for_help">Tap the ? button for help.</string>
     <string name="getting_started_title">Getting started</string>
     <string name="getting_started_text">The buttons on the remote control are mapped to specific commands that are executed on the host.\n\nYou have to install the appropriate utility on the host, which one depends on which window manager the host uses (X11 or Wayland).\n\nTo get started, please select a preset. You can always reset to a preset later by editing the remote control.\n\nPlease read the Help page if this is the first time you are using this app.</string>
-    <string name="error_reading_volume">Error reading volume. Please install pactl.</string>
-    <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %s (muted)</string>
-    <string name="smart_volume_settings">Smart volume settings</string>
-    <string name="read_current_volume">Read current volume</string>
-    <string name="show_volume_slider">Show volume slider</string>
-    <string name="control_volume_with_hardware_buttons">Control volume with hardware buttons</string>
-    <string name="test_pactl">Test pactl</string>
-    <string name="pactl_installation_requirement">Requires that pactl is installed.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Remote Control</string>

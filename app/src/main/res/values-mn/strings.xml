@@ -122,6 +122,15 @@
     <string name="executing_command">Тушаалыг ажиллуулж байна…</string>
     <string name="executing_on">%s дээр ажиллуулж байна</string>
     <string name="sharing_to">%s руу хуваалцаж байна</string>
+    <string name="smart_volume_settings">Ухаалаг дууны тохиргоо</string>
+    <string name="read_current_volume">Одоогийн дууны түвшинг унших</string>
+    <string name="show_volume_slider">Дууны гулсуурыг харуулах</string>
+    <string name="control_volume_with_hardware_buttons">Дууг төхөөрөмжийн физик товчоор удирдах</string>
+    <string name="test_pactl">pactl-г шалгах</string>
+    <string name="pactl_installation_requirement">pactl суусан байх шаардлагатай.</string>
+    <string name="error_reading_volume">Дууны түвшин уншихад алдаа гарлаа. pactl-г суулгана уу.</string>
+    <string name="volume_format">Дууны түвшин: %s</string>
+    <string name="volume_muted_format">Дууны түвшин: %s (чимээгүй)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Буцах</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH сан</string>
     <string name="ssh_library_subtitle">%1$s %2$s ашиглаж байна</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Тусламж</string>
     <string name="tap_the_help_button_for_help">Тусламж авахын тулд ? товчийг дарна уу.</string>
     <string name="getting_started_title">Эхлүүлэх</string>
     <string name="getting_started_text">Алсын удирдлагын товчлуурууд нь хост дээр ажиллах тодорхой тушаалуудтай холбогдсон байдаг.\n\nТа хост дээрээ тохирох хэрэгслийг суулгах хэрэгтэй бөгөөд аль нь хэрэгтэй нь тухайн хостын ашиглаж буй цонхны менежерээс (X11 эсвэл Wayland) хамаарна.\n\nЭхлэхийн тулд урьдчилсан тохиргоо сонгоно уу. Та дараа нь алсын удирдлагыг засаж дахин урьдчилсан тохиргоо руу сэргээх боломжтой.\n\nХэрэв та энэ аппыг анх удаа ашиглаж байгаа бол Тусламж хуудсыг заавал уншаарай.</string>
-    <string name="error_reading_volume">Дууны түвшин уншихад алдаа гарлаа. pactl-г суулгана уу.</string>
-    <string name="volume_format">Дууны түвшин: %s</string>
-    <string name="volume_muted_format">Дууны түвшин: %s (чимээгүй)</string>
-    <string name="smart_volume_settings">Ухаалаг дууны тохиргоо</string>
-    <string name="read_current_volume">Одоогийн дууны түвшинг унших</string>
-    <string name="show_volume_slider">Дууны гулсуурыг харуулах</string>
-    <string name="control_volume_with_hardware_buttons">Дууг төхөөрөмжийн физик товчоор удирдах</string>
-    <string name="test_pactl">pactl-г шалгах</string>
-    <string name="pactl_installation_requirement">pactl суусан байх шаардлагатай.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Алсын удирдлага</string>

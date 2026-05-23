@@ -122,6 +122,15 @@
     <string name="executing_command">Выполнение команды…</string>
     <string name="executing_on">Выполнение на %s</string>
     <string name="sharing_to">Передача для %s</string>
+    <string name="smart_volume_settings">Настройки «умной» громкости</string>
+    <string name="read_current_volume">Считать текущую громкость</string>
+    <string name="show_volume_slider">Показывать ползунок громкости</string>
+    <string name="control_volume_with_hardware_buttons">Управлять громкостью аппаратными кнопками</string>
+    <string name="test_pactl">Проверить pactl</string>
+    <string name="pactl_installation_requirement">Требуется установленный pactl.</string>
+    <string name="error_reading_volume">Ошибка чтения громкости. Пожалуйста, установите pactl.</string>
+    <string name="volume_format">Громкость: %s</string>
+    <string name="volume_muted_format">Громкость: %s (без звука)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Назад</string>
@@ -350,20 +359,11 @@
     <string name="ssh_library">SSH-библиотека</string>
     <string name="ssh_library_subtitle">Используется %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Справка</string>
     <string name="tap_the_help_button_for_help">Нажмите кнопку ?, чтобы открыть справку.</string>
     <string name="getting_started_title">Начало работы</string>
     <string name="getting_started_text">Кнопки на пульте сопоставлены с определёнными командами, которые выполняются на хосте.\n\nНа хосте необходимо установить подходящую утилиту; какая именно нужна, зависит от того, какой оконный менеджер используется — X11 или Wayland.\n\nДля начала выберите предустановку. Позже вы всегда сможете снова сбросить всё к предустановке, отредактировав пульт.\n\nЕсли вы впервые используете это приложение, пожалуйста, прочитайте страницу «Справка».</string>
-    <string name="error_reading_volume">Ошибка чтения громкости. Пожалуйста, установите pactl.</string>
-    <string name="volume_format">Громкость: %s</string>
-    <string name="volume_muted_format">Громкость: %s (без звука)</string>
-    <string name="smart_volume_settings">Настройки «умной» громкости</string>
-    <string name="read_current_volume">Считать текущую громкость</string>
-    <string name="show_volume_slider">Показывать ползунок громкости</string>
-    <string name="control_volume_with_hardware_buttons">Управлять громкостью аппаратными кнопками</string>
-    <string name="test_pactl">Проверить pactl</string>
-    <string name="pactl_installation_requirement">Требуется установленный pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Пульт дистанционного управления</string>

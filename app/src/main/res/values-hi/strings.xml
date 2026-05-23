@@ -122,6 +122,15 @@
     <string name="executing_command">कमांड चलाया जा रहा है…</string>
     <string name="executing_on">%s पर चलाया जा रहा है</string>
     <string name="sharing_to">%s के साथ साझा किया जा रहा है</string>
+    <string name="smart_volume_settings">स्मार्ट वॉल्यूम सेटिंग्स</string>
+    <string name="read_current_volume">वर्तमान वॉल्यूम पढ़ें</string>
+    <string name="show_volume_slider">वॉल्यूम स्लाइडर दिखाएँ</string>
+    <string name="control_volume_with_hardware_buttons">हार्डवेयर बटन से वॉल्यूम नियंत्रित करें</string>
+    <string name="test_pactl">pactl जाँचें</string>
+    <string name="pactl_installation_requirement">इसके लिए pactl इंस्टॉल होना आवश्यक है।</string>
+    <string name="error_reading_volume">वॉल्यूम पढ़ने में त्रुटि। कृपया pactl इंस्टॉल करें।</string>
+    <string name="volume_format">वॉल्यूम: %s</string>
+    <string name="volume_muted_format">वॉल्यूम: %s (म्यूट)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">वापस</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH लाइब्रेरी</string>
     <string name="ssh_library_subtitle">%1$s %2$s का उपयोग कर रहा है</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">मदद</string>
     <string name="tap_the_help_button_for_help">मदद के लिए ? बटन दबाएँ।</string>
     <string name="getting_started_title">शुरुआत</string>
     <string name="getting_started_text">रिमोट कंट्रोल के बटन उन विशिष्ट कमांड से मैप किए जाते हैं जो होस्ट पर चलाए जाते हैं।\n\nआपको होस्ट पर उपयुक्त यूटिलिटी इंस्टॉल करनी होगी, जो इस बात पर निर्भर करती है कि होस्ट कौन सा window manager उपयोग करता है (X11 या Wayland)।\n\nशुरू करने के लिए, कृपया एक प्रीसेट चुनें। आप बाद में रिमोट कंट्रोल संपादित करके हमेशा किसी प्रीसेट पर रीसेट कर सकते हैं।\n\nयदि आप पहली बार इस ऐप का उपयोग कर रहे हैं तो कृपया Help पेज पढ़ें।</string>
-    <string name="error_reading_volume">वॉल्यूम पढ़ने में त्रुटि। कृपया pactl इंस्टॉल करें।</string>
-    <string name="volume_format">वॉल्यूम: %s</string>
-    <string name="volume_muted_format">वॉल्यूम: %s (म्यूट)</string>
-    <string name="smart_volume_settings">स्मार्ट वॉल्यूम सेटिंग्स</string>
-    <string name="read_current_volume">वर्तमान वॉल्यूम पढ़ें</string>
-    <string name="show_volume_slider">वॉल्यूम स्लाइडर दिखाएँ</string>
-    <string name="control_volume_with_hardware_buttons">हार्डवेयर बटन से वॉल्यूम नियंत्रित करें</string>
-    <string name="test_pactl">pactl जाँचें</string>
-    <string name="pactl_installation_requirement">इसके लिए pactl इंस्टॉल होना आवश्यक है।</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">रिमोट कंट्रोल</string>

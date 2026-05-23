@@ -122,6 +122,15 @@
     <string name="executing_command">ಆಜ್ಞೆ ಚಲಾಯಿಸಲಾಗುತ್ತಿದೆ…</string>
     <string name="executing_on">%s ನಲ್ಲಿ ಚಲಾಯಿಸಲಾಗುತ್ತಿದೆ</string>
     <string name="sharing_to">%s ಗೆ ಹಂಚಲಾಗುತ್ತಿದೆ</string>
+    <string name="smart_volume_settings">ಸ್ಮಾರ್ಟ್ ಶಬ್ದ ಮಟ್ಟ ಸೆಟ್ಟಿಂಗ್‌ಗಳು</string>
+    <string name="read_current_volume">ಪ್ರಸ್ತುತ ಶಬ್ದ ಮಟ್ಟ ಓದಿ</string>
+    <string name="show_volume_slider">ಶಬ್ದ ಮಟ್ಟ ಸ್ಲೈಡರ್ ತೋರಿಸಿ</string>
+    <string name="control_volume_with_hardware_buttons">ಹಾರ್ಡ್‌ವೇರ್ ಬಟನ್‌ಗಳೊಂದಿಗೆ ಶಬ್ದ ಮಟ್ಟ ನಿಯಂತ್ರಿಸಿ</string>
+    <string name="test_pactl">pactl ಪರೀಕ್ಷಿಸಿ</string>
+    <string name="pactl_installation_requirement">pactl ಸ್ಥಾಪಿತವಾಗಿರುವುದು ಅಗತ್ಯ.</string>
+    <string name="error_reading_volume">ಶಬ್ದ ಮಟ್ಟ ಓದಲು ದೋಷ. ದಯವಿಟ್ಟು pactl ಅನ್ನು ಸ್ಥಾಪಿಸಿ.</string>
+    <string name="volume_format">ಶಬ್ದ ಮಟ್ಟ: %s</string>
+    <string name="volume_muted_format">ಶಬ್ದ ಮಟ್ಟ: %s (ಮ್ಯೂಟ್)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">ಹಿಂದೆ</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH ಗ್ರಂಥಾಲಯ</string>
     <string name="ssh_library_subtitle">%1$s %2$s ಬಳಸಲಾಗುತ್ತಿದೆ</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">ಸಹಾಯ</string>
     <string name="tap_the_help_button_for_help">ಸಹಾಯಕ್ಕಾಗಿ ? ಬಟನ್ ಒತ್ತಿರಿ.</string>
     <string name="getting_started_title">ಪ್ರಾರಂಭಿಸುವುದು</string>
     <string name="getting_started_text">ರಿಮೋಟ್ ಕಂಟ್ರೋಲ್‌ನಲ್ಲಿನ ಬಟನ್‌ಗಳು ಹೋಸ್ಟ್‌ನಲ್ಲಿ ಚಲಾಯಿಸಲ್ಪಡುವ ನಿರ್ದಿಷ್ಟ ಆಜ್ಞೆಗಳಿಗೆ ಮ್ಯಾಪ್ ಆಗಿರುತ್ತವೆ.\n\nಹೋಸ್ಟ್ ಯಾವ window manager ಅನ್ನು ಬಳಸುತ್ತದೆ ಎಂಬುದರ ಮೇಲೆ ಅವಲಂಬಿಸಿ (X11 ಅಥವಾ Wayland), ನೀವು ಸೂಕ್ತ utility ಅನ್ನು ಹೋಸ್ಟ್‌ನಲ್ಲಿ ಸ್ಥಾಪಿಸಬೇಕು.\n\nಪ್ರಾರಂಭಿಸಲು ದಯವಿಟ್ಟು ಒಂದು ಪ್ರೀಸೆಟ್ ಆಯ್ಕೆಮಾಡಿ. ನಂತರ ಯಾವಾಗ ಬೇಕಾದರೂ ರಿಮೋಟ್ ಕಂಟ್ರೋಲ್ ತಿದ್ದುದು ಮತ್ತೆ ಪ್ರೀಸೆಟ್‌ಗೆ ಮರುಹೊಂದಿಸಬಹುದು.\n\nಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ನೀವು ಮೊದಲ ಬಾರಿಗೆ ಬಳಸುತ್ತಿದ್ದರೆ ದಯವಿಟ್ಟು Help ಪುಟವನ್ನು ಓದಿ.</string>
-    <string name="error_reading_volume">ಶಬ್ದ ಮಟ್ಟ ಓದಲು ದೋಷ. ದಯವಿಟ್ಟು pactl ಅನ್ನು ಸ್ಥಾಪಿಸಿ.</string>
-    <string name="volume_format">ಶಬ್ದ ಮಟ್ಟ: %s</string>
-    <string name="volume_muted_format">ಶಬ್ದ ಮಟ್ಟ: %s (ಮ್ಯೂಟ್)</string>
-    <string name="smart_volume_settings">ಸ್ಮಾರ್ಟ್ ಶಬ್ದ ಮಟ್ಟ ಸೆಟ್ಟಿಂಗ್‌ಗಳು</string>
-    <string name="read_current_volume">ಪ್ರಸ್ತುತ ಶಬ್ದ ಮಟ್ಟ ಓದಿ</string>
-    <string name="show_volume_slider">ಶಬ್ದ ಮಟ್ಟ ಸ್ಲೈಡರ್ ತೋರಿಸಿ</string>
-    <string name="control_volume_with_hardware_buttons">ಹಾರ್ಡ್‌ವೇರ್ ಬಟನ್‌ಗಳೊಂದಿಗೆ ಶಬ್ದ ಮಟ್ಟ ನಿಯಂತ್ರಿಸಿ</string>
-    <string name="test_pactl">pactl ಪರೀಕ್ಷಿಸಿ</string>
-    <string name="pactl_installation_requirement">pactl ಸ್ಥಾಪಿತವಾಗಿರುವುದು ಅಗತ್ಯ.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">ರಿಮೋಟ್ ಕಂಟ್ರೋಲ್</string>

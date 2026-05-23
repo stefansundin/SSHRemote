@@ -122,6 +122,15 @@
     <string name="executing_command">کمانڈ چل رہی ہے…</string>
     <string name="executing_on">%s پر چلایا جا رہا ہے</string>
     <string name="sharing_to">%s کے ساتھ شیئر کیا جا رہا ہے</string>
+    <string name="smart_volume_settings">سمارٹ آواز کی ترتیبات</string>
+    <string name="read_current_volume">موجودہ آواز پڑھیں</string>
+    <string name="show_volume_slider">آواز کا سلائیڈر دکھائیں</string>
+    <string name="control_volume_with_hardware_buttons">ہارڈویئر بٹنوں سے آواز کنٹرول کریں</string>
+    <string name="test_pactl">pactl آزمائیں</string>
+    <string name="pactl_installation_requirement">اس کے لیے pactl کا انسٹال ہونا ضروری ہے۔</string>
+    <string name="error_reading_volume">آواز پڑھنے میں خرابی۔ براہ کرم pactl انسٹال کریں۔</string>
+    <string name="volume_format">آواز: %s</string>
+    <string name="volume_muted_format">آواز: %s (خاموش)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">پیچھے</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH لائبریری</string>
     <string name="ssh_library_subtitle">%1$s %2$s استعمال ہو رہا ہے</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">مدد</string>
     <string name="tap_the_help_button_for_help">مدد کے لیے ? بٹن دبائیں۔</string>
     <string name="getting_started_title">شروعات</string>
     <string name="getting_started_text">ریموٹ کنٹرول کے بٹن مخصوص کمانڈز سے منسلک ہیں جو ہوسٹ پر چلتی ہیں۔\n\nآپ کو ہوسٹ پر مناسب utility انسٹال کرنی ہوگی، اور یہ اس بات پر منحصر ہے کہ ہوسٹ کون سا window manager استعمال کرتا ہے (X11 یا Wayland)۔\n\nشروع کرنے کے لیے، براہ کرم ایک پری سیٹ منتخب کریں۔ آپ بعد میں بھی ریموٹ کنٹرول میں ترمیم کر کے کسی پری سیٹ پر ری سیٹ کر سکتے ہیں۔\n\nاگر آپ پہلی بار یہ ایپ استعمال کر رہے ہیں تو براہ کرم Help صفحہ ضرور پڑھیں۔</string>
-    <string name="error_reading_volume">آواز پڑھنے میں خرابی۔ براہ کرم pactl انسٹال کریں۔</string>
-    <string name="volume_format">آواز: %s</string>
-    <string name="volume_muted_format">آواز: %s (خاموش)</string>
-    <string name="smart_volume_settings">سمارٹ آواز کی ترتیبات</string>
-    <string name="read_current_volume">موجودہ آواز پڑھیں</string>
-    <string name="show_volume_slider">آواز کا سلائیڈر دکھائیں</string>
-    <string name="control_volume_with_hardware_buttons">ہارڈویئر بٹنوں سے آواز کنٹرول کریں</string>
-    <string name="test_pactl">pactl آزمائیں</string>
-    <string name="pactl_installation_requirement">اس کے لیے pactl کا انسٹال ہونا ضروری ہے۔</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">ریموٹ کنٹرول</string>

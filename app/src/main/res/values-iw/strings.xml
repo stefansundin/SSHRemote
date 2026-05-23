@@ -122,6 +122,15 @@
     <string name="executing_command">מבצע פקודה…</string>
     <string name="executing_on">מבצע על %s</string>
     <string name="sharing_to">משתף אל %s</string>
+    <string name="smart_volume_settings">הגדרות עוצמת קול חכמות</string>
+    <string name="read_current_volume">קרא את עוצמת הקול הנוכחית</string>
+    <string name="show_volume_slider">הצג מחוון עוצמת קול</string>
+    <string name="control_volume_with_hardware_buttons">שלוט בעוצמת הקול באמצעות כפתורי החומרה</string>
+    <string name="test_pactl">בדוק pactl</string>
+    <string name="pactl_installation_requirement">דורש ש-pactl מותקן.</string>
+    <string name="error_reading_volume">שגיאה בקריאת עוצמת הקול. נא להתקין את pactl.</string>
+    <string name="volume_format">עוצמת קול: %s</string>
+    <string name="volume_muted_format">עוצמת קול: %s (מושתק)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">חזרה</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">ספריית SSH</string>
     <string name="ssh_library_subtitle">משתמש ב-%1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">עזרה</string>
     <string name="tap_the_help_button_for_help">הקש על כפתור ? לעזרה.</string>
     <string name="getting_started_title">תחילת העבודה</string>
     <string name="getting_started_text">הכפתורים בשלט ממופים לפקודות מסוימות שמבוצעות על המארח.\n\nעליך להתקין במארח את הכלי המתאים, והבחירה תלויה במנהל החלונות שבו המארח משתמש (X11 או Wayland).\n\nכדי להתחיל, בחר תצורה מוגדרת מראש. תמיד אפשר לאפס לתצורה מוגדרת מראש מאוחר יותר על ידי עריכת השלט.\n\nאנא קרא את דף העזרה אם זו הפעם הראשונה שאתה משתמש באפליקציה הזו.</string>
-    <string name="error_reading_volume">שגיאה בקריאת עוצמת הקול. נא להתקין את pactl.</string>
-    <string name="volume_format">עוצמת קול: %s</string>
-    <string name="volume_muted_format">עוצמת קול: %s (מושתק)</string>
-    <string name="smart_volume_settings">הגדרות עוצמת קול חכמות</string>
-    <string name="read_current_volume">קרא את עוצמת הקול הנוכחית</string>
-    <string name="show_volume_slider">הצג מחוון עוצמת קול</string>
-    <string name="control_volume_with_hardware_buttons">שלוט בעוצמת הקול באמצעות כפתורי החומרה</string>
-    <string name="test_pactl">בדוק pactl</string>
-    <string name="pactl_installation_requirement">דורש ש-pactl מותקן.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">שלט</string>

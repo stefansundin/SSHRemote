@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Жаңы сырсөз киргизиңиз, же тазалоо үчүн бош калтырыңыз</string>
     <string name="optional_password_prompt">Милдеттүү эмес, эгер берилбесе кийин суралат</string>
     <string name="optional">Милдеттүү эмес</string>
-    <string name="re_enter">Кайра киргизүү</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Кайра киргизүү</string>
     <string name="change_or_clear">Өзгөртүү же тазалоо</string>
     <string name="unsaved_changes_title">Сакталбаган өзгөртүүлөр</string>
     <string name="unsaved_changes_text">Чыгаардан мурун хостту сактагыңыз келеби?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Буйрук аткарылууда…</string>
     <string name="executing_on">%s түзмөгүндө аткарылууда</string>
     <string name="sharing_to">%s менен бөлүшүү</string>
+    <string name="smart_volume_settings">Акылдуу үн жөндөөлөрү</string>
+    <string name="read_current_volume">Учурдагы үндү окуу</string>
+    <string name="show_volume_slider">Үн сыдырмасын көрсөтүү</string>
+    <string name="control_volume_with_hardware_buttons">Үндү аппараттык баскычтар менен башкаруу</string>
+    <string name="test_pactl">pactl\'ди текшерүү</string>
+    <string name="pactl_installation_requirement">pactl орнотулган болушу керек.</string>
+    <string name="error_reading_volume">Үндү окууда ката кетти. Сураныч, pactl орнотуңуз.</string>
+    <string name="volume_format">Үн: %s</string>
+    <string name="volume_muted_format">Үн: %s (үнсүз)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Артка</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote жөнүндө</string>
     <string name="app_version">Тиркеме версиясы</string>
     <string name="author">Автор</string>
-    <string name="author_name">Stefan Sundin тарабынан иштелип чыккан</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Stefan Sundin тарабынан иштелип чыккан</string>
     <string name="donate">Кайрымдуулук кылуу</string>
     <string name="support_developer">Иштеп чыгуучуну колдоо</string>
     <string name="license">Лицензия</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH китепканасы</string>
     <string name="ssh_library_subtitle">%1$s %2$s колдонулат</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Жардам</string>
     <string name="tap_the_help_button_for_help">Жардам үчүн ? баскычын таптаңыз.</string>
     <string name="getting_started_title">Баштоо</string>
     <string name="getting_started_text">Пульттагы баскычтар хостто аткарылуучу белгилүү бир буйруктарга байланган.\n\nХостко тиешелүү утилитаны орнотушуңуз керек, кайсынысы керек экени хост кайсы терезе башкаргычын колдонооруна жараша болот (X11 же Wayland).\n\nБаштоо үчүн, алдын ала орнотууну тандаңыз. Кийинчерээк пультту түзөтүү аркылуу каалаган убакта кайра алдын ала орнотууга кайтара аласыз.\n\nЭгер бул тиркемени биринчи жолу колдонуп жатсаңыз, Жардам барагын окуңуз.</string>
-    <string name="error_reading_volume">Үндү окууда ката кетти. Сураныч, pactl орнотуңуз.</string>
-    <string name="volume_format">Үн: %s</string>
-    <string name="volume_muted_format">Үн: %s (үнсүз)</string>
-    <string name="smart_volume_settings">Акылдуу үн жөндөөлөрү</string>
-    <string name="read_current_volume">Учурдагы үндү окуу</string>
-    <string name="show_volume_slider">Үн сыдырмасын көрсөтүү</string>
-    <string name="control_volume_with_hardware_buttons">Үндү аппараттык баскычтар менен башкаруу</string>
-    <string name="test_pactl">pactl\'ди текшерүү</string>
-    <string name="pactl_installation_requirement">pactl орнотулган болушу керек.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Пульт</string>

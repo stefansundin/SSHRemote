@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Մուտքագրեք նոր գաղտնաբառ կամ դատարկ թողեք՝ մաքրելու համար</string>
     <string name="optional_password_prompt">Ըստ ցանկության, եթե չի տրվել՝ կպահանջվի կապի ժամանակ</string>
     <string name="optional">Ըստ ցանկության</string>
-    <string name="re_enter">Կրկին մուտքագրել</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Կրկին մուտքագրել</string>
     <string name="change_or_clear">Փոխել կամ մաքրել</string>
     <string name="unsaved_changes_title">Չպահպանված փոփոխություններ</string>
     <string name="unsaved_changes_text">Ցանկանու՞մ եք պահպանել հոսթը՝ նախքան դուրս գալը։</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Կատարվում է հրամանը…</string>
     <string name="executing_on">Կատարվում է %s-ի վրա</string>
     <string name="sharing_to">Կիսվում է %s-ի հետ</string>
+    <string name="smart_volume_settings">Խելացի ձայնի կարգավորումներ</string>
+    <string name="read_current_volume">Կարդալ ընթացիկ ձայնը</string>
+    <string name="show_volume_slider">Ցույց տալ ձայնի սահիչը</string>
+    <string name="control_volume_with_hardware_buttons">Կառավարել ձայնը սարքի ֆիզիկական կոճակներով</string>
+    <string name="test_pactl">Փորձարկել pactl-ը</string>
+    <string name="pactl_installation_requirement">Պահանջվում է, որ pactl-ը տեղադրված լինի։</string>
+    <string name="error_reading_volume">Ձայնը կարդալիս սխալ։ Խնդրում ենք տեղադրել pactl։</string>
+    <string name="volume_format">Ձայն՝ %s</string>
+    <string name="volume_muted_format">Ձայն՝ %s (անջատված)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Հետ</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote-ի մասին</string>
     <string name="app_version">Հավելվածի տարբերակ</string>
     <string name="author">Հեղինակ</string>
-    <string name="author_name">Մշակել է Stefan Sundin-ը</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Մշակել է Stefan Sundin-ը</string>
     <string name="donate">Նվիրաբերել</string>
     <string name="support_developer">Աջակցել մշակողին</string>
     <string name="license">Լիցենզիա</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH գրադարան</string>
     <string name="ssh_library_subtitle">Օգտագործվում է %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Օգնություն</string>
     <string name="tap_the_help_button_for_help">Օգնության համար սեղմեք ? կոճակը։</string>
     <string name="getting_started_title">Սկսելու համար</string>
     <string name="getting_started_text">Հեռակառավարման կոճակները համապատասխանում են որոշակի հրամանների, որոնք կատարվում են հոսթի վրա։\n\nՀոսթում պետք է տեղադրեք համապատասխան գործիքը, որը կախված է օգտագործվող պատուհանային համակարգից (X11 կամ Wayland)։\n\nՍկսելու համար ընտրեք նախադրվածք։ Հետագայում միշտ կարող եք վերակայել նախադրվածքի՝ խմբագրելով հեռակառավարումը։\n\nԵթե առաջին անգամն է, որ օգտագործում եք այս հավելվածը, անպայման կարդացեք Օգնության էջը։</string>
-    <string name="error_reading_volume">Ձայնը կարդալիս սխալ։ Խնդրում ենք տեղադրել pactl։</string>
-    <string name="volume_format">Ձայն՝ %s</string>
-    <string name="volume_muted_format">Ձայն՝ %s (անջատված)</string>
-    <string name="smart_volume_settings">Խելացի ձայնի կարգավորումներ</string>
-    <string name="read_current_volume">Կարդալ ընթացիկ ձայնը</string>
-    <string name="show_volume_slider">Ցույց տալ ձայնի սահիչը</string>
-    <string name="control_volume_with_hardware_buttons">Կառավարել ձայնը սարքի ֆիզիկական կոճակներով</string>
-    <string name="test_pactl">Փորձարկել pactl-ը</string>
-    <string name="pactl_installation_requirement">Պահանջվում է, որ pactl-ը տեղադրված լինի։</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Հեռակառավարում</string>

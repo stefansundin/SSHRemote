@@ -122,6 +122,15 @@
     <string name="executing_command">Vykdoma komanda…</string>
     <string name="executing_on">Vykdoma kompiuteryje %s</string>
     <string name="sharing_to">Bendrinama su %s</string>
+    <string name="smart_volume_settings">Išmanieji garsumo nustatymai</string>
+    <string name="read_current_volume">Nuskaityti esamą garsumą</string>
+    <string name="show_volume_slider">Rodyti garsumo slankiklį</string>
+    <string name="control_volume_with_hardware_buttons">Valdyti garsumą aparatiniais mygtukais</string>
+    <string name="test_pactl">Išbandyti pactl</string>
+    <string name="pactl_installation_requirement">Reikalinga, kad būtų įdiegtas pactl.</string>
+    <string name="error_reading_volume">Klaida skaitant garsumo lygį. Įdiekite pactl.</string>
+    <string name="volume_format">Garsumas: %s</string>
+    <string name="volume_muted_format">Garsumas: %s (nutildyta)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Atgal</string>
@@ -350,20 +359,11 @@
     <string name="ssh_library">SSH biblioteka</string>
     <string name="ssh_library_subtitle">Naudojama %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Pagalba</string>
     <string name="tap_the_help_button_for_help">Pagalbos ieškokite bakstelėję ? mygtuką.</string>
     <string name="getting_started_title">Darbo pradžia</string>
     <string name="getting_started_text">Nuotolinio valdymo pulto mygtukai susieti su konkrečiomis komandomis, kurios vykdomos kompiuteryje.\n\nKompiuteryje turite įdiegti tinkamą įrankį; kuris tiksliai reikalingas, priklauso nuo to, kokią langų sistemą kompiuteris naudoja (X11 ar Wayland).\n\nKad pradėtumėte, pasirinkite išankstinį nustatymą. Vėliau visada galėsite atkurti išankstinį nustatymą redaguodami nuotolinio valdymo pultą.\n\nJei šia programa naudojatės pirmą kartą, perskaitykite pagalbos puslapį.</string>
-    <string name="error_reading_volume">Klaida skaitant garsumo lygį. Įdiekite pactl.</string>
-    <string name="volume_format">Garsumas: %s</string>
-    <string name="volume_muted_format">Garsumas: %s (nutildyta)</string>
-    <string name="smart_volume_settings">Išmanieji garsumo nustatymai</string>
-    <string name="read_current_volume">Nuskaityti esamą garsumą</string>
-    <string name="show_volume_slider">Rodyti garsumo slankiklį</string>
-    <string name="control_volume_with_hardware_buttons">Valdyti garsumą aparatiniais mygtukais</string>
-    <string name="test_pactl">Išbandyti pactl</string>
-    <string name="pactl_installation_requirement">Reikalinga, kad būtų įdiegtas pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Nuotolinio valdymo pultas</string>

@@ -122,6 +122,15 @@
     <string name="executing_command">Käsu käivitamine…</string>
     <string name="executing_on">Käivitamine hostis %s</string>
     <string name="sharing_to">Jagamine sihtkohta %s</string>
+    <string name="smart_volume_settings">Nutikad helitugevuse seaded</string>
+    <string name="read_current_volume">Loe praegust helitugevust</string>
+    <string name="show_volume_slider">Näita helitugevuse liugurit</string>
+    <string name="control_volume_with_hardware_buttons">Juhi helitugevust riistvaranuppudega</string>
+    <string name="test_pactl">Testi pactl-i</string>
+    <string name="pactl_installation_requirement">Eeldab, et pactl on paigaldatud.</string>
+    <string name="error_reading_volume">Viga helitugevuse lugemisel. Palun paigalda pactl.</string>
+    <string name="volume_format">Helitugevus: %s</string>
+    <string name="volume_muted_format">Helitugevus: %s (vaigistatud)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Tagasi</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH teek</string>
     <string name="ssh_library_subtitle">Kasutusel %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Abi</string>
     <string name="tap_the_help_button_for_help">Abi saamiseks puuduta nuppu ?.</string>
     <string name="getting_started_title">Alustamine</string>
     <string name="getting_started_text">Puldi nupud on vastendatud konkreetsetele käskudele, mis hostis käivitatakse.\n\nHosti tuleb paigaldada sobiv utiliit; see sõltub sellest, millist aknahaldurit host kasutab (X11 või Wayland).\n\nAlustamiseks vali palun eelseadistus. Hiljem saad puldi muutmisel alati eelseadistusele lähtestada.\n\nPalun loe Abi lehte, kui kasutad seda rakendust esimest korda.</string>
-    <string name="error_reading_volume">Viga helitugevuse lugemisel. Palun paigalda pactl.</string>
-    <string name="volume_format">Helitugevus: %s</string>
-    <string name="volume_muted_format">Helitugevus: %s (vaigistatud)</string>
-    <string name="smart_volume_settings">Nutikad helitugevuse seaded</string>
-    <string name="read_current_volume">Loe praegust helitugevust</string>
-    <string name="show_volume_slider">Näita helitugevuse liugurit</string>
-    <string name="control_volume_with_hardware_buttons">Juhi helitugevust riistvaranuppudega</string>
-    <string name="test_pactl">Testi pactl-i</string>
-    <string name="pactl_installation_requirement">Eeldab, et pactl on paigaldatud.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Pult</string>

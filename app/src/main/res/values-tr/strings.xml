@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Genel -->
+    <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">Tamam</string>
     <string name="cancel">İptal</string>
@@ -42,7 +42,7 @@
     <string name="search_match_position">Eşleşme %1$d / %2$d</string>
     <string name="search_next_match">Sonraki eşleşme</string>
 
-    <!-- Ana bilgisayarlar -->
+    <!-- Hosts -->
     <string name="hosts_title">Ana Bilgisayarlar</string>
     <string name="no_ssh_hosts_added_yet">Henüz SSH ana bilgisayarı eklenmedi.</string>
     <string name="empty_list_add_prompt">Bir tane eklemek için + düğmesine dokunun.</string>
@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Yeni bir parola girin veya temizlemek için boş bırakın</string>
     <string name="optional_password_prompt">İsteğe bağlıdır, verilmezse daha sonra sorulur</string>
     <string name="optional">İsteğe bağlı</string>
-    <string name="re_enter">Yeniden gir</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Yeniden gir</string>
     <string name="change_or_clear">Değiştir veya Temizle</string>
     <string name="unsaved_changes_title">Kaydedilmemiş değişiklikler</string>
     <string name="unsaved_changes_text">Ayrılmadan önce ana bilgisayarı kaydetmek istiyor musunuz?</string>
@@ -80,7 +80,7 @@
     <string name="select_host">Bir ana bilgisayar seçin</string>
     <string name="no_hosts_found">Ana bilgisayar bulunamadı</string>
 
-    <!-- Uzaktan Kumanda -->
+    <!-- Remote Control -->
     <string name="tab_remote">Uzaktan Kumanda</string>
     <string name="tab_mouse">Fare</string>
     <string name="tab_keyboard">Klavye</string>
@@ -122,8 +122,17 @@
     <string name="executing_command">Komut çalıştırılıyor…</string>
     <string name="executing_on">%s üzerinde çalıştırılıyor</string>
     <string name="sharing_to">%s hedefine paylaşılıyor</string>
+    <string name="smart_volume_settings">Akıllı ses ayarları</string>
+    <string name="read_current_volume">Geçerli sesi oku</string>
+    <string name="show_volume_slider">Ses kaydırıcısını göster</string>
+    <string name="control_volume_with_hardware_buttons">Sesi donanım düğmeleriyle kontrol et</string>
+    <string name="test_pactl">pactl test et</string>
+    <string name="pactl_installation_requirement">pactl kurulu olmasını gerektirir.</string>
+    <string name="error_reading_volume">Ses okunurken hata oluştu. Lütfen pactl kurun.</string>
+    <string name="volume_format">Ses: %s</string>
+    <string name="volume_muted_format">Ses: %s (sessiz)</string>
 
-    <!-- Düğmeler / Tuşlar -->
+    <!-- Buttons / Keys -->
     <string name="key_back">Geri</string>
     <string name="key_home">Ana ekran</string>
     <string name="key_menu">Menü</string>
@@ -139,7 +148,7 @@
     <string name="key_mute">Sesi Kapat</string>
     <string name="key_volume_up">Sesi Artır</string>
 
-    <!-- Fare -->
+    <!-- Mouse -->
     <string name="mouse_pad">Fare Yüzeyi</string>
     <string name="mouse_pad_disabled">Fare Yüzeyi Devre Dışı</string>
     <string name="mouse_commands_not_configured">Fare komutları yapılandırılmadı</string>
@@ -161,7 +170,7 @@
     <string name="key_mouse_pan_left">İki Parmakla Sola Kaydır</string>
     <string name="key_mouse_pan_right">İki Parmakla Sağa Kaydır</string>
 
-    <!-- Klavye -->
+    <!-- Keyboard -->
     <string name="keyboard_commands_not_configured">Klavye komutları yapılandırılmadı</string>
     <string name="edit_keyboard_commands">Klavye Komutlarını Düzenle</string>
     <string name="key_esc">Esc</string>
@@ -180,7 +189,7 @@
     <string name="key_keyboard_key_down">Klavye Tuşu Basılı</string>
     <string name="key_keyboard_key_up">Klavye Tuşu Bırakma</string>
 
-    <!-- SSH Yapılandırması -->
+    <!-- SSH Configuration -->
     <string name="advanced_ssh_config">Gelişmiş SSH Yapılandırması</string>
     <string name="advanced_users_only">Yalnızca İleri Düzey Kullanıcılar</string>
     <string name="advanced_users_warning">SSH yapılandırma değerlerini değiştirmek ileri düzey kullanıcılar içindir. Yanlış ayarlar bağlantıyı engelleyebilir.</string>
@@ -190,7 +199,7 @@
     <string name="strict_host_key_checking">Sıkı ana bilgisayar anahtarı denetimi</string>
     <string name="allow_password_prompting">Parola sorulmasına izin ver</string>
 
-    <!-- SSH Anahtarları -->
+    <!-- SSH Keys -->
     <string name="ssh_keys">SSH Anahtarları</string>
     <string name="ssh_key">SSH Anahtarı</string>
     <string name="add_ssh_key">SSH Anahtarı Ekle</string>
@@ -247,7 +256,7 @@
     <string name="delete_certificate">Sertifikayı sil</string>
     <string name="certificate">Sertifika</string>
 
-    <!-- Ayarlar -->
+    <!-- Settings -->
     <string name="settings">Ayarlar</string>
     <string name="appearance">Görünüm</string>
     <string name="theme">Tema</string>
@@ -271,15 +280,7 @@
     <string name="known_hosts_subtitle">Güvenilen ana bilgisayar anahtarlarını ve sertifikaları yönetin</string>
     <string name="no_known_hosts_added_yet">Henüz bilinen ana bilgisayar girdisi eklenmedi.</string>
     <string name="known_host_help_title">Girdi Biçimi</string>
-    <string name="known_host_help_text">Buraya eklenen girdiler tüm ana bilgisayarlar için otomatik olarak kullanılır. Ana bilgisayarlar ayrıca kendi kabul edilen ana bilgisayar anahtarı listelerini de saklar.
-
-Bu bölümün temel kullanım amacı, örneğin ana bilgisayar sertifikalarına güvenmektir:
-
-@cert-authority host.example.com ssh-ed25519 AAA…
-
-Normal girdiler de desteklenir:
-
-host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_help_text">Buraya eklenen girdiler tüm ana bilgisayarlar için otomatik olarak kullanılır. Ana bilgisayarlar ayrıca kendi kabul edilen ana bilgisayar anahtarı listelerini de saklar.\n\nBu bölümün temel kullanım amacı, örneğin ana bilgisayar sertifikalarına güvenmektir:\n\n@cert-authority host.example.com ssh-ed25519 AAA…\n\nNormal girdiler de desteklenir:\n\nhost.example.com ssh-ed25519 AAA…</string>
     <string name="known_host_add_title">Bilinen Ana Bilgisayar Girdileri Ekle</string>
     <string name="known_host_input_label">Her satıra bir girdi yapıştırın</string>
     <string name="add_entries">Girdileri ekle</string>
@@ -307,12 +308,10 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="green_format">Yeşil: %d</string>
     <string name="blue_format">Mavi: %d</string>
 
-    <!-- Veri Yönetimi -->
+    <!-- Data Management -->
     <string name="data">Veri</string>
     <string name="restored_from_backup_title">Yedekten geri yüklendi</string>
-    <string name="restored_from_backup_text">Uygulama verileri bir yedekten geri yüklendi. Güvenlik nedeniyle SSH anahtarları ve parolalar gibi şifrelenmiş veriler yedeklere dahil edilmez.
-
-Lütfen bunları yeniden yapılandırın.</string>
+    <string name="restored_from_backup_text">Uygulama verileri bir yedekten geri yüklendi. Güvenlik nedeniyle SSH anahtarları ve parolalar gibi şifrelenmiş veriler yedeklere dahil edilmez.\n\nLütfen bunları yeniden yapılandırın.</string>
     <string name="export_to_file">Dosyaya dışa aktar</string>
     <string name="export_to_file_subtitle">Ayarları ve ana bilgisayarları bir dosyaya dışa aktarın.</string>
     <string name="import_from_file">Dosyadan içe aktar</string>
@@ -336,19 +335,17 @@ Lütfen bunları yeniden yapılandırın.</string>
     <string name="scan_qr_code_certificate_prompt">SSH sertifikasını içe aktarmak için QR kod tarayın</string>
     <string name="qr_code_content_description">QR Kod</string>
     <string name="import_settings_title">Ayarları içe aktar</string>
-    <string name="import_settings_text">Mevcut ana bilgisayarlarla çakışma olursa güncellemek mi yoksa çoğaltmak mı istiyorsunuz?
-
-Ayrıca Değiştir seçeneğini seçerek mevcut tüm ana bilgisayarları silebilirsiniz.</string>
+    <string name="import_settings_text">Mevcut ana bilgisayarlarla çakışma olursa güncellemek mi yoksa çoğaltmak mı istiyorsunuz?\n\nAyrıca Değiştir seçeneğini seçerek mevcut tüm ana bilgisayarları silebilirsiniz.</string>
     <plurals name="successfully_imported_hosts">
         <item quantity="one">%d ana bilgisayar başarıyla içe aktarıldı.</item>
         <item quantity="other">%d ana bilgisayar başarıyla içe aktarıldı.</item>
     </plurals>
 
-    <!-- Hakkında -->
+    <!-- About -->
     <string name="about_app">SSH Remote Hakkında</string>
     <string name="app_version">Uygulama sürümü</string>
     <string name="author">Geliştirici</string>
-    <string name="author_name">Stefan Sundin tarafından geliştirildi</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Stefan Sundin tarafından geliştirildi</string>
     <string name="donate">Bağış yap</string>
     <string name="support_developer">Geliştiriciyi destekleyin</string>
     <string name="license">Lisans</string>
@@ -358,28 +355,13 @@ Ayrıca Değiştir seçeneğini seçerek mevcut tüm ana bilgisayarları silebil
     <string name="ssh_library">SSH kütüphanesi</string>
     <string name="ssh_library_subtitle">%1$s %2$s kullanılıyor</string>
 
-    <!-- Yardım ve Ses -->
+    <!-- Help -->
     <string name="help">Yardım</string>
     <string name="tap_the_help_button_for_help">Yardım için ? düğmesine dokunun.</string>
     <string name="getting_started_title">Başlarken</string>
-    <string name="getting_started_text">Uzaktan kumandadaki düğmeler, ana bilgisayarda çalıştırılan belirli komutlarla eşlenir.
+    <string name="getting_started_text">Uzaktan kumandadaki düğmeler, ana bilgisayarda çalıştırılan belirli komutlarla eşlenir.\n\nAna bilgisayara uygun yardımcı programı kurmanız gerekir; hangisinin gerekli olduğu, ana bilgisayarın hangi pencere yöneticisini kullandığına bağlıdır (X11 veya Wayland).\n\nBaşlamak için lütfen bir ön ayar seçin. Daha sonra uzaktan kumandayı düzenleyerek her zaman bir ön ayara sıfırlayabilirsiniz.\n\nBu uygulamayı ilk kez kullanıyorsanız lütfen Yardım sayfasını okuyun.</string>
 
-Ana bilgisayara uygun yardımcı programı kurmanız gerekir; hangisinin gerekli olduğu, ana bilgisayarın hangi pencere yöneticisini kullandığına bağlıdır (X11 veya Wayland).
-
-Başlamak için lütfen bir ön ayar seçin. Daha sonra uzaktan kumandayı düzenleyerek her zaman bir ön ayara sıfırlayabilirsiniz.
-
-Bu uygulamayı ilk kez kullanıyorsanız lütfen Yardım sayfasını okuyun.</string>
-    <string name="error_reading_volume">Ses okunurken hata oluştu. Lütfen pactl kurun.</string>
-    <string name="volume_format">Ses: %s</string>
-    <string name="volume_muted_format">Ses: %s (sessiz)</string>
-    <string name="smart_volume_settings">Akıllı ses ayarları</string>
-    <string name="read_current_volume">Geçerli sesi oku</string>
-    <string name="show_volume_slider">Ses kaydırıcısını göster</string>
-    <string name="control_volume_with_hardware_buttons">Sesi donanım düğmeleriyle kontrol et</string>
-    <string name="test_pactl">pactl test et</string>
-    <string name="pactl_installation_requirement">pactl kurulu olmasını gerektirir.</string>
-
-    <!-- Bildirimler -->
+    <!-- Notifications -->
     <string name="notification_channel_name">Uzaktan Kumanda</string>
     <string name="notification_connected_to">%s ana bilgisayarına bağlandı</string>
     <string name="notification_connecting_to">%s ana bilgisayarına bağlanıyor</string>
@@ -389,7 +371,7 @@ Bu uygulamayı ilk kez kullanıyorsanız lütfen Yardım sayfasını okuyun.</st
     <string name="notification_open">Aç</string>
     <string name="notification_close">Kapat</string>
 
-    <!-- Kısayollar -->
+    <!-- Shortcuts -->
     <string name="add_to_home_screen">Ana ekrana ekle</string>
     <string name="run_command_on_host_short">%2$s üzerinde %1$s</string>
     <string name="run_command_on_host_long">%2$s üzerinde %1$s komutunu çalıştır</string>
@@ -398,7 +380,7 @@ Bu uygulamayı ilk kez kullanıyorsanız lütfen Yardım sayfasını okuyun.</st
     <string name="shortcut_remote_control_key_not_found">Kısayol eylemi artık desteklenmiyor.</string>
     <string name="shortcut_save_changes_before_using">Lütfen kısayolları kullanmadan önce uzaktan kumanda değişikliklerinizi kaydedin.</string>
 
-    <!-- Paylaş -->
+    <!-- Share -->
     <string name="sharing">Paylaşım</string>
     <string name="share_target_enabled">Paylaşım hedefini etkinleştir</string>
     <string name="share_target_enabled_subtitle">Bu uygulama, düz metin içerikleri için paylaşım menüsünde görünecektir. Varsayılan olarak paylaşılan metin, bağlı olunan ana bilgisayarda klavye metin yazma komutu kullanılarak yazılır; ancak bu davranış her ana bilgisayar için özelleştirilebilir.</string>

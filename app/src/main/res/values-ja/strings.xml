@@ -122,6 +122,15 @@
     <string name="executing_command">コマンドを実行中…</string>
     <string name="executing_on">%s で実行中</string>
     <string name="sharing_to">%s に共有中</string>
+    <string name="smart_volume_settings">スマート音量設定</string>
+    <string name="read_current_volume">現在の音量を読み取る</string>
+    <string name="show_volume_slider">音量スライダーを表示</string>
+    <string name="control_volume_with_hardware_buttons">ハードウェアボタンで音量を操作</string>
+    <string name="test_pactl">pactl をテスト</string>
+    <string name="pactl_installation_requirement">pactl がインストールされている必要があります。</string>
+    <string name="error_reading_volume">音量の読み取りエラーです。pactl をインストールしてください。</string>
+    <string name="volume_format">音量: %s</string>
+    <string name="volume_muted_format">音量: %s（ミュート）</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">戻る</string>
@@ -344,20 +353,11 @@
     <string name="ssh_library">SSH ライブラリ</string>
     <string name="ssh_library_subtitle">%1$s %2$s を使用</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">ヘルプ</string>
     <string name="tap_the_help_button_for_help">ヘルプを見るには ? ボタンをタップしてください。</string>
     <string name="getting_started_title">はじめに</string>
     <string name="getting_started_text">リモートコントロールのボタンは、ホスト上で実行される特定のコマンドに割り当てられています。\n\nホストには適切なユーティリティをインストールする必要があります。どれを使うかは、ホストが使用しているウィンドウマネージャー（X11 または Wayland）によって異なります。\n\nはじめるには、プリセットを選択してください。後からリモートコントロールを編集してプリセットに戻すこともできます。\n\nこのアプリを初めて使う場合は、ヘルプページを読んでください。</string>
-    <string name="error_reading_volume">音量の読み取りエラーです。pactl をインストールしてください。</string>
-    <string name="volume_format">音量: %s</string>
-    <string name="volume_muted_format">音量: %s（ミュート）</string>
-    <string name="smart_volume_settings">スマート音量設定</string>
-    <string name="read_current_volume">現在の音量を読み取る</string>
-    <string name="show_volume_slider">音量スライダーを表示</string>
-    <string name="control_volume_with_hardware_buttons">ハードウェアボタンで音量を操作</string>
-    <string name="test_pactl">pactl をテスト</string>
-    <string name="pactl_installation_requirement">pactl がインストールされている必要があります。</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">リモートコントロール</string>

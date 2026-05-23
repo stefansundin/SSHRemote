@@ -122,6 +122,15 @@
     <string name="executing_command">Đang thực thi lệnh…</string>
     <string name="executing_on">Đang thực thi trên %s</string>
     <string name="sharing_to">Đang chia sẻ tới %s</string>
+    <string name="smart_volume_settings">Cài đặt âm lượng thông minh</string>
+    <string name="read_current_volume">Đọc âm lượng hiện tại</string>
+    <string name="show_volume_slider">Hiển thị thanh trượt âm lượng</string>
+    <string name="control_volume_with_hardware_buttons">Điều khiển âm lượng bằng nút phần cứng</string>
+    <string name="test_pactl">Kiểm tra pactl</string>
+    <string name="pactl_installation_requirement">Yêu cầu đã cài đặt pactl.</string>
+    <string name="error_reading_volume">Lỗi đọc âm lượng. Vui lòng cài đặt pactl.</string>
+    <string name="volume_format">Âm lượng: %s</string>
+    <string name="volume_muted_format">Âm lượng: %s (đã tắt tiếng)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Quay lại</string>
@@ -270,15 +279,7 @@
     <string name="known_hosts_subtitle">Quản lý khóa và chứng chỉ máy chủ đáng tin cậy</string>
     <string name="no_known_hosts_added_yet">Chưa có mục máy chủ đã biết nào được thêm.</string>
     <string name="known_host_help_title">Định dạng mục nhập</string>
-    <string name="known_host_help_text">Các mục nhập được thêm ở đây sẽ tự động được dùng cho mọi máy chủ. Mỗi máy chủ cũng lưu danh sách các khóa máy chủ đã được chấp nhận riêng.
-
-Trường hợp sử dụng chính của phần này là tin cậy chứng chỉ máy chủ, ví dụ:
-
-@cert-authority host.example.com ssh-ed25519 AAA…
-
-Các mục nhập thông thường cũng được hỗ trợ:
-
-host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_help_text">Các mục nhập được thêm ở đây sẽ tự động được dùng cho mọi máy chủ. Mỗi máy chủ cũng lưu danh sách các khóa máy chủ đã được chấp nhận riêng.\n\nTrường hợp sử dụng chính của phần này là tin cậy chứng chỉ máy chủ, ví dụ:\n\n@cert-authority host.example.com ssh-ed25519 AAA…\n\nCác mục nhập thông thường cũng được hỗ trợ:\n\nhost.example.com ssh-ed25519 AAA…</string>
     <string name="known_host_add_title">Thêm mục máy chủ đã biết</string>
     <string name="known_host_input_label">Dán mỗi mục trên một dòng</string>
     <string name="add_entries">Thêm mục</string>
@@ -309,9 +310,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <!-- Data Management -->
     <string name="data">Dữ liệu</string>
     <string name="restored_from_backup_title">Đã khôi phục từ bản sao lưu</string>
-    <string name="restored_from_backup_text">Dữ liệu ứng dụng đã được khôi phục từ bản sao lưu. Vì lý do bảo mật, dữ liệu được mã hóa như khóa SSH và mật khẩu không được bao gồm trong bản sao lưu.
-
-Vui lòng cấu hình lại những mục này.</string>
+    <string name="restored_from_backup_text">Dữ liệu ứng dụng đã được khôi phục từ bản sao lưu. Vì lý do bảo mật, dữ liệu được mã hóa như khóa SSH và mật khẩu không được bao gồm trong bản sao lưu.\n\nVui lòng cấu hình lại những mục này.</string>
     <string name="export_to_file">Xuất ra tệp</string>
     <string name="export_to_file_subtitle">Xuất cài đặt và máy chủ ra tệp.</string>
     <string name="import_from_file">Nhập từ tệp</string>
@@ -335,9 +334,7 @@ Vui lòng cấu hình lại những mục này.</string>
     <string name="scan_qr_code_certificate_prompt">Quét mã QR để nhập chứng chỉ SSH</string>
     <string name="qr_code_content_description">Mã QR</string>
     <string name="import_settings_title">Nhập cài đặt</string>
-    <string name="import_settings_text">Trong trường hợp trùng với máy chủ hiện có, bạn muốn cập nhật hay nhân bản?
-
-Bạn cũng có thể chọn Thay thế, thao tác này sẽ xóa tất cả máy chủ hiện có.</string>
+    <string name="import_settings_text">Trong trường hợp trùng với máy chủ hiện có, bạn muốn cập nhật hay nhân bản?\n\nBạn cũng có thể chọn Thay thế, thao tác này sẽ xóa tất cả máy chủ hiện có.</string>
     <plurals name="successfully_imported_hosts">
         <item quantity="other">Đã nhập thành công %d máy chủ.</item>
     </plurals>
@@ -356,26 +353,11 @@ Bạn cũng có thể chọn Thay thế, thao tác này sẽ xóa tất cả má
     <string name="ssh_library">Thư viện SSH</string>
     <string name="ssh_library_subtitle">Đang dùng %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Trợ giúp</string>
     <string name="tap_the_help_button_for_help">Nhấn nút ? để được trợ giúp.</string>
     <string name="getting_started_title">Bắt đầu</string>
-    <string name="getting_started_text">Các nút trên điều khiển từ xa được ánh xạ tới những lệnh cụ thể sẽ được thực thi trên máy chủ.
-
-Bạn phải cài đặt tiện ích phù hợp trên máy chủ; tiện ích nào cần dùng phụ thuộc vào việc máy chủ dùng trình quản lý cửa sổ nào (X11 hoặc Wayland).
-
-Để bắt đầu, vui lòng chọn một cấu hình sẵn. Bạn luôn có thể đặt lại về một cấu hình sẵn sau này bằng cách chỉnh sửa điều khiển từ xa.
-
-Vui lòng đọc trang Trợ giúp nếu đây là lần đầu tiên bạn sử dụng ứng dụng này.</string>
-    <string name="error_reading_volume">Lỗi đọc âm lượng. Vui lòng cài đặt pactl.</string>
-    <string name="volume_format">Âm lượng: %s</string>
-    <string name="volume_muted_format">Âm lượng: %s (đã tắt tiếng)</string>
-    <string name="smart_volume_settings">Cài đặt âm lượng thông minh</string>
-    <string name="read_current_volume">Đọc âm lượng hiện tại</string>
-    <string name="show_volume_slider">Hiển thị thanh trượt âm lượng</string>
-    <string name="control_volume_with_hardware_buttons">Điều khiển âm lượng bằng nút phần cứng</string>
-    <string name="test_pactl">Kiểm tra pactl</string>
-    <string name="pactl_installation_requirement">Yêu cầu đã cài đặt pactl.</string>
+    <string name="getting_started_text">Các nút trên điều khiển từ xa được ánh xạ tới những lệnh cụ thể sẽ được thực thi trên máy chủ.\n\nBạn phải cài đặt tiện ích phù hợp trên máy chủ; tiện ích nào cần dùng phụ thuộc vào việc máy chủ dùng trình quản lý cửa sổ nào (X11 hoặc Wayland).\n\nĐể bắt đầu, vui lòng chọn một cấu hình sẵn. Bạn luôn có thể đặt lại về một cấu hình sẵn sau này bằng cách chỉnh sửa điều khiển từ xa.\n\nVui lòng đọc trang Trợ giúp nếu đây là lần đầu tiên bạn sử dụng ứng dụng này.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Điều khiển từ xa</string>

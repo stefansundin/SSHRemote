@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Ievadiet jaunu paroli vai atstājiet lauku tukšu, lai to notīrītu</string>
     <string name="optional_password_prompt">Neobligāti; ja nav norādīts, tā tiks pieprasīta</string>
     <string name="optional">Neobligāti</string>
-    <string name="re_enter">Ievadīt vēlreiz</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Ievadīt vēlreiz</string>
     <string name="change_or_clear">Mainīt vai notīrīt</string>
     <string name="unsaved_changes_title">Nesaglabātas izmaiņas</string>
     <string name="unsaved_changes_text">Vai vēlaties saglabāt hostu pirms aiziešanas?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Izpilda komandu…</string>
     <string name="executing_on">Izpilda uz %s</string>
     <string name="sharing_to">Kopīgo uz %s</string>
+    <string name="smart_volume_settings">Viedie skaļuma iestatījumi</string>
+    <string name="read_current_volume">Nolasīt pašreizējo skaļumu</string>
+    <string name="show_volume_slider">Rādīt skaļuma slīdni</string>
+    <string name="control_volume_with_hardware_buttons">Vadīt skaļumu ar aparatūras pogām</string>
+    <string name="test_pactl">Pārbaudīt pactl</string>
+    <string name="pactl_installation_requirement">Nepieciešams, lai būtu instalēts pactl.</string>
+    <string name="error_reading_volume">Kļūda, nolasot skaļumu. Lūdzu, instalējiet pactl.</string>
+    <string name="volume_format">Skaļums: %s</string>
+    <string name="volume_muted_format">Skaļums: %s (izslēgts)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Atpakaļ</string>
@@ -338,7 +347,7 @@
     <string name="about_app">Par SSH Remote</string>
     <string name="app_version">Lietotnes versija</string>
     <string name="author">Autors</string>
-    <string name="author_name">Izstrādājis Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Izstrādājis Stefan Sundin</string>
     <string name="donate">Ziedot</string>
     <string name="support_developer">Atbalstīt izstrādātāju</string>
     <string name="license">Licence</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">SSH bibliotēka</string>
     <string name="ssh_library_subtitle">Izmanto %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Palīdzība</string>
     <string name="tap_the_help_button_for_help">Pieskarieties ? pogai, lai saņemtu palīdzību.</string>
     <string name="getting_started_title">Darba sākšana</string>
     <string name="getting_started_text">Tālvadības pogas ir piesaistītas noteiktām komandām, kas tiek izpildītas uz hosta.\n\nUz hosta ir jāinstalē atbilstošā utilīta; izvēle ir atkarīga no tā, kuru logu pārvaldnieku hosts izmanto (X11 vai Wayland).\n\nLai sāktu, lūdzu, izvēlieties priekšiestatījumu. Vēlāk vienmēr varēsiet atiestatīt uz priekšiestatījumu, rediģējot tālvadību.\n\nLūdzu, izlasiet Palīdzības lapu, ja lietojat šo lietotni pirmo reizi.</string>
-    <string name="error_reading_volume">Kļūda, nolasot skaļumu. Lūdzu, instalējiet pactl.</string>
-    <string name="volume_format">Skaļums: %s</string>
-    <string name="volume_muted_format">Skaļums: %s (izslēgts)</string>
-    <string name="smart_volume_settings">Viedie skaļuma iestatījumi</string>
-    <string name="read_current_volume">Nolasīt pašreizējo skaļumu</string>
-    <string name="show_volume_slider">Rādīt skaļuma slīdni</string>
-    <string name="control_volume_with_hardware_buttons">Vadīt skaļumu ar aparatūras pogām</string>
-    <string name="test_pactl">Pārbaudīt pactl</string>
-    <string name="pactl_installation_requirement">Nepieciešams, lai būtu instalēts pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Tālvadība</string>

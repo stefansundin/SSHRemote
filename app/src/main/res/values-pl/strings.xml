@@ -122,6 +122,15 @@
     <string name="executing_command">Wykonywanie polecenia…</string>
     <string name="executing_on">Wykonywanie na %s</string>
     <string name="sharing_to">Udostępnianie do %s</string>
+    <string name="smart_volume_settings">Inteligentne ustawienia głośności</string>
+    <string name="read_current_volume">Odczytaj bieżącą głośność</string>
+    <string name="show_volume_slider">Pokaż suwak głośności</string>
+    <string name="control_volume_with_hardware_buttons">Steruj głośnością przyciskami sprzętowymi</string>
+    <string name="test_pactl">Testuj pactl</string>
+    <string name="pactl_installation_requirement">Wymaga zainstalowanego pactl.</string>
+    <string name="error_reading_volume">Błąd odczytu głośności. Zainstaluj pactl.</string>
+    <string name="volume_format">Głośność: %s</string>
+    <string name="volume_muted_format">Głośność: %s (wyciszono)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Wstecz</string>
@@ -350,20 +359,11 @@
     <string name="ssh_library">Biblioteka SSH</string>
     <string name="ssh_library_subtitle">Używa %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Pomoc</string>
     <string name="tap_the_help_button_for_help">Stuknij przycisk ?, aby uzyskać pomoc.</string>
     <string name="getting_started_title">Pierwsze kroki</string>
     <string name="getting_started_text">Przyciski na pilocie są mapowane na konkretne polecenia wykonywane na hoście.\n\nMusisz zainstalować odpowiednie narzędzie na hoście; to, które będzie potrzebne, zależy od używanego menedżera okien (X11 lub Wayland).\n\nNa początek wybierz preset. Zawsze możesz później zresetować do presetu, edytując pilot.\n\nJeśli korzystasz z tej aplikacji po raz pierwszy, przeczytaj stronę Pomoc.</string>
-    <string name="error_reading_volume">Błąd odczytu głośności. Zainstaluj pactl.</string>
-    <string name="volume_format">Głośność: %s</string>
-    <string name="volume_muted_format">Głośność: %s (wyciszono)</string>
-    <string name="smart_volume_settings">Inteligentne ustawienia głośności</string>
-    <string name="read_current_volume">Odczytaj bieżącą głośność</string>
-    <string name="show_volume_slider">Pokaż suwak głośności</string>
-    <string name="control_volume_with_hardware_buttons">Steruj głośnością przyciskami sprzętowymi</string>
-    <string name="test_pactl">Testuj pactl</string>
-    <string name="pactl_installation_requirement">Wymaga zainstalowanego pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Pilot</string>

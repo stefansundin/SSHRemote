@@ -122,6 +122,15 @@
     <string name="executing_command">Komandoa exekutatzen…</string>
     <string name="executing_on">Exekutatzen %s ostalarian</string>
     <string name="sharing_to">Partekatzen %s ostalarira</string>
+    <string name="smart_volume_settings">Bolumen adimendunaren ezarpenak</string>
+    <string name="read_current_volume">Irakurri uneko bolumena</string>
+    <string name="show_volume_slider">Erakutsi bolumenaren graduatzailea</string>
+    <string name="control_volume_with_hardware_buttons">Kontrolatu bolumena hardware botoiekin</string>
+    <string name="test_pactl">Probatu pactl</string>
+    <string name="pactl_installation_requirement">pactl instalatuta egotea behar da.</string>
+    <string name="error_reading_volume">Errorea bolumena irakurtzean. Instalatu pactl mesedez.</string>
+    <string name="volume_format">Bolumena: %s</string>
+    <string name="volume_muted_format">Bolumena: %s (mutututa)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Atzera</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH liburutegia</string>
     <string name="ssh_library_subtitle">%1$s %2$s erabiltzen</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Laguntza</string>
     <string name="tap_the_help_button_for_help">Sakatu ? botoia laguntzarako.</string>
     <string name="getting_started_title">Hasteko</string>
     <string name="getting_started_text">Urruneko kontrolean dauden botoiak ostalarian exekutatzen diren komando zehatzetara mapatuta daude.\n\nOstalarian tresna egokia instalatu behar duzu; zein den ostalariak erabiltzen duen leiho-kudeatzailearen araberakoa da (X11 edo Wayland).\n\nHasteko, hautatu aurrezarpen bat. Geroago ere beti berrezar dezakezu aurrezarpen batera urruneko kontrola editatuz.\n\nAplikazio hau erabiltzen duzun lehen aldia bada, irakurri Laguntza orria.</string>
-    <string name="error_reading_volume">Errorea bolumena irakurtzean. Instalatu pactl mesedez.</string>
-    <string name="volume_format">Bolumena: %s</string>
-    <string name="volume_muted_format">Bolumena: %s (mutututa)</string>
-    <string name="smart_volume_settings">Bolumen adimendunaren ezarpenak</string>
-    <string name="read_current_volume">Irakurri uneko bolumena</string>
-    <string name="show_volume_slider">Erakutsi bolumenaren graduatzailea</string>
-    <string name="control_volume_with_hardware_buttons">Kontrolatu bolumena hardware botoiekin</string>
-    <string name="test_pactl">Probatu pactl</string>
-    <string name="pactl_installation_requirement">pactl instalatuta egotea behar da.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Urruneko kontrola</string>

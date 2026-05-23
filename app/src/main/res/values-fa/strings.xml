@@ -122,6 +122,15 @@
     <string name="executing_command">در حال اجرای دستور…</string>
     <string name="executing_on">در حال اجرا روی %s</string>
     <string name="sharing_to">در حال اشتراک‌گذاری به %s</string>
+    <string name="smart_volume_settings">تنظیمات صدای هوشمند</string>
+    <string name="read_current_volume">خواندن صدای فعلی</string>
+    <string name="show_volume_slider">نمایش لغزنده صدا</string>
+    <string name="control_volume_with_hardware_buttons">کنترل صدا با دکمه‌های سخت‌افزاری</string>
+    <string name="test_pactl">آزمون pactl</string>
+    <string name="pactl_installation_requirement">نیازمند نصب بودن pactl است.</string>
+    <string name="error_reading_volume">خطا در خواندن صدا. لطفاً pactl را نصب کنید.</string>
+    <string name="volume_format">صدا: %s</string>
+    <string name="volume_muted_format">صدا: %s (بی‌صدا)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">بازگشت</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">کتابخانه SSH</string>
     <string name="ssh_library_subtitle">استفاده از %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">راهنما</string>
     <string name="tap_the_help_button_for_help">برای راهنما روی دکمه ? بزنید.</string>
     <string name="getting_started_title">شروع کار</string>
     <string name="getting_started_text">دکمه‌های روی کنترل از راه دور به دستورهای مشخصی نگاشت شده‌اند که روی میزبان اجرا می‌شوند.\n\nشما باید ابزار مناسب را روی میزبان نصب کنید؛ اینکه کدام ابزار لازم است به مدیر پنجره میزبان بستگی دارد (X11 یا Wayland).\n\nبرای شروع، لطفاً یک پیش‌تنظیم انتخاب کنید. بعداً همیشه می‌توانید با ویرایش کنترل از راه دور دوباره به یک پیش‌تنظیم بازنشانی کنید.\n\nاگر اولین بار است که از این برنامه استفاده می‌کنید، لطفاً صفحه راهنما را بخوانید.</string>
-    <string name="error_reading_volume">خطا در خواندن صدا. لطفاً pactl را نصب کنید.</string>
-    <string name="volume_format">صدا: %s</string>
-    <string name="volume_muted_format">صدا: %s (بی‌صدا)</string>
-    <string name="smart_volume_settings">تنظیمات صدای هوشمند</string>
-    <string name="read_current_volume">خواندن صدای فعلی</string>
-    <string name="show_volume_slider">نمایش لغزنده صدا</string>
-    <string name="control_volume_with_hardware_buttons">کنترل صدا با دکمه‌های سخت‌افزاری</string>
-    <string name="test_pactl">آزمون pactl</string>
-    <string name="pactl_installation_requirement">نیازمند نصب بودن pactl است.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">کنترل از راه دور</string>

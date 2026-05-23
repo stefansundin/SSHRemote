@@ -122,6 +122,15 @@
     <string name="executing_command">Udfører kommando…</string>
     <string name="executing_on">Udfører på %s</string>
     <string name="sharing_to">Deler til %s</string>
+    <string name="smart_volume_settings">Smarte lydstyrkeindstillinger</string>
+    <string name="read_current_volume">Læs nuværende lydstyrke</string>
+    <string name="show_volume_slider">Vis lydstyrkeskyder</string>
+    <string name="control_volume_with_hardware_buttons">Styr lydstyrken med hardwareknapperne</string>
+    <string name="test_pactl">Test pactl</string>
+    <string name="pactl_installation_requirement">Kræver, at pactl er installeret.</string>
+    <string name="error_reading_volume">Fejl ved læsning af lydstyrke. Installer venligst pactl.</string>
+    <string name="volume_format">Lydstyrke: %s</string>
+    <string name="volume_muted_format">Lydstyrke: %s (lydløs)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Tilbage</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH-bibliotek</string>
     <string name="ssh_library_subtitle">Bruger %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Hjælp</string>
     <string name="tap_the_help_button_for_help">Tryk på ?-knappen for hjælp.</string>
     <string name="getting_started_title">Kom godt i gang</string>
     <string name="getting_started_text">Knapperne på fjernbetjeningen er knyttet til bestemte kommandoer, som udføres på værten.\n\nDu skal installere det passende værktøj på værten; hvilket værktøj afhænger af, hvilken vindueshåndtering værten bruger (X11 eller Wayland).\n\nFor at komme i gang skal du vælge en forudindstilling. Du kan altid senere nulstille til en forudindstilling ved at redigere fjernbetjeningen.\n\nLæs venligst hjælpesiden, hvis det er første gang, du bruger appen.</string>
-    <string name="error_reading_volume">Fejl ved læsning af lydstyrke. Installer venligst pactl.</string>
-    <string name="volume_format">Lydstyrke: %s</string>
-    <string name="volume_muted_format">Lydstyrke: %s (lydløs)</string>
-    <string name="smart_volume_settings">Smarte lydstyrkeindstillinger</string>
-    <string name="read_current_volume">Læs nuværende lydstyrke</string>
-    <string name="show_volume_slider">Vis lydstyrkeskyder</string>
-    <string name="control_volume_with_hardware_buttons">Styr lydstyrken med hardwareknapperne</string>
-    <string name="test_pactl">Test pactl</string>
-    <string name="pactl_installation_requirement">Kræver, at pactl er installeret.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Fjernbetjening</string>

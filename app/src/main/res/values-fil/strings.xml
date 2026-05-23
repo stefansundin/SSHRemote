@@ -122,6 +122,15 @@
     <string name="executing_command">Pinapatakbo ang utos…</string>
     <string name="executing_on">Pinapatakbo sa %s</string>
     <string name="sharing_to">Ibinabahagi sa %s</string>
+    <string name="smart_volume_settings">Mga setting ng smart volume</string>
+    <string name="read_current_volume">Basahin ang kasalukuyang volume</string>
+    <string name="show_volume_slider">Ipakita ang volume slider</string>
+    <string name="control_volume_with_hardware_buttons">Kontrolin ang volume gamit ang mga hardware button</string>
+    <string name="test_pactl">Subukan ang pactl</string>
+    <string name="pactl_installation_requirement">Kinakailangang naka-install ang pactl.</string>
+    <string name="error_reading_volume">Error sa pagbabasa ng volume. Pakii-install ang pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (naka-mute)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Bumalik</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH library</string>
     <string name="ssh_library_subtitle">Gumagamit ng %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Tulong</string>
     <string name="tap_the_help_button_for_help">I-tap ang ? button para sa tulong.</string>
     <string name="getting_started_title">Pagsisimula</string>
     <string name="getting_started_text">Ang mga button sa remote control ay naka-map sa mga partikular na utos na pinapatakbo sa host.\n\nKailangan mong i-install ang naaangkop na utility sa host; depende ito sa kung anong window manager ang gamit ng host (X11 o Wayland).\n\nPara makapagsimula, mangyaring pumili ng preset. Maaari mong i-reset sa preset anumang oras sa pamamagitan ng pag-edit sa remote control.\n\nPakibasa ang Help page kung ito ang unang beses mong gamitin ang app na ito.</string>
-    <string name="error_reading_volume">Error sa pagbabasa ng volume. Pakii-install ang pactl.</string>
-    <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %s (naka-mute)</string>
-    <string name="smart_volume_settings">Mga setting ng smart volume</string>
-    <string name="read_current_volume">Basahin ang kasalukuyang volume</string>
-    <string name="show_volume_slider">Ipakita ang volume slider</string>
-    <string name="control_volume_with_hardware_buttons">Kontrolin ang volume gamit ang mga hardware button</string>
-    <string name="test_pactl">Subukan ang pactl</string>
-    <string name="pactl_installation_requirement">Kinakailangang naka-install ang pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Remote Control</string>

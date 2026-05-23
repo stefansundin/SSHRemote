@@ -122,6 +122,15 @@
     <string name="executing_command">Exécution de la commande…</string>
     <string name="executing_on">Exécution sur %s</string>
     <string name="sharing_to">Partage vers %s</string>
+    <string name="smart_volume_settings">Paramètres de volume intelligents</string>
+    <string name="read_current_volume">Lire le volume actuel</string>
+    <string name="show_volume_slider">Afficher le curseur de volume</string>
+    <string name="control_volume_with_hardware_buttons">Contrôler le volume avec les boutons matériels</string>
+    <string name="test_pactl">Tester pactl</string>
+    <string name="pactl_installation_requirement">Nécessite que pactl soit installé.</string>
+    <string name="error_reading_volume">Erreur lors de la lecture du volume. Veuillez installer pactl.</string>
+    <string name="volume_format">Volume : %s</string>
+    <string name="volume_muted_format">Volume : %s (muet)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Retour</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">Bibliothèque SSH</string>
     <string name="ssh_library_subtitle">Utilise %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Aide</string>
     <string name="tap_the_help_button_for_help">Touchez le bouton ? pour obtenir de l\'aide.</string>
     <string name="getting_started_title">Premiers pas</string>
     <string name="getting_started_text">Les boutons de la télécommande sont associés à des commandes spécifiques exécutées sur l\'hôte.\n\nVous devez installer l\'utilitaire approprié sur l\'hôte, lequel dépend du gestionnaire de fenêtres utilisé (X11 ou Wayland).\n\nPour commencer, veuillez sélectionner un préréglage. Vous pourrez toujours réinitialiser vers un préréglage plus tard en modifiant la télécommande.\n\nVeuillez lire la page d\'aide si c\'est la première fois que vous utilisez cette application.</string>
-    <string name="error_reading_volume">Erreur lors de la lecture du volume. Veuillez installer pactl.</string>
-    <string name="volume_format">Volume : %s</string>
-    <string name="volume_muted_format">Volume : %s (muet)</string>
-    <string name="smart_volume_settings">Paramètres de volume intelligents</string>
-    <string name="read_current_volume">Lire le volume actuel</string>
-    <string name="show_volume_slider">Afficher le curseur de volume</string>
-    <string name="control_volume_with_hardware_buttons">Contrôler le volume avec les boutons matériels</string>
-    <string name="test_pactl">Tester pactl</string>
-    <string name="pactl_installation_requirement">Nécessite que pactl soit installé.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Télécommande</string>

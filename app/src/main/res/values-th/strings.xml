@@ -122,6 +122,15 @@
     <string name="executing_command">กำลังเรียกใช้คำสั่ง…</string>
     <string name="executing_on">กำลังเรียกใช้บน %s</string>
     <string name="sharing_to">กำลังแชร์ไปยัง %s</string>
+    <string name="smart_volume_settings">การตั้งค่าระดับเสียงอัจฉริยะ</string>
+    <string name="read_current_volume">อ่านระดับเสียงปัจจุบัน</string>
+    <string name="show_volume_slider">แสดงแถบเลื่อนระดับเสียง</string>
+    <string name="control_volume_with_hardware_buttons">ควบคุมระดับเสียงด้วยปุ่มฮาร์ดแวร์</string>
+    <string name="test_pactl">ทดสอบ pactl</string>
+    <string name="pactl_installation_requirement">ต้องติดตั้ง pactl</string>
+    <string name="error_reading_volume">เกิดข้อผิดพลาดในการอ่านระดับเสียง โปรดติดตั้ง pactl</string>
+    <string name="volume_format">ระดับเสียง: %s</string>
+    <string name="volume_muted_format">ระดับเสียง: %s (ปิดเสียง)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">ย้อนกลับ</string>
@@ -344,20 +353,11 @@
     <string name="ssh_library">ไลบรารี SSH</string>
     <string name="ssh_library_subtitle">ใช้ %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">ช่วยเหลือ</string>
     <string name="tap_the_help_button_for_help">แตะปุ่ม ? เพื่อดูความช่วยเหลือ</string>
     <string name="getting_started_title">เริ่มต้นใช้งาน</string>
     <string name="getting_started_text">ปุ่มต่างๆ บนรีโมตคอนโทรลจะถูกแมปกับคำสั่งเฉพาะที่ถูกเรียกใช้บนโฮสต์\n\nคุณต้องติดตั้งยูทิลิตีที่เหมาะสมบนโฮสต์ ซึ่งขึ้นอยู่กับว่าโฮสต์ใช้ตัวจัดการหน้าต่างแบบใด (X11 หรือ Wayland)\n\nหากต้องการเริ่มต้น โปรดเลือกพรีเซ็ต คุณสามารถรีเซ็ตกลับเป็นพรีเซ็ตได้เสมอในภายหลังโดยแก้ไขรีโมตคอนโทรล\n\nโปรดอ่านหน้าช่วยเหลือหากนี่เป็นครั้งแรกที่คุณใช้แอปนี้</string>
-    <string name="error_reading_volume">เกิดข้อผิดพลาดในการอ่านระดับเสียง โปรดติดตั้ง pactl</string>
-    <string name="volume_format">ระดับเสียง: %s</string>
-    <string name="volume_muted_format">ระดับเสียง: %s (ปิดเสียง)</string>
-    <string name="smart_volume_settings">การตั้งค่าระดับเสียงอัจฉริยะ</string>
-    <string name="read_current_volume">อ่านระดับเสียงปัจจุบัน</string>
-    <string name="show_volume_slider">แสดงแถบเลื่อนระดับเสียง</string>
-    <string name="control_volume_with_hardware_buttons">ควบคุมระดับเสียงด้วยปุ่มฮาร์ดแวร์</string>
-    <string name="test_pactl">ทดสอบ pactl</string>
-    <string name="pactl_installation_requirement">ต้องติดตั้ง pactl</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">รีโมตคอนโทรล</string>

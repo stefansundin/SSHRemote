@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">እሺ</string>
@@ -121,6 +122,15 @@
     <string name="executing_command">ትእዛዝ በመፈጸም ላይ…</string>
     <string name="executing_on">በ %s ላይ በመፈጸም ላይ</string>
     <string name="sharing_to">ወደ %s በማጋራት ላይ</string>
+    <string name="smart_volume_settings">ስማርት የድምጽ ቅንብሮች</string>
+    <string name="read_current_volume">አሁን ያለውን ድምጽ አንብብ</string>
+    <string name="show_volume_slider">የድምጽ ተንሸራታች አሳይ</string>
+    <string name="control_volume_with_hardware_buttons">ድምጽን በሃርድዌር አዝራሮች ተቆጣጠር</string>
+    <string name="test_pactl">pactl ሞክር</string>
+    <string name="pactl_installation_requirement">pactl እንዲጫን ይፈልጋል።</string>
+    <string name="error_reading_volume">ድምጽ በማንበብ ላይ ስህተት ተፈጥሯል። እባክዎ pactl ይጫኑ።</string>
+    <string name="volume_format">ድምጽ: %s</string>
+    <string name="volume_muted_format">ድምጽ: %s (ድምጽ ተጠፍቷል)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">ተመለስ</string>
@@ -345,20 +355,11 @@
     <string name="ssh_library">SSH ላይብረሪ</string>
     <string name="ssh_library_subtitle">%1$s %2$s በመጠቀም</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">እርዳታ</string>
     <string name="tap_the_help_button_for_help">ለእርዳታ ? አዝራሩን ይንኩ።</string>
     <string name="getting_started_title">መጀመር</string>
     <string name="getting_started_text">በየርቀት መቆጣጠሪያው ላይ ያሉ አዝራሮች በአስተናጋጁ ላይ ወደሚፈጸሙ የተወሰኑ ትእዛዞች ተያይዘዋል።\n\nበአስተናጋጁ ላይ ተገቢውን መሣሪያ መጫን አለብዎት፣ የሚፈለገውም አስተናጋጁ የሚጠቀመው የመስኮት አስተዳዳሪ (X11 ወይም Wayland) ላይ ይመረኮዛል።\n\nለመጀመር እባክዎ ቅድመ-ቅንብር ይምረጡ። በኋላም የርቀት መቆጣጠሪያውን በማርትዕ ሁልጊዜ ወደ ቅድመ-ቅንብር መመለስ ይችላሉ።\n\nይህን መተግበሪያ ለመጀመሪያ ጊዜ እየተጠቀሙ ከሆነ የHelp ገጹን ያንብቡ።</string>
-    <string name="error_reading_volume">ድምጽ በማንበብ ላይ ስህተት ተፈጥሯል። እባክዎ pactl ይጫኑ።</string>
-    <string name="volume_format">ድምጽ: %s</string>
-    <string name="volume_muted_format">ድምጽ: %s (ድምጽ ተጠፍቷል)</string>
-    <string name="smart_volume_settings">ስማርት የድምጽ ቅንብሮች</string>
-    <string name="read_current_volume">አሁን ያለውን ድምጽ አንብብ</string>
-    <string name="show_volume_slider">የድምጽ ተንሸራታች አሳይ</string>
-    <string name="control_volume_with_hardware_buttons">ድምጽን በሃርድዌር አዝራሮች ተቆጣጠር</string>
-    <string name="test_pactl">pactl ሞክር</string>
-    <string name="pactl_installation_requirement">pactl እንዲጫን ይፈልጋል።</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">የርቀት መቆጣጠሪያ</string>

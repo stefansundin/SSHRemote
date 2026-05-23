@@ -122,6 +122,15 @@
     <string name="executing_command">Ejecutando comando…</string>
     <string name="executing_on">Ejecutando en %s</string>
     <string name="sharing_to">Compartiendo con %s</string>
+    <string name="smart_volume_settings">Configuración inteligente del volumen</string>
+    <string name="read_current_volume">Leer volumen actual</string>
+    <string name="show_volume_slider">Mostrar deslizador de volumen</string>
+    <string name="control_volume_with_hardware_buttons">Controlar el volumen con los botones físicos</string>
+    <string name="test_pactl">Probar pactl</string>
+    <string name="pactl_installation_requirement">Requiere que pactl esté instalado.</string>
+    <string name="error_reading_volume">Error al leer el volumen. Instala pactl.</string>
+    <string name="volume_format">Volumen: %s</string>
+    <string name="volume_muted_format">Volumen: %s (silenciado)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Atrás</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">Biblioteca SSH</string>
     <string name="ssh_library_subtitle">Usando %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Ayuda</string>
     <string name="tap_the_help_button_for_help">Toca el botón ? para obtener ayuda.</string>
     <string name="getting_started_title">Primeros pasos</string>
     <string name="getting_started_text">Los botones del control remoto están asignados a comandos específicos que se ejecutan en el host.\n\nTienes que instalar la utilidad adecuada en el host; cuál depende del gestor de ventanas que use el host (X11 o Wayland).\n\nPara empezar, selecciona un preajuste. Siempre puedes restablecer un preajuste más adelante editando el control remoto.\n\nLee la página de Ayuda si es la primera vez que usas esta aplicación.</string>
-    <string name="error_reading_volume">Error al leer el volumen. Instala pactl.</string>
-    <string name="volume_format">Volumen: %s</string>
-    <string name="volume_muted_format">Volumen: %s (silenciado)</string>
-    <string name="smart_volume_settings">Configuración inteligente del volumen</string>
-    <string name="read_current_volume">Leer volumen actual</string>
-    <string name="show_volume_slider">Mostrar deslizador de volumen</string>
-    <string name="control_volume_with_hardware_buttons">Controlar el volumen con los botones físicos</string>
-    <string name="test_pactl">Probar pactl</string>
-    <string name="pactl_installation_requirement">Requiere que pactl esté instalado.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Control remoto</string>

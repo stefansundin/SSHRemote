@@ -122,6 +122,15 @@
     <string name="executing_command">Suoritetaan komentoa…</string>
     <string name="executing_on">Suoritetaan kohteessa %s</string>
     <string name="sharing_to">Jaetaan kohteeseen %s</string>
+    <string name="smart_volume_settings">Älykkäät äänenvoimakkuusasetukset</string>
+    <string name="read_current_volume">Lue nykyinen äänenvoimakkuus</string>
+    <string name="show_volume_slider">Näytä äänenvoimakkuusliukusäädin</string>
+    <string name="control_volume_with_hardware_buttons">Säädä äänenvoimakkuutta laitteen painikkeilla</string>
+    <string name="test_pactl">Testaa pactl</string>
+    <string name="pactl_installation_requirement">Edellyttää, että pactl on asennettu.</string>
+    <string name="error_reading_volume">Virhe luettaessa äänenvoimakkuutta. Asenna pactl.</string>
+    <string name="volume_format">Äänenvoimakkuus: %s</string>
+    <string name="volume_muted_format">Äänenvoimakkuus: %s (mykistetty)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Takaisin</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH-kirjasto</string>
     <string name="ssh_library_subtitle">Käyttää: %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Ohje</string>
     <string name="tap_the_help_button_for_help">Saat ohjeita napauttamalla ?-painiketta.</string>
     <string name="getting_started_title">Aloittaminen</string>
     <string name="getting_started_text">Kaukosäätimen painikkeet on liitetty tiettyihin komentoihin, jotka suoritetaan isännällä.\n\nSinun on asennettava isännälle sopiva työkalu. Sopiva työkalu riippuu siitä, käyttääkö isäntä X11:tä vai Waylandia.\n\nAloittaaksesi valitse esiasetus. Voit aina palauttaa esiasetuksen myöhemmin muokkaamalla kaukosäädintä.\n\nLue Ohje-sivu, jos käytät tätä sovellusta ensimmäistä kertaa.</string>
-    <string name="error_reading_volume">Virhe luettaessa äänenvoimakkuutta. Asenna pactl.</string>
-    <string name="volume_format">Äänenvoimakkuus: %s</string>
-    <string name="volume_muted_format">Äänenvoimakkuus: %s (mykistetty)</string>
-    <string name="smart_volume_settings">Älykkäät äänenvoimakkuusasetukset</string>
-    <string name="read_current_volume">Lue nykyinen äänenvoimakkuus</string>
-    <string name="show_volume_slider">Näytä äänenvoimakkuusliukusäädin</string>
-    <string name="control_volume_with_hardware_buttons">Säädä äänenvoimakkuutta laitteen painikkeilla</string>
-    <string name="test_pactl">Testaa pactl</string>
-    <string name="pactl_installation_requirement">Edellyttää, että pactl on asennettu.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Kaukosäädin</string>

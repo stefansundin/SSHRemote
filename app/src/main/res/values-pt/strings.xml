@@ -122,6 +122,15 @@
     <string name="executing_command">Executando comando…</string>
     <string name="executing_on">Executando em %s</string>
     <string name="sharing_to">Compartilhando com %s</string>
+    <string name="smart_volume_settings">Configurações inteligentes de volume</string>
+    <string name="read_current_volume">Ler volume atual</string>
+    <string name="show_volume_slider">Mostrar controle deslizante de volume</string>
+    <string name="control_volume_with_hardware_buttons">Controlar volume com os botões físicos</string>
+    <string name="test_pactl">Testar pactl</string>
+    <string name="pactl_installation_requirement">Requer que o pactl esteja instalado.</string>
+    <string name="error_reading_volume">Erro ao ler o volume. Instale o pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (mudo)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Voltar</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">Biblioteca SSH</string>
     <string name="ssh_library_subtitle">Usando %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Ajuda</string>
     <string name="tap_the_help_button_for_help">Toque no botão ? para obter ajuda.</string>
     <string name="getting_started_title">Primeiros passos</string>
     <string name="getting_started_text">Os botões do controle remoto são mapeados para comandos específicos que são executados no host.\n\nVocê precisa instalar o utilitário apropriado no host; qual deles depende do gerenciador de janelas usado pelo host (X11 ou Wayland).\n\nPara começar, selecione uma predefinição. Você sempre pode redefinir para uma predefinição depois editando o controle remoto.\n\nLeia a página de Ajuda se esta for a primeira vez que você usa o aplicativo.</string>
-    <string name="error_reading_volume">Erro ao ler o volume. Instale o pactl.</string>
-    <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %s (mudo)</string>
-    <string name="smart_volume_settings">Configurações inteligentes de volume</string>
-    <string name="read_current_volume">Ler volume atual</string>
-    <string name="show_volume_slider">Mostrar controle deslizante de volume</string>
-    <string name="control_volume_with_hardware_buttons">Controlar volume com os botões físicos</string>
-    <string name="test_pactl">Testar pactl</string>
-    <string name="pactl_installation_requirement">Requer que o pactl esteja instalado.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Controle remoto</string>

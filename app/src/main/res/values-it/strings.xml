@@ -122,6 +122,15 @@
     <string name="executing_command">Esecuzione comando…</string>
     <string name="executing_on">Esecuzione su %s</string>
     <string name="sharing_to">Condivisione verso %s</string>
+    <string name="smart_volume_settings">Impostazioni volume intelligenti</string>
+    <string name="read_current_volume">Leggi il volume attuale</string>
+    <string name="show_volume_slider">Mostra cursore volume</string>
+    <string name="control_volume_with_hardware_buttons">Controlla il volume con i pulsanti hardware</string>
+    <string name="test_pactl">Testa pactl</string>
+    <string name="pactl_installation_requirement">Richiede che pactl sia installato.</string>
+    <string name="error_reading_volume">Errore durante la lettura del volume. Installa pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (disattivato)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Indietro</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">Libreria SSH</string>
     <string name="ssh_library_subtitle">Usa %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Aiuto</string>
     <string name="tap_the_help_button_for_help">Tocca il pulsante ? per assistenza.</string>
     <string name="getting_started_title">Per iniziare</string>
     <string name="getting_started_text">I pulsanti del telecomando sono associati a comandi specifici che vengono eseguiti sull\'host.\n\nDevi installare sull\'host l\'utilità appropriata; quale dipende dal window manager usato (X11 o Wayland).\n\nPer iniziare, seleziona un preset. Puoi sempre ripristinare un preset in seguito modificando il telecomando.\n\nLeggi la pagina Aiuto se è la prima volta che usi questa app.</string>
-    <string name="error_reading_volume">Errore durante la lettura del volume. Installa pactl.</string>
-    <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %s (disattivato)</string>
-    <string name="smart_volume_settings">Impostazioni volume intelligenti</string>
-    <string name="read_current_volume">Leggi il volume attuale</string>
-    <string name="show_volume_slider">Mostra cursore volume</string>
-    <string name="control_volume_with_hardware_buttons">Controlla il volume con i pulsanti hardware</string>
-    <string name="test_pactl">Testa pactl</string>
-    <string name="pactl_installation_requirement">Richiede che pactl sia installato.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Telecomando</string>

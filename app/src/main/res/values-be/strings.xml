@@ -122,6 +122,15 @@
     <string name="executing_command">Выкананне каманды…</string>
     <string name="executing_on">Выконваецца на %s</string>
     <string name="sharing_to">Адпраўка ў %s</string>
+    <string name="smart_volume_settings">Разумныя налады гучнасці</string>
+    <string name="read_current_volume">Счытаць бягучую гучнасць</string>
+    <string name="show_volume_slider">Паказаць паўзунок гучнасці</string>
+    <string name="control_volume_with_hardware_buttons">Кіраваць гучнасцю апаратнымі кнопкамі</string>
+    <string name="test_pactl">Праверыць pactl</string>
+    <string name="pactl_installation_requirement">Патрабуецца ўсталяваны pactl.</string>
+    <string name="error_reading_volume">Памылка чытання гучнасці. Усталюйце pactl.</string>
+    <string name="volume_format">Гучнасць: %s</string>
+    <string name="volume_muted_format">Гучнасць: %s (без гуку)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Назад</string>
@@ -350,20 +359,11 @@
     <string name="ssh_library">Бібліятэка SSH</string>
     <string name="ssh_library_subtitle">Выкарыстоўваецца %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Даведка</string>
     <string name="tap_the_help_button_for_help">Націсніце кнопку ?, каб адкрыць даведку.</string>
     <string name="getting_started_title">Пачатак працы</string>
     <string name="getting_started_text">Кнопкі на пульце супастаўлены з пэўнымі камандамі, якія выконваюцца на хосце.\n\nНа хосце трэба ўсталяваць адпаведную ўтыліту; якая менавіта патрэбная, залежыць ад таго, які дысплейны сервер выкарыстоўваецца — X11 або Wayland.\n\nКаб пачаць, выберыце прадустаноўку. Пазней вы заўсёды зможаце зноў скінуць усё да прадустаноўкі, адрэдагаваўшы пульт.\n\nКалі вы карыстаецеся праграмай упершыню, абавязкова прачытайце раздзел Даведка.</string>
-    <string name="error_reading_volume">Памылка чытання гучнасці. Усталюйце pactl.</string>
-    <string name="volume_format">Гучнасць: %s</string>
-    <string name="volume_muted_format">Гучнасць: %s (без гуку)</string>
-    <string name="smart_volume_settings">Разумныя налады гучнасці</string>
-    <string name="read_current_volume">Счытаць бягучую гучнасць</string>
-    <string name="show_volume_slider">Паказаць паўзунок гучнасці</string>
-    <string name="control_volume_with_hardware_buttons">Кіраваць гучнасцю апаратнымі кнопкамі</string>
-    <string name="test_pactl">Праверыць pactl</string>
-    <string name="pactl_installation_requirement">Патрабуецца ўсталяваны pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Пульт</string>

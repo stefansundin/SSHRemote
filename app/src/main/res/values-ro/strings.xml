@@ -122,6 +122,15 @@
     <string name="executing_command">Se execută comanda…</string>
     <string name="executing_on">Se execută pe %s</string>
     <string name="sharing_to">Se partajează către %s</string>
+    <string name="smart_volume_settings">Setări inteligente pentru volum</string>
+    <string name="read_current_volume">Citește volumul curent</string>
+    <string name="show_volume_slider">Afișează glisorul de volum</string>
+    <string name="control_volume_with_hardware_buttons">Controlează volumul cu butoanele hardware</string>
+    <string name="test_pactl">Testează pactl</string>
+    <string name="pactl_installation_requirement">Necesită ca pactl să fie instalat.</string>
+    <string name="error_reading_volume">Eroare la citirea volumului. Te rugăm să instalezi pactl.</string>
+    <string name="volume_format">Volum: %s</string>
+    <string name="volume_muted_format">Volum: %s (mut)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Înapoi</string>
@@ -348,20 +357,11 @@
     <string name="ssh_library">Bibliotecă SSH</string>
     <string name="ssh_library_subtitle">Folosește %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Ajutor</string>
     <string name="tap_the_help_button_for_help">Atinge butonul ? pentru ajutor.</string>
     <string name="getting_started_title">Primii pași</string>
     <string name="getting_started_text">Butoanele de pe telecomandă sunt mapate la comenzi specifice care sunt executate pe gazdă.\n\nTrebuie să instalezi utilitarul potrivit pe gazdă, iar alegerea depinde de managerul de ferestre folosit de gazdă (X11 sau Wayland).\n\nPentru a începe, selectează o presetare. Poți oricând să revii mai târziu la o presetare prin editarea telecomenzii.\n\nTe rugăm să citești pagina de Ajutor dacă este prima dată când folosești această aplicație.</string>
-    <string name="error_reading_volume">Eroare la citirea volumului. Te rugăm să instalezi pactl.</string>
-    <string name="volume_format">Volum: %s</string>
-    <string name="volume_muted_format">Volum: %s (mut)</string>
-    <string name="smart_volume_settings">Setări inteligente pentru volum</string>
-    <string name="read_current_volume">Citește volumul curent</string>
-    <string name="show_volume_slider">Afișează glisorul de volum</string>
-    <string name="control_volume_with_hardware_buttons">Controlează volumul cu butoanele hardware</string>
-    <string name="test_pactl">Testează pactl</string>
-    <string name="pactl_installation_requirement">Necesită ca pactl să fie instalat.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Telecomandă</string>

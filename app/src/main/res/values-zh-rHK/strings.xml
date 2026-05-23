@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">輸入新密碼，或留空以清除</string>
     <string name="optional_password_prompt">選填，若未提供則會在連線時提示輸入</string>
     <string name="optional">選填</string>
-    <string name="re_enter">重新輸入</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">重新輸入</string>
     <string name="change_or_clear">變更或清除</string>
     <string name="unsaved_changes_title">尚未儲存的變更</string>
     <string name="unsaved_changes_text">離開前要先儲存此主機嗎？</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">正在執行指令…</string>
     <string name="executing_on">正在於 %s 執行</string>
     <string name="sharing_to">正在分享到 %s</string>
+    <string name="smart_volume_settings">智慧音量設定</string>
+    <string name="read_current_volume">讀取目前音量</string>
+    <string name="show_volume_slider">顯示音量滑桿</string>
+    <string name="control_volume_with_hardware_buttons">使用硬體按鈕控制音量</string>
+    <string name="test_pactl">測試 pactl</string>
+    <string name="pactl_installation_requirement">需要已安裝 pactl。</string>
+    <string name="error_reading_volume">讀取音量時發生錯誤。請安裝 pactl。</string>
+    <string name="volume_format">音量：%s</string>
+    <string name="volume_muted_format">音量：%s（已靜音）</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">返回</string>
@@ -334,7 +343,7 @@
     <string name="about_app">關於 SSH Remote</string>
     <string name="app_version">App 版本</string>
     <string name="author">作者</string>
-    <string name="author_name">由 Stefan Sundin 開發</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">由 Stefan Sundin 開發</string>
     <string name="donate">捐款</string>
     <string name="support_developer">支持開發者</string>
     <string name="license">授權條款</string>
@@ -344,20 +353,11 @@
     <string name="ssh_library">SSH 函式庫</string>
     <string name="ssh_library_subtitle">使用 %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">說明</string>
     <string name="tap_the_help_button_for_help">點一下 ? 按鈕以取得說明。</string>
     <string name="getting_started_title">開始使用</string>
     <string name="getting_started_text">遙控器上的按鈕會對應到在主機上執行的特定指令。\n\n你必須在主機上安裝適當的工具，而使用哪一個工具取決於主機使用的視窗系統（X11 或 Wayland）。\n\n若要開始使用，請先選擇一個預設集。之後你隨時都可以在編輯遙控器時重設回預設集。如果你願意，也可以選擇「無預設集」以不套用任何設定開始。\n\n如果這是你第一次使用此 app，請先閱讀說明頁面。</string>
-    <string name="error_reading_volume">讀取音量時發生錯誤。請安裝 pactl。</string>
-    <string name="volume_format">音量：%s</string>
-    <string name="volume_muted_format">音量：%s（已靜音）</string>
-    <string name="smart_volume_settings">智慧音量設定</string>
-    <string name="read_current_volume">讀取目前音量</string>
-    <string name="show_volume_slider">顯示音量滑桿</string>
-    <string name="control_volume_with_hardware_buttons">使用硬體按鈕控制音量</string>
-    <string name="test_pactl">測試 pactl</string>
-    <string name="pactl_installation_requirement">需要已安裝 pactl。</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">遙控器</string>

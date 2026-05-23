@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">नयाँ पासवर्ड प्रविष्ट गर्नुहोस्, वा खाली छोडेर यसलाई खाली गर्नुहोस्</string>
     <string name="optional_password_prompt">वैकल्पिक, नदिएमा पछि सोधिनेछ</string>
     <string name="optional">वैकल्पिक</string>
-    <string name="re_enter">फेरि प्रविष्ट गर्नुहोस्</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">फेरि प्रविष्ट गर्नुहोस्</string>
     <string name="change_or_clear">परिवर्तन वा खाली गर्नुहोस्</string>
     <string name="unsaved_changes_title">सेभ नगरिएका परिवर्तनहरू</string>
     <string name="unsaved_changes_text">बाहिरिनुअघि के तपाईं होस्ट सेभ गर्न चाहनुहुन्छ?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">आदेश चलाउँदैछ…</string>
     <string name="executing_on">%s मा चलाउँदैछ</string>
     <string name="sharing_to">%s मा साझेदारी गर्दै</string>
+    <string name="smart_volume_settings">स्मार्ट भोल्युम सेटिङहरू</string>
+    <string name="read_current_volume">हालको भोल्युम पढ्नुहोस्</string>
+    <string name="show_volume_slider">भोल्युम स्लाइडर देखाउनुहोस्</string>
+    <string name="control_volume_with_hardware_buttons">हार्डवेयर बटनहरूले भोल्युम नियन्त्रण गर्नुहोस्</string>
+    <string name="test_pactl">pactl परीक्षण गर्नुहोस्</string>
+    <string name="pactl_installation_requirement">pactl स्थापना गरिएको हुनु आवश्यक छ।</string>
+    <string name="error_reading_volume">भोल्युम पढ्दा त्रुटि भयो। कृपया pactl स्थापना गर्नुहोस्।</string>
+    <string name="volume_format">भोल्युम: %s</string>
+    <string name="volume_muted_format">भोल्युम: %s (म्युट)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">पछाडि</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote बारेमा</string>
     <string name="app_version">एप संस्करण</string>
     <string name="author">लेखक</string>
-    <string name="author_name">Stefan Sundin द्वारा विकसित</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Stefan Sundin द्वारा विकसित</string>
     <string name="donate">दान गर्नुहोस्</string>
     <string name="support_developer">विकासकर्तालाई समर्थन गर्नुहोस्</string>
     <string name="license">इजाजतपत्र</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH लाइब्रेरी</string>
     <string name="ssh_library_subtitle">%1$s %2$s प्रयोग गर्दै</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">मद्दत</string>
     <string name="tap_the_help_button_for_help">मद्दतका लागि ? बटन थिच्नुहोस्।</string>
     <string name="getting_started_title">सुरु गर्ने तरिका</string>
     <string name="getting_started_text">रिमोट कन्ट्रोलका बटनहरू होस्टमा चलाइने निश्चित आदेशहरूसँग म्याप गरिएका हुन्छन्।\n\nहोस्टले कुन विन्डो प्रबन्धक प्रयोग गर्छ (X11 वा Wayland) भन्ने आधारमा, तपाईंले होस्टमा उपयुक्त utility स्थापना गर्नुपर्छ।\n\nसुरु गर्न, कृपया एउटा प्रिसेट चयन गर्नुहोस्। तपाईं पछि पनि रिमोट कन्ट्रोल सम्पादन गरेर फेरि प्रिसेटमा रिसेट गर्न सक्नुहुन्छ।\n\nयदि तपाईं पहिलो पटक यो एप प्रयोग गर्दै हुनुहुन्छ भने कृपया Help पृष्ठ पढ्नुहोस्।</string>
-    <string name="error_reading_volume">भोल्युम पढ्दा त्रुटि भयो। कृपया pactl स्थापना गर्नुहोस्।</string>
-    <string name="volume_format">भोल्युम: %s</string>
-    <string name="volume_muted_format">भोल्युम: %s (म्युट)</string>
-    <string name="smart_volume_settings">स्मार्ट भोल्युम सेटिङहरू</string>
-    <string name="read_current_volume">हालको भोल्युम पढ्नुहोस्</string>
-    <string name="show_volume_slider">भोल्युम स्लाइडर देखाउनुहोस्</string>
-    <string name="control_volume_with_hardware_buttons">हार्डवेयर बटनहरूले भोल्युम नियन्त्रण गर्नुहोस्</string>
-    <string name="test_pactl">pactl परीक्षण गर्नुहोस्</string>
-    <string name="pactl_installation_requirement">pactl स्थापना गरिएको हुनु आवश्यक छ।</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">रिमोट कन्ट्रोल</string>

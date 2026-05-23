@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Unesite novu lozinku ili ostavite prazno da je obrišete</string>
     <string name="optional_password_prompt">Opcionalno, ako nije uneseno bit će zatražena kasnije</string>
     <string name="optional">Opcionalno</string>
-    <string name="re_enter">Unesite ponovo</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Unesite ponovo</string>
     <string name="change_or_clear">Promijeni ili obriši</string>
     <string name="unsaved_changes_title">Nesačuvane izmjene</string>
     <string name="unsaved_changes_text">Da li želite sačuvati host prije izlaska?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Izvršavanje komande…</string>
     <string name="executing_on">Izvršavanje na %s</string>
     <string name="sharing_to">Dijeljenje na %s</string>
+    <string name="smart_volume_settings">Pametne postavke glasnoće</string>
+    <string name="read_current_volume">Očitaj trenutnu glasnoću</string>
+    <string name="show_volume_slider">Prikaži klizač glasnoće</string>
+    <string name="control_volume_with_hardware_buttons">Upravljaj glasnoćom pomoću hardverskih tipki</string>
+    <string name="test_pactl">Testiraj pactl</string>
+    <string name="pactl_installation_requirement">Zahtijeva da je pactl instaliran.</string>
+    <string name="error_reading_volume">Greška pri čitanju glasnoće. Molimo instalirajte pactl.</string>
+    <string name="volume_format">Glasnoća: %s</string>
+    <string name="volume_muted_format">Glasnoća: %s (utišano)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Nazad</string>
@@ -226,7 +235,8 @@
     <string name="zip_keys_detected_title">Otkriveni ključevi</string>
     <plurals name="zip_keys_detected_in_zip">
         <item quantity="one">Otkriven je %d SSH ključ u zip datoteci.</item>
-        <item quantity="other">Otkrivena su %d SSH ključa u zip datoteci.</item>
+        <item quantity="few">Otkrivena su %d SSH ključa u zip datoteci.</item>
+        <item quantity="other">Otkriveno je %d SSH ključeva u zip datoteci.</item>
     </plurals>
     <string name="zip_no_valid_keys">Nisu pronađeni ispravni SSH privatni ključevi u zip datoteci.</string>
     <string name="select_key_type_prompt">Odaberite vrstu ključa za generiranje</string>
@@ -329,14 +339,15 @@
     <string name="import_settings_text">U slučaju sukoba s postojećim hostovima, da li želite ažurirati ili duplicirati?\n\nMožete odabrati i Zamijeni, što će izbrisati sve postojeće hostove.</string>
     <plurals name="successfully_imported_hosts">
         <item quantity="one">Uspješno je uvezen %d host.</item>
-        <item quantity="other">Uspješno su uvezena %d hosta.</item>
+        <item quantity="few">Uspješno su uvezena %d hosta.</item>
+        <item quantity="other">Uspješno je uvezeno %d hostova.</item>
     </plurals>
 
     <!-- About -->
     <string name="about_app">O aplikaciji SSH Remote</string>
     <string name="app_version">Verzija aplikacije</string>
     <string name="author">Autor</string>
-    <string name="author_name">Razvio Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Razvio Stefan Sundin</string>
     <string name="donate">Doniraj</string>
     <string name="support_developer">Podržite programera</string>
     <string name="license">Licenca</string>
@@ -346,20 +357,11 @@
     <string name="ssh_library">SSH biblioteka</string>
     <string name="ssh_library_subtitle">Koristi %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Pomoć</string>
     <string name="tap_the_help_button_for_help">Dodirnite dugme ? za pomoć.</string>
     <string name="getting_started_title">Početak rada</string>
     <string name="getting_started_text">Dugmad na daljinskom upravljaču mapirana su na određene komande koje se izvršavaju na hostu.\n\nMorate instalirati odgovarajući alat na hostu; koji tačno zavisi od toga koji upravitelj prozora host koristi (X11 ili Wayland).\n\nZa početak odaberite unaprijed postavljeno. Uvijek se kasnije možete vratiti na unaprijed postavljeno uređivanjem daljinskog upravljača.\n\nMolimo pročitajte stranicu Pomoć ako prvi put koristite ovu aplikaciju.</string>
-    <string name="error_reading_volume">Greška pri čitanju glasnoće. Molimo instalirajte pactl.</string>
-    <string name="volume_format">Glasnoća: %s</string>
-    <string name="volume_muted_format">Glasnoća: %s (utišano)</string>
-    <string name="smart_volume_settings">Pametne postavke glasnoće</string>
-    <string name="read_current_volume">Očitaj trenutnu glasnoću</string>
-    <string name="show_volume_slider">Prikaži klizač glasnoće</string>
-    <string name="control_volume_with_hardware_buttons">Upravljaj glasnoćom pomoću hardverskih tipki</string>
-    <string name="test_pactl">Testiraj pactl</string>
-    <string name="pactl_installation_requirement">Zahtijeva da je pactl instaliran.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Daljinski upravljač</string>

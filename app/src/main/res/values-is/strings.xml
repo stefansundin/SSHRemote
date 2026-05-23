@@ -122,6 +122,15 @@
     <string name="executing_command">Keyri skipun…</string>
     <string name="executing_on">Keyri á %s</string>
     <string name="sharing_to">Deili til %s</string>
+    <string name="smart_volume_settings">Snjallar hljóðstyrksstillingar</string>
+    <string name="read_current_volume">Lesa núverandi hljóðstyrk</string>
+    <string name="show_volume_slider">Sýna hljóðstyrkssleða</string>
+    <string name="control_volume_with_hardware_buttons">Stjórna hljóðstyrk með vélbúnaðarhnöppum</string>
+    <string name="test_pactl">Prófa pactl</string>
+    <string name="pactl_installation_requirement">Krefst þess að pactl sé uppsett.</string>
+    <string name="error_reading_volume">Villa við að lesa hljóðstyrk. Vinsamlegast settu upp pactl.</string>
+    <string name="volume_format">Hljóðstyrkur: %s</string>
+    <string name="volume_muted_format">Hljóðstyrkur: %s (þaggað)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Til baka</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH-safn</string>
     <string name="ssh_library_subtitle">Notar %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Hjálp</string>
     <string name="tap_the_help_button_for_help">Pikkaðu á ? hnappinn til að fá hjálp.</string>
     <string name="getting_started_title">Að byrja</string>
     <string name="getting_started_text">Hnapparnir á fjarstýringunni eru varpaðir á tilteknar skipanir sem eru keyrðar á vélinni.\n\nÞú þarft að setja upp viðeigandi tól á vélinni og það fer eftir því hvaða gluggastjóra vélin notar (X11 eða Wayland).\n\nTil að byrja skaltu velja forstillingu. Þú getur alltaf endurstillt á forstillingu síðar með því að breyta fjarstýringunni.\n\nVinsamlegast lestu Hjálp síðuna ef þetta er í fyrsta skipti sem þú notar þetta forrit.</string>
-    <string name="error_reading_volume">Villa við að lesa hljóðstyrk. Vinsamlegast settu upp pactl.</string>
-    <string name="volume_format">Hljóðstyrkur: %s</string>
-    <string name="volume_muted_format">Hljóðstyrkur: %s (þaggað)</string>
-    <string name="smart_volume_settings">Snjallar hljóðstyrksstillingar</string>
-    <string name="read_current_volume">Lesa núverandi hljóðstyrk</string>
-    <string name="show_volume_slider">Sýna hljóðstyrkssleða</string>
-    <string name="control_volume_with_hardware_buttons">Stjórna hljóðstyrk með vélbúnaðarhnöppum</string>
-    <string name="test_pactl">Prófa pactl</string>
-    <string name="pactl_installation_requirement">Krefst þess að pactl sé uppsett.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Fjarstýring</string>

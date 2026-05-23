@@ -122,6 +122,15 @@
     <string name="executing_command">कमांड चालवत आहे…</string>
     <string name="executing_on">%s वर चालवत आहे</string>
     <string name="sharing_to">%s ला शेअर करत आहे</string>
+    <string name="smart_volume_settings">स्मार्ट आवाज सेटिंग्ज</string>
+    <string name="read_current_volume">सध्याचा आवाज वाचा</string>
+    <string name="show_volume_slider">आवाज स्लायडर दाखवा</string>
+    <string name="control_volume_with_hardware_buttons">हार्डवेअर बटणांनी आवाज नियंत्रित करा</string>
+    <string name="test_pactl">pactl तपासा</string>
+    <string name="pactl_installation_requirement">यासाठी pactl इन्स्टॉल असणे आवश्यक आहे.</string>
+    <string name="error_reading_volume">आवाज वाचताना त्रुटी. कृपया pactl इन्स्टॉल करा.</string>
+    <string name="volume_format">आवाज: %s</string>
+    <string name="volume_muted_format">आवाज: %s (म्यूट)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">मागे</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH लायब्ररी</string>
     <string name="ssh_library_subtitle">%1$s %2$s वापरत आहे</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">मदत</string>
     <string name="tap_the_help_button_for_help">मदतीसाठी ? बटण टॅप करा.</string>
     <string name="getting_started_title">सुरुवात</string>
     <string name="getting_started_text">रिमोट कंट्रोलवरील बटणे विशिष्ट कमांड्सशी नकाशित केलेली असतात जी होस्टवर चालवल्या जातात.\n\nतुम्हाला होस्टवर योग्य युटिलिटी इन्स्टॉल करावी लागेल, कोणती ते होस्ट कोणता विंडो मॅनेजर वापरतो यावर अवलंबून आहे (X11 किंवा Wayland).\n\nसुरुवात करण्यासाठी, कृपया एक प्रीसेट निवडा. नंतर रिमोट कंट्रोल संपादित करून तुम्ही नेहमीच प्रीसेटवर रीसेट करू शकता.\n\nतुम्ही हा अ‍ॅप प्रथमच वापरत असाल तर कृपया Help पान वाचा.</string>
-    <string name="error_reading_volume">आवाज वाचताना त्रुटी. कृपया pactl इन्स्टॉल करा.</string>
-    <string name="volume_format">आवाज: %s</string>
-    <string name="volume_muted_format">आवाज: %s (म्यूट)</string>
-    <string name="smart_volume_settings">स्मार्ट आवाज सेटिंग्ज</string>
-    <string name="read_current_volume">सध्याचा आवाज वाचा</string>
-    <string name="show_volume_slider">आवाज स्लायडर दाखवा</string>
-    <string name="control_volume_with_hardware_buttons">हार्डवेअर बटणांनी आवाज नियंत्रित करा</string>
-    <string name="test_pactl">pactl तपासा</string>
-    <string name="pactl_installation_requirement">यासाठी pactl इन्स्टॉल असणे आवश्यक आहे.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">रिमोट कंट्रोल</string>

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Κοινά -->
+    <!-- Common -->
     <string name="app_name">SSH Remote</string>
     <string name="ok">OK</string>
     <string name="cancel">Άκυρο</string>
@@ -42,7 +42,7 @@
     <string name="search_match_position">Αντιστοιχία %1$d από %2$d</string>
     <string name="search_next_match">Επόμενη αντιστοιχία</string>
 
-    <!-- Κεντρικοί υπολογιστές -->
+    <!-- Hosts -->
     <string name="hosts_title">Κεντρικοί υπολογιστές</string>
     <string name="no_ssh_hosts_added_yet">Δεν έχουν προστεθεί ακόμη κεντρικοί υπολογιστές SSH.</string>
     <string name="empty_list_add_prompt">Πατήστε το κουμπί + για να προσθέσετε έναν.</string>
@@ -80,7 +80,7 @@
     <string name="select_host">Επιλέξτε κεντρικό υπολογιστή</string>
     <string name="no_hosts_found">Δεν βρέθηκαν κεντρικοί υπολογιστές</string>
 
-    <!-- Απομακρυσμένος έλεγχος -->
+    <!-- Remote Control -->
     <string name="tab_remote">Τηλεχειριστήριο</string>
     <string name="tab_mouse">Ποντίκι</string>
     <string name="tab_keyboard">Πληκτρολόγιο</string>
@@ -122,8 +122,17 @@
     <string name="executing_command">Εκτέλεση εντολής…</string>
     <string name="executing_on">Εκτέλεση στο %s</string>
     <string name="sharing_to">Κοινοποίηση σε %s</string>
+    <string name="smart_volume_settings">Έξυπνες ρυθμίσεις έντασης</string>
+    <string name="read_current_volume">Ανάγνωση τρέχουσας έντασης</string>
+    <string name="show_volume_slider">Εμφάνιση ρυθμιστικού έντασης</string>
+    <string name="control_volume_with_hardware_buttons">Έλεγχος έντασης με τα κουμπιά υλικού</string>
+    <string name="test_pactl">Δοκιμή pactl</string>
+    <string name="pactl_installation_requirement">Απαιτεί να είναι εγκατεστημένο το pactl.</string>
+    <string name="error_reading_volume">Σφάλμα ανάγνωσης έντασης. Παρακαλώ εγκαταστήστε το pactl.</string>
+    <string name="volume_format">Ένταση: %s</string>
+    <string name="volume_muted_format">Ένταση: %s (σε σίγαση)</string>
 
-    <!-- Κουμπιά / Πλήκτρα -->
+    <!-- Buttons / Keys -->
     <string name="key_back">Πίσω</string>
     <string name="key_home">Αρχική</string>
     <string name="key_menu">Μενού</string>
@@ -139,7 +148,7 @@
     <string name="key_mute">Σίγαση</string>
     <string name="key_volume_up">Αύξηση έντασης</string>
 
-    <!-- Ποντίκι -->
+    <!-- Mouse -->
     <string name="mouse_pad">Επιφάνεια ποντικιού</string>
     <string name="mouse_pad_disabled">Η επιφάνεια ποντικιού είναι απενεργοποιημένη</string>
     <string name="mouse_commands_not_configured">Οι εντολές ποντικιού δεν έχουν ρυθμιστεί</string>
@@ -161,7 +170,7 @@
     <string name="key_mouse_pan_left">Κίνηση δύο δαχτύλων αριστερά</string>
     <string name="key_mouse_pan_right">Κίνηση δύο δαχτύλων δεξιά</string>
 
-    <!-- Πληκτρολόγιο -->
+    <!-- Keyboard -->
     <string name="keyboard_commands_not_configured">Οι εντολές πληκτρολογίου δεν έχουν ρυθμιστεί</string>
     <string name="edit_keyboard_commands">Επεξεργασία εντολών πληκτρολογίου</string>
     <string name="key_esc">Esc</string>
@@ -180,7 +189,7 @@
     <string name="key_keyboard_key_down">Πάτημα πλήκτρου κάτω</string>
     <string name="key_keyboard_key_up">Απελευθέρωση πλήκτρου</string>
 
-    <!-- Ρυθμίσεις SSH -->
+    <!-- SSH Configuration -->
     <string name="advanced_ssh_config">Προηγμένες ρυθμίσεις SSH</string>
     <string name="advanced_users_only">Μόνο για προχωρημένους χρήστες</string>
     <string name="advanced_users_warning">Η αλλαγή τιμών ρυθμίσεων SSH προορίζεται για προχωρημένους χρήστες. Εσφαλμένες ρυθμίσεις μπορεί να εμποδίσουν τη σύνδεση.</string>
@@ -190,7 +199,7 @@
     <string name="strict_host_key_checking">Αυστηρός έλεγχος κλειδιού κεντρικού υπολογιστή</string>
     <string name="allow_password_prompting">Να επιτρέπεται η προτροπή για κωδικό πρόσβασης</string>
 
-    <!-- Κλειδιά SSH -->
+    <!-- SSH Keys -->
     <string name="ssh_keys">Κλειδιά SSH</string>
     <string name="ssh_key">Κλειδί SSH</string>
     <string name="add_ssh_key">Προσθήκη κλειδιού SSH</string>
@@ -247,7 +256,7 @@
     <string name="delete_certificate">Διαγραφή πιστοποιητικού</string>
     <string name="certificate">Πιστοποιητικό</string>
 
-    <!-- Ρυθμίσεις -->
+    <!-- Settings -->
     <string name="settings">Ρυθμίσεις</string>
     <string name="appearance">Εμφάνιση</string>
     <string name="theme">Θέμα</string>
@@ -271,15 +280,7 @@
     <string name="known_hosts_subtitle">Διαχείριση έμπιστων κλειδιών και πιστοποιητικών κεντρικών υπολογιστών</string>
     <string name="no_known_hosts_added_yet">Δεν έχουν προστεθεί ακόμη καταχωρίσεις γνωστών κεντρικών υπολογιστών.</string>
     <string name="known_host_help_title">Μορφή καταχώρισης</string>
-    <string name="known_host_help_text">Οι καταχωρίσεις που προστίθενται εδώ χρησιμοποιούνται αυτόματα για όλους τους κεντρικούς υπολογιστές. Οι κεντρικοί υπολογιστές αποθηκεύουν επίσης τις δικές τους λίστες αποδεκτών κλειδιών.
-
-Η κύρια χρήση αυτής της ενότητας είναι η εμπιστοσύνη σε πιστοποιητικά κεντρικών υπολογιστών, για παράδειγμα:
-
-@cert-authority host.example.com ssh-ed25519 AAA…
-
-Υποστηρίζονται επίσης κανονικές καταχωρίσεις:
-
-host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_help_text">Οι καταχωρίσεις που προστίθενται εδώ χρησιμοποιούνται αυτόματα για όλους τους κεντρικούς υπολογιστές. Οι κεντρικοί υπολογιστές αποθηκεύουν επίσης τις δικές τους λίστες αποδεκτών κλειδιών.\n\nΗ κύρια χρήση αυτής της ενότητας είναι η εμπιστοσύνη σε πιστοποιητικά κεντρικών υπολογιστών, για παράδειγμα:\n\n@cert-authority host.example.com ssh-ed25519 AAA…\n\nΥποστηρίζονται επίσης κανονικές καταχωρίσεις:\n\nhost.example.com ssh-ed25519 AAA…</string>
     <string name="known_host_add_title">Προσθήκη καταχωρίσεων γνωστών κεντρικών υπολογιστών</string>
     <string name="known_host_input_label">Επικολλήστε μία καταχώριση ανά γραμμή</string>
     <string name="add_entries">Προσθήκη καταχωρίσεων</string>
@@ -307,12 +308,10 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="green_format">Πράσινο: %d</string>
     <string name="blue_format">Μπλε: %d</string>
 
-    <!-- Διαχείριση δεδομένων -->
+    <!-- Data Management -->
     <string name="data">Δεδομένα</string>
     <string name="restored_from_backup_title">Έγινε επαναφορά από αντίγραφο ασφαλείας</string>
-    <string name="restored_from_backup_text">Τα δεδομένα της εφαρμογής επαναφέρθηκαν από αντίγραφο ασφαλείας. Για λόγους ασφαλείας, κρυπτογραφημένα δεδομένα όπως κλειδιά SSH και κωδικοί πρόσβασης δεν περιλαμβάνονται στα αντίγραφα ασφαλείας.
-
-Παρακαλώ ρυθμίστε τα ξανά.</string>
+    <string name="restored_from_backup_text">Τα δεδομένα της εφαρμογής επαναφέρθηκαν από αντίγραφο ασφαλείας. Για λόγους ασφαλείας, κρυπτογραφημένα δεδομένα όπως κλειδιά SSH και κωδικοί πρόσβασης δεν περιλαμβάνονται στα αντίγραφα ασφαλείας.\n\nΠαρακαλώ ρυθμίστε τα ξανά.</string>
     <string name="export_to_file">Εξαγωγή σε αρχείο</string>
     <string name="export_to_file_subtitle">Εξαγωγή ρυθμίσεων και κεντρικών υπολογιστών σε αρχείο.</string>
     <string name="import_from_file">Εισαγωγή από αρχείο</string>
@@ -336,15 +335,13 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="scan_qr_code_certificate_prompt">Σαρώστε κωδικό QR για εισαγωγή πιστοποιητικού SSH</string>
     <string name="qr_code_content_description">Κωδικός QR</string>
     <string name="import_settings_title">Εισαγωγή ρυθμίσεων</string>
-    <string name="import_settings_text">Σε περίπτωση συγκρούσεων με υπάρχοντες κεντρικούς υπολογιστές, θέλετε ενημέρωση ή δημιουργία διπλοτύπου;
-
-Μπορείτε επίσης να επιλέξετε Αντικατάσταση, που θα διαγράψει όλους τους υπάρχοντες κεντρικούς υπολογιστές.</string>
+    <string name="import_settings_text">Σε περίπτωση συγκρούσεων με υπάρχοντες κεντρικούς υπολογιστές, θέλετε ενημέρωση ή δημιουργία διπλοτύπου;\n\nΜπορείτε επίσης να επιλέξετε Αντικατάσταση, που θα διαγράψει όλους τους υπάρχοντες κεντρικούς υπολογιστές.</string>
     <plurals name="successfully_imported_hosts">
         <item quantity="one">Εισήχθη επιτυχώς %d κεντρικός υπολογιστής.</item>
         <item quantity="other">Εισήχθησαν επιτυχώς %d κεντρικοί υπολογιστές.</item>
     </plurals>
 
-    <!-- Σχετικά -->
+    <!-- About -->
     <string name="about_app">Σχετικά με το SSH Remote</string>
     <string name="app_version">Έκδοση εφαρμογής</string>
     <string name="author">Δημιουργός</string>
@@ -358,28 +355,13 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="ssh_library">Βιβλιοθήκη SSH</string>
     <string name="ssh_library_subtitle">Χρησιμοποιείται %1$s %2$s</string>
 
-    <!-- Βοήθεια & Ένταση -->
+    <!-- Help -->
     <string name="help">Βοήθεια</string>
     <string name="tap_the_help_button_for_help">Πατήστε το κουμπί ? για βοήθεια.</string>
     <string name="getting_started_title">Ξεκινώντας</string>
-    <string name="getting_started_text">Τα κουμπιά στο τηλεχειριστήριο αντιστοιχίζονται σε συγκεκριμένες εντολές που εκτελούνται στον κεντρικό υπολογιστή.
+    <string name="getting_started_text">Τα κουμπιά στο τηλεχειριστήριο αντιστοιχίζονται σε συγκεκριμένες εντολές που εκτελούνται στον κεντρικό υπολογιστή.\n\nΠρέπει να εγκαταστήσετε το κατάλληλο εργαλείο στον κεντρικό υπολογιστή· ποιο είναι αυτό εξαρτάται από το ποιον διαχειριστή παραθύρων χρησιμοποιεί ο κεντρικός υπολογιστής (X11 ή Wayland).\n\nΓια να ξεκινήσετε, παρακαλώ επιλέξτε μια προεπιλογή. Μπορείτε πάντα να επαναφέρετε σε προεπιλογή αργότερα επεξεργαζόμενοι το τηλεχειριστήριο.\n\nΠαρακαλώ διαβάστε τη σελίδα Βοήθειας αν είναι η πρώτη φορά που χρησιμοποιείτε αυτή την εφαρμογή.</string>
 
-Πρέπει να εγκαταστήσετε το κατάλληλο εργαλείο στον κεντρικό υπολογιστή· ποιο είναι αυτό εξαρτάται από το ποιον διαχειριστή παραθύρων χρησιμοποιεί ο κεντρικός υπολογιστής (X11 ή Wayland).
-
-Για να ξεκινήσετε, παρακαλώ επιλέξτε μια προεπιλογή. Μπορείτε πάντα να επαναφέρετε σε προεπιλογή αργότερα επεξεργαζόμενοι το τηλεχειριστήριο.
-
-Παρακαλώ διαβάστε τη σελίδα Βοήθειας αν είναι η πρώτη φορά που χρησιμοποιείτε αυτή την εφαρμογή.</string>
-    <string name="error_reading_volume">Σφάλμα ανάγνωσης έντασης. Παρακαλώ εγκαταστήστε το pactl.</string>
-    <string name="volume_format">Ένταση: %s</string>
-    <string name="volume_muted_format">Ένταση: %s (σε σίγαση)</string>
-    <string name="smart_volume_settings">Έξυπνες ρυθμίσεις έντασης</string>
-    <string name="read_current_volume">Ανάγνωση τρέχουσας έντασης</string>
-    <string name="show_volume_slider">Εμφάνιση ρυθμιστικού έντασης</string>
-    <string name="control_volume_with_hardware_buttons">Έλεγχος έντασης με τα κουμπιά υλικού</string>
-    <string name="test_pactl">Δοκιμή pactl</string>
-    <string name="pactl_installation_requirement">Απαιτεί να είναι εγκατεστημένο το pactl.</string>
-
-    <!-- Ειδοποιήσεις -->
+    <!-- Notifications -->
     <string name="notification_channel_name">Τηλεχειριστήριο</string>
     <string name="notification_connected_to">Συνδέθηκε στο %s</string>
     <string name="notification_connecting_to">Σύνδεση στο %s</string>
@@ -389,7 +371,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="notification_open">Άνοιγμα</string>
     <string name="notification_close">Κλείσιμο</string>
 
-    <!-- Συντομεύσεις -->
+    <!-- Shortcuts -->
     <string name="add_to_home_screen">Προσθήκη στην αρχική οθόνη</string>
     <string name="run_command_on_host_short">%1$s στο %2$s</string>
     <string name="run_command_on_host_long">Εκτέλεση %1$s στο %2$s</string>
@@ -398,7 +380,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="shortcut_remote_control_key_not_found">Η ενέργεια συντόμευσης δεν υποστηρίζεται πλέον.</string>
     <string name="shortcut_save_changes_before_using">Παρακαλώ αποθηκεύστε τις αλλαγές του τηλεχειριστηρίου πριν χρησιμοποιήσετε συντομεύσεις.</string>
 
-    <!-- Κοινοποίηση -->
+    <!-- Share -->
     <string name="sharing">Κοινοποίηση</string>
     <string name="share_target_enabled">Ενεργοποίηση στόχου κοινοποίησης</string>
     <string name="share_target_enabled_subtitle">Αυτή η εφαρμογή θα εμφανίζεται στο μενού κοινοποίησης για απλό κείμενο. Από προεπιλογή, το κοινόχρηστο κείμενο θα πληκτρολογείται στον συνδεδεμένο κεντρικό υπολογιστή χρησιμοποιώντας την εντολή πληκτρολόγησης του πληκτρολογίου, αλλά αυτό μπορεί να προσαρμοστεί ανά κεντρικό υπολογιστή.</string>

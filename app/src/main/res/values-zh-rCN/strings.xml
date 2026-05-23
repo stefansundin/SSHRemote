@@ -122,6 +122,15 @@
     <string name="executing_command">正在执行命令…</string>
     <string name="executing_on">正在 %s 上执行</string>
     <string name="sharing_to">正在分享到 %s</string>
+    <string name="smart_volume_settings">智能音量设置</string>
+    <string name="read_current_volume">读取当前音量</string>
+    <string name="show_volume_slider">显示音量滑块</string>
+    <string name="control_volume_with_hardware_buttons">使用硬件按键控制音量</string>
+    <string name="test_pactl">测试 pactl</string>
+    <string name="pactl_installation_requirement">需要已安装 pactl。</string>
+    <string name="error_reading_volume">读取音量时出错。请安装 pactl。</string>
+    <string name="volume_format">音量：%s</string>
+    <string name="volume_muted_format">音量：%s（已静音）</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">返回</string>
@@ -344,20 +353,11 @@
     <string name="ssh_library">SSH 库</string>
     <string name="ssh_library_subtitle">使用 %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">帮助</string>
     <string name="tap_the_help_button_for_help">点击 ? 按钮获取帮助。</string>
     <string name="getting_started_title">快速开始</string>
     <string name="getting_started_text">遥控器上的按钮会映射到在主机上执行的特定命令。\n\n你需要在主机上安装相应的工具，具体取决于主机使用的是哪种窗口管理系统（X11 或 Wayland）。\n\n要开始使用，请先选择一个预设。稍后你也可以随时通过编辑遥控器重置为某个预设。\n\n如果这是你第一次使用此应用，请阅读帮助页面。</string>
-    <string name="error_reading_volume">读取音量时出错。请安装 pactl。</string>
-    <string name="volume_format">音量：%s</string>
-    <string name="volume_muted_format">音量：%s（已静音）</string>
-    <string name="smart_volume_settings">智能音量设置</string>
-    <string name="read_current_volume">读取当前音量</string>
-    <string name="show_volume_slider">显示音量滑块</string>
-    <string name="control_volume_with_hardware_buttons">使用硬件按键控制音量</string>
-    <string name="test_pactl">测试 pactl</string>
-    <string name="pactl_installation_requirement">需要已安装 pactl。</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">遥控器</string>

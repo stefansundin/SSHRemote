@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Внесете нова лозинка или оставете празно за да ја исчистите</string>
     <string name="optional_password_prompt">Изборно, ќе биде побарана ако не е внесена</string>
     <string name="optional">Изборно</string>
-    <string name="re_enter">Внеси повторно</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Внеси повторно</string>
     <string name="change_or_clear">Промени или исчисти</string>
     <string name="unsaved_changes_title">Незачувани промени</string>
     <string name="unsaved_changes_text">Дали сакате да го зачувате хостот пред да заминете?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Се извршува команда…</string>
     <string name="executing_on">Се извршува на %s</string>
     <string name="sharing_to">Се споделува на %s</string>
+    <string name="smart_volume_settings">Паметни поставки за јачина на звук</string>
+    <string name="read_current_volume">Прочитај ја тековната јачина на звук</string>
+    <string name="show_volume_slider">Прикажи лизгач за јачина на звук</string>
+    <string name="control_volume_with_hardware_buttons">Контролирај јачина на звук со хардверските копчиња</string>
+    <string name="test_pactl">Тестирај pactl</string>
+    <string name="pactl_installation_requirement">Бара да е инсталиран pactl.</string>
+    <string name="error_reading_volume">Грешка при читање на јачината на звукот. Ве молиме инсталирајте pactl.</string>
+    <string name="volume_format">Јачина на звук: %s</string>
+    <string name="volume_muted_format">Јачина на звук: %s (исклучен)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Назад</string>
@@ -271,15 +280,7 @@
     <string name="known_hosts_subtitle">Управувај со доверливи клучеви и сертификати на хостови</string>
     <string name="no_known_hosts_added_yet">Сѐ уште не се додадени записи за познати хостови.</string>
     <string name="known_host_help_title">Формат на запис</string>
-    <string name="known_host_help_text">Записите додадени овде автоматски се користат за сите хостови. Хостовите исто така чуваат свои листи на прифатени клучеви на хост.
-
-Примарната намена на овој дел е да им се верува на сертификатите на хостови, на пример:
-
-@cert-authority host.example.com ssh-ed25519 AAA…
-
-Поддржани се и обични записи:
-
-host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_help_text">Записите додадени овде автоматски се користат за сите хостови. Хостовите исто така чуваат свои листи на прифатени клучеви на хост.\n\nПримарната намена на овој дел е да им се верува на сертификатите на хостови, на пример:\n\n@cert-authority host.example.com ssh-ed25519 AAA…\n\nПоддржани се и обични записи:\n\nhost.example.com ssh-ed25519 AAA…</string>
     <string name="known_host_add_title">Додај записи за познат хост</string>
     <string name="known_host_input_label">Залепете по еден запис во секој ред</string>
     <string name="add_entries">Додај записи</string>
@@ -310,9 +311,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <!-- Data Management -->
     <string name="data">Податоци</string>
     <string name="restored_from_backup_title">Вратено од резервна копија</string>
-    <string name="restored_from_backup_text">Податоците на апликацијата се вратени од резервна копија. Од безбедносни причини, шифрираните податоци како SSH клучеви и лозинки не се вклучени во резервните копии.
-
-Ве молиме конфигурирајте ги повторно.</string>
+    <string name="restored_from_backup_text">Податоците на апликацијата се вратени од резервна копија. Од безбедносни причини, шифрираните податоци како SSH клучеви и лозинки не се вклучени во резервните копии.\n\nВе молиме конфигурирајте ги повторно.</string>
     <string name="export_to_file">Извези во датотека</string>
     <string name="export_to_file_subtitle">Извези поставки и хостови во датотека.</string>
     <string name="import_from_file">Увези од датотека</string>
@@ -336,9 +335,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="scan_qr_code_certificate_prompt">Скенирај QR-код за увоз на SSH сертификат</string>
     <string name="qr_code_content_description">QR-код</string>
     <string name="import_settings_title">Увези поставки</string>
-    <string name="import_settings_text">Во случај на судир со постојните хостови, дали сакате да ажурирате или да дуплирате?
-
-Може да изберете и Замени, што ќе ги избрише сите постојни хостови.</string>
+    <string name="import_settings_text">Во случај на судир со постојните хостови, дали сакате да ажурирате или да дуплирате?\n\nМоже да изберете и Замени, што ќе ги избрише сите постојни хостови.</string>
     <plurals name="successfully_imported_hosts">
         <item quantity="one">Успешно е увезен %d хост.</item>
         <item quantity="other">Успешно се увезени %d хостови.</item>
@@ -348,7 +345,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="about_app">За SSH Remote</string>
     <string name="app_version">Верзија на апликацијата</string>
     <string name="author">Автор</string>
-    <string name="author_name">Развиено од Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Развиено од Stefan Sundin</string>
     <string name="donate">Донирај</string>
     <string name="support_developer">Поддржете го развивачот</string>
     <string name="license">Лиценца</string>
@@ -358,26 +355,11 @@ host.example.com ssh-ed25519 AAA…</string>
     <string name="ssh_library">SSH библиотека</string>
     <string name="ssh_library_subtitle">Користи %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Помош</string>
     <string name="tap_the_help_button_for_help">Допрете го копчето ? за помош.</string>
     <string name="getting_started_title">Започнување</string>
-    <string name="getting_started_text">Копчињата на далечинскиот управувач се мапирани на одредени команди што се извршуваат на хостот.
-
-Мора да ја инсталирате соодветната алатка на хостот; која ќе биде тоа зависи од тоа кој window manager го користи хостот (X11 или Wayland).
-
-За да започнете, ве молиме изберете пресет. Секогаш можете подоцна повторно да ресетирате на пресет со уредување на далечинскиот управувач.
-
-Ве молиме прочитајте ја страницата Помош ако првпат ја користите оваа апликација.</string>
-    <string name="error_reading_volume">Грешка при читање на јачината на звукот. Ве молиме инсталирајте pactl.</string>
-    <string name="volume_format">Јачина на звук: %s</string>
-    <string name="volume_muted_format">Јачина на звук: %s (исклучен)</string>
-    <string name="smart_volume_settings">Паметни поставки за јачина на звук</string>
-    <string name="read_current_volume">Прочитај ја тековната јачина на звук</string>
-    <string name="show_volume_slider">Прикажи лизгач за јачина на звук</string>
-    <string name="control_volume_with_hardware_buttons">Контролирај јачина на звук со хардверските копчиња</string>
-    <string name="test_pactl">Тестирај pactl</string>
-    <string name="pactl_installation_requirement">Бара да е инсталиран pactl.</string>
+    <string name="getting_started_text">Копчињата на далечинскиот управувач се мапирани на одредени команди што се извршуваат на хостот.\n\nМора да ја инсталирате соодветната алатка на хостот; која ќе биде тоа зависи од тоа кој window manager го користи хостот (X11 или Wayland).\n\nЗа да започнете, ве молиме изберете пресет. Секогаш можете подоцна повторно да ресетирате на пресет со уредување на далечинскиот управувач.\n\nВе молиме прочитајте ја страницата Помош ако првпат ја користите оваа апликација.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Далечински управувач</string>

@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">შეიყვანეთ ახალი პაროლი, ან დატოვეთ ცარიელი მის გასასუფთავებლად</string>
     <string name="optional_password_prompt">სურვილისამებრ, თუ არ მიუთითებთ, მოთხოვნილი იქნება მოგვიანებით</string>
     <string name="optional">სურვილისამებრ</string>
-    <string name="re_enter">ხელახლა შეყვანა</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">ხელახლა შეყვანა</string>
     <string name="change_or_clear">შეცვლა ან გასუფთავება</string>
     <string name="unsaved_changes_title">შეუნახავი ცვლილებები</string>
     <string name="unsaved_changes_text">გასვლამდე გსურთ ჰოსტის შენახვა?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">ბრძანება სრულდება…</string>
     <string name="executing_on">შესრულება ჰოსტზე: %s</string>
     <string name="sharing_to">გაზიარება ჰოსტზე: %s</string>
+    <string name="smart_volume_settings">ჭკვიანი ხმის პარამეტრები</string>
+    <string name="read_current_volume">მიმდინარე ხმის წაკითხვა</string>
+    <string name="show_volume_slider">ხმის სლაიდერის ჩვენება</string>
+    <string name="control_volume_with_hardware_buttons">ხმის მართვა მოწყობილობის ღილაკებით</string>
+    <string name="test_pactl">pactl-ის ტესტირება</string>
+    <string name="pactl_installation_requirement">საჭიროა, რომ pactl დაყენებული იყოს.</string>
+    <string name="error_reading_volume">ხმის წაკითხვის შეცდომა. გთხოვთ, დააყენოთ pactl.</string>
+    <string name="volume_format">ხმა: %s</string>
+    <string name="volume_muted_format">ხმა: %s (დადუმებულია)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">უკან</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote-ის შესახებ</string>
     <string name="app_version">აპის ვერსია</string>
     <string name="author">ავტორი</string>
-    <string name="author_name">შემქმნელი: Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">შემქმნელი: Stefan Sundin</string>
     <string name="donate">შემოწირულობა</string>
     <string name="support_developer">დაუჭირეთ მხარი დეველოპერს</string>
     <string name="license">ლიცენზია</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH ბიბლიოთეკა</string>
     <string name="ssh_library_subtitle">გამოიყენება %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">დახმარება</string>
     <string name="tap_the_help_button_for_help">დახმარებისთვის შეეხეთ ? ღილაკს.</string>
     <string name="getting_started_title">დაწყება</string>
     <string name="getting_started_text">პულტის ღილაკები მიბმულია კონკრეტულ ბრძანებებზე, რომლებიც ჰოსტზე სრულდება.\n\nჰოსტზე უნდა დააყენოთ შესაბამისი პროგრამა; რომელი იქნება საჭირო, დამოკიდებულია იმაზე, ჰოსტი იყენებს X11-ს თუ Wayland-ს.\n\nდასაწყებად აირჩიეთ პრესეტი. მოგვიანებით ყოველთვის შეძლებთ პრესეტზე დაბრუნებას პულტის რედაქტირებით.\n\nთუ ამ აპს პირველად იყენებთ, აუცილებლად წაიკითხეთ დახმარების გვერდი.</string>
-    <string name="error_reading_volume">ხმის წაკითხვის შეცდომა. გთხოვთ, დააყენოთ pactl.</string>
-    <string name="volume_format">ხმა: %s</string>
-    <string name="volume_muted_format">ხმა: %s (დადუმებულია)</string>
-    <string name="smart_volume_settings">ჭკვიანი ხმის პარამეტრები</string>
-    <string name="read_current_volume">მიმდინარე ხმის წაკითხვა</string>
-    <string name="show_volume_slider">ხმის სლაიდერის ჩვენება</string>
-    <string name="control_volume_with_hardware_buttons">ხმის მართვა მოწყობილობის ღილაკებით</string>
-    <string name="test_pactl">pactl-ის ტესტირება</string>
-    <string name="pactl_installation_requirement">საჭიროა, რომ pactl დაყენებული იყოს.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">პულტი</string>

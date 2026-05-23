@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">නව මුරපදයක් ඇතුළත් කරන්න, නැතහොත් ඉවත් කිරීමට හිස්ව තබන්න</string>
     <string name="optional_password_prompt">විකල්පය, ලබා නොදෙන ලද්දේ නම් එය ඇතුළත් කිරීමට ඔබෙන් අසනු ඇත</string>
     <string name="optional">විකල්ප</string>
-    <string name="re_enter">නැවත ඇතුළත් කරන්න</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">නැවත ඇතුළත් කරන්න</string>
     <string name="change_or_clear">වෙනස් කරන්න හෝ හිස් කරන්න</string>
     <string name="unsaved_changes_title">සුරකි නොමැති වෙනස්කම්</string>
     <string name="unsaved_changes_text">පිටවීමට පෙර ධාරකය සුරැකීමට ඔබට අවශ්‍යද?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">විධානය ක්‍රියාත්මක වෙමින්…</string>
     <string name="executing_on">%s මත ක්‍රියාත්මක වෙමින්</string>
     <string name="sharing_to">%s වෙත බෙදාගනිමින්</string>
+    <string name="smart_volume_settings">ස්මාර්ට් ශබ්ද සැකසුම්</string>
+    <string name="read_current_volume">වත්මන් ශබ්ද මට්ටම කියවන්න</string>
+    <string name="show_volume_slider">ශබ්ද ස්ලයිඩරය පෙන්වන්න</string>
+    <string name="control_volume_with_hardware_buttons">දෘඩාංග බොත්තම් භාවිතයෙන් ශබ්දය පාලනය කරන්න</string>
+    <string name="test_pactl">pactl පරීක්ෂා කරන්න</string>
+    <string name="pactl_installation_requirement">pactl ස්ථාපනය කර තිබීම අවශ්‍යයි.</string>
+    <string name="error_reading_volume">ශබ්ද මට්ටම කියවීමේ දෝෂය. කරුණාකර pactl ස්ථාපනය කරන්න.</string>
+    <string name="volume_format">ශබ්දය: %s</string>
+    <string name="volume_muted_format">ශබ්දය: %s (නිශ්ශබ්ද)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">ආපසු</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote ගැන</string>
     <string name="app_version">යෙදුම් අනුවාදය</string>
     <string name="author">කර්තෘ</string>
-    <string name="author_name">Stefan Sundin විසින් සංවර්ධනය කරන ලදී</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Stefan Sundin විසින් සංවර්ධනය කරන ලදී</string>
     <string name="donate">පරිත්‍යාග කරන්න</string>
     <string name="support_developer">සංවර්ධකයාට සහය වන්න</string>
     <string name="license">බලපත්‍රය</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH පුස්තකාලය</string>
     <string name="ssh_library_subtitle">%1$s %2$s භාවිත කරමින්</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">උදව්</string>
     <string name="tap_the_help_button_for_help">උදව් සඳහා ? බොත්තම තට්ටු කරන්න.</string>
     <string name="getting_started_title">ආරම්භ කිරීම</string>
     <string name="getting_started_text">දුරස්ථ පාලකයේ බොත්තම් ධාරකය මත ක්‍රියාත්මක වන විශේෂිත විධානවලට සිතියම්ගත කර ඇත.\n\nඔබ ධාරකය භාවිත කරන window manager එකට (X11 හෝ Wayland) අනුව සුදුසු utility එක ස්ථාපනය කළ යුතුය.\n\nආරම්භ කිරීමට, කරුණාකර පෙරසිටුවීමක් තෝරන්න. ඔබට පසුවත් දුරස්ථ පාලකය සංස්කරණය කිරීමෙන් පෙරසිටුවීමට යළි පිහිටුවිය හැක.\n\nඔබ මෙම යෙදුම පළමු වරට භාවිත කරන්නේ නම්, කරුණාකර Help පිටුව කියවන්න.</string>
-    <string name="error_reading_volume">ශබ්ද මට්ටම කියවීමේ දෝෂය. කරුණාකර pactl ස්ථාපනය කරන්න.</string>
-    <string name="volume_format">ශබ්දය: %s</string>
-    <string name="volume_muted_format">ශබ්දය: %s (නිශ්ශබ්ද)</string>
-    <string name="smart_volume_settings">ස්මාර්ට් ශබ්ද සැකසුම්</string>
-    <string name="read_current_volume">වත්මන් ශබ්ද මට්ටම කියවන්න</string>
-    <string name="show_volume_slider">ශබ්ද ස්ලයිඩරය පෙන්වන්න</string>
-    <string name="control_volume_with_hardware_buttons">දෘඩාංග බොත්තම් භාවිතයෙන් ශබ්දය පාලනය කරන්න</string>
-    <string name="test_pactl">pactl පරීක්ෂා කරන්න</string>
-    <string name="pactl_installation_requirement">pactl ස්ථාපනය කර තිබීම අවශ්‍යයි.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">දුරස්ථ පාලකය</string>

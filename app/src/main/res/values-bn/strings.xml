@@ -122,6 +122,15 @@
     <string name="executing_command">কমান্ড কার্যকর হচ্ছে…</string>
     <string name="executing_on">%s-এ কার্যকর হচ্ছে</string>
     <string name="sharing_to">%s-এ শেয়ার হচ্ছে</string>
+    <string name="smart_volume_settings">স্মার্ট ভলিউম সেটিংস</string>
+    <string name="read_current_volume">বর্তমান ভলিউম পড়ুন</string>
+    <string name="show_volume_slider">ভলিউম স্লাইডার দেখান</string>
+    <string name="control_volume_with_hardware_buttons">হার্ডওয়্যার বোতাম দিয়ে ভলিউম নিয়ন্ত্রণ করুন</string>
+    <string name="test_pactl">pactl পরীক্ষা করুন</string>
+    <string name="pactl_installation_requirement">pactl ইনস্টল থাকা প্রয়োজন।</string>
+    <string name="error_reading_volume">ভলিউম পড়তে ত্রুটি। অনুগ্রহ করে pactl ইনস্টল করুন।</string>
+    <string name="volume_format">ভলিউম: %s</string>
+    <string name="volume_muted_format">ভলিউম: %s (নিঃশব্দ)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">পেছনে</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH লাইব্রেরি</string>
     <string name="ssh_library_subtitle">%1$s %2$s ব্যবহার করছে</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">সহায়তা</string>
     <string name="tap_the_help_button_for_help">সহায়তার জন্য ? বোতামে ট্যাপ করুন।</string>
     <string name="getting_started_title">শুরু করার উপায়</string>
     <string name="getting_started_text">রিমোট কন্ট্রোলের বোতামগুলো নির্দিষ্ট কমান্ডের সাথে ম্যাপ করা, যা হোস্টে কার্যকর হয়।\n\nহোস্ট কোন উইন্ডো ম্যানেজার (X11 বা Wayland) ব্যবহার করে তার ওপর নির্ভর করে আপনাকে উপযুক্ত ইউটিলিটি ইনস্টল করতে হবে।\n\nশুরু করতে একটি প্রিসেট নির্বাচন করুন। পরে রিমোট কন্ট্রোল সম্পাদনা করে আপনি যেকোনো সময় প্রিসেটে রিসেট করতে পারবেন।\n\nএটি যদি আপনার প্রথমবার হয়, তবে Help পৃষ্ঠা পড়ুন।</string>
-    <string name="error_reading_volume">ভলিউম পড়তে ত্রুটি। অনুগ্রহ করে pactl ইনস্টল করুন।</string>
-    <string name="volume_format">ভলিউম: %s</string>
-    <string name="volume_muted_format">ভলিউম: %s (নিঃশব্দ)</string>
-    <string name="smart_volume_settings">স্মার্ট ভলিউম সেটিংস</string>
-    <string name="read_current_volume">বর্তমান ভলিউম পড়ুন</string>
-    <string name="show_volume_slider">ভলিউম স্লাইডার দেখান</string>
-    <string name="control_volume_with_hardware_buttons">হার্ডওয়্যার বোতাম দিয়ে ভলিউম নিয়ন্ত্রণ করুন</string>
-    <string name="test_pactl">pactl পরীক্ষা করুন</string>
-    <string name="pactl_installation_requirement">pactl ইনস্টল থাকা প্রয়োজন।</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">রিমোট কন্ট্রোল</string>

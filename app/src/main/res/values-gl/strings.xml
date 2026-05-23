@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Introduza un novo contrasinal, ou déixeo baleiro para borralo</string>
     <string name="optional_password_prompt">Opcional, pedirase se non se proporciona</string>
     <string name="optional">Opcional</string>
-    <string name="re_enter">Volver introducir</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Volver introducir</string>
     <string name="change_or_clear">Cambiar ou borrar</string>
     <string name="unsaved_changes_title">Cambios sen gardar</string>
     <string name="unsaved_changes_text">Quere gardar o host antes de saír?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Executando comando…</string>
     <string name="executing_on">Executando en %s</string>
     <string name="sharing_to">Compartindo con %s</string>
+    <string name="smart_volume_settings">Axustes intelixentes de volume</string>
+    <string name="read_current_volume">Ler o volume actual</string>
+    <string name="show_volume_slider">Mostrar o control deslizante do volume</string>
+    <string name="control_volume_with_hardware_buttons">Controlar o volume cos botóns físicos</string>
+    <string name="test_pactl">Probar pactl</string>
+    <string name="pactl_installation_requirement">Require que pactl estea instalado.</string>
+    <string name="error_reading_volume">Erro ao ler o volume. Instale pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (silenciado)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Atrás</string>
@@ -271,15 +280,7 @@
     <string name="known_hosts_subtitle">Xestionar claves e certificados de host de confianza</string>
     <string name="no_known_hosts_added_yet">Aínda non se engadiron entradas de hosts coñecidos.</string>
     <string name="known_host_help_title">Formato da entrada</string>
-    <string name="known_host_help_text">As entradas engadidas aquí úsanse automaticamente para todos os hosts. Os hosts tamén almacenan as súas propias listas de claves de host aceptadas.
-
-O caso de uso principal desta sección é confiar en certificados de host, por exemplo:
-
-@cert-authority host.example.com ssh-ed25519 AAA…
-
-Tamén se admiten entradas normais:
-
-host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_help_text">As entradas engadidas aquí úsanse automaticamente para todos os hosts. Os hosts tamén almacenan as súas propias listas de claves de host aceptadas.\n\nO caso de uso principal desta sección é confiar en certificados de host, por exemplo:\n\n@cert-authority host.example.com ssh-ed25519 AAA…\n\nTamén se admiten entradas normais:\n\nhost.example.com ssh-ed25519 AAA…</string>
     <string name="known_host_add_title">Engadir entradas de hosts coñecidos</string>
     <string name="known_host_input_label">Pegue unha entrada por liña</string>
     <string name="add_entries">Engadir entradas</string>
@@ -310,9 +311,7 @@ host.example.com ssh-ed25519 AAA…</string>
     <!-- Data Management -->
     <string name="data">Datos</string>
     <string name="restored_from_backup_title">Restaurado desde unha copia de seguridade</string>
-    <string name="restored_from_backup_text">Os datos da aplicación restauráronse desde unha copia de seguridade. Por razóns de seguridade, os datos cifrados como as claves SSH e os contrasinais non se inclúen nas copias de seguridade.
-
-Volva configuralos.</string>
+    <string name="restored_from_backup_text">Os datos da aplicación restauráronse desde unha copia de seguridade. Por razóns de seguridade, os datos cifrados como as claves SSH e os contrasinais non se inclúen nas copias de seguridade.\n\nVolva configuralos.</string>
     <string name="export_to_file">Exportar a ficheiro</string>
     <string name="export_to_file_subtitle">Exportar os axustes e os hosts a un ficheiro.</string>
     <string name="import_from_file">Importar desde ficheiro</string>
@@ -336,9 +335,7 @@ Volva configuralos.</string>
     <string name="scan_qr_code_certificate_prompt">Escanee un código QR para importar un certificado SSH</string>
     <string name="qr_code_content_description">Código QR</string>
     <string name="import_settings_title">Importar axustes</string>
-    <string name="import_settings_text">En caso de conflitos cos hosts existentes, quere actualizar ou duplicar?
-
-Tamén pode escoller Substituír, o que eliminará todos os hosts existentes.</string>
+    <string name="import_settings_text">En caso de conflitos cos hosts existentes, quere actualizar ou duplicar?\n\nTamén pode escoller Substituír, o que eliminará todos os hosts existentes.</string>
     <plurals name="successfully_imported_hosts">
         <item quantity="one">Importouse correctamente %d host.</item>
         <item quantity="other">Importáronse correctamente %d hosts.</item>
@@ -348,7 +345,7 @@ Tamén pode escoller Substituír, o que eliminará todos os hosts existentes.</s
     <string name="about_app">Acerca de SSH Remote</string>
     <string name="app_version">Versión da aplicación</string>
     <string name="author">Autor</string>
-    <string name="author_name">Desenvolvido por Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Desenvolvido por Stefan Sundin</string>
     <string name="donate">Doar</string>
     <string name="support_developer">Apoiar o desenvolvedor</string>
     <string name="license">Licenza</string>
@@ -358,26 +355,11 @@ Tamén pode escoller Substituír, o que eliminará todos os hosts existentes.</s
     <string name="ssh_library">Biblioteca SSH</string>
     <string name="ssh_library_subtitle">Usando %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Axuda</string>
     <string name="tap_the_help_button_for_help">Toque o botón ? para obter axuda.</string>
     <string name="getting_started_title">Primeiros pasos</string>
-    <string name="getting_started_text">Os botóns do control remoto están asignados a comandos específicos que se executan no host.
-
-Ten que instalar a utilidade axeitada no host; cal depende do xestor de xanelas que use o host (X11 ou Wayland).
-
-Para comezar, seleccione unha predefinición. Sempre poderá volver a unha predefinición máis tarde editando o control remoto.
-
-Lea a páxina de Axuda se é a primeira vez que usa esta aplicación.</string>
-    <string name="error_reading_volume">Erro ao ler o volume. Instale pactl.</string>
-    <string name="volume_format">Volume: %s</string>
-    <string name="volume_muted_format">Volume: %s (silenciado)</string>
-    <string name="smart_volume_settings">Axustes intelixentes de volume</string>
-    <string name="read_current_volume">Ler o volume actual</string>
-    <string name="show_volume_slider">Mostrar o control deslizante do volume</string>
-    <string name="control_volume_with_hardware_buttons">Controlar o volume cos botóns físicos</string>
-    <string name="test_pactl">Probar pactl</string>
-    <string name="pactl_installation_requirement">Require que pactl estea instalado.</string>
+    <string name="getting_started_text">Os botóns do control remoto están asignados a comandos específicos que se executan no host.\n\nTen que instalar a utilidade axeitada no host; cal depende do xestor de xanelas que use o host (X11 ou Wayland).\n\nPara comezar, seleccione unha predefinición. Sempre poderá volver a unha predefinición máis tarde editando o control remoto.\n\nLea a páxina de Axuda se é a primeira vez que usa esta aplicación.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Control remoto</string>

@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Zadajte nové heslo alebo ponechajte pole prázdne, ak ho chcete vymazať</string>
     <string name="optional_password_prompt">Voliteľné, ak nie je zadané, budete naň vyzvaní</string>
     <string name="optional">Voliteľné</string>
-    <string name="re_enter">Zadať znova</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Zadať znova</string>
     <string name="change_or_clear">Zmeniť alebo vymazať</string>
     <string name="unsaved_changes_title">Neuložené zmeny</string>
     <string name="unsaved_changes_text">Chcete hostiteľa pred odchodom uložiť?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Vykonáva sa príkaz…</string>
     <string name="executing_on">Vykonáva sa na %s</string>
     <string name="sharing_to">Zdieľa sa do %s</string>
+    <string name="smart_volume_settings">Inteligentné nastavenia hlasitosti</string>
+    <string name="read_current_volume">Načítať aktuálnu hlasitosť</string>
+    <string name="show_volume_slider">Zobraziť posuvník hlasitosti</string>
+    <string name="control_volume_with_hardware_buttons">Ovládať hlasitosť hardvérovými tlačidlami</string>
+    <string name="test_pactl">Otestovať pactl</string>
+    <string name="pactl_installation_requirement">Vyžaduje nainštalovaný pactl.</string>
+    <string name="error_reading_volume">Chyba pri čítaní hlasitosti. Nainštalujte prosím pactl.</string>
+    <string name="volume_format">Hlasitosť: %s</string>
+    <string name="volume_muted_format">Hlasitosť: %s (stlmené)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Späť</string>
@@ -340,7 +349,7 @@
     <string name="about_app">O aplikácii SSH Remote</string>
     <string name="app_version">Verzia aplikácie</string>
     <string name="author">Autor</string>
-    <string name="author_name">Vyvinul Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Vyvinul Stefan Sundin</string>
     <string name="donate">Prispieť</string>
     <string name="support_developer">Podporte vývojára</string>
     <string name="license">Licencia</string>
@@ -350,20 +359,11 @@
     <string name="ssh_library">SSH knižnica</string>
     <string name="ssh_library_subtitle">Používa %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Pomocník</string>
     <string name="tap_the_help_button_for_help">Klepnite na tlačidlo ? pre pomoc.</string>
     <string name="getting_started_title">Začíname</string>
     <string name="getting_started_text">Tlačidlá na diaľkovom ovládaní sú namapované na konkrétne príkazy, ktoré sa vykonávajú na hostiteľovi.\n\nNa hostiteľovi musíte nainštalovať príslušný nástroj; ktorý z nich potrebujete, závisí od toho, aký správca okien sa na hostiteľovi používa (X11 alebo Wayland).\n\nAk chcete začať, vyberte predvoľbu. Neskôr môžete diaľkové ovládanie kedykoľvek obnoviť na predvoľbu jeho úpravou.\n\nAk túto aplikáciu používate prvýkrát, prečítajte si stránku Pomocník.</string>
-    <string name="error_reading_volume">Chyba pri čítaní hlasitosti. Nainštalujte prosím pactl.</string>
-    <string name="volume_format">Hlasitosť: %s</string>
-    <string name="volume_muted_format">Hlasitosť: %s (stlmené)</string>
-    <string name="smart_volume_settings">Inteligentné nastavenia hlasitosti</string>
-    <string name="read_current_volume">Načítať aktuálnu hlasitosť</string>
-    <string name="show_volume_slider">Zobraziť posuvník hlasitosti</string>
-    <string name="control_volume_with_hardware_buttons">Ovládať hlasitosť hardvérovými tlačidlami</string>
-    <string name="test_pactl">Otestovať pactl</string>
-    <string name="pactl_installation_requirement">Vyžaduje nainštalovaný pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Diaľkové ovládanie</string>

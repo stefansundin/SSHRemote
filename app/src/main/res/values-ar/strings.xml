@@ -122,6 +122,15 @@
     <string name="executing_command">جارٍ تنفيذ الأمر…</string>
     <string name="executing_on">جارٍ التنفيذ على %s</string>
     <string name="sharing_to">جارٍ المشاركة إلى %s</string>
+    <string name="smart_volume_settings">إعدادات التحكم الذكي بالصوت</string>
+    <string name="read_current_volume">قراءة مستوى الصوت الحالي</string>
+    <string name="show_volume_slider">إظهار شريط تمرير الصوت</string>
+    <string name="control_volume_with_hardware_buttons">التحكم بالصوت عبر الأزرار المادية</string>
+    <string name="test_pactl">اختبار pactl</string>
+    <string name="pactl_installation_requirement">يتطلب تثبيت pactl.</string>
+    <string name="error_reading_volume">خطأ في قراءة مستوى الصوت. يرجى تثبيت pactl.</string>
+    <string name="volume_format">مستوى الصوت: %s</string>
+    <string name="volume_muted_format">مستوى الصوت: %s (مكتوم)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">رجوع</string>
@@ -354,20 +363,11 @@
     <string name="ssh_library">مكتبة SSH</string>
     <string name="ssh_library_subtitle">باستخدام %1$s %2$s</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">المساعدة</string>
     <string name="tap_the_help_button_for_help">اضغط زر ? للحصول على المساعدة.</string>
     <string name="getting_started_title">البدء</string>
     <string name="getting_started_text">الأزرار في جهاز التحكم عن بُعد مرتبطة بأوامر محددة يتم تنفيذها على المضيف.\n\nيجب عليك تثبيت الأداة المناسبة على المضيف، ويعتمد ذلك على مدير النوافذ الذي يستخدمه المضيف (X11 أو Wayland).\n\nللبدء، يرجى اختيار إعداد مسبق. يمكنك دائمًا إعادة الضبط إلى إعداد مسبق لاحقًا عبر تعديل جهاز التحكم عن بُعد.\n\nيرجى قراءة صفحة المساعدة إذا كانت هذه أول مرة تستخدم فيها هذا التطبيق.</string>
-    <string name="error_reading_volume">خطأ في قراءة مستوى الصوت. يرجى تثبيت pactl.</string>
-    <string name="volume_format">مستوى الصوت: %s</string>
-    <string name="volume_muted_format">مستوى الصوت: %s (مكتوم)</string>
-    <string name="smart_volume_settings">إعدادات التحكم الذكي بالصوت</string>
-    <string name="read_current_volume">قراءة مستوى الصوت الحالي</string>
-    <string name="show_volume_slider">إظهار شريط تمرير الصوت</string>
-    <string name="control_volume_with_hardware_buttons">التحكم بالصوت عبر الأزرار المادية</string>
-    <string name="test_pactl">اختبار pactl</string>
-    <string name="pactl_installation_requirement">يتطلب تثبيت pactl.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">التحكم عن بُعد</string>

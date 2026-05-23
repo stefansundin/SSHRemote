@@ -64,7 +64,7 @@
     <string name="enter_new_password_or_empty">Yangi parol kiriting yoki tozalash uchun boʻsh qoldiring</string>
     <string name="optional_password_prompt">Ixtiyoriy, koʻrsatilmasa keyin soʻraladi</string>
     <string name="optional">Ixtiyoriy</string>
-    <string name="re_enter">Qayta kiriting</string> <!-- context: "Re-enter" a lost password -->
+    <string name="re_enter">Qayta kiriting</string>
     <string name="change_or_clear">Oʻzgartirish yoki tozalash</string>
     <string name="unsaved_changes_title">Saqlanmagan oʻzgarishlar</string>
     <string name="unsaved_changes_text">Chiqishdan oldin hostni saqlamoqchimisiz?</string>
@@ -122,6 +122,15 @@
     <string name="executing_command">Buyruq bajarilmoqda…</string>
     <string name="executing_on">%s da bajarilmoqda</string>
     <string name="sharing_to">%s ga ulashilmoqda</string>
+    <string name="smart_volume_settings">Aqlli ovoz balandligi sozlamalari</string>
+    <string name="read_current_volume">Joriy ovoz balandligini oʻqish</string>
+    <string name="show_volume_slider">Ovoz balandligi slayderini koʻrsatish</string>
+    <string name="control_volume_with_hardware_buttons">Ovoz balandligini apparat tugmalari bilan boshqarish</string>
+    <string name="test_pactl">pactl ni sinash</string>
+    <string name="pactl_installation_requirement">pactl oʻrnatilgan boʻlishi kerak.</string>
+    <string name="error_reading_volume">Ovoz balandligini oʻqishda xato. Iltimos, pactl ni oʻrnating.</string>
+    <string name="volume_format">Ovoz balandligi: %s</string>
+    <string name="volume_muted_format">Ovoz balandligi: %s (oʻchirilgan)</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Orqaga</string>
@@ -336,7 +345,7 @@
     <string name="about_app">SSH Remote haqida</string>
     <string name="app_version">Ilova versiyasi</string>
     <string name="author">Muallif</string>
-    <string name="author_name">Stefan Sundin tomonidan ishlab chiqilgan</string> <!-- only translate my name if it makes sense -->
+    <string name="author_name">Stefan Sundin tomonidan ishlab chiqilgan</string>
     <string name="donate">Xayriya qilish</string>
     <string name="support_developer">Dasturchini qoʻllab-quvvatlash</string>
     <string name="license">Litsenziya</string>
@@ -346,20 +355,11 @@
     <string name="ssh_library">SSH kutubxonasi</string>
     <string name="ssh_library_subtitle">%1$s %2$s dan foydalanmoqda</string>
 
-    <!-- Help & Volume -->
+    <!-- Help -->
     <string name="help">Yordam</string>
     <string name="tap_the_help_button_for_help">Yordam uchun ? tugmasini bosing.</string>
     <string name="getting_started_title">Boshlash</string>
     <string name="getting_started_text">Pultdagi tugmalar hostda bajariladigan aniq buyruqlarga bogʻlangan.\n\nHostda mos utilitani oʻrnatishingiz kerak, qaysi biri kerakligi esa host qaysi oynalar boshqaruvchisidan foydalanishiga bogʻliq (X11 yoki Wayland).\n\nBoshlash uchun oldindan sozlamani tanlang. Keyinroq ham pultni tahrirlab oldindan sozlamaga qayta tiklashingiz mumkin.\n\nAgar siz bu ilovadan birinchi marta foydalanayotgan boʻlsangiz, Yordam sahifasini oʻqing.</string>
-    <string name="error_reading_volume">Ovoz balandligini oʻqishda xato. Iltimos, pactl ni oʻrnating.</string>
-    <string name="volume_format">Ovoz balandligi: %s</string>
-    <string name="volume_muted_format">Ovoz balandligi: %s (oʻchirilgan)</string>
-    <string name="smart_volume_settings">Aqlli ovoz balandligi sozlamalari</string>
-    <string name="read_current_volume">Joriy ovoz balandligini oʻqish</string>
-    <string name="show_volume_slider">Ovoz balandligi slayderini koʻrsatish</string>
-    <string name="control_volume_with_hardware_buttons">Ovoz balandligini apparat tugmalari bilan boshqarish</string>
-    <string name="test_pactl">pactl ni sinash</string>
-    <string name="pactl_installation_requirement">pactl oʻrnatilgan boʻlishi kerak.</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Pult</string>
