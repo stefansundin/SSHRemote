@@ -1,0 +1,415 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Common -->
+    <string name="app_name">SSH Remote</string>
+    <string name="ok">ຕົກລົງ</string>
+    <string name="cancel">ຍົກເລີກ</string>
+    <string name="save">ບັນທຶກ</string>
+    <string name="close">ປິດ</string>
+    <string name="error">ຂໍ້ຜິດພາດ</string>
+    <string name="error_format">ຂໍ້ຜິດພາດ: %s</string>
+    <string name="copy">ຄັດລອກ</string>
+    <string name="share">ແບ່ງປັນ</string>
+    <string name="edit">ແກ້ໄຂ</string>
+    <string name="delete">ລຶບ</string>
+    <string name="undo">ຍ້ອນກັບ</string>
+    <string name="rename">ປ່ຽນຊື່</string>
+    <string name="reorder">ຈັດລໍາດັບໃໝ່</string>
+    <string name="clear">ລ້າງ</string>
+    <string name="more">ເພີ່ມເຕີມ</string>
+    <string name="more_options">ຕົວເລືອກເພີ່ມເຕີມ</string>
+    <string name="back">ຍ້ອນກັບ</string>
+    <string name="go_back">ກັບຄືນ</string>
+    <string name="navigate_back">ນໍາທາງກັບຄືນ</string>
+    <string name="message">ຂໍ້ຄວາມ</string>
+    <string name="name">ຊື່</string>
+    <string name="name_optional">ຊື່ (ບໍ່ບັງຄັບ)</string>
+    <string name="loading">ກໍາລັງໂຫຼດ…</string>
+    <string name="update">ອັບເດດ</string>
+    <string name="duplicate">ສໍາເນົາ</string>
+    <string name="replace">ແທນທີ່</string>
+    <string name="permission_denied">ບໍ່ອະນຸຍາດ</string>
+    <string name="reset">ຣີເຊັດ</string>
+    <string name="reset_to_default">ຣີເຊັດເປັນຄ່າເລີ່ມຕົ້ນ</string>
+    <string name="discard_and_leave">ຍົກເລີກການປ່ຽນແປງແລະອອກ</string>
+    <string name="please_wait">ກະລຸນາລໍຖ້າ…</string>
+    <string name="link_destination">ປາຍທາງຂອງລິ້ງ</string>
+    <string name="open_in_browser">ເປີດໃນບຣາວເຊີ</string>
+    <string name="toggle_word_wrap">ສະຫຼັບການຕັດບັນທັດອັດຕະໂນມັດ</string>
+    <string name="custom">ກໍານົດເອງ</string>
+    <string name="search">ຄົ້ນຫາ</string>
+    <string name="search_no_matches">ບໍ່ພົບຜົນກົງກັນ</string>
+    <string name="search_match_position">ຜົນກົງກັນ %1$d ຈາກ %2$d</string>
+    <string name="search_next_match">ຜົນກົງກັນຖັດໄປ</string>
+
+    <!-- Hosts -->
+    <string name="hosts_title">ໂຮສ</string>
+    <string name="no_ssh_hosts_added_yet">ຍັງບໍ່ມີການເພີ່ມໂຮສ SSH.</string>
+    <string name="empty_list_add_prompt">ແຕະປຸ່ມ + ເພື່ອເພີ່ມ.</string>
+    <string name="connect_to_host">ເຊື່ອມຕໍ່ໄປຫາ %s</string>
+    <string name="add_ssh_host">ເພີ່ມໂຮສ SSH</string>
+    <string name="add_host_title">ເພີ່ມໂຮສ</string>
+    <string name="edit_host_title">ແກ້ໄຂໂຮສ</string>
+    <string name="host_deleted">ລຶບໂຮສແລ້ວ</string>
+    <string name="clone">ໂຄລນ</string>
+    <string name="hostname_or_ip">ຊື່ໂຮສ ຫຼື IP</string>
+    <string name="port">ພອດ</string>
+    <string name="user">ຜູ້ໃຊ້</string>
+    <string name="password">ລະຫັດຜ່ານ</string>
+    <string name="hide_password">ເຊື່ອງລະຫັດຜ່ານ</string>
+    <string name="show_password">ສະແດງລະຫັດຜ່ານ</string>
+    <string name="password_lost">ລະຫັດຜ່ານຫາຍ</string>
+    <string name="password_saved">ບັນທຶກລະຫັດຜ່ານແລ້ວ</string>
+    <string name="passwords_not_backed_up">ລະຫັດຜ່ານບໍ່ຖືກສໍາຮອງຂໍ້ມູນ, ກະລຸນາປ້ອນໃໝ່</string>
+    <string name="enter_new_password_or_empty">ປ້ອນລະຫັດຜ່ານໃໝ່ ຫຼືປ່ອຍຫວ່າງເພື່ອລ້າງ</string>
+    <string name="optional_password_prompt">ບໍ່ບັງຄັບ, ຖ້າບໍ່ລະບຸຈະຖືກຖາມພາຍຫຼັງ</string>
+    <string name="optional">ບໍ່ບັງຄັບ</string>
+    <string name="re_enter">ປ້ອນອີກຄັ້ງ</string> <!-- context: "Re-enter" a lost password -->
+    <string name="change_or_clear">ປ່ຽນ ຫຼື ລ້າງ</string>
+    <string name="unsaved_changes_title">ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ</string>
+    <string name="unsaved_changes_text">ທ່ານຕ້ອງການບັນທຶກໂຮສກ່ອນອອກບໍ?</string>
+    <string name="save_and_leave">ບັນທຶກແລະອອກ</string>
+    <string name="stay">ຢູ່ຕໍ່</string>
+    <string name="connection_error">ຂໍ້ຜິດພາດການເຊື່ອມຕໍ່</string>
+    <string name="host_key_verification">ການຢືນຢັນກະແຈໂຮສ</string>
+    <string name="accept">ຍອມຮັບ</string>
+    <string name="reject">ປະຕິເສດ</string>
+    <string name="saved_host_keys">ກະແຈໂຮສທີ່ບັນທຶກໄວ້: %d</string>
+    <string name="connection_details_only">ສະເພາະລາຍລະອຽດການເຊື່ອມຕໍ່</string>
+    <string name="identity_info_format">%1$s - %2$s</string>
+    <string name="select_host">ເລືອກໂຮສ</string>
+    <string name="no_hosts_found">ບໍ່ພົບໂຮສ</string>
+
+    <!-- Remote Control -->
+    <string name="tab_remote">ຣີໂມດ</string>
+    <string name="tab_mouse">ເມົາສ໌</string>
+    <string name="tab_keyboard">ແປ້ນພິມ</string>
+    <string name="tab_commands">ຄໍາສັ່ງ</string>
+    <string name="edit_remote_control">ແກ້ໄຂການຄວບຄຸມຣີໂມດ</string>
+    <string name="edit_remote_to_add_commands">ແກ້ໄຂການຄວບຄຸມຣີໂມດເພື່ອເພີ່ມຄໍາສັ່ງ.</string>
+    <string name="remote_control_group">ການຄວບຄຸມຣີໂມດ</string>
+    <string name="select_preset">ເລືອກຄ່າຕັ້ງສໍາເລັດຮູບ</string>
+    <string name="no_preset">ບໍ່ມີຄ່າຕັ້ງສໍາເລັດຮູບ</string>
+    <string name="unsaved_changes_remote_control_text">ທ່ານຕ້ອງການບັນທຶກການປ່ຽນແປງກ່ອນອອກບໍ?</string>
+    <string name="reset_commands_title">ຣີເຊັດຄໍາສັ່ງ?</string>
+    <string name="reset_commands_text">ການກະທໍານີ້ຈະຣີເຊັດຄໍາສັ່ງການຄວບຄຸມຣີໂມດທັງໝົດກັບໄປເປັນຄ່າ %s ເລີ່ມຕົ້ນ.</string>
+    <string name="reset_to_preset_title">ຣີເຊັດເປັນຄ່າຕັ້ງສໍາເລັດຮູບ</string>
+    <string name="set_as_default_tab">ຕັ້ງເປັນແຖບເລີ່ມຕົ້ນ</string>
+    <string name="ad_hoc_command">ຄໍາສັ່ງສະເພາະກິດ</string>
+    <string name="ad_hoc_command_title">ຄໍາສັ່ງສະເພາະກິດ</string>
+    <string name="command">ຄໍາສັ່ງ</string>
+    <string name="execute">ດໍາເນີນການ</string>
+    <string name="command_output">ຜົນລັບຄໍາສັ່ງ</string>
+    <string name="command_output_label">ຜົນລັບຄໍາສັ່ງ</string>
+    <string name="show_output">ສະແດງຜົນລັບ</string>
+    <string name="render_output_as_markdown">ສະແດງຜົນລັບເປັນ Markdown</string>
+    <string name="clear_history">ລ້າງປະຫວັດ</string>
+    <string name="no_commands_added">ຍັງບໍ່ໄດ້ເພີ່ມຄໍາສັ່ງ.</string>
+    <string name="add_command">ເພີ່ມຄໍາສັ່ງ</string>
+    <string name="edit_command">ແກ້ໄຂຄໍາສັ່ງ</string>
+    <string name="command_deleted">ລຶບຄໍາສັ່ງແລ້ວ</string>
+    <string name="repeat_command_while_pressed">ເຮັດຄໍາສັ່ງຊໍ້າຂະນະກົດປຸ່ມຄ້າງ</string>
+    <string name="long_press_command">ຄໍາສັ່ງເມື່ອກົດຄ້າງ</string>
+    <string name="key_title_format">ປຸ່ມ: %s</string>
+    <string name="fullscreen">ເຕັມຈໍ</string>
+    <string name="exit_fullscreen">ອອກຈາກເຕັມຈໍ</string>
+    <string name="disconnect">ຕັດການເຊື່ອມຕໍ່</string>
+    <string name="configure_remote_commands_prompt">ກະລຸນາຕັ້ງຄ່າຄໍາສັ່ງການຄວບຄຸມຣີໂມດໂດຍເຂົ້າສູ່ໂໝດແກ້ໄຂຜ່ານເມນູ.</string>
+    <string name="tap_to_edit_button_command">ແຕະປຸ່ມເພື່ອແກ້ໄຂຄໍາສັ່ງຂອງມັນ</string>
+    <string name="run_command_in_background">ໃຫ້ຄໍາສັ່ງເຮັດວຽກໃນພື້ນຫຼັງ</string>
+    <string name="shortcut_label">ປ້າຍລັດ</string>
+    <string name="connecting">ກໍາລັງເຊື່ອມຕໍ່…</string>
+    <string name="executing_command">ກໍາລັງດໍາເນີນຄໍາສັ່ງ…</string>
+    <string name="executing_on">ກໍາລັງດໍາເນີນເທິງ %s</string>
+    <string name="sharing_to">ກໍາລັງແບ່ງປັນໄປຫາ %s</string>
+
+    <!-- Buttons / Keys -->
+    <string name="key_back">ກັບຄືນ</string>
+    <string name="key_home">ໜ້າຫຼັກ</string>
+    <string name="key_menu">ເມນູ</string>
+    <string name="key_previous">ກ່ອນໜ້າ</string>
+    <string name="key_play_pause">ຫຼິ້ນ/ຢຸດຊົ່ວຄາວ</string>
+    <string name="key_next">ຖັດໄປ</string>
+    <string name="key_up">ຂຶ້ນ</string>
+    <string name="key_right">ຂວາ</string>
+    <string name="key_down">ລົງ</string>
+    <string name="key_left">ຊ້າຍ</string>
+    <string name="key_select">ເລືອກ</string>
+    <string name="key_volume_down">ຫຼຸດສຽງ</string>
+    <string name="key_mute">ປິດສຽງ</string>
+    <string name="key_volume_up">ເພີ່ມສຽງ</string>
+
+    <!-- Mouse -->
+    <string name="mouse_pad">ແຜ່ນສໍາຜັດເມົາສ໌</string>
+    <string name="mouse_pad_disabled">ປິດໃຊ້ງານແຜ່ນສໍາຜັດເມົາສ໌</string>
+    <string name="mouse_commands_not_configured">ຍັງບໍ່ໄດ້ຕັ້ງຄ່າຄໍາສັ່ງເມົາສ໌</string>
+    <string name="left_click">ຄລິກຊ້າຍ</string>
+    <string name="right_click">ຄລິກຂວາ</string>
+    <string name="tap_to_edit_mouse_commands">ແຕະເພື່ອແກ້ໄຂຄໍາສັ່ງເມົາສ໌</string>
+    <string name="tap_to_left_click">ແຕະເພື່ອຄລິກຊ້າຍ</string>
+    <string name="long_press_to_click_and_drag">ກົດຄ້າງເພື່ອຄລິກແລະລາກ</string>
+    <string name="long_press_two_fingers_to_right_click">ກົດຄ້າງສອງນິ້ວເພື່ອຄລິກຂວາ</string>
+    <string name="scroll_using_two_fingers">ເລື່ອນດ້ວຍສອງນິ້ວ</string>
+    <string name="edit_mouse_commands">ແກ້ໄຂຄໍາສັ່ງເມົາສ໌</string>
+    <string name="key_mouse_move">ເລື່ອນເມົາສ໌</string>
+    <string name="key_mouse_left_down">ປຸ່ມຊ້າຍກົດລົງ</string>
+    <string name="key_mouse_left_up">ປຸ່ມຊ້າຍປ່ອຍຂຶ້ນ</string>
+    <string name="key_mouse_right_down">ປຸ່ມຂວາກົດລົງ</string>
+    <string name="key_mouse_right_up">ປຸ່ມຂວາປ່ອຍຂຶ້ນ</string>
+    <string name="key_mouse_pan_up">ປັດສອງນິ້ວຂຶ້ນ</string>
+    <string name="key_mouse_pan_down">ປັດສອງນິ້ວລົງ</string>
+    <string name="key_mouse_pan_left">ປັດສອງນິ້ວໄປຊ້າຍ</string>
+    <string name="key_mouse_pan_right">ປັດສອງນິ້ວໄປຂວາ</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_commands_not_configured">ຍັງບໍ່ໄດ້ຕັ້ງຄ່າຄໍາສັ່ງແປ້ນພິມ</string>
+    <string name="edit_keyboard_commands">ແກ້ໄຂຄໍາສັ່ງແປ້ນພິມ</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_ctrl">Ctrl</string>
+    <string name="key_alt">Alt</string>
+    <string name="key_shift">Shift</string>
+    <string name="key_super">Super</string>
+    <string name="key_caps">Caps</string>
+    <string name="key_del">Del</string>
+    <string name="key_pageup">PgUp</string>
+    <string name="key_pagedown">PgDn</string>
+    <string name="key_end">End</string>
+    <string name="key_keyboard_type_text">ແປ້ນພິມພິມຂໍ້ຄວາມ</string>
+    <string name="key_keyboard_key_press">ແປ້ນພິມກົດປຸ່ມ</string>
+    <string name="key_keyboard_key_down">ແປ້ນພິມກົດລົງ</string>
+    <string name="key_keyboard_key_up">ແປ້ນພິມປ່ອຍຂຶ້ນ</string>
+
+    <!-- SSH Configuration -->
+    <string name="advanced_ssh_config">ການຕັ້ງຄ່າ SSH ຂັ້ນສູງ</string>
+    <string name="advanced_users_only">ສໍາລັບຜູ້ໃຊ້ຂັ້ນສູງເທົ່ານັ້ນ</string>
+    <string name="advanced_users_warning">ການປ່ຽນຄ່າການຕັ້ງຄ່າ SSH ເໝາະສໍາລັບຜູ້ໃຊ້ຂັ້ນສູງເທົ່ານັ້ນ. ການຕັ້ງຄ່າຜິດອາດເຮັດໃຫ້ບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້.</string>
+    <string name="i_know_what_i_am_doing">ຂ້ອຍຮູ້ວ່າກໍາລັງເຮັດຫຍັງ</string>
+    <string name="ssh_configuration_title">ການຕັ້ງຄ່າ SSH</string>
+    <string name="jsch_config_description">ການຕັ້ງຄ່າ JSch ຄ້າຍກັບ OpenSSH ເປັນສ່ວນໃຫຍ່, ແຕ່ບໍ່ເໝືອນກັນເສຍທີດຽວ. ກະລຸນາສຶກສາຂໍ້ມູນເພີ່ມເຕີມ (ຄລິກປຸ່ມ Help ດ້ານລຸ່ມ).</string>
+    <string name="strict_host_key_checking">ກວດສອບກະແຈໂຮສຢ່າງເຂັ້ມງວດ</string>
+    <string name="allow_password_prompting">ອະນຸຍາດໃຫ້ຖາມຫາລະຫັດຜ່ານ</string>
+
+    <!-- SSH Keys -->
+    <string name="ssh_keys">ກະແຈ SSH</string>
+    <string name="ssh_key">ກະແຈ SSH</string>
+    <string name="add_ssh_key">ເພີ່ມກະແຈ SSH</string>
+    <string name="add_ssh_key_title">ເພີ່ມກະແຈ SSH</string>
+    <string name="no_ssh_keys_added_yet">ຍັງບໍ່ມີການເພີ່ມກະແຈ SSH.</string>
+    <string name="ssh_key_deleted">ລຶບກະແຈ SSH ແລ້ວ</string>
+    <string name="use_any_key">ໃຊ້ກະແຈໃດກໍໄດ້</string>
+    <string name="do_not_use_keys">ບໍ່ໃຊ້ກະແຈ</string>
+    <string name="select_public_key">ເລືອກກະແຈສາທາລະນະ</string>
+    <string name="public_key_copied">ຄັດລອກກະແຈສາທາລະນະໄປຫາໂຮສແລ້ວ.</string>
+    <string name="push_public_key">ສົ່ງກະແຈສາທາລະນະ</string>
+    <string name="passphrase">ລະຫັດຜ່ານກະແຈ</string>
+    <string name="hide_passphrase">ເຊື່ອງລະຫັດຜ່ານກະແຈ</string>
+    <string name="show_passphrase">ສະແດງລະຫັດຜ່ານກະແຈ</string>
+    <string name="passphrase_protected">ມີການປ້ອງກັນດ້ວຍລະຫັດຜ່ານກະແຈ</string>
+    <string name="view_public_key">ເບິ່ງກະແຈສາທາລະນະ</string>
+    <string name="export_public_key">ສົ່ງອອກກະແຈສາທາລະນະ</string>
+    <string name="public_key_title">ກະແຈສາທາລະນະ</string>
+    <string name="public_ssh_key_label">ກະແຈ SSH ສາທາລະນະ</string>
+    <string name="rename_ssh_key_title">ປ່ຽນຊື່ກະແຈ SSH</string>
+    <string name="new_name">ຊື່ໃໝ່</string>
+    <string name="invalid_key">ກະແຈບໍ່ຖືກຕ້ອງ</string>
+    <string name="invalid_key_format">ຮູບແບບກະແຈບໍ່ຖືກຕ້ອງ</string>
+    <string name="invalid_certificate_format">ຮູບແບບໃບຮັບຮອງບໍ່ຖືກຕ້ອງ</string>
+    <string name="private_key">ກະແຈສ່ວນຕົວ</string>
+    <string name="paste_from_clipboard">ວາງຈາກຄລິບບອດ</string>
+    <string name="generated_key_name">ກະແຈທີ່ສ້າງຂຶ້ນ</string>
+    <string name="generating_key_title">ກໍາລັງສ້າງກະແຈ</string>
+    <string name="please_wait_generating">ກະລຸນາລໍຖ້າຂະນະທີ່ກໍາລັງສ້າງກະແຈ…</string>
+    <string name="key_name_optional">ຊື່ກະແຈ (ບໍ່ບັງຄັບ)</string>
+    <string name="key_name_default_hint">ກະແຈ SSH ຂອງຂ້ອຍ</string>
+    <string name="import_key_file_prompt">ນໍາເຂົ້າໄຟລ໌ກະແຈສ່ວນຕົວ SSH</string>
+    <string name="zip_keys_detected_title">ພົບກະແຈ</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="one">ພົບກະແຈ SSH %d ອັນໃນໄຟລ໌ zip.</item>
+        <item quantity="other">ພົບກະແຈ SSH %d ອັນໃນໄຟລ໌ zip.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">ບໍ່ພົບກະແຈສ່ວນຕົວ SSH ທີ່ໃຊ້ໄດ້ໃນໄຟລ໌ zip.</string>
+    <string name="select_key_type_prompt">ເລືອກປະເພດກະແຈທີ່ຈະສ້າງ</string>
+    <string name="or_scan_qr_code">ຫຼືສະແກນ QR code</string>
+    <string name="tab_import">ນໍາເຂົ້າ</string>
+    <string name="tab_generate">ສ້າງ</string>
+    <string name="tab_manual">ປ້ອນເອງ</string>
+    <string name="key_type_format">ປະເພດກະແຈ: %s</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d ບິດ)</string>
+    <string name="key_list_type_format">%1$s %2$d-ບິດ</string>
+    <string name="unsaved_key_changes_text">ທ່ານມີການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ. ຕ້ອງການບັນທຶກກະແຈກ່ອນອອກບໍ?</string>
+    <string name="no_keys_found_prompt">ບໍ່ພົບກະແຈ. ສ້າງກະແຈ SSH ໃນການຕັ້ງຄ່າແອັບ.</string>
+    <string name="key_addition_info">ກະແຈຈະຖືກເພີ່ມເຂົ້າໃນໄຟລ໌ ~/.ssh/authorized_keys ຂອງໂຮສ.</string>
+    <string name="attach_certificate">ແນບໃບຮັບຮອງ</string>
+    <string name="certificate_attached">ແນບໃບຮັບຮອງແລ້ວ</string>
+    <string name="replace_certificate_title">ແທນທີ່ໃບຮັບຮອງ?</string>
+    <string name="replace_certificate_text">ກະແຈນີ້ມີໃບຮັບຮອງແນບຢູ່ແລ້ວ. ທ່ານຕ້ອງການແທນທີ່ມັນບໍ?</string>
+    <string name="delete_certificate">ລຶບໃບຮັບຮອງ</string>
+    <string name="certificate">ໃບຮັບຮອງ</string>
+
+    <!-- Settings -->
+    <string name="settings">ການຕັ້ງຄ່າ</string>
+    <string name="appearance">ຮູບລັກສະນະ</string>
+    <string name="theme">ທີມ</string>
+    <string name="theme_system">ລະບົບ</string>
+    <string name="theme_light">ສະຫວ່າງ</string>
+    <string name="theme_dark">ມືດ</string>
+    <string name="dynamic_colors">ສີແບບໄດນາມິກ</string>
+    <string name="haptic_feedback">ການຕອບສະໜອງແບບສັ່ນ</string>
+    <string name="haptic_vibration_duration_label">ໄລຍະເວລາສັ່ນເປັນມິລິວິນາທີ</string>
+    <string name="haptic_off">ປິດ</string>
+    <string name="haptic_short">ສັ້ນ (%d ms)</string>
+    <string name="haptic_medium">ປານກາງ (%d ms)</string>
+    <string name="haptic_long">ຍາວ (%d ms)</string>
+    <string name="haptic_custom">ກໍານົດເອງ (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
+    <string name="show_notification">ສະແດງການແຈ້ງເຕືອນ</string>
+    <string name="keep_screen_on">ເຮັດໃຫ້ໜ້າຈໍຕິດຢູ່</string>
+    <string name="security">ຄວາມປອດໄພ</string>
+    <string name="ssh_keys_subtitle">ຈັດການກະແຈ SSH ສໍາລັບການຢືນຢັນຕົວຕົນ</string>
+    <string name="known_hosts">Known Hosts</string>
+    <string name="known_hosts_subtitle">ຈັດການກະແຈໂຮສ ແລະໃບຮັບຮອງທີ່ໄວ້ໃຈ</string>
+    <string name="no_known_hosts_added_yet">ຍັງບໍ່ມີລາຍການ known host ທີ່ຖືກເພີ່ມ.</string>
+    <string name="known_host_help_title">ຮູບແບບລາຍການ</string>
+    <string name="known_host_help_text">ລາຍການທີ່ເພີ່ມຢູ່ນີ້ຈະຖືກໃຊ້ໂດຍອັດຕະໂນມັດສໍາລັບທຸກໂຮສ. ໂຮສແຕ່ລະອັນກໍຍັງເກັບລາຍຊື່ກະແຈໂຮສທີ່ຍອມຮັບໄວ້ຂອງຕົນເອງ.
+
+ການໃຊ້ງານຫຼັກຂອງສ່ວນນີ້ແມ່ນເພື່ອໄວ້ໃຈໃບຮັບຮອງໂຮສ, ຕົວຢ່າງ:
+
+@cert-authority host.example.com ssh-ed25519 AAA…
+
+ລາຍການປົກກະຕິກໍຮອງຮັບເຊັ່ນກັນ:
+
+host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_add_title">ເພີ່ມລາຍການ Known Host</string>
+    <string name="known_host_input_label">ວາງໜຶ່ງລາຍການຕໍ່ໜຶ່ງແຖວ</string>
+    <string name="add_entries">ເພີ່ມລາຍການ</string>
+    <string name="known_host_import_summary">ລາຍການທີ່ໃຊ້ໄດ້: %d</string>
+    <string name="known_host_deleted">ລຶບລາຍການ known host ແລ້ວ</string>
+    <string name="view_host_key">ເບິ່ງກະແຈໂຮສ</string>
+    <string name="scan_qr_code_known_host_prompt">ສະແກນ QR code ເພື່ອນໍາເຂົ້າລາຍການ known host</string>
+    <string name="colors">ສີ</string>
+    <string name="customize_colors">ປັບແຕ່ງສີຂອງແອັບ</string>
+    <string name="color_options">ຕົວເລືອກສີ</string>
+    <string name="color_overrides">ການແທນຄ່າສີ</string>
+    <string name="choose_a_color">ເລືອກສີ</string>
+    <string name="primary_color">ສີຫຼັກ</string>
+    <string name="choose_primary_color">ເລືອກສີຫຼັກ</string>
+    <string name="choose_on_primary_color">ເລືອກສີຂໍ້ຄວາມເທິງສີຫຼັກ</string>
+    <string name="text_on_primary_color">ສີຂໍ້ຄວາມເທິງສີຫຼັກ</string>
+    <string name="background_color">ສີພື້ນຫຼັງ</string>
+    <string name="choose_background_color">ເລືອກສີພື້ນຫຼັງ</string>
+    <string name="hsl">HSL</string>
+    <string name="rgb">RGB</string>
+    <string name="hue_format">ຄ່າ Hue: %d</string>
+    <string name="saturation_format">ຄ່າ Saturation: %d%%</string>
+    <string name="lightness_format">ຄ່າ Lightness: %d%%</string>
+    <string name="red_format">ສີແດງ: %d</string>
+    <string name="green_format">ສີຂຽວ: %d</string>
+    <string name="blue_format">ສີຟ້າ: %d</string>
+
+    <!-- Data Management -->
+    <string name="data">ຂໍ້ມູນ</string>
+    <string name="restored_from_backup_title">ກູ້ຄືນຈາກການສໍາຮອງຂໍ້ມູນ</string>
+    <string name="restored_from_backup_text">ຂໍ້ມູນແອັບຖືກກູ້ຄືນຈາກການສໍາຮອງຂໍ້ມູນ. ດ້ວຍເຫດຜົນດ້ານຄວາມປອດໄພ, ຂໍ້ມູນທີ່ເຂົ້າລະຫັດເຊັ່ນກະແຈ SSH ແລະລະຫັດຜ່ານຈະບໍ່ຖືກລວມຢູ່ໃນການສໍາຮອງຂໍ້ມູນ.
+
+ກະລຸນາຕັ້ງຄ່າສິ່ງເຫຼົ່ານີ້ອີກຄັ້ງ.</string>
+    <string name="export_to_file">ສົ່ງອອກໄປຫາໄຟລ໌</string>
+    <string name="export_to_file_subtitle">ສົ່ງອອກການຕັ້ງຄ່າ ແລະ ໂຮສໄປຫາໄຟລ໌.</string>
+    <string name="import_from_file">ນໍາເຂົ້າຈາກໄຟລ໌</string>
+    <string name="import_from_file_subtitle">ນໍາເຂົ້າການຕັ້ງຄ່າ ແລະ ໂຮສຈາກໄຟລ໌.</string>
+    <string name="select_file">ເລືອກໄຟລ໌</string>
+    <string name="export_to_qr_code">ສົ່ງອອກເປັນ QR code</string>
+    <string name="export_to_qr_code_subtitle">ສົ່ງອອກການຕັ້ງຄ່າ ແລະ ໂຮສເປັນ QR code.</string>
+    <string name="export_host_title">ສົ່ງອອກໂຮສ</string>
+    <string name="choose_what_to_include">ເລືອກສິ່ງທີ່ຈະລວມຢູ່ໃນ QR code.</string>
+    <string name="full_configuration">ການຕັ້ງຄ່າເຕັມຮູບແບບ</string>
+    <string name="export_settings_too_large_for_qr">ຂໍ້ມູນໃຫຍ່ເກີນໄປສໍາລັບ QR code. ໃຊ້ການສົ່ງອອກເປັນໄຟລ໌ແທນ.</string>
+    <string name="import_from_qr_code">ນໍາເຂົ້າຈາກ QR code</string>
+    <string name="import_from_qr_code_subtitle">ນໍາເຂົ້າການຕັ້ງຄ່າ ແລະ ໂຮສຈາກ QR code.</string>
+    <string name="scan_qr_code">ສະແກນ QR code</string>
+    <string name="scan_qr_code_prompt">ສະແກນ QR code ເພື່ອນໍາເຂົ້າໂຮສ</string>
+    <string name="scan_qr_code_to_import">ສະແກນ QR code ເພື່ອນໍາເຂົ້າໂຮສ</string>
+    <string name="scan_qr_code_settings_prompt">ສະແກນ QR code ເພື່ອນໍາເຂົ້າການຕັ້ງຄ່າ</string>
+    <string name="scan_qr_code_to_import_settings">ສະແກນ QR code ເພື່ອນໍາເຂົ້າການຕັ້ງຄ່າ</string>
+    <string name="scan_qr_code_key_prompt">ສະແກນ QR code ເພື່ອນໍາເຂົ້າກະແຈ SSH</string>
+    <string name="scan_qr_code_public_key_prompt">QR code ນີ້ບັນຈຸກະແຈ SSH ສາທາລະນະຂອງທ່ານ</string>
+    <string name="scan_qr_code_certificate_prompt">ສະແກນ QR code ເພື່ອນໍາເຂົ້າໃບຮັບຮອງ SSH</string>
+    <string name="qr_code_content_description">QR Code</string>
+    <string name="import_settings_title">ນໍາເຂົ້າການຕັ້ງຄ່າ</string>
+    <string name="import_settings_text">ໃນກໍລະນີທີ່ຂັດແຍ້ງກັບໂຮສທີ່ມີຢູ່, ທ່ານຕ້ອງການອັບເດດ ຫຼື ສໍາເນົາ?
+
+ທ່ານຍັງສາມາດເລືອກ ແທນທີ່ ເຊິ່ງຈະລຶບໂຮສທີ່ມີຢູ່ທັງໝົດ.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="one">ນໍາເຂົ້າໂຮສ %d ລາຍການສໍາເລັດ.</item>
+        <item quantity="other">ນໍາເຂົ້າໂຮສ %d ລາຍການສໍາເລັດ.</item>
+    </plurals>
+
+    <!-- About -->
+    <string name="about_app">ກ່ຽວກັບ SSH Remote</string>
+    <string name="app_version">ເວີຊັນແອັບ</string>
+    <string name="author">ຜູ້ພັດທະນາ</string>
+    <string name="author_name">ພັດທະນາໂດຍ Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="donate">ບໍລິຈາກ</string>
+    <string name="support_developer">ສະໜັບສະໜູນຜູ້ພັດທະນາ</string>
+    <string name="license">ໃບອະນຸຍາດ</string>
+    <string name="license_name">GNU General Public License v3.0</string>
+    <string name="source_code">ຊອດໂຄດ</string>
+    <string name="view_on_github">ເບິ່ງໃນ GitHub</string>
+    <string name="ssh_library">ໄລບຣາຣີ SSH</string>
+    <string name="ssh_library_subtitle">ໃຊ້ %1$s %2$s</string>
+
+    <!-- Help & Volume -->
+    <string name="help">ຊ່ວຍເຫຼືອ</string>
+    <string name="tap_the_help_button_for_help">ແຕະປຸ່ມ ? ເພື່ອຂໍຄວາມຊ່ວຍເຫຼືອ.</string>
+    <string name="getting_started_title">ເລີ່ມຕົ້ນ</string>
+    <string name="getting_started_text">ປຸ່ມຕ່າງໆໃນການຄວບຄຸມຣີໂມດຖືກຈັບຄູ່ກັບຄໍາສັ່ງສະເພາະທີ່ຈະຖືກດໍາເນີນໃນໂຮສ.
+
+ທ່ານຕ້ອງຕິດຕັ້ງເຄື່ອງມືທີ່ເໝາະສົມໃນໂຮສ, ວ່າຈະເປັນຕົວໃດຂຶ້ນກັບວ່າໂຮສໃຊ້ window manager ແບບໃດ (X11 ຫຼື Wayland).
+
+ເພື່ອເລີ່ມຕົ້ນ, ກະລຸນາເລືອກຄ່າຕັ້ງສໍາເລັດຮູບ. ທ່ານສາມາດຣີເຊັດກັບໄປຫາຄ່າຕັ້ງສໍາເລັດຮູບໄດ້ພາຍຫຼັງໂດຍການແກ້ໄຂການຄວບຄຸມຣີໂມດ.
+
+ກະລຸນາອ່ານໜ້າຊ່ວຍເຫຼືອຖ້ານີ້ເປັນຄັ້ງທໍາອິດທີ່ທ່ານໃຊ້ແອັບນີ້.</string>
+    <string name="error_reading_volume">ອ່ານຄ່າສຽງບໍ່ໄດ້. ກະລຸນາຕິດຕັ້ງ pactl.</string>
+    <string name="volume_format">ລະດັບສຽງ: %s</string>
+    <string name="volume_muted_format">ລະດັບສຽງ: %s (ປິດສຽງ)</string>
+    <string name="smart_volume_settings">ການຕັ້ງຄ່າສຽງອັດສະລິຍະ</string>
+    <string name="read_current_volume">ອ່ານຄ່າສຽງປັດຈຸບັນ</string>
+    <string name="show_volume_slider">ສະແດງແຖບເລື່ອນລະດັບສຽງ</string>
+    <string name="control_volume_with_hardware_buttons">ຄວບຄຸມສຽງດ້ວຍປຸ່ມຮາດແວ</string>
+    <string name="test_pactl">ທົດສອບ pactl</string>
+    <string name="pactl_installation_requirement">ຕ້ອງມີການຕິດຕັ້ງ pactl.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">ການຄວບຄຸມຣີໂມດ</string>
+    <string name="notification_connected_to">ເຊື່ອມຕໍ່ກັບ %s ແລ້ວ</string>
+    <string name="notification_connecting_to">ກໍາລັງເຊື່ອມຕໍ່ກັບ %s</string>
+    <string name="notification_disconnected_from">ຕັດການເຊື່ອມຕໍ່ຈາກ %s ແລ້ວ</string>
+    <string name="notification_active">ຣີໂມດກໍາລັງໃຊ້ງານ</string>
+    <string name="notification_inactive">ຣີໂມດບໍ່ໄດ້ໃຊ້ງານ</string>
+    <string name="notification_open">ເປີດ</string>
+    <string name="notification_close">ປິດ</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">ເພີ່ມໄປໜ້າຫຼັກ</string>
+    <string name="run_command_on_host_short">%1$s ເທິງ %2$s</string>
+    <string name="run_command_on_host_long">ເຮັດຄໍາສັ່ງ %1$s ເທິງ %2$s</string>
+    <string name="shortcut_host_not_found">ບໍ່ພົບໂຮສ.</string>
+    <string name="shortcut_command_not_found">ບໍ່ພົບຄໍາສັ່ງ.</string>
+    <string name="shortcut_remote_control_key_not_found">ບໍ່ຮອງຮັບການກະທໍາຂອງທາງລັດນີ້ອີກແລ້ວ.</string>
+    <string name="shortcut_save_changes_before_using">ກະລຸນາບັນທຶກການປ່ຽນແປງການຄວບຄຸມຣີໂມດຂອງທ່ານກ່ອນໃຊ້ທາງລັດ.</string>
+
+    <!-- Share -->
+    <string name="sharing">ການແບ່ງປັນ</string>
+    <string name="share_target_enabled">ເປີດໃຊ້ share target</string>
+    <string name="share_target_enabled_subtitle">ແອັບນີ້ຈະປາກົດໃນເມນູແບ່ງປັນສໍາລັບເນື້ອຫາຂໍ້ຄວາມທໍາມະດາ. ໂດຍຄ່າເລີ່ມຕົ້ນ, ຂໍ້ຄວາມທີ່ແບ່ງປັນຈະຖືກພິມໃນໂຮສທີ່ເຊື່ອມຕໍ່ຜ່ານຄໍາສັ່ງ keyboard type, ແຕ່ສາມາດປັບແຕ່ງໄດ້ແຍກຕາມໂຮສ.</string>
+    <string name="share_target_disabled_title">ປິດໃຊ້ share target ຢູ່</string>
+    <string name="share_target_disabled_text">ເປີດການຕັ້ງຄ່າ share target ກ່ອນ. ທ່ານສາມາດພົບມັນໄດ້ໃນການຕັ້ງຄ່າຂອງແອັບ.</string>
+    <string name="share_missing_share_command_title">ຍັງບໍ່ໄດ້ຕັ້ງຄ່າຄໍາສັ່ງແບ່ງປັນ</string>
+    <string name="share_missing_share_command_text">ໂຮສນີ້ບໍ່ມີຄໍາສັ່ງແບ່ງປັນທີ່ຖືກຕັ້ງຄ່າ. ແກ້ໄຂການຄວບຄຸມຣີໂມດຂອງໂຮສ ແລະ ຕັ້ງຄ່າຄໍາສັ່ງສໍາລັບການແບ່ງປັນຂໍ້ຄວາມ.</string>
+    <string name="share_text">ແບ່ງປັນຂໍ້ຄວາມ</string>
+    <string name="share_target_settings">ການຕັ້ງຄ່າ share target</string>
+    <string name="use_keyboard_type_command">ໃຊ້ຄໍາສັ່ງ keyboard type</string>
+    <string name="custom_share_command">ຄໍາສັ່ງແບ່ງປັນແບບກໍານົດເອງ</string>
+    <string name="share_command_placeholder">%s ຈະຖືກແທນທີ່ດ້ວຍຂໍ້ຄວາມທີ່ແບ່ງປັນ</string>
+
+</resources>

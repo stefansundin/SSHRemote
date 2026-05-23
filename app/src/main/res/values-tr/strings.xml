@@ -1,0 +1,415 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Genel -->
+    <string name="app_name">SSH Remote</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
+    <string name="save">Kaydet</string>
+    <string name="close">Kapat</string>
+    <string name="error">Hata</string>
+    <string name="error_format">Hata: %s</string>
+    <string name="copy">Kopyala</string>
+    <string name="share">Paylaş</string>
+    <string name="edit">Düzenle</string>
+    <string name="delete">Sil</string>
+    <string name="undo">Geri al</string>
+    <string name="rename">Yeniden adlandır</string>
+    <string name="reorder">Yeniden sırala</string>
+    <string name="clear">Temizle</string>
+    <string name="more">Daha fazla</string>
+    <string name="more_options">Diğer seçenekler</string>
+    <string name="back">Geri</string>
+    <string name="go_back">Geri git</string>
+    <string name="navigate_back">Geri git</string>
+    <string name="message">Mesaj</string>
+    <string name="name">Ad</string>
+    <string name="name_optional">Ad (isteğe bağlı)</string>
+    <string name="loading">Yükleniyor…</string>
+    <string name="update">Güncelle</string>
+    <string name="duplicate">Çoğalt</string>
+    <string name="replace">Değiştir</string>
+    <string name="permission_denied">İzin reddedildi</string>
+    <string name="reset">Sıfırla</string>
+    <string name="reset_to_default">Varsayılana sıfırla</string>
+    <string name="discard_and_leave">Vazgeç ve çık</string>
+    <string name="please_wait">Lütfen bekleyin…</string>
+    <string name="link_destination">Bağlantı Hedefi</string>
+    <string name="open_in_browser">Tarayıcıda aç</string>
+    <string name="toggle_word_wrap">Satır kaydırmayı aç/kapat</string>
+    <string name="custom">Özel</string>
+    <string name="search">Ara</string>
+    <string name="search_no_matches">Eşleşme bulunamadı</string>
+    <string name="search_match_position">Eşleşme %1$d / %2$d</string>
+    <string name="search_next_match">Sonraki eşleşme</string>
+
+    <!-- Ana bilgisayarlar -->
+    <string name="hosts_title">Ana Bilgisayarlar</string>
+    <string name="no_ssh_hosts_added_yet">Henüz SSH ana bilgisayarı eklenmedi.</string>
+    <string name="empty_list_add_prompt">Bir tane eklemek için + düğmesine dokunun.</string>
+    <string name="connect_to_host">%s ana bilgisayarına bağlan</string>
+    <string name="add_ssh_host">SSH Ana Bilgisayarı Ekle</string>
+    <string name="add_host_title">Ana Bilgisayar Ekle</string>
+    <string name="edit_host_title">Ana Bilgisayarı Düzenle</string>
+    <string name="host_deleted">Ana bilgisayar silindi</string>
+    <string name="clone">Klonla</string>
+    <string name="hostname_or_ip">Ana bilgisayar adı veya IP</string>
+    <string name="port">Bağlantı noktası</string>
+    <string name="user">Kullanıcı</string>
+    <string name="password">Parola</string>
+    <string name="hide_password">Parolayı gizle</string>
+    <string name="show_password">Parolayı göster</string>
+    <string name="password_lost">Parola kayboldu</string>
+    <string name="password_saved">Parola kaydedildi</string>
+    <string name="passwords_not_backed_up">Parolalar yedeklenmez, lütfen yeniden girin</string>
+    <string name="enter_new_password_or_empty">Yeni bir parola girin veya temizlemek için boş bırakın</string>
+    <string name="optional_password_prompt">İsteğe bağlıdır, verilmezse daha sonra sorulur</string>
+    <string name="optional">İsteğe bağlı</string>
+    <string name="re_enter">Yeniden gir</string> <!-- context: "Re-enter" a lost password -->
+    <string name="change_or_clear">Değiştir veya Temizle</string>
+    <string name="unsaved_changes_title">Kaydedilmemiş değişiklikler</string>
+    <string name="unsaved_changes_text">Ayrılmadan önce ana bilgisayarı kaydetmek istiyor musunuz?</string>
+    <string name="save_and_leave">Kaydet ve çık</string>
+    <string name="stay">Kal</string>
+    <string name="connection_error">Bağlantı Hatası</string>
+    <string name="host_key_verification">Ana Bilgisayar Anahtarı Doğrulaması</string>
+    <string name="accept">Kabul et</string>
+    <string name="reject">Reddet</string>
+    <string name="saved_host_keys">Kayıtlı ana bilgisayar anahtarları: %d</string>
+    <string name="connection_details_only">Yalnızca bağlantı ayrıntıları</string>
+    <string name="identity_info_format">%1$s - %2$s</string>
+    <string name="select_host">Bir ana bilgisayar seçin</string>
+    <string name="no_hosts_found">Ana bilgisayar bulunamadı</string>
+
+    <!-- Uzaktan Kumanda -->
+    <string name="tab_remote">Uzaktan Kumanda</string>
+    <string name="tab_mouse">Fare</string>
+    <string name="tab_keyboard">Klavye</string>
+    <string name="tab_commands">Komutlar</string>
+    <string name="edit_remote_control">Uzaktan kumandayı düzenle</string>
+    <string name="edit_remote_to_add_commands">Komut eklemek için uzaktan kumandayı düzenleyin.</string>
+    <string name="remote_control_group">Uzaktan kumanda</string>
+    <string name="select_preset">Ön ayar seçin</string>
+    <string name="no_preset">Ön ayar yok</string>
+    <string name="unsaved_changes_remote_control_text">Ayrılmadan önce değişikliklerinizi kaydetmek istiyor musunuz?</string>
+    <string name="reset_commands_title">Komutlar sıfırlansın mı?</string>
+    <string name="reset_commands_text">Bu işlem tüm uzaktan kumanda komutlarını varsayılan %s değerlerine sıfırlayacaktır.</string>
+    <string name="reset_to_preset_title">Ön ayara sıfırla</string>
+    <string name="set_as_default_tab">Varsayılan sekme olarak ayarla</string>
+    <string name="ad_hoc_command">Geçici komut</string>
+    <string name="ad_hoc_command_title">Geçici Komut</string>
+    <string name="command">Komut</string>
+    <string name="execute">Çalıştır</string>
+    <string name="command_output">Komut Çıktısı</string>
+    <string name="command_output_label">Komut çıktısı</string>
+    <string name="show_output">Çıktıyı göster</string>
+    <string name="render_output_as_markdown">Çıktıyı Markdown olarak işle</string>
+    <string name="clear_history">Geçmişi temizle</string>
+    <string name="no_commands_added">Hiç komut eklenmedi.</string>
+    <string name="add_command">Komut Ekle</string>
+    <string name="edit_command">Komutu Düzenle</string>
+    <string name="command_deleted">Komut silindi</string>
+    <string name="repeat_command_while_pressed">Düğmeye basılı tutulurken komutu yinele</string>
+    <string name="long_press_command">Uzun basma komutu</string>
+    <string name="key_title_format">Tuş: %s</string>
+    <string name="fullscreen">Tam ekran</string>
+    <string name="exit_fullscreen">Tam ekrandan çık</string>
+    <string name="disconnect">Bağlantıyı kes</string>
+    <string name="configure_remote_commands_prompt">Lütfen menüden düzenleme moduna girerek uzaktan kumanda komutlarını yapılandırın.</string>
+    <string name="tap_to_edit_button_command">Komutunu düzenlemek için bir düğmeye dokunun</string>
+    <string name="run_command_in_background">Komutu arka planda çalıştır</string>
+    <string name="shortcut_label">Kısayol etiketi</string>
+    <string name="connecting">Bağlanıyor…</string>
+    <string name="executing_command">Komut çalıştırılıyor…</string>
+    <string name="executing_on">%s üzerinde çalıştırılıyor</string>
+    <string name="sharing_to">%s hedefine paylaşılıyor</string>
+
+    <!-- Düğmeler / Tuşlar -->
+    <string name="key_back">Geri</string>
+    <string name="key_home">Ana ekran</string>
+    <string name="key_menu">Menü</string>
+    <string name="key_previous">Önceki</string>
+    <string name="key_play_pause">Oynat/Duraklat</string>
+    <string name="key_next">Sonraki</string>
+    <string name="key_up">Yukarı</string>
+    <string name="key_right">Sağ</string>
+    <string name="key_down">Aşağı</string>
+    <string name="key_left">Sol</string>
+    <string name="key_select">Seç</string>
+    <string name="key_volume_down">Sesi Azalt</string>
+    <string name="key_mute">Sesi Kapat</string>
+    <string name="key_volume_up">Sesi Artır</string>
+
+    <!-- Fare -->
+    <string name="mouse_pad">Fare Yüzeyi</string>
+    <string name="mouse_pad_disabled">Fare Yüzeyi Devre Dışı</string>
+    <string name="mouse_commands_not_configured">Fare komutları yapılandırılmadı</string>
+    <string name="left_click">Sol Tık</string>
+    <string name="right_click">Sağ Tık</string>
+    <string name="tap_to_edit_mouse_commands">Fare komutlarını düzenlemek için dokunun</string>
+    <string name="tap_to_left_click">Sol tıklamak için dokunun</string>
+    <string name="long_press_to_click_and_drag">Tıklayıp sürüklemek için uzun basın</string>
+    <string name="long_press_two_fingers_to_right_click">Sağ tıklamak için iki parmakla uzun basın</string>
+    <string name="scroll_using_two_fingers">İki parmakla kaydırın</string>
+    <string name="edit_mouse_commands">Fare Komutlarını Düzenle</string>
+    <string name="key_mouse_move">Fareyi Hareket Ettir</string>
+    <string name="key_mouse_left_down">Sol Düğme Aşağı</string>
+    <string name="key_mouse_left_up">Sol Düğme Yukarı</string>
+    <string name="key_mouse_right_down">Sağ Düğme Aşağı</string>
+    <string name="key_mouse_right_up">Sağ Düğme Yukarı</string>
+    <string name="key_mouse_pan_up">İki Parmakla Yukarı Kaydır</string>
+    <string name="key_mouse_pan_down">İki Parmakla Aşağı Kaydır</string>
+    <string name="key_mouse_pan_left">İki Parmakla Sola Kaydır</string>
+    <string name="key_mouse_pan_right">İki Parmakla Sağa Kaydır</string>
+
+    <!-- Klavye -->
+    <string name="keyboard_commands_not_configured">Klavye komutları yapılandırılmadı</string>
+    <string name="edit_keyboard_commands">Klavye Komutlarını Düzenle</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_ctrl">Ctrl</string>
+    <string name="key_alt">Alt</string>
+    <string name="key_shift">Shift</string>
+    <string name="key_super">Super</string>
+    <string name="key_caps">Caps</string>
+    <string name="key_del">Del</string>
+    <string name="key_pageup">PgUp</string>
+    <string name="key_pagedown">PgDn</string>
+    <string name="key_end">End</string>
+    <string name="key_keyboard_type_text">Klavye Metin Yazma</string>
+    <string name="key_keyboard_key_press">Klavye Tuş Basma</string>
+    <string name="key_keyboard_key_down">Klavye Tuşu Basılı</string>
+    <string name="key_keyboard_key_up">Klavye Tuşu Bırakma</string>
+
+    <!-- SSH Yapılandırması -->
+    <string name="advanced_ssh_config">Gelişmiş SSH Yapılandırması</string>
+    <string name="advanced_users_only">Yalnızca İleri Düzey Kullanıcılar</string>
+    <string name="advanced_users_warning">SSH yapılandırma değerlerini değiştirmek ileri düzey kullanıcılar içindir. Yanlış ayarlar bağlantıyı engelleyebilir.</string>
+    <string name="i_know_what_i_am_doing">Ne yaptığımı biliyorum</string>
+    <string name="ssh_configuration_title">SSH Yapılandırması</string>
+    <string name="jsch_config_description">JSch yapılandırması çoğunlukla OpenSSH gibidir, ancak tamamen aynı değildir. Lütfen araştırmanızı yapın (aşağıdaki Yardım düğmesine tıklayın).</string>
+    <string name="strict_host_key_checking">Sıkı ana bilgisayar anahtarı denetimi</string>
+    <string name="allow_password_prompting">Parola sorulmasına izin ver</string>
+
+    <!-- SSH Anahtarları -->
+    <string name="ssh_keys">SSH Anahtarları</string>
+    <string name="ssh_key">SSH Anahtarı</string>
+    <string name="add_ssh_key">SSH Anahtarı Ekle</string>
+    <string name="add_ssh_key_title">SSH Anahtarı Ekle</string>
+    <string name="no_ssh_keys_added_yet">Henüz SSH anahtarı eklenmedi.</string>
+    <string name="ssh_key_deleted">SSH anahtarı silindi</string>
+    <string name="use_any_key">Herhangi bir anahtarı kullan</string>
+    <string name="do_not_use_keys">Anahtar kullanma</string>
+    <string name="select_public_key">Açık anahtar seç</string>
+    <string name="public_key_copied">Açık anahtar ana bilgisayara kopyalandı.</string>
+    <string name="push_public_key">Açık anahtarı yükle</string>
+    <string name="passphrase">Parola ifadesi</string>
+    <string name="hide_passphrase">Parola ifadesini gizle</string>
+    <string name="show_passphrase">Parola ifadesini göster</string>
+    <string name="passphrase_protected">Parola ifadesiyle korunuyor</string>
+    <string name="view_public_key">Açık anahtarı görüntüle</string>
+    <string name="export_public_key">Açık anahtarı dışa aktar</string>
+    <string name="public_key_title">Açık Anahtar</string>
+    <string name="public_ssh_key_label">Açık SSH anahtarı</string>
+    <string name="rename_ssh_key_title">SSH Anahtarını Yeniden Adlandır</string>
+    <string name="new_name">Yeni ad</string>
+    <string name="invalid_key">Geçersiz anahtar</string>
+    <string name="invalid_key_format">Geçersiz anahtar biçimi</string>
+    <string name="invalid_certificate_format">Geçersiz sertifika biçimi</string>
+    <string name="private_key">Özel Anahtar</string>
+    <string name="paste_from_clipboard">Panodan yapıştır</string>
+    <string name="generated_key_name">Oluşturulan Anahtar</string>
+    <string name="generating_key_title">Anahtar Oluşturuluyor</string>
+    <string name="please_wait_generating">Lütfen anahtar oluşturulurken bekleyin…</string>
+    <string name="key_name_optional">Anahtar adı (isteğe bağlı)</string>
+    <string name="key_name_default_hint">SSH Anahtarım</string>
+    <string name="import_key_file_prompt">Bir SSH özel anahtar dosyası içe aktarın</string>
+    <string name="zip_keys_detected_title">Anahtarlar algılandı</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="one">Zip dosyasında %d SSH anahtarı algılandı.</item>
+        <item quantity="other">Zip dosyasında %d SSH anahtarı algılandı.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">Zip dosyasında geçerli SSH özel anahtarı bulunamadı.</string>
+    <string name="select_key_type_prompt">Oluşturulacak anahtar türünü seçin</string>
+    <string name="or_scan_qr_code">veya bir QR kod tarayın</string>
+    <string name="tab_import">İçe Aktar</string>
+    <string name="tab_generate">Oluştur</string>
+    <string name="tab_manual">Elle</string>
+    <string name="key_type_format">Anahtar türü: %s</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d bit)</string>
+    <string name="key_list_type_format">%1$s %2$d bit</string>
+    <string name="unsaved_key_changes_text">Kaydedilmemiş değişiklikleriniz var. Ayrılmadan önce anahtarı kaydetmek istiyor musunuz?</string>
+    <string name="no_keys_found_prompt">Anahtar bulunamadı. Uygulama ayarlarında bir SSH anahtarı oluşturun.</string>
+    <string name="key_addition_info">Anahtar, ana bilgisayarın ~/.ssh/authorized_keys dosyasına eklenecektir.</string>
+    <string name="attach_certificate">Sertifika ekle</string>
+    <string name="certificate_attached">Sertifika eklendi</string>
+    <string name="replace_certificate_title">Sertifika değiştirilsin mi?</string>
+    <string name="replace_certificate_text">Bu anahtara zaten bir sertifika eklenmiş. Değiştirmek istiyor musunuz?</string>
+    <string name="delete_certificate">Sertifikayı sil</string>
+    <string name="certificate">Sertifika</string>
+
+    <!-- Ayarlar -->
+    <string name="settings">Ayarlar</string>
+    <string name="appearance">Görünüm</string>
+    <string name="theme">Tema</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="dynamic_colors">Dinamik renkler</string>
+    <string name="haptic_feedback">Dokunsal geri bildirim</string>
+    <string name="haptic_vibration_duration_label">Milisaniye cinsinden titreşim süresi</string>
+    <string name="haptic_off">Kapalı</string>
+    <string name="haptic_short">Kısa (%d ms)</string>
+    <string name="haptic_medium">Orta (%d ms)</string>
+    <string name="haptic_long">Uzun (%d ms)</string>
+    <string name="haptic_custom">Özel (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
+    <string name="show_notification">Bildirimi göster</string>
+    <string name="keep_screen_on">Ekranı açık tut</string>
+    <string name="security">Güvenlik</string>
+    <string name="ssh_keys_subtitle">Kimlik doğrulama için SSH anahtarlarını yönetin</string>
+    <string name="known_hosts">Bilinen Ana Bilgisayarlar</string>
+    <string name="known_hosts_subtitle">Güvenilen ana bilgisayar anahtarlarını ve sertifikaları yönetin</string>
+    <string name="no_known_hosts_added_yet">Henüz bilinen ana bilgisayar girdisi eklenmedi.</string>
+    <string name="known_host_help_title">Girdi Biçimi</string>
+    <string name="known_host_help_text">Buraya eklenen girdiler tüm ana bilgisayarlar için otomatik olarak kullanılır. Ana bilgisayarlar ayrıca kendi kabul edilen ana bilgisayar anahtarı listelerini de saklar.
+
+Bu bölümün temel kullanım amacı, örneğin ana bilgisayar sertifikalarına güvenmektir:
+
+@cert-authority host.example.com ssh-ed25519 AAA…
+
+Normal girdiler de desteklenir:
+
+host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_add_title">Bilinen Ana Bilgisayar Girdileri Ekle</string>
+    <string name="known_host_input_label">Her satıra bir girdi yapıştırın</string>
+    <string name="add_entries">Girdileri ekle</string>
+    <string name="known_host_import_summary">Geçerli girdiler: %d</string>
+    <string name="known_host_deleted">Bilinen ana bilgisayar girdisi silindi</string>
+    <string name="view_host_key">Ana bilgisayar anahtarını görüntüle</string>
+    <string name="scan_qr_code_known_host_prompt">Bilinen ana bilgisayar girdilerini içe aktarmak için QR kod tarayın</string>
+    <string name="colors">Renkler</string>
+    <string name="customize_colors">Uygulama renklerini özelleştirin</string>
+    <string name="color_options">Renk seçenekleri</string>
+    <string name="color_overrides">Renk geçersiz kılmaları</string>
+    <string name="choose_a_color">Bir renk seçin</string>
+    <string name="primary_color">Birincil renk</string>
+    <string name="choose_primary_color">Birincil rengi seçin</string>
+    <string name="choose_on_primary_color">Birincil renk üzerindeki metin rengini seçin</string>
+    <string name="text_on_primary_color">Birincil renk üzerindeki metin rengi</string>
+    <string name="background_color">Arka plan rengi</string>
+    <string name="choose_background_color">Arka plan rengini seçin</string>
+    <string name="hsl">HSL</string>
+    <string name="rgb">RGB</string>
+    <string name="hue_format">Ton: %d</string>
+    <string name="saturation_format">Doygunluk: %d%%</string>
+    <string name="lightness_format">Açıklık: %d%%</string>
+    <string name="red_format">Kırmızı: %d</string>
+    <string name="green_format">Yeşil: %d</string>
+    <string name="blue_format">Mavi: %d</string>
+
+    <!-- Veri Yönetimi -->
+    <string name="data">Veri</string>
+    <string name="restored_from_backup_title">Yedekten geri yüklendi</string>
+    <string name="restored_from_backup_text">Uygulama verileri bir yedekten geri yüklendi. Güvenlik nedeniyle SSH anahtarları ve parolalar gibi şifrelenmiş veriler yedeklere dahil edilmez.
+
+Lütfen bunları yeniden yapılandırın.</string>
+    <string name="export_to_file">Dosyaya dışa aktar</string>
+    <string name="export_to_file_subtitle">Ayarları ve ana bilgisayarları bir dosyaya dışa aktarın.</string>
+    <string name="import_from_file">Dosyadan içe aktar</string>
+    <string name="import_from_file_subtitle">Ayarları ve ana bilgisayarları bir dosyadan içe aktarın.</string>
+    <string name="select_file">Dosya seç</string>
+    <string name="export_to_qr_code">QR koda dışa aktar</string>
+    <string name="export_to_qr_code_subtitle">Ayarları ve ana bilgisayarları bir QR koda dışa aktarın.</string>
+    <string name="export_host_title">Ana Bilgisayarı Dışa Aktar</string>
+    <string name="choose_what_to_include">QR koda nelerin dahil edileceğini seçin.</string>
+    <string name="full_configuration">Tam yapılandırma</string>
+    <string name="export_settings_too_large_for_qr">Veriler QR kod için çok büyük. Bunun yerine dosya dışa aktarmayı kullanın.</string>
+    <string name="import_from_qr_code">QR koddan içe aktar</string>
+    <string name="import_from_qr_code_subtitle">Ayarları ve ana bilgisayarları bir QR koddan içe aktarın.</string>
+    <string name="scan_qr_code">QR kod tara</string>
+    <string name="scan_qr_code_prompt">Ana bilgisayarı içe aktarmak için bir QR kod tarayın</string>
+    <string name="scan_qr_code_to_import">Ana bilgisayarı içe aktarmak için QR kodu tarayın</string>
+    <string name="scan_qr_code_settings_prompt">Ayarları içe aktarmak için bir QR kod tarayın</string>
+    <string name="scan_qr_code_to_import_settings">Ayarları içe aktarmak için QR kodu tarayın</string>
+    <string name="scan_qr_code_key_prompt">SSH anahtarını içe aktarmak için QR kod tarayın</string>
+    <string name="scan_qr_code_public_key_prompt">Bu QR kod sizin açık SSH anahtarınızı içerir</string>
+    <string name="scan_qr_code_certificate_prompt">SSH sertifikasını içe aktarmak için QR kod tarayın</string>
+    <string name="qr_code_content_description">QR Kod</string>
+    <string name="import_settings_title">Ayarları içe aktar</string>
+    <string name="import_settings_text">Mevcut ana bilgisayarlarla çakışma olursa güncellemek mi yoksa çoğaltmak mı istiyorsunuz?
+
+Ayrıca Değiştir seçeneğini seçerek mevcut tüm ana bilgisayarları silebilirsiniz.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="one">%d ana bilgisayar başarıyla içe aktarıldı.</item>
+        <item quantity="other">%d ana bilgisayar başarıyla içe aktarıldı.</item>
+    </plurals>
+
+    <!-- Hakkında -->
+    <string name="about_app">SSH Remote Hakkında</string>
+    <string name="app_version">Uygulama sürümü</string>
+    <string name="author">Geliştirici</string>
+    <string name="author_name">Stefan Sundin tarafından geliştirildi</string> <!-- only translate my name if it makes sense -->
+    <string name="donate">Bağış yap</string>
+    <string name="support_developer">Geliştiriciyi destekleyin</string>
+    <string name="license">Lisans</string>
+    <string name="license_name">GNU General Public License v3.0</string>
+    <string name="source_code">Kaynak kod</string>
+    <string name="view_on_github">GitHub\'da görüntüle</string>
+    <string name="ssh_library">SSH kütüphanesi</string>
+    <string name="ssh_library_subtitle">%1$s %2$s kullanılıyor</string>
+
+    <!-- Yardım ve Ses -->
+    <string name="help">Yardım</string>
+    <string name="tap_the_help_button_for_help">Yardım için ? düğmesine dokunun.</string>
+    <string name="getting_started_title">Başlarken</string>
+    <string name="getting_started_text">Uzaktan kumandadaki düğmeler, ana bilgisayarda çalıştırılan belirli komutlarla eşlenir.
+
+Ana bilgisayara uygun yardımcı programı kurmanız gerekir; hangisinin gerekli olduğu, ana bilgisayarın hangi pencere yöneticisini kullandığına bağlıdır (X11 veya Wayland).
+
+Başlamak için lütfen bir ön ayar seçin. Daha sonra uzaktan kumandayı düzenleyerek her zaman bir ön ayara sıfırlayabilirsiniz.
+
+Bu uygulamayı ilk kez kullanıyorsanız lütfen Yardım sayfasını okuyun.</string>
+    <string name="error_reading_volume">Ses okunurken hata oluştu. Lütfen pactl kurun.</string>
+    <string name="volume_format">Ses: %s</string>
+    <string name="volume_muted_format">Ses: %s (sessiz)</string>
+    <string name="smart_volume_settings">Akıllı ses ayarları</string>
+    <string name="read_current_volume">Geçerli sesi oku</string>
+    <string name="show_volume_slider">Ses kaydırıcısını göster</string>
+    <string name="control_volume_with_hardware_buttons">Sesi donanım düğmeleriyle kontrol et</string>
+    <string name="test_pactl">pactl test et</string>
+    <string name="pactl_installation_requirement">pactl kurulu olmasını gerektirir.</string>
+
+    <!-- Bildirimler -->
+    <string name="notification_channel_name">Uzaktan Kumanda</string>
+    <string name="notification_connected_to">%s ana bilgisayarına bağlandı</string>
+    <string name="notification_connecting_to">%s ana bilgisayarına bağlanıyor</string>
+    <string name="notification_disconnected_from">%s ana bilgisayarıyla bağlantı kesildi</string>
+    <string name="notification_active">Uzaktan kumanda etkin</string>
+    <string name="notification_inactive">Uzaktan kumanda etkin değil</string>
+    <string name="notification_open">Aç</string>
+    <string name="notification_close">Kapat</string>
+
+    <!-- Kısayollar -->
+    <string name="add_to_home_screen">Ana ekrana ekle</string>
+    <string name="run_command_on_host_short">%2$s üzerinde %1$s</string>
+    <string name="run_command_on_host_long">%2$s üzerinde %1$s komutunu çalıştır</string>
+    <string name="shortcut_host_not_found">Ana bilgisayar bulunamadı.</string>
+    <string name="shortcut_command_not_found">Komut bulunamadı.</string>
+    <string name="shortcut_remote_control_key_not_found">Kısayol eylemi artık desteklenmiyor.</string>
+    <string name="shortcut_save_changes_before_using">Lütfen kısayolları kullanmadan önce uzaktan kumanda değişikliklerinizi kaydedin.</string>
+
+    <!-- Paylaş -->
+    <string name="sharing">Paylaşım</string>
+    <string name="share_target_enabled">Paylaşım hedefini etkinleştir</string>
+    <string name="share_target_enabled_subtitle">Bu uygulama, düz metin içerikleri için paylaşım menüsünde görünecektir. Varsayılan olarak paylaşılan metin, bağlı olunan ana bilgisayarda klavye metin yazma komutu kullanılarak yazılır; ancak bu davranış her ana bilgisayar için özelleştirilebilir.</string>
+    <string name="share_target_disabled_title">Paylaşım hedefi devre dışı</string>
+    <string name="share_target_disabled_text">Önce paylaşım hedefi ayarını etkinleştirin. Bu ayar uygulama ayarlarında bulunabilir.</string>
+    <string name="share_missing_share_command_title">Paylaşım komutu yapılandırılmadı</string>
+    <string name="share_missing_share_command_text">Bu ana bilgisayar için paylaşım komutu yapılandırılmamış. Ana bilgisayarın uzaktan kumandasını düzenleyin ve metin paylaşımı için bir komut ayarlayın.</string>
+    <string name="share_text">Metin Paylaş</string>
+    <string name="share_target_settings">Paylaşım hedefi ayarları</string>
+    <string name="use_keyboard_type_command">Klavye metin yazma komutunu kullan</string>
+    <string name="custom_share_command">Özel paylaşım komutu</string>
+    <string name="share_command_placeholder">%s, paylaşılan metinle değiştirilecektir</string>
+
+</resources>

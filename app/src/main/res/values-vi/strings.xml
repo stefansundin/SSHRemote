@@ -1,0 +1,413 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Common -->
+    <string name="app_name">SSH Remote</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy</string>
+    <string name="save">Lưu</string>
+    <string name="close">Đóng</string>
+    <string name="error">Lỗi</string>
+    <string name="error_format">Lỗi: %s</string>
+    <string name="copy">Sao chép</string>
+    <string name="share">Chia sẻ</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="delete">Xóa</string>
+    <string name="undo">Hoàn tác</string>
+    <string name="rename">Đổi tên</string>
+    <string name="reorder">Sắp xếp lại</string>
+    <string name="clear">Xóa</string>
+    <string name="more">Thêm</string>
+    <string name="more_options">Tùy chọn khác</string>
+    <string name="back">Quay lại</string>
+    <string name="go_back">Quay lại</string>
+    <string name="navigate_back">Điều hướng quay lại</string>
+    <string name="message">Tin nhắn</string>
+    <string name="name">Tên</string>
+    <string name="name_optional">Tên (không bắt buộc)</string>
+    <string name="loading">Đang tải…</string>
+    <string name="update">Cập nhật</string>
+    <string name="duplicate">Nhân bản</string>
+    <string name="replace">Thay thế</string>
+    <string name="permission_denied">Quyền bị từ chối</string>
+    <string name="reset">Đặt lại</string>
+    <string name="reset_to_default">Đặt lại về mặc định</string>
+    <string name="discard_and_leave">Bỏ thay đổi và rời đi</string>
+    <string name="please_wait">Vui lòng chờ…</string>
+    <string name="link_destination">Đích liên kết</string>
+    <string name="open_in_browser">Mở trong trình duyệt</string>
+    <string name="toggle_word_wrap">Bật/tắt ngắt dòng</string>
+    <string name="custom">Tùy chỉnh</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="search_no_matches">Không tìm thấy kết quả</string>
+    <string name="search_match_position">Kết quả %1$d trên %2$d</string>
+    <string name="search_next_match">Kết quả tiếp theo</string>
+
+    <!-- Hosts -->
+    <string name="hosts_title">Máy chủ</string>
+    <string name="no_ssh_hosts_added_yet">Chưa có máy chủ SSH nào được thêm.</string>
+    <string name="empty_list_add_prompt">Nhấn nút + để thêm.</string>
+    <string name="connect_to_host">Kết nối tới %s</string>
+    <string name="add_ssh_host">Thêm máy chủ SSH</string>
+    <string name="add_host_title">Thêm máy chủ</string>
+    <string name="edit_host_title">Chỉnh sửa máy chủ</string>
+    <string name="host_deleted">Đã xóa máy chủ</string>
+    <string name="clone">Sao chép</string>
+    <string name="hostname_or_ip">Tên máy chủ hoặc IP</string>
+    <string name="port">Cổng</string>
+    <string name="user">Người dùng</string>
+    <string name="password">Mật khẩu</string>
+    <string name="hide_password">Ẩn mật khẩu</string>
+    <string name="show_password">Hiện mật khẩu</string>
+    <string name="password_lost">Mật khẩu đã mất</string>
+    <string name="password_saved">Đã lưu mật khẩu</string>
+    <string name="passwords_not_backed_up">Mật khẩu không được sao lưu, vui lòng nhập lại</string>
+    <string name="enter_new_password_or_empty">Nhập mật khẩu mới hoặc để trống để xóa</string>
+    <string name="optional_password_prompt">Không bắt buộc, nếu không cung cấp thì sẽ được hỏi khi cần</string>
+    <string name="optional">Không bắt buộc</string>
+    <string name="re_enter">Nhập lại</string>
+    <string name="change_or_clear">Thay đổi hoặc xóa</string>
+    <string name="unsaved_changes_title">Thay đổi chưa lưu</string>
+    <string name="unsaved_changes_text">Bạn có muốn lưu máy chủ trước khi rời đi không?</string>
+    <string name="save_and_leave">Lưu và rời đi</string>
+    <string name="stay">Ở lại</string>
+    <string name="connection_error">Lỗi kết nối</string>
+    <string name="host_key_verification">Xác minh khóa máy chủ</string>
+    <string name="accept">Chấp nhận</string>
+    <string name="reject">Từ chối</string>
+    <string name="saved_host_keys">Khóa máy chủ đã lưu: %d</string>
+    <string name="connection_details_only">Chỉ thông tin kết nối</string>
+    <string name="identity_info_format">%1$s - %2$s</string>
+    <string name="select_host">Chọn một máy chủ</string>
+    <string name="no_hosts_found">Không tìm thấy máy chủ nào</string>
+
+    <!-- Remote Control -->
+    <string name="tab_remote">Điều khiển</string>
+    <string name="tab_mouse">Chuột</string>
+    <string name="tab_keyboard">Bàn phím</string>
+    <string name="tab_commands">Lệnh</string>
+    <string name="edit_remote_control">Chỉnh sửa điều khiển từ xa</string>
+    <string name="edit_remote_to_add_commands">Chỉnh sửa điều khiển từ xa để thêm lệnh.</string>
+    <string name="remote_control_group">Điều khiển từ xa</string>
+    <string name="select_preset">Chọn cấu hình sẵn</string>
+    <string name="no_preset">Không có cấu hình sẵn</string>
+    <string name="unsaved_changes_remote_control_text">Bạn có muốn lưu thay đổi trước khi rời đi không?</string>
+    <string name="reset_commands_title">Đặt lại lệnh?</string>
+    <string name="reset_commands_text">Thao tác này sẽ đặt lại tất cả lệnh của điều khiển từ xa về giá trị %s mặc định.</string>
+    <string name="reset_to_preset_title">Đặt lại theo cấu hình sẵn</string>
+    <string name="set_as_default_tab">Đặt làm tab mặc định</string>
+    <string name="ad_hoc_command">Lệnh tức thời</string>
+    <string name="ad_hoc_command_title">Lệnh tức thời</string>
+    <string name="command">Lệnh</string>
+    <string name="execute">Thực thi</string>
+    <string name="command_output">Đầu ra lệnh</string>
+    <string name="command_output_label">Đầu ra của lệnh</string>
+    <string name="show_output">Hiển thị đầu ra</string>
+    <string name="render_output_as_markdown">Hiển thị đầu ra dưới dạng Markdown</string>
+    <string name="clear_history">Xóa lịch sử</string>
+    <string name="no_commands_added">Chưa có lệnh nào được thêm.</string>
+    <string name="add_command">Thêm lệnh</string>
+    <string name="edit_command">Chỉnh sửa lệnh</string>
+    <string name="command_deleted">Đã xóa lệnh</string>
+    <string name="repeat_command_while_pressed">Lặp lại lệnh khi nút được nhấn giữ</string>
+    <string name="long_press_command">Lệnh nhấn giữ</string>
+    <string name="key_title_format">Phím: %s</string>
+    <string name="fullscreen">Toàn màn hình</string>
+    <string name="exit_fullscreen">Thoát toàn màn hình</string>
+    <string name="disconnect">Ngắt kết nối</string>
+    <string name="configure_remote_commands_prompt">Vui lòng cấu hình các lệnh điều khiển từ xa bằng cách vào chế độ chỉnh sửa từ menu.</string>
+    <string name="tap_to_edit_button_command">Nhấn vào một nút để chỉnh sửa lệnh của nó</string>
+    <string name="run_command_in_background">Chạy lệnh trong nền</string>
+    <string name="shortcut_label">Nhãn lối tắt</string>
+    <string name="connecting">Đang kết nối…</string>
+    <string name="executing_command">Đang thực thi lệnh…</string>
+    <string name="executing_on">Đang thực thi trên %s</string>
+    <string name="sharing_to">Đang chia sẻ tới %s</string>
+
+    <!-- Buttons / Keys -->
+    <string name="key_back">Quay lại</string>
+    <string name="key_home">Trang chủ</string>
+    <string name="key_menu">Trình đơn</string>
+    <string name="key_previous">Trước</string>
+    <string name="key_play_pause">Phát/Tạm dừng</string>
+    <string name="key_next">Tiếp theo</string>
+    <string name="key_up">Lên</string>
+    <string name="key_right">Phải</string>
+    <string name="key_down">Xuống</string>
+    <string name="key_left">Trái</string>
+    <string name="key_select">Chọn</string>
+    <string name="key_volume_down">Giảm âm lượng</string>
+    <string name="key_mute">Tắt tiếng</string>
+    <string name="key_volume_up">Tăng âm lượng</string>
+
+    <!-- Mouse -->
+    <string name="mouse_pad">Bàn di chuột</string>
+    <string name="mouse_pad_disabled">Bàn di chuột bị tắt</string>
+    <string name="mouse_commands_not_configured">Lệnh chuột chưa được cấu hình</string>
+    <string name="left_click">Nhấp trái</string>
+    <string name="right_click">Nhấp phải</string>
+    <string name="tap_to_edit_mouse_commands">Nhấn để chỉnh sửa lệnh chuột</string>
+    <string name="tap_to_left_click">Nhấn để nhấp trái</string>
+    <string name="long_press_to_click_and_drag">Nhấn giữ để nhấp và kéo</string>
+    <string name="long_press_two_fingers_to_right_click">Nhấn giữ bằng hai ngón để nhấp phải</string>
+    <string name="scroll_using_two_fingers">Cuộn bằng hai ngón</string>
+    <string name="edit_mouse_commands">Chỉnh sửa lệnh chuột</string>
+    <string name="key_mouse_move">Di chuyển chuột</string>
+    <string name="key_mouse_left_down">Nút trái nhấn xuống</string>
+    <string name="key_mouse_left_up">Nút trái nhả ra</string>
+    <string name="key_mouse_right_down">Nút phải nhấn xuống</string>
+    <string name="key_mouse_right_up">Nút phải nhả ra</string>
+    <string name="key_mouse_pan_up">Cuộn hai ngón lên</string>
+    <string name="key_mouse_pan_down">Cuộn hai ngón xuống</string>
+    <string name="key_mouse_pan_left">Cuộn hai ngón sang trái</string>
+    <string name="key_mouse_pan_right">Cuộn hai ngón sang phải</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_commands_not_configured">Lệnh bàn phím chưa được cấu hình</string>
+    <string name="edit_keyboard_commands">Chỉnh sửa lệnh bàn phím</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_ctrl">Ctrl</string>
+    <string name="key_alt">Alt</string>
+    <string name="key_shift">Shift</string>
+    <string name="key_super">Super</string>
+    <string name="key_caps">Caps</string>
+    <string name="key_del">Del</string>
+    <string name="key_pageup">PgUp</string>
+    <string name="key_pagedown">PgDn</string>
+    <string name="key_end">End</string>
+    <string name="key_keyboard_type_text">Bàn phím nhập văn bản</string>
+    <string name="key_keyboard_key_press">Bàn phím nhấn phím</string>
+    <string name="key_keyboard_key_down">Bàn phím giữ phím</string>
+    <string name="key_keyboard_key_up">Bàn phím nhả phím</string>
+
+    <!-- SSH Configuration -->
+    <string name="advanced_ssh_config">Cấu hình SSH nâng cao</string>
+    <string name="advanced_users_only">Chỉ dành cho người dùng nâng cao</string>
+    <string name="advanced_users_warning">Việc thay đổi các giá trị cấu hình SSH chỉ dành cho người dùng nâng cao. Cài đặt không chính xác có thể khiến việc kết nối thất bại.</string>
+    <string name="i_know_what_i_am_doing">Tôi biết mình đang làm gì</string>
+    <string name="ssh_configuration_title">Cấu hình SSH</string>
+    <string name="jsch_config_description">Cấu hình JSch phần lớn giống OpenSSH, nhưng không hoàn toàn giống. Hãy tìm hiểu kỹ (nhấn nút Trợ giúp bên dưới).</string>
+    <string name="strict_host_key_checking">Kiểm tra nghiêm ngặt khóa máy chủ</string>
+    <string name="allow_password_prompting">Cho phép hỏi mật khẩu</string>
+
+    <!-- SSH Keys -->
+    <string name="ssh_keys">Khóa SSH</string>
+    <string name="ssh_key">Khóa SSH</string>
+    <string name="add_ssh_key">Thêm khóa SSH</string>
+    <string name="add_ssh_key_title">Thêm khóa SSH</string>
+    <string name="no_ssh_keys_added_yet">Chưa có khóa SSH nào được thêm.</string>
+    <string name="ssh_key_deleted">Đã xóa khóa SSH</string>
+    <string name="use_any_key">Dùng bất kỳ khóa nào</string>
+    <string name="do_not_use_keys">Không dùng khóa</string>
+    <string name="select_public_key">Chọn khóa công khai</string>
+    <string name="public_key_copied">Khóa công khai đã được sao chép lên máy chủ.</string>
+    <string name="push_public_key">Đẩy khóa công khai</string>
+    <string name="passphrase">Cụm mật khẩu</string>
+    <string name="hide_passphrase">Ẩn cụm mật khẩu</string>
+    <string name="show_passphrase">Hiện cụm mật khẩu</string>
+    <string name="passphrase_protected">Được bảo vệ bằng cụm mật khẩu</string>
+    <string name="view_public_key">Xem khóa công khai</string>
+    <string name="export_public_key">Xuất khóa công khai</string>
+    <string name="public_key_title">Khóa công khai</string>
+    <string name="public_ssh_key_label">Khóa SSH công khai</string>
+    <string name="rename_ssh_key_title">Đổi tên khóa SSH</string>
+    <string name="new_name">Tên mới</string>
+    <string name="invalid_key">Khóa không hợp lệ</string>
+    <string name="invalid_key_format">Định dạng khóa không hợp lệ</string>
+    <string name="invalid_certificate_format">Định dạng chứng chỉ không hợp lệ</string>
+    <string name="private_key">Khóa riêng tư</string>
+    <string name="paste_from_clipboard">Dán từ khay nhớ tạm</string>
+    <string name="generated_key_name">Khóa được tạo</string>
+    <string name="generating_key_title">Đang tạo khóa</string>
+    <string name="please_wait_generating">Vui lòng chờ trong khi khóa đang được tạo…</string>
+    <string name="key_name_optional">Tên khóa (không bắt buộc)</string>
+    <string name="key_name_default_hint">Khóa SSH của tôi</string>
+    <string name="import_key_file_prompt">Nhập tệp khóa riêng tư SSH</string>
+    <string name="zip_keys_detected_title">Đã phát hiện khóa</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="other">Đã phát hiện %d khóa SSH trong tệp zip.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">Không tìm thấy khóa riêng tư SSH hợp lệ nào trong tệp zip.</string>
+    <string name="select_key_type_prompt">Chọn loại khóa để tạo</string>
+    <string name="or_scan_qr_code">hoặc quét mã QR</string>
+    <string name="tab_import">Nhập</string>
+    <string name="tab_generate">Tạo</string>
+    <string name="tab_manual">Thủ công</string>
+    <string name="key_type_format">Loại khóa: %s</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d bit)</string>
+    <string name="key_list_type_format">%1$s %2$d-bit</string>
+    <string name="unsaved_key_changes_text">Bạn có thay đổi chưa lưu. Bạn có muốn lưu khóa trước khi rời đi không?</string>
+    <string name="no_keys_found_prompt">Không tìm thấy khóa nào. Hãy tạo một khóa SSH trong cài đặt ứng dụng.</string>
+    <string name="key_addition_info">Khóa sẽ được thêm vào tệp ~/.ssh/authorized_keys của máy chủ.</string>
+    <string name="attach_certificate">Đính kèm chứng chỉ</string>
+    <string name="certificate_attached">Đã đính kèm chứng chỉ</string>
+    <string name="replace_certificate_title">Thay chứng chỉ?</string>
+    <string name="replace_certificate_text">Khóa này đã có chứng chỉ được đính kèm. Bạn có muốn thay thế nó không?</string>
+    <string name="delete_certificate">Xóa chứng chỉ</string>
+    <string name="certificate">Chứng chỉ</string>
+
+    <!-- Settings -->
+    <string name="settings">Cài đặt</string>
+    <string name="appearance">Giao diện</string>
+    <string name="theme">Chủ đề</string>
+    <string name="theme_system">Hệ thống</string>
+    <string name="theme_light">Sáng</string>
+    <string name="theme_dark">Tối</string>
+    <string name="dynamic_colors">Màu động</string>
+    <string name="haptic_feedback">Phản hồi rung</string>
+    <string name="haptic_vibration_duration_label">Thời lượng rung tính bằng mili giây</string>
+    <string name="haptic_off">Tắt</string>
+    <string name="haptic_short">Ngắn (%d ms)</string>
+    <string name="haptic_medium">Trung bình (%d ms)</string>
+    <string name="haptic_long">Dài (%d ms)</string>
+    <string name="haptic_custom">Tùy chỉnh (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
+    <string name="show_notification">Hiển thị thông báo</string>
+    <string name="keep_screen_on">Giữ màn hình luôn bật</string>
+    <string name="security">Bảo mật</string>
+    <string name="ssh_keys_subtitle">Quản lý khóa SSH để xác thực</string>
+    <string name="known_hosts">Máy chủ đã biết</string>
+    <string name="known_hosts_subtitle">Quản lý khóa và chứng chỉ máy chủ đáng tin cậy</string>
+    <string name="no_known_hosts_added_yet">Chưa có mục máy chủ đã biết nào được thêm.</string>
+    <string name="known_host_help_title">Định dạng mục nhập</string>
+    <string name="known_host_help_text">Các mục nhập được thêm ở đây sẽ tự động được dùng cho mọi máy chủ. Mỗi máy chủ cũng lưu danh sách các khóa máy chủ đã được chấp nhận riêng.
+
+Trường hợp sử dụng chính của phần này là tin cậy chứng chỉ máy chủ, ví dụ:
+
+@cert-authority host.example.com ssh-ed25519 AAA…
+
+Các mục nhập thông thường cũng được hỗ trợ:
+
+host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_add_title">Thêm mục máy chủ đã biết</string>
+    <string name="known_host_input_label">Dán mỗi mục trên một dòng</string>
+    <string name="add_entries">Thêm mục</string>
+    <string name="known_host_import_summary">Mục hợp lệ: %d</string>
+    <string name="known_host_deleted">Đã xóa mục máy chủ đã biết</string>
+    <string name="view_host_key">Xem khóa máy chủ</string>
+    <string name="scan_qr_code_known_host_prompt">Quét mã QR để nhập các mục máy chủ đã biết</string>
+    <string name="colors">Màu sắc</string>
+    <string name="customize_colors">Tùy chỉnh màu sắc của ứng dụng</string>
+    <string name="color_options">Tùy chọn màu</string>
+    <string name="color_overrides">Ghi đè màu</string>
+    <string name="choose_a_color">Chọn một màu</string>
+    <string name="primary_color">Màu chính</string>
+    <string name="choose_primary_color">Chọn màu chính</string>
+    <string name="choose_on_primary_color">Chọn màu chữ trên màu chính</string>
+    <string name="text_on_primary_color">Màu chữ trên màu chính</string>
+    <string name="background_color">Màu nền</string>
+    <string name="choose_background_color">Chọn màu nền</string>
+    <string name="hsl">HSL</string>
+    <string name="rgb">RGB</string>
+    <string name="hue_format">Sắc độ: %d</string>
+    <string name="saturation_format">Độ bão hòa: %d%%</string>
+    <string name="lightness_format">Độ sáng: %d%%</string>
+    <string name="red_format">Đỏ: %d</string>
+    <string name="green_format">Xanh lá: %d</string>
+    <string name="blue_format">Xanh dương: %d</string>
+
+    <!-- Data Management -->
+    <string name="data">Dữ liệu</string>
+    <string name="restored_from_backup_title">Đã khôi phục từ bản sao lưu</string>
+    <string name="restored_from_backup_text">Dữ liệu ứng dụng đã được khôi phục từ bản sao lưu. Vì lý do bảo mật, dữ liệu được mã hóa như khóa SSH và mật khẩu không được bao gồm trong bản sao lưu.
+
+Vui lòng cấu hình lại những mục này.</string>
+    <string name="export_to_file">Xuất ra tệp</string>
+    <string name="export_to_file_subtitle">Xuất cài đặt và máy chủ ra tệp.</string>
+    <string name="import_from_file">Nhập từ tệp</string>
+    <string name="import_from_file_subtitle">Nhập cài đặt và máy chủ từ tệp.</string>
+    <string name="select_file">Chọn tệp</string>
+    <string name="export_to_qr_code">Xuất ra mã QR</string>
+    <string name="export_to_qr_code_subtitle">Xuất cài đặt và máy chủ ra mã QR.</string>
+    <string name="export_host_title">Xuất máy chủ</string>
+    <string name="choose_what_to_include">Chọn nội dung cần đưa vào mã QR.</string>
+    <string name="full_configuration">Cấu hình đầy đủ</string>
+    <string name="export_settings_too_large_for_qr">Dữ liệu quá lớn cho mã QR. Hãy dùng xuất ra tệp thay thế.</string>
+    <string name="import_from_qr_code">Nhập từ mã QR</string>
+    <string name="import_from_qr_code_subtitle">Nhập cài đặt và máy chủ từ mã QR.</string>
+    <string name="scan_qr_code">Quét mã QR</string>
+    <string name="scan_qr_code_prompt">Quét mã QR để nhập máy chủ</string>
+    <string name="scan_qr_code_to_import">Quét mã QR để nhập máy chủ</string>
+    <string name="scan_qr_code_settings_prompt">Quét mã QR để nhập cài đặt</string>
+    <string name="scan_qr_code_to_import_settings">Quét mã QR để nhập cài đặt</string>
+    <string name="scan_qr_code_key_prompt">Quét mã QR để nhập khóa SSH</string>
+    <string name="scan_qr_code_public_key_prompt">Mã QR này chứa khóa SSH công khai của bạn</string>
+    <string name="scan_qr_code_certificate_prompt">Quét mã QR để nhập chứng chỉ SSH</string>
+    <string name="qr_code_content_description">Mã QR</string>
+    <string name="import_settings_title">Nhập cài đặt</string>
+    <string name="import_settings_text">Trong trường hợp trùng với máy chủ hiện có, bạn muốn cập nhật hay nhân bản?
+
+Bạn cũng có thể chọn Thay thế, thao tác này sẽ xóa tất cả máy chủ hiện có.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="other">Đã nhập thành công %d máy chủ.</item>
+    </plurals>
+
+    <!-- About -->
+    <string name="about_app">Giới thiệu về SSH Remote</string>
+    <string name="app_version">Phiên bản ứng dụng</string>
+    <string name="author">Tác giả</string>
+    <string name="author_name">Được phát triển bởi Stefan Sundin</string>
+    <string name="donate">Quyên góp</string>
+    <string name="support_developer">Ủng hộ nhà phát triển</string>
+    <string name="license">Giấy phép</string>
+    <string name="license_name">GNU General Public License v3.0</string>
+    <string name="source_code">Mã nguồn</string>
+    <string name="view_on_github">Xem trên GitHub</string>
+    <string name="ssh_library">Thư viện SSH</string>
+    <string name="ssh_library_subtitle">Đang dùng %1$s %2$s</string>
+
+    <!-- Help & Volume -->
+    <string name="help">Trợ giúp</string>
+    <string name="tap_the_help_button_for_help">Nhấn nút ? để được trợ giúp.</string>
+    <string name="getting_started_title">Bắt đầu</string>
+    <string name="getting_started_text">Các nút trên điều khiển từ xa được ánh xạ tới những lệnh cụ thể sẽ được thực thi trên máy chủ.
+
+Bạn phải cài đặt tiện ích phù hợp trên máy chủ; tiện ích nào cần dùng phụ thuộc vào việc máy chủ dùng trình quản lý cửa sổ nào (X11 hoặc Wayland).
+
+Để bắt đầu, vui lòng chọn một cấu hình sẵn. Bạn luôn có thể đặt lại về một cấu hình sẵn sau này bằng cách chỉnh sửa điều khiển từ xa.
+
+Vui lòng đọc trang Trợ giúp nếu đây là lần đầu tiên bạn sử dụng ứng dụng này.</string>
+    <string name="error_reading_volume">Lỗi đọc âm lượng. Vui lòng cài đặt pactl.</string>
+    <string name="volume_format">Âm lượng: %s</string>
+    <string name="volume_muted_format">Âm lượng: %s (đã tắt tiếng)</string>
+    <string name="smart_volume_settings">Cài đặt âm lượng thông minh</string>
+    <string name="read_current_volume">Đọc âm lượng hiện tại</string>
+    <string name="show_volume_slider">Hiển thị thanh trượt âm lượng</string>
+    <string name="control_volume_with_hardware_buttons">Điều khiển âm lượng bằng nút phần cứng</string>
+    <string name="test_pactl">Kiểm tra pactl</string>
+    <string name="pactl_installation_requirement">Yêu cầu đã cài đặt pactl.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Điều khiển từ xa</string>
+    <string name="notification_connected_to">Đã kết nối tới %s</string>
+    <string name="notification_connecting_to">Đang kết nối tới %s</string>
+    <string name="notification_disconnected_from">Đã ngắt kết nối khỏi %s</string>
+    <string name="notification_active">Điều khiển từ xa đang hoạt động</string>
+    <string name="notification_inactive">Điều khiển từ xa không hoạt động</string>
+    <string name="notification_open">Mở</string>
+    <string name="notification_close">Đóng</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Thêm vào màn hình chính</string>
+    <string name="run_command_on_host_short">%1$s trên %2$s</string>
+    <string name="run_command_on_host_long">Chạy %1$s trên %2$s</string>
+    <string name="shortcut_host_not_found">Không tìm thấy máy chủ.</string>
+    <string name="shortcut_command_not_found">Không tìm thấy lệnh.</string>
+    <string name="shortcut_remote_control_key_not_found">Hành động lối tắt không còn được hỗ trợ nữa.</string>
+    <string name="shortcut_save_changes_before_using">Vui lòng lưu các thay đổi điều khiển từ xa trước khi dùng lối tắt.</string>
+
+    <!-- Share -->
+    <string name="sharing">Chia sẻ</string>
+    <string name="share_target_enabled">Bật đích chia sẻ</string>
+    <string name="share_target_enabled_subtitle">Ứng dụng này sẽ xuất hiện trong menu chia sẻ cho nội dung văn bản thuần. Theo mặc định, văn bản được chia sẻ sẽ được nhập trên máy chủ đã kết nối bằng lệnh nhập văn bản từ bàn phím, nhưng điều này có thể được tùy chỉnh cho từng máy chủ.</string>
+    <string name="share_target_disabled_title">Đích chia sẻ đang bị tắt</string>
+    <string name="share_target_disabled_text">Hãy bật cài đặt đích chia sẻ trước. Bạn có thể tìm thấy nó trong phần cài đặt ứng dụng.</string>
+    <string name="share_missing_share_command_title">Lệnh chia sẻ chưa được cấu hình</string>
+    <string name="share_missing_share_command_text">Máy chủ này chưa có lệnh chia sẻ nào được cấu hình. Hãy chỉnh sửa điều khiển từ xa của máy chủ và đặt một lệnh để chia sẻ văn bản.</string>
+    <string name="share_text">Chia sẻ văn bản</string>
+    <string name="share_target_settings">Cài đặt đích chia sẻ</string>
+    <string name="use_keyboard_type_command">Dùng lệnh nhập văn bản từ bàn phím</string>
+    <string name="custom_share_command">Lệnh chia sẻ tùy chỉnh</string>
+    <string name="share_command_placeholder">%s sẽ được thay thế bằng văn bản được chia sẻ</string>
+
+</resources>

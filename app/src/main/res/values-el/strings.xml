@@ -1,0 +1,415 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Κοινά -->
+    <string name="app_name">SSH Remote</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Άκυρο</string>
+    <string name="save">Αποθήκευση</string>
+    <string name="close">Κλείσιμο</string>
+    <string name="error">Σφάλμα</string>
+    <string name="error_format">Σφάλμα: %s</string>
+    <string name="copy">Αντιγραφή</string>
+    <string name="share">Κοινοποίηση</string>
+    <string name="edit">Επεξεργασία</string>
+    <string name="delete">Διαγραφή</string>
+    <string name="undo">Αναίρεση</string>
+    <string name="rename">Μετονομασία</string>
+    <string name="reorder">Αναδιάταξη</string>
+    <string name="clear">Εκκαθάριση</string>
+    <string name="more">Περισσότερα</string>
+    <string name="more_options">Περισσότερες επιλογές</string>
+    <string name="back">Πίσω</string>
+    <string name="go_back">Επιστροφή</string>
+    <string name="navigate_back">Πλοήγηση πίσω</string>
+    <string name="message">Μήνυμα</string>
+    <string name="name">Όνομα</string>
+    <string name="name_optional">Όνομα (προαιρετικό)</string>
+    <string name="loading">Φόρτωση…</string>
+    <string name="update">Ενημέρωση</string>
+    <string name="duplicate">Διπλότυπο</string>
+    <string name="replace">Αντικατάσταση</string>
+    <string name="permission_denied">Δεν επιτρέπεται</string>
+    <string name="reset">Επαναφορά</string>
+    <string name="reset_to_default">Επαναφορά στις προεπιλογές</string>
+    <string name="discard_and_leave">Απόρριψη και έξοδος</string>
+    <string name="please_wait">Παρακαλώ περιμένετε…</string>
+    <string name="link_destination">Προορισμός συνδέσμου</string>
+    <string name="open_in_browser">Άνοιγμα στο πρόγραμμα περιήγησης</string>
+    <string name="toggle_word_wrap">Εναλλαγή αναδίπλωσης γραμμών</string>
+    <string name="custom">Προσαρμοσμένο</string>
+    <string name="search">Αναζήτηση</string>
+    <string name="search_no_matches">Δεν βρέθηκαν αντιστοιχίες</string>
+    <string name="search_match_position">Αντιστοιχία %1$d από %2$d</string>
+    <string name="search_next_match">Επόμενη αντιστοιχία</string>
+
+    <!-- Κεντρικοί υπολογιστές -->
+    <string name="hosts_title">Κεντρικοί υπολογιστές</string>
+    <string name="no_ssh_hosts_added_yet">Δεν έχουν προστεθεί ακόμη κεντρικοί υπολογιστές SSH.</string>
+    <string name="empty_list_add_prompt">Πατήστε το κουμπί + για να προσθέσετε έναν.</string>
+    <string name="connect_to_host">Σύνδεση στο %s</string>
+    <string name="add_ssh_host">Προσθήκη κεντρικού υπολογιστή SSH</string>
+    <string name="add_host_title">Προσθήκη κεντρικού υπολογιστή</string>
+    <string name="edit_host_title">Επεξεργασία κεντρικού υπολογιστή</string>
+    <string name="host_deleted">Ο κεντρικός υπολογιστής διαγράφηκε</string>
+    <string name="clone">Κλωνοποίηση</string>
+    <string name="hostname_or_ip">Όνομα κεντρικού υπολογιστή ή IP</string>
+    <string name="port">Θύρα</string>
+    <string name="user">Χρήστης</string>
+    <string name="password">Κωδικός πρόσβασης</string>
+    <string name="hide_password">Απόκρυψη κωδικού πρόσβασης</string>
+    <string name="show_password">Εμφάνιση κωδικού πρόσβασης</string>
+    <string name="password_lost">Ο κωδικός πρόσβασης χάθηκε</string>
+    <string name="password_saved">Ο κωδικός πρόσβασης αποθηκεύτηκε</string>
+    <string name="passwords_not_backed_up">Δεν δημιουργούνται αντίγραφα ασφαλείας των κωδικών πρόσβασης, παρακαλώ εισαγάγετέ τους ξανά</string>
+    <string name="enter_new_password_or_empty">Εισαγάγετε νέο κωδικό πρόσβασης ή αφήστε το κενό για εκκαθάριση</string>
+    <string name="optional_password_prompt">Προαιρετικό, θα ζητηθεί αν δεν δοθεί</string>
+    <string name="optional">Προαιρετικό</string>
+    <string name="re_enter">Εισαγωγή ξανά</string>
+    <string name="change_or_clear">Αλλαγή ή εκκαθάριση</string>
+    <string name="unsaved_changes_title">Μη αποθηκευμένες αλλαγές</string>
+    <string name="unsaved_changes_text">Θέλετε να αποθηκεύσετε τον κεντρικό υπολογιστή πριν φύγετε;</string>
+    <string name="save_and_leave">Αποθήκευση και έξοδος</string>
+    <string name="stay">Παραμονή</string>
+    <string name="connection_error">Σφάλμα σύνδεσης</string>
+    <string name="host_key_verification">Επαλήθευση κλειδιού κεντρικού υπολογιστή</string>
+    <string name="accept">Αποδοχή</string>
+    <string name="reject">Απόρριψη</string>
+    <string name="saved_host_keys">Αποθηκευμένα κλειδιά κεντρικού υπολογιστή: %d</string>
+    <string name="connection_details_only">Μόνο στοιχεία σύνδεσης</string>
+    <string name="identity_info_format">%1$s - %2$s</string>
+    <string name="select_host">Επιλέξτε κεντρικό υπολογιστή</string>
+    <string name="no_hosts_found">Δεν βρέθηκαν κεντρικοί υπολογιστές</string>
+
+    <!-- Απομακρυσμένος έλεγχος -->
+    <string name="tab_remote">Τηλεχειριστήριο</string>
+    <string name="tab_mouse">Ποντίκι</string>
+    <string name="tab_keyboard">Πληκτρολόγιο</string>
+    <string name="tab_commands">Εντολές</string>
+    <string name="edit_remote_control">Επεξεργασία τηλεχειριστηρίου</string>
+    <string name="edit_remote_to_add_commands">Επεξεργαστείτε το τηλεχειριστήριο για να προσθέσετε εντολές.</string>
+    <string name="remote_control_group">Τηλεχειριστήριο</string>
+    <string name="select_preset">Επιλογή προεπιλογής</string>
+    <string name="no_preset">Χωρίς προεπιλογή</string>
+    <string name="unsaved_changes_remote_control_text">Θέλετε να αποθηκεύσετε τις αλλαγές σας πριν φύγετε;</string>
+    <string name="reset_commands_title">Επαναφορά εντολών;</string>
+    <string name="reset_commands_text">Αυτό θα επαναφέρει όλες τις εντολές του τηλεχειριστηρίου στις προεπιλεγμένες τιμές %s.</string>
+    <string name="reset_to_preset_title">Επαναφορά σε προεπιλογή</string>
+    <string name="set_as_default_tab">Ορισμός ως προεπιλεγμένης καρτέλας</string>
+    <string name="ad_hoc_command">Ad-hoc εντολή</string>
+    <string name="ad_hoc_command_title">Ad-Hoc Εντολή</string>
+    <string name="command">Εντολή</string>
+    <string name="execute">Εκτέλεση</string>
+    <string name="command_output">Έξοδος εντολής</string>
+    <string name="command_output_label">Έξοδος εντολής</string>
+    <string name="show_output">Εμφάνιση εξόδου</string>
+    <string name="render_output_as_markdown">Απόδοση εξόδου ως Markdown</string>
+    <string name="clear_history">Εκκαθάριση ιστορικού</string>
+    <string name="no_commands_added">Δεν έχουν προστεθεί εντολές.</string>
+    <string name="add_command">Προσθήκη εντολής</string>
+    <string name="edit_command">Επεξεργασία εντολής</string>
+    <string name="command_deleted">Η εντολή διαγράφηκε</string>
+    <string name="repeat_command_while_pressed">Επανάληψη εντολής όσο το κουμπί παραμένει πατημένο</string>
+    <string name="long_press_command">Εντολή παρατεταμένου πατήματος</string>
+    <string name="key_title_format">Πλήκτρο: %s</string>
+    <string name="fullscreen">Πλήρης οθόνη</string>
+    <string name="exit_fullscreen">Έξοδος από πλήρη οθόνη</string>
+    <string name="disconnect">Αποσύνδεση</string>
+    <string name="configure_remote_commands_prompt">Παρακαλώ ρυθμίστε τις εντολές του τηλεχειριστηρίου μπαίνοντας σε λειτουργία επεξεργασίας μέσω του μενού.</string>
+    <string name="tap_to_edit_button_command">Πατήστε ένα κουμπί για να επεξεργαστείτε την εντολή του</string>
+    <string name="run_command_in_background">Εκτέλεση εντολής στο παρασκήνιο</string>
+    <string name="shortcut_label">Ετικέτα συντόμευσης</string>
+    <string name="connecting">Σύνδεση…</string>
+    <string name="executing_command">Εκτέλεση εντολής…</string>
+    <string name="executing_on">Εκτέλεση στο %s</string>
+    <string name="sharing_to">Κοινοποίηση σε %s</string>
+
+    <!-- Κουμπιά / Πλήκτρα -->
+    <string name="key_back">Πίσω</string>
+    <string name="key_home">Αρχική</string>
+    <string name="key_menu">Μενού</string>
+    <string name="key_previous">Προηγούμενο</string>
+    <string name="key_play_pause">Αναπαραγωγή/Παύση</string>
+    <string name="key_next">Επόμενο</string>
+    <string name="key_up">Πάνω</string>
+    <string name="key_right">Δεξιά</string>
+    <string name="key_down">Κάτω</string>
+    <string name="key_left">Αριστερά</string>
+    <string name="key_select">Επιλογή</string>
+    <string name="key_volume_down">Μείωση έντασης</string>
+    <string name="key_mute">Σίγαση</string>
+    <string name="key_volume_up">Αύξηση έντασης</string>
+
+    <!-- Ποντίκι -->
+    <string name="mouse_pad">Επιφάνεια ποντικιού</string>
+    <string name="mouse_pad_disabled">Η επιφάνεια ποντικιού είναι απενεργοποιημένη</string>
+    <string name="mouse_commands_not_configured">Οι εντολές ποντικιού δεν έχουν ρυθμιστεί</string>
+    <string name="left_click">Αριστερό κλικ</string>
+    <string name="right_click">Δεξί κλικ</string>
+    <string name="tap_to_edit_mouse_commands">Πατήστε για να επεξεργαστείτε τις εντολές ποντικιού</string>
+    <string name="tap_to_left_click">Πατήστε για αριστερό κλικ</string>
+    <string name="long_press_to_click_and_drag">Παρατεταμένο πάτημα για κλικ και μεταφορά</string>
+    <string name="long_press_two_fingers_to_right_click">Παρατεταμένο πάτημα με δύο δάχτυλα για δεξί κλικ</string>
+    <string name="scroll_using_two_fingers">Κύλιση με δύο δάχτυλα</string>
+    <string name="edit_mouse_commands">Επεξεργασία εντολών ποντικιού</string>
+    <string name="key_mouse_move">Μετακίνηση ποντικιού</string>
+    <string name="key_mouse_left_down">Αριστερό κουμπί κάτω</string>
+    <string name="key_mouse_left_up">Αριστερό κουμπί πάνω</string>
+    <string name="key_mouse_right_down">Δεξί κουμπί κάτω</string>
+    <string name="key_mouse_right_up">Δεξί κουμπί πάνω</string>
+    <string name="key_mouse_pan_up">Κίνηση δύο δαχτύλων πάνω</string>
+    <string name="key_mouse_pan_down">Κίνηση δύο δαχτύλων κάτω</string>
+    <string name="key_mouse_pan_left">Κίνηση δύο δαχτύλων αριστερά</string>
+    <string name="key_mouse_pan_right">Κίνηση δύο δαχτύλων δεξιά</string>
+
+    <!-- Πληκτρολόγιο -->
+    <string name="keyboard_commands_not_configured">Οι εντολές πληκτρολογίου δεν έχουν ρυθμιστεί</string>
+    <string name="edit_keyboard_commands">Επεξεργασία εντολών πληκτρολογίου</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_ctrl">Ctrl</string>
+    <string name="key_alt">Alt</string>
+    <string name="key_shift">Shift</string>
+    <string name="key_super">Super</string>
+    <string name="key_caps">Caps</string>
+    <string name="key_del">Del</string>
+    <string name="key_pageup">PgUp</string>
+    <string name="key_pagedown">PgDn</string>
+    <string name="key_end">End</string>
+    <string name="key_keyboard_type_text">Πληκτρολόγηση κειμένου</string>
+    <string name="key_keyboard_key_press">Πάτημα πλήκτρου πληκτρολογίου</string>
+    <string name="key_keyboard_key_down">Πάτημα πλήκτρου κάτω</string>
+    <string name="key_keyboard_key_up">Απελευθέρωση πλήκτρου</string>
+
+    <!-- Ρυθμίσεις SSH -->
+    <string name="advanced_ssh_config">Προηγμένες ρυθμίσεις SSH</string>
+    <string name="advanced_users_only">Μόνο για προχωρημένους χρήστες</string>
+    <string name="advanced_users_warning">Η αλλαγή τιμών ρυθμίσεων SSH προορίζεται για προχωρημένους χρήστες. Εσφαλμένες ρυθμίσεις μπορεί να εμποδίσουν τη σύνδεση.</string>
+    <string name="i_know_what_i_am_doing">Ξέρω τι κάνω</string>
+    <string name="ssh_configuration_title">Ρυθμίσεις SSH</string>
+    <string name="jsch_config_description">Οι ρυθμίσεις του JSch μοιάζουν κυρίως με του OpenSSH, αλλά όχι ακριβώς. Παρακαλώ κάντε την έρευνά σας (πατήστε το κουμπί Βοήθεια παρακάτω).</string>
+    <string name="strict_host_key_checking">Αυστηρός έλεγχος κλειδιού κεντρικού υπολογιστή</string>
+    <string name="allow_password_prompting">Να επιτρέπεται η προτροπή για κωδικό πρόσβασης</string>
+
+    <!-- Κλειδιά SSH -->
+    <string name="ssh_keys">Κλειδιά SSH</string>
+    <string name="ssh_key">Κλειδί SSH</string>
+    <string name="add_ssh_key">Προσθήκη κλειδιού SSH</string>
+    <string name="add_ssh_key_title">Προσθήκη κλειδιού SSH</string>
+    <string name="no_ssh_keys_added_yet">Δεν έχουν προστεθεί ακόμη κλειδιά SSH.</string>
+    <string name="ssh_key_deleted">Το κλειδί SSH διαγράφηκε</string>
+    <string name="use_any_key">Χρήση οποιουδήποτε κλειδιού</string>
+    <string name="do_not_use_keys">Να μη χρησιμοποιηθούν κλειδιά</string>
+    <string name="select_public_key">Επιλογή δημόσιου κλειδιού</string>
+    <string name="public_key_copied">Το δημόσιο κλειδί αντιγράφηκε στον κεντρικό υπολογιστή.</string>
+    <string name="push_public_key">Αποστολή δημόσιου κλειδιού</string>
+    <string name="passphrase">Φράση πρόσβασης</string>
+    <string name="hide_passphrase">Απόκρυψη φράσης πρόσβασης</string>
+    <string name="show_passphrase">Εμφάνιση φράσης πρόσβασης</string>
+    <string name="passphrase_protected">Προστατεύεται με φράση πρόσβασης</string>
+    <string name="view_public_key">Προβολή δημόσιου κλειδιού</string>
+    <string name="export_public_key">Εξαγωγή δημόσιου κλειδιού</string>
+    <string name="public_key_title">Δημόσιο κλειδί</string>
+    <string name="public_ssh_key_label">Δημόσιο κλειδί SSH</string>
+    <string name="rename_ssh_key_title">Μετονομασία κλειδιού SSH</string>
+    <string name="new_name">Νέο όνομα</string>
+    <string name="invalid_key">Μη έγκυρο κλειδί</string>
+    <string name="invalid_key_format">Μη έγκυρη μορφή κλειδιού</string>
+    <string name="invalid_certificate_format">Μη έγκυρη μορφή πιστοποιητικού</string>
+    <string name="private_key">Ιδιωτικό κλειδί</string>
+    <string name="paste_from_clipboard">Επικόλληση από το πρόχειρο</string>
+    <string name="generated_key_name">Δημιουργημένο κλειδί</string>
+    <string name="generating_key_title">Δημιουργία κλειδιού</string>
+    <string name="please_wait_generating">Παρακαλώ περιμένετε όσο δημιουργείται το κλειδί…</string>
+    <string name="key_name_optional">Όνομα κλειδιού (προαιρετικό)</string>
+    <string name="key_name_default_hint">Το κλειδί SSH μου</string>
+    <string name="import_key_file_prompt">Εισαγωγή αρχείου ιδιωτικού κλειδιού SSH</string>
+    <string name="zip_keys_detected_title">Εντοπίστηκαν κλειδιά</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="one">Εντοπίστηκε %d κλειδί SSH στο αρχείο zip.</item>
+        <item quantity="other">Εντοπίστηκαν %d κλειδιά SSH στο αρχείο zip.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">Δεν βρέθηκαν έγκυρα ιδιωτικά κλειδιά SSH στο αρχείο zip.</string>
+    <string name="select_key_type_prompt">Επιλέξτε τον τύπο κλειδιού για δημιουργία</string>
+    <string name="or_scan_qr_code">ή σαρώστε έναν κωδικό QR</string>
+    <string name="tab_import">Εισαγωγή</string>
+    <string name="tab_generate">Δημιουργία</string>
+    <string name="tab_manual">Χειροκίνητα</string>
+    <string name="key_type_format">Τύπος κλειδιού: %s</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d bit)</string>
+    <string name="key_list_type_format">%1$s %2$d-bit</string>
+    <string name="unsaved_key_changes_text">Έχετε μη αποθηκευμένες αλλαγές. Θέλετε να αποθηκεύσετε το κλειδί πριν φύγετε;</string>
+    <string name="no_keys_found_prompt">Δεν βρέθηκαν κλειδιά. Δημιουργήστε ένα κλειδί SSH στις ρυθμίσεις της εφαρμογής.</string>
+    <string name="key_addition_info">Το κλειδί θα προστεθεί στο αρχείο ~/.ssh/authorized_keys του κεντρικού υπολογιστή.</string>
+    <string name="attach_certificate">Επισύναψη πιστοποιητικού</string>
+    <string name="certificate_attached">Το πιστοποιητικό επισυνάφθηκε</string>
+    <string name="replace_certificate_title">Αντικατάσταση πιστοποιητικού;</string>
+    <string name="replace_certificate_text">Αυτό το κλειδί έχει ήδη επισυναπτόμενο πιστοποιητικό. Θέλετε να το αντικαταστήσετε;</string>
+    <string name="delete_certificate">Διαγραφή πιστοποιητικού</string>
+    <string name="certificate">Πιστοποιητικό</string>
+
+    <!-- Ρυθμίσεις -->
+    <string name="settings">Ρυθμίσεις</string>
+    <string name="appearance">Εμφάνιση</string>
+    <string name="theme">Θέμα</string>
+    <string name="theme_system">Σύστημα</string>
+    <string name="theme_light">Ανοιχτό</string>
+    <string name="theme_dark">Σκούρο</string>
+    <string name="dynamic_colors">Δυναμικά χρώματα</string>
+    <string name="haptic_feedback">Απτική ανάδραση</string>
+    <string name="haptic_vibration_duration_label">Διάρκεια δόνησης σε χιλιοστά του δευτερολέπτου</string>
+    <string name="haptic_off">Απενεργοποιημένο</string>
+    <string name="haptic_short">Σύντομη (%d ms)</string>
+    <string name="haptic_medium">Μεσαία (%d ms)</string>
+    <string name="haptic_long">Μεγάλη (%d ms)</string>
+    <string name="haptic_custom">Προσαρμοσμένη (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
+    <string name="show_notification">Εμφάνιση ειδοποίησης</string>
+    <string name="keep_screen_on">Διατήρηση οθόνης ενεργής</string>
+    <string name="security">Ασφάλεια</string>
+    <string name="ssh_keys_subtitle">Διαχείριση κλειδιών SSH για έλεγχο ταυτότητας</string>
+    <string name="known_hosts">Γνωστοί κεντρικοί υπολογιστές</string>
+    <string name="known_hosts_subtitle">Διαχείριση έμπιστων κλειδιών και πιστοποιητικών κεντρικών υπολογιστών</string>
+    <string name="no_known_hosts_added_yet">Δεν έχουν προστεθεί ακόμη καταχωρίσεις γνωστών κεντρικών υπολογιστών.</string>
+    <string name="known_host_help_title">Μορφή καταχώρισης</string>
+    <string name="known_host_help_text">Οι καταχωρίσεις που προστίθενται εδώ χρησιμοποιούνται αυτόματα για όλους τους κεντρικούς υπολογιστές. Οι κεντρικοί υπολογιστές αποθηκεύουν επίσης τις δικές τους λίστες αποδεκτών κλειδιών.
+
+Η κύρια χρήση αυτής της ενότητας είναι η εμπιστοσύνη σε πιστοποιητικά κεντρικών υπολογιστών, για παράδειγμα:
+
+@cert-authority host.example.com ssh-ed25519 AAA…
+
+Υποστηρίζονται επίσης κανονικές καταχωρίσεις:
+
+host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_add_title">Προσθήκη καταχωρίσεων γνωστών κεντρικών υπολογιστών</string>
+    <string name="known_host_input_label">Επικολλήστε μία καταχώριση ανά γραμμή</string>
+    <string name="add_entries">Προσθήκη καταχωρίσεων</string>
+    <string name="known_host_import_summary">Έγκυρες καταχωρίσεις: %d</string>
+    <string name="known_host_deleted">Η καταχώριση γνωστού κεντρικού υπολογιστή διαγράφηκε</string>
+    <string name="view_host_key">Προβολή κλειδιού κεντρικού υπολογιστή</string>
+    <string name="scan_qr_code_known_host_prompt">Σαρώστε κωδικό QR για εισαγωγή καταχωρίσεων γνωστών κεντρικών υπολογιστών</string>
+    <string name="colors">Χρώματα</string>
+    <string name="customize_colors">Προσαρμόστε τα χρώματα της εφαρμογής</string>
+    <string name="color_options">Επιλογές χρωμάτων</string>
+    <string name="color_overrides">Παρακάμψεις χρωμάτων</string>
+    <string name="choose_a_color">Επιλέξτε χρώμα</string>
+    <string name="primary_color">Κύριο χρώμα</string>
+    <string name="choose_primary_color">Επιλέξτε κύριο χρώμα</string>
+    <string name="choose_on_primary_color">Επιλέξτε χρώμα κειμένου πάνω στο κύριο</string>
+    <string name="text_on_primary_color">Χρώμα κειμένου πάνω στο κύριο</string>
+    <string name="background_color">Χρώμα φόντου</string>
+    <string name="choose_background_color">Επιλέξτε χρώμα φόντου</string>
+    <string name="hsl">HSL</string>
+    <string name="rgb">RGB</string>
+    <string name="hue_format">Απόχρωση: %d</string>
+    <string name="saturation_format">Κορεσμός: %d%%</string>
+    <string name="lightness_format">Φωτεινότητα: %d%%</string>
+    <string name="red_format">Κόκκινο: %d</string>
+    <string name="green_format">Πράσινο: %d</string>
+    <string name="blue_format">Μπλε: %d</string>
+
+    <!-- Διαχείριση δεδομένων -->
+    <string name="data">Δεδομένα</string>
+    <string name="restored_from_backup_title">Έγινε επαναφορά από αντίγραφο ασφαλείας</string>
+    <string name="restored_from_backup_text">Τα δεδομένα της εφαρμογής επαναφέρθηκαν από αντίγραφο ασφαλείας. Για λόγους ασφαλείας, κρυπτογραφημένα δεδομένα όπως κλειδιά SSH και κωδικοί πρόσβασης δεν περιλαμβάνονται στα αντίγραφα ασφαλείας.
+
+Παρακαλώ ρυθμίστε τα ξανά.</string>
+    <string name="export_to_file">Εξαγωγή σε αρχείο</string>
+    <string name="export_to_file_subtitle">Εξαγωγή ρυθμίσεων και κεντρικών υπολογιστών σε αρχείο.</string>
+    <string name="import_from_file">Εισαγωγή από αρχείο</string>
+    <string name="import_from_file_subtitle">Εισαγωγή ρυθμίσεων και κεντρικών υπολογιστών από αρχείο.</string>
+    <string name="select_file">Επιλογή αρχείου</string>
+    <string name="export_to_qr_code">Εξαγωγή σε κωδικό QR</string>
+    <string name="export_to_qr_code_subtitle">Εξαγωγή ρυθμίσεων και κεντρικών υπολογιστών σε κωδικό QR.</string>
+    <string name="export_host_title">Εξαγωγή κεντρικού υπολογιστή</string>
+    <string name="choose_what_to_include">Επιλέξτε τι θα συμπεριληφθεί στον κωδικό QR.</string>
+    <string name="full_configuration">Πλήρης ρύθμιση</string>
+    <string name="export_settings_too_large_for_qr">Τα δεδομένα είναι υπερβολικά μεγάλα για κωδικό QR. Χρησιμοποιήστε εξαγωγή σε αρχείο.</string>
+    <string name="import_from_qr_code">Εισαγωγή από κωδικό QR</string>
+    <string name="import_from_qr_code_subtitle">Εισαγωγή ρυθμίσεων και κεντρικών υπολογιστών από κωδικό QR.</string>
+    <string name="scan_qr_code">Σάρωση κωδικού QR</string>
+    <string name="scan_qr_code_prompt">Σαρώστε έναν κωδικό QR για εισαγωγή κεντρικού υπολογιστή</string>
+    <string name="scan_qr_code_to_import">Σαρώστε τον κωδικό QR για να εισαγάγετε κεντρικό υπολογιστή</string>
+    <string name="scan_qr_code_settings_prompt">Σαρώστε έναν κωδικό QR για εισαγωγή ρυθμίσεων</string>
+    <string name="scan_qr_code_to_import_settings">Σαρώστε τον κωδικό QR για να εισαγάγετε ρυθμίσεις</string>
+    <string name="scan_qr_code_key_prompt">Σαρώστε κωδικό QR για εισαγωγή κλειδιού SSH</string>
+    <string name="scan_qr_code_public_key_prompt">Αυτός ο κωδικός QR περιέχει το δημόσιο κλειδί SSH σας</string>
+    <string name="scan_qr_code_certificate_prompt">Σαρώστε κωδικό QR για εισαγωγή πιστοποιητικού SSH</string>
+    <string name="qr_code_content_description">Κωδικός QR</string>
+    <string name="import_settings_title">Εισαγωγή ρυθμίσεων</string>
+    <string name="import_settings_text">Σε περίπτωση συγκρούσεων με υπάρχοντες κεντρικούς υπολογιστές, θέλετε ενημέρωση ή δημιουργία διπλοτύπου;
+
+Μπορείτε επίσης να επιλέξετε Αντικατάσταση, που θα διαγράψει όλους τους υπάρχοντες κεντρικούς υπολογιστές.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="one">Εισήχθη επιτυχώς %d κεντρικός υπολογιστής.</item>
+        <item quantity="other">Εισήχθησαν επιτυχώς %d κεντρικοί υπολογιστές.</item>
+    </plurals>
+
+    <!-- Σχετικά -->
+    <string name="about_app">Σχετικά με το SSH Remote</string>
+    <string name="app_version">Έκδοση εφαρμογής</string>
+    <string name="author">Δημιουργός</string>
+    <string name="author_name">Αναπτύχθηκε από τον Stefan Sundin</string>
+    <string name="donate">Δωρεά</string>
+    <string name="support_developer">Υποστηρίξτε τον δημιουργό</string>
+    <string name="license">Άδεια</string>
+    <string name="license_name">GNU General Public License v3.0</string>
+    <string name="source_code">Πηγαίος κώδικας</string>
+    <string name="view_on_github">Προβολή στο GitHub</string>
+    <string name="ssh_library">Βιβλιοθήκη SSH</string>
+    <string name="ssh_library_subtitle">Χρησιμοποιείται %1$s %2$s</string>
+
+    <!-- Βοήθεια & Ένταση -->
+    <string name="help">Βοήθεια</string>
+    <string name="tap_the_help_button_for_help">Πατήστε το κουμπί ? για βοήθεια.</string>
+    <string name="getting_started_title">Ξεκινώντας</string>
+    <string name="getting_started_text">Τα κουμπιά στο τηλεχειριστήριο αντιστοιχίζονται σε συγκεκριμένες εντολές που εκτελούνται στον κεντρικό υπολογιστή.
+
+Πρέπει να εγκαταστήσετε το κατάλληλο εργαλείο στον κεντρικό υπολογιστή· ποιο είναι αυτό εξαρτάται από το ποιον διαχειριστή παραθύρων χρησιμοποιεί ο κεντρικός υπολογιστής (X11 ή Wayland).
+
+Για να ξεκινήσετε, παρακαλώ επιλέξτε μια προεπιλογή. Μπορείτε πάντα να επαναφέρετε σε προεπιλογή αργότερα επεξεργαζόμενοι το τηλεχειριστήριο.
+
+Παρακαλώ διαβάστε τη σελίδα Βοήθειας αν είναι η πρώτη φορά που χρησιμοποιείτε αυτή την εφαρμογή.</string>
+    <string name="error_reading_volume">Σφάλμα ανάγνωσης έντασης. Παρακαλώ εγκαταστήστε το pactl.</string>
+    <string name="volume_format">Ένταση: %s</string>
+    <string name="volume_muted_format">Ένταση: %s (σε σίγαση)</string>
+    <string name="smart_volume_settings">Έξυπνες ρυθμίσεις έντασης</string>
+    <string name="read_current_volume">Ανάγνωση τρέχουσας έντασης</string>
+    <string name="show_volume_slider">Εμφάνιση ρυθμιστικού έντασης</string>
+    <string name="control_volume_with_hardware_buttons">Έλεγχος έντασης με τα κουμπιά υλικού</string>
+    <string name="test_pactl">Δοκιμή pactl</string>
+    <string name="pactl_installation_requirement">Απαιτεί να είναι εγκατεστημένο το pactl.</string>
+
+    <!-- Ειδοποιήσεις -->
+    <string name="notification_channel_name">Τηλεχειριστήριο</string>
+    <string name="notification_connected_to">Συνδέθηκε στο %s</string>
+    <string name="notification_connecting_to">Σύνδεση στο %s</string>
+    <string name="notification_disconnected_from">Αποσυνδέθηκε από το %s</string>
+    <string name="notification_active">Το τηλεχειριστήριο είναι ενεργό</string>
+    <string name="notification_inactive">Το τηλεχειριστήριο είναι ανενεργό</string>
+    <string name="notification_open">Άνοιγμα</string>
+    <string name="notification_close">Κλείσιμο</string>
+
+    <!-- Συντομεύσεις -->
+    <string name="add_to_home_screen">Προσθήκη στην αρχική οθόνη</string>
+    <string name="run_command_on_host_short">%1$s στο %2$s</string>
+    <string name="run_command_on_host_long">Εκτέλεση %1$s στο %2$s</string>
+    <string name="shortcut_host_not_found">Ο κεντρικός υπολογιστής δεν βρέθηκε.</string>
+    <string name="shortcut_command_not_found">Η εντολή δεν βρέθηκε.</string>
+    <string name="shortcut_remote_control_key_not_found">Η ενέργεια συντόμευσης δεν υποστηρίζεται πλέον.</string>
+    <string name="shortcut_save_changes_before_using">Παρακαλώ αποθηκεύστε τις αλλαγές του τηλεχειριστηρίου πριν χρησιμοποιήσετε συντομεύσεις.</string>
+
+    <!-- Κοινοποίηση -->
+    <string name="sharing">Κοινοποίηση</string>
+    <string name="share_target_enabled">Ενεργοποίηση στόχου κοινοποίησης</string>
+    <string name="share_target_enabled_subtitle">Αυτή η εφαρμογή θα εμφανίζεται στο μενού κοινοποίησης για απλό κείμενο. Από προεπιλογή, το κοινόχρηστο κείμενο θα πληκτρολογείται στον συνδεδεμένο κεντρικό υπολογιστή χρησιμοποιώντας την εντολή πληκτρολόγησης του πληκτρολογίου, αλλά αυτό μπορεί να προσαρμοστεί ανά κεντρικό υπολογιστή.</string>
+    <string name="share_target_disabled_title">Ο στόχος κοινοποίησης είναι απενεργοποιημένος</string>
+    <string name="share_target_disabled_text">Ενεργοποιήστε πρώτα τη ρύθμιση στόχου κοινοποίησης. Μπορεί να βρεθεί στις ρυθμίσεις της εφαρμογής.</string>
+    <string name="share_missing_share_command_title">Η εντολή κοινοποίησης δεν έχει ρυθμιστεί</string>
+    <string name="share_missing_share_command_text">Αυτός ο κεντρικός υπολογιστής δεν έχει ρυθμισμένη εντολή κοινοποίησης. Επεξεργαστείτε το τηλεχειριστήριο του κεντρικού υπολογιστή και ορίστε μια εντολή για κοινοποίηση κειμένου.</string>
+    <string name="share_text">Κοινοποίηση κειμένου</string>
+    <string name="share_target_settings">Ρυθμίσεις στόχου κοινοποίησης</string>
+    <string name="use_keyboard_type_command">Χρήση εντολής πληκτρολόγησης του πληκτρολογίου</string>
+    <string name="custom_share_command">Προσαρμοσμένη εντολή κοινοποίησης</string>
+    <string name="share_command_placeholder">Το %s θα αντικατασταθεί με το κοινόχρηστο κείμενο</string>
+
+</resources>

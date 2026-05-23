@@ -1,0 +1,415 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Common -->
+    <string name="app_name">SSH Remote</string>
+    <string name="ok">Во ред</string>
+    <string name="cancel">Откажи</string>
+    <string name="save">Зачувај</string>
+    <string name="close">Затвори</string>
+    <string name="error">Грешка</string>
+    <string name="error_format">Грешка: %s</string>
+    <string name="copy">Копирај</string>
+    <string name="share">Сподели</string>
+    <string name="edit">Уреди</string>
+    <string name="delete">Избриши</string>
+    <string name="undo">Врати</string>
+    <string name="rename">Преименувај</string>
+    <string name="reorder">Преуреди</string>
+    <string name="clear">Исчисти</string>
+    <string name="more">Повеќе</string>
+    <string name="more_options">Повеќе опции</string>
+    <string name="back">Назад</string>
+    <string name="go_back">Врати се</string>
+    <string name="navigate_back">Назад</string>
+    <string name="message">Порака</string>
+    <string name="name">Име</string>
+    <string name="name_optional">Име (изборно)</string>
+    <string name="loading">Се вчитува…</string>
+    <string name="update">Ажурирај</string>
+    <string name="duplicate">Дуплирај</string>
+    <string name="replace">Замени</string>
+    <string name="permission_denied">Дозволата е одбиена</string>
+    <string name="reset">Ресетирај</string>
+    <string name="reset_to_default">Ресетирај на стандардно</string>
+    <string name="discard_and_leave">Отфрли и излези</string>
+    <string name="please_wait">Ве молиме почекајте…</string>
+    <string name="link_destination">Одредиште на врска</string>
+    <string name="open_in_browser">Отвори во прелистувач</string>
+    <string name="toggle_word_wrap">Вклучи/исклучи пренос на зборови</string>
+    <string name="custom">Прилагодено</string>
+    <string name="search">Пребарај</string>
+    <string name="search_no_matches">Не се пронајдени совпаѓања</string>
+    <string name="search_match_position">Совпаѓање %1$d од %2$d</string>
+    <string name="search_next_match">Следно совпаѓање</string>
+
+    <!-- Hosts -->
+    <string name="hosts_title">Хостови</string>
+    <string name="no_ssh_hosts_added_yet">Сѐ уште не се додадени SSH хостови.</string>
+    <string name="empty_list_add_prompt">Допрете го копчето + за да додадете.</string>
+    <string name="connect_to_host">Поврзи се со %s</string>
+    <string name="add_ssh_host">Додај SSH хост</string>
+    <string name="add_host_title">Додај хост</string>
+    <string name="edit_host_title">Уреди хост</string>
+    <string name="host_deleted">Хостот е избришан</string>
+    <string name="clone">Клонирај</string>
+    <string name="hostname_or_ip">Име на хост или IP</string>
+    <string name="port">Порта</string>
+    <string name="user">Корисник</string>
+    <string name="password">Лозинка</string>
+    <string name="hide_password">Сокриј лозинка</string>
+    <string name="show_password">Прикажи лозинка</string>
+    <string name="password_lost">Лозинката е изгубена</string>
+    <string name="password_saved">Лозинката е зачувана</string>
+    <string name="passwords_not_backed_up">Лозинките не се прават резервна копија, ве молиме внесете ги повторно</string>
+    <string name="enter_new_password_or_empty">Внесете нова лозинка или оставете празно за да ја исчистите</string>
+    <string name="optional_password_prompt">Изборно, ќе биде побарана ако не е внесена</string>
+    <string name="optional">Изборно</string>
+    <string name="re_enter">Внеси повторно</string> <!-- context: "Re-enter" a lost password -->
+    <string name="change_or_clear">Промени или исчисти</string>
+    <string name="unsaved_changes_title">Незачувани промени</string>
+    <string name="unsaved_changes_text">Дали сакате да го зачувате хостот пред да заминете?</string>
+    <string name="save_and_leave">Зачувај и излези</string>
+    <string name="stay">Остани</string>
+    <string name="connection_error">Грешка при поврзување</string>
+    <string name="host_key_verification">Проверка на клуч на хост</string>
+    <string name="accept">Прифати</string>
+    <string name="reject">Одбиј</string>
+    <string name="saved_host_keys">Зачувани клучеви на хост: %d</string>
+    <string name="connection_details_only">Само детали за поврзување</string>
+    <string name="identity_info_format">%1$s - %2$s</string>
+    <string name="select_host">Изберете хост</string>
+    <string name="no_hosts_found">Не се пронајдени хостови</string>
+
+    <!-- Remote Control -->
+    <string name="tab_remote">Далечински</string>
+    <string name="tab_mouse">Глушец</string>
+    <string name="tab_keyboard">Тастатура</string>
+    <string name="tab_commands">Команди</string>
+    <string name="edit_remote_control">Уреди далечински управувач</string>
+    <string name="edit_remote_to_add_commands">Уредете го далечинскиот управувач за да додадете команди.</string>
+    <string name="remote_control_group">Далечински управувач</string>
+    <string name="select_preset">Изберете пресет</string>
+    <string name="no_preset">Без пресет</string>
+    <string name="unsaved_changes_remote_control_text">Дали сакате да ги зачувате вашите промени пред да излезете?</string>
+    <string name="reset_commands_title">Да се ресетираат командите?</string>
+    <string name="reset_commands_text">Ова ќе ги ресетира сите команди на далечинскиот управувач на нивните стандардни %s вредности.</string>
+    <string name="reset_to_preset_title">Ресетирај на пресет</string>
+    <string name="set_as_default_tab">Постави како стандардно јазиче</string>
+    <string name="ad_hoc_command">Ad-hoc команда</string>
+    <string name="ad_hoc_command_title">Ad-Hoc команда</string>
+    <string name="command">Команда</string>
+    <string name="execute">Изврши</string>
+    <string name="command_output">Излез од команда</string>
+    <string name="command_output_label">Излез од команда</string>
+    <string name="show_output">Прикажи излез</string>
+    <string name="render_output_as_markdown">Прикажи го излезот како Markdown</string>
+    <string name="clear_history">Исчисти историја</string>
+    <string name="no_commands_added">Не се додадени команди.</string>
+    <string name="add_command">Додај команда</string>
+    <string name="edit_command">Уреди команда</string>
+    <string name="command_deleted">Командата е избришана</string>
+    <string name="repeat_command_while_pressed">Повторувај ја командата додека копчето е притиснато</string>
+    <string name="long_press_command">Команда при долго притискање</string>
+    <string name="key_title_format">Копче: %s</string>
+    <string name="fullscreen">Цел екран</string>
+    <string name="exit_fullscreen">Излези од цел екран</string>
+    <string name="disconnect">Прекини врска</string>
+    <string name="configure_remote_commands_prompt">Ве молиме конфигурирајте ги командите на далечинскиот управувач со влегување во режим за уредување преку менито.</string>
+    <string name="tap_to_edit_button_command">Допрете копче за да ја уредите неговата команда</string>
+    <string name="run_command_in_background">Изврши команда во позадина</string>
+    <string name="shortcut_label">Ознака на кратенка</string>
+    <string name="connecting">Се поврзува…</string>
+    <string name="executing_command">Се извршува команда…</string>
+    <string name="executing_on">Се извршува на %s</string>
+    <string name="sharing_to">Се споделува на %s</string>
+
+    <!-- Buttons / Keys -->
+    <string name="key_back">Назад</string>
+    <string name="key_home">Почетна</string>
+    <string name="key_menu">Мени</string>
+    <string name="key_previous">Претходно</string>
+    <string name="key_play_pause">Пушти/Пауза</string>
+    <string name="key_next">Следно</string>
+    <string name="key_up">Горе</string>
+    <string name="key_right">Десно</string>
+    <string name="key_down">Долу</string>
+    <string name="key_left">Лево</string>
+    <string name="key_select">Избери</string>
+    <string name="key_volume_down">Намали звук</string>
+    <string name="key_mute">Без звук</string>
+    <string name="key_volume_up">Зголеми звук</string>
+
+    <!-- Mouse -->
+    <string name="mouse_pad">Подлога за глушец</string>
+    <string name="mouse_pad_disabled">Подлогата за глушец е оневозможена</string>
+    <string name="mouse_commands_not_configured">Командите за глушец не се конфигурирани</string>
+    <string name="left_click">Лев клик</string>
+    <string name="right_click">Десен клик</string>
+    <string name="tap_to_edit_mouse_commands">Допрете за да ги уредите командите за глушец</string>
+    <string name="tap_to_left_click">Допрете за лев клик</string>
+    <string name="long_press_to_click_and_drag">Долго притиснете за клик и влечење</string>
+    <string name="long_press_two_fingers_to_right_click">Долго притиснете со два прста за десен клик</string>
+    <string name="scroll_using_two_fingers">Лизгајте со два прста</string>
+    <string name="edit_mouse_commands">Уреди команди за глушец</string>
+    <string name="key_mouse_move">Движење на глушец</string>
+    <string name="key_mouse_left_down">Лево копче надолу</string>
+    <string name="key_mouse_left_up">Лево копче нагоре</string>
+    <string name="key_mouse_right_down">Десно копче надолу</string>
+    <string name="key_mouse_right_up">Десно копче нагоре</string>
+    <string name="key_mouse_pan_up">Два прста нагоре</string>
+    <string name="key_mouse_pan_down">Два прста надолу</string>
+    <string name="key_mouse_pan_left">Два прста лево</string>
+    <string name="key_mouse_pan_right">Два прста десно</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_commands_not_configured">Командите за тастатура не се конфигурирани</string>
+    <string name="edit_keyboard_commands">Уреди команди за тастатура</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_ctrl">Ctrl</string>
+    <string name="key_alt">Alt</string>
+    <string name="key_shift">Shift</string>
+    <string name="key_super">Super</string>
+    <string name="key_caps">Caps</string>
+    <string name="key_del">Del</string>
+    <string name="key_pageup">PgUp</string>
+    <string name="key_pagedown">PgDn</string>
+    <string name="key_end">End</string>
+    <string name="key_keyboard_type_text">Внесување текст од тастатура</string>
+    <string name="key_keyboard_key_press">Притискање копче на тастатура</string>
+    <string name="key_keyboard_key_down">Копче на тастатура надолу</string>
+    <string name="key_keyboard_key_up">Копче на тастатура нагоре</string>
+
+    <!-- SSH Configuration -->
+    <string name="advanced_ssh_config">Напредна SSH конфигурација</string>
+    <string name="advanced_users_only">Само за напредни корисници</string>
+    <string name="advanced_users_warning">Менувањето на вредностите на SSH конфигурацијата е наменето за напредни корисници. Неправилните поставки може да спречат поврзување.</string>
+    <string name="i_know_what_i_am_doing">Знам што правам</string>
+    <string name="ssh_configuration_title">SSH конфигурација</string>
+    <string name="jsch_config_description">JSch конфигурацијата е главно слична на OpenSSH, но не е иста. Ве молиме истражете сами (кликнете на копчето Помош подолу).</string>
+    <string name="strict_host_key_checking">Строга проверка на клуч на хост</string>
+    <string name="allow_password_prompting">Дозволи барање лозинка</string>
+
+    <!-- SSH Keys -->
+    <string name="ssh_keys">SSH клучеви</string>
+    <string name="ssh_key">SSH клуч</string>
+    <string name="add_ssh_key">Додај SSH клуч</string>
+    <string name="add_ssh_key_title">Додај SSH клуч</string>
+    <string name="no_ssh_keys_added_yet">Сѐ уште не се додадени SSH клучеви.</string>
+    <string name="ssh_key_deleted">SSH клучот е избришан</string>
+    <string name="use_any_key">Користи кој било клуч</string>
+    <string name="do_not_use_keys">Не користи клучеви</string>
+    <string name="select_public_key">Избери јавен клуч</string>
+    <string name="public_key_copied">Јавниот клуч е копиран на хостот.</string>
+    <string name="push_public_key">Испрати јавен клуч</string>
+    <string name="passphrase">Лозинка за клуч</string>
+    <string name="hide_passphrase">Сокриј лозинка за клуч</string>
+    <string name="show_passphrase">Прикажи лозинка за клуч</string>
+    <string name="passphrase_protected">Заштитено со лозинка за клуч</string>
+    <string name="view_public_key">Прикажи јавен клуч</string>
+    <string name="export_public_key">Извези јавен клуч</string>
+    <string name="public_key_title">Јавен клуч</string>
+    <string name="public_ssh_key_label">Јавен SSH клуч</string>
+    <string name="rename_ssh_key_title">Преименувај SSH клуч</string>
+    <string name="new_name">Ново име</string>
+    <string name="invalid_key">Невалиден клуч</string>
+    <string name="invalid_key_format">Невалиден формат на клуч</string>
+    <string name="invalid_certificate_format">Невалиден формат на сертификат</string>
+    <string name="private_key">Приватен клуч</string>
+    <string name="paste_from_clipboard">Залепи од таблата со исечоци</string>
+    <string name="generated_key_name">Генериран клуч</string>
+    <string name="generating_key_title">Се генерира клуч</string>
+    <string name="please_wait_generating">Ве молиме почекајте додека се генерира клучот…</string>
+    <string name="key_name_optional">Име на клуч (изборно)</string>
+    <string name="key_name_default_hint">Мој SSH клуч</string>
+    <string name="import_key_file_prompt">Увезете датотека со SSH приватен клуч</string>
+    <string name="zip_keys_detected_title">Откриени клучеви</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="one">Откриен е %d SSH клуч во zip-датотека.</item>
+        <item quantity="other">Откриени се %d SSH клучеви во zip-датотека.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">Не се пронајдени валидни SSH приватни клучеви во zip-датотеката.</string>
+    <string name="select_key_type_prompt">Изберете тип на клуч за генерирање</string>
+    <string name="or_scan_qr_code">или скенирај QR-код</string>
+    <string name="tab_import">Увоз</string>
+    <string name="tab_generate">Генерирај</string>
+    <string name="tab_manual">Рачно</string>
+    <string name="key_type_format">Тип на клуч: %s</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d бита)</string>
+    <string name="key_list_type_format">%1$s %2$d-битен</string>
+    <string name="unsaved_key_changes_text">Имате незачувани промени. Дали сакате да го зачувате клучот пред да излезете?</string>
+    <string name="no_keys_found_prompt">Не се пронајдени клучеви. Создадете SSH клуч во поставките на апликацијата.</string>
+    <string name="key_addition_info">Клучот ќе биде додаден во датотеката ~/.ssh/authorized_keys на хостот.</string>
+    <string name="attach_certificate">Прикачи сертификат</string>
+    <string name="certificate_attached">Сертификатот е прикачен</string>
+    <string name="replace_certificate_title">Да се замени сертификатот?</string>
+    <string name="replace_certificate_text">Овој клуч веќе има прикачен сертификат. Дали сакате да го замените?</string>
+    <string name="delete_certificate">Избриши сертификат</string>
+    <string name="certificate">Сертификат</string>
+
+    <!-- Settings -->
+    <string name="settings">Поставки</string>
+    <string name="appearance">Изглед</string>
+    <string name="theme">Тема</string>
+    <string name="theme_system">Системска</string>
+    <string name="theme_light">Светла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="dynamic_colors">Динамични бои</string>
+    <string name="haptic_feedback">Хаптички повратен одговор</string>
+    <string name="haptic_vibration_duration_label">Времетраење на вибрацијата во милисекунди</string>
+    <string name="haptic_off">Исклучено</string>
+    <string name="haptic_short">Кратко (%d ms)</string>
+    <string name="haptic_medium">Средно (%d ms)</string>
+    <string name="haptic_long">Долго (%d ms)</string>
+    <string name="haptic_custom">Прилагодено (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
+    <string name="show_notification">Прикажи известување</string>
+    <string name="keep_screen_on">Задржи го екранот вклучен</string>
+    <string name="security">Безбедност</string>
+    <string name="ssh_keys_subtitle">Управувај со SSH клучи за автентикација</string>
+    <string name="known_hosts">Познати хостови</string>
+    <string name="known_hosts_subtitle">Управувај со доверливи клучеви и сертификати на хостови</string>
+    <string name="no_known_hosts_added_yet">Сѐ уште не се додадени записи за познати хостови.</string>
+    <string name="known_host_help_title">Формат на запис</string>
+    <string name="known_host_help_text">Записите додадени овде автоматски се користат за сите хостови. Хостовите исто така чуваат свои листи на прифатени клучеви на хост.
+
+Примарната намена на овој дел е да им се верува на сертификатите на хостови, на пример:
+
+@cert-authority host.example.com ssh-ed25519 AAA…
+
+Поддржани се и обични записи:
+
+host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_add_title">Додај записи за познат хост</string>
+    <string name="known_host_input_label">Залепете по еден запис во секој ред</string>
+    <string name="add_entries">Додај записи</string>
+    <string name="known_host_import_summary">Валидни записи: %d</string>
+    <string name="known_host_deleted">Записот за познат хост е избришан</string>
+    <string name="view_host_key">Прикажи клуч на хост</string>
+    <string name="scan_qr_code_known_host_prompt">Скенирај QR-код за увоз на записи за познати хостови</string>
+    <string name="colors">Бои</string>
+    <string name="customize_colors">Прилагодете ги боите на апликацијата</string>
+    <string name="color_options">Опции за бои</string>
+    <string name="color_overrides">Замени на бои</string>
+    <string name="choose_a_color">Изберете боја</string>
+    <string name="primary_color">Примарна боја</string>
+    <string name="choose_primary_color">Изберете примарна боја</string>
+    <string name="choose_on_primary_color">Изберете боја на текст на примарната</string>
+    <string name="text_on_primary_color">Боја на текст на примарната</string>
+    <string name="background_color">Боја на заднина</string>
+    <string name="choose_background_color">Изберете боја на заднина</string>
+    <string name="hsl">HSL</string>
+    <string name="rgb">RGB</string>
+    <string name="hue_format">Нијанса: %d</string>
+    <string name="saturation_format">Заситеност: %d%%</string>
+    <string name="lightness_format">Светлина: %d%%</string>
+    <string name="red_format">Црвена: %d</string>
+    <string name="green_format">Зелена: %d</string>
+    <string name="blue_format">Сина: %d</string>
+
+    <!-- Data Management -->
+    <string name="data">Податоци</string>
+    <string name="restored_from_backup_title">Вратено од резервна копија</string>
+    <string name="restored_from_backup_text">Податоците на апликацијата се вратени од резервна копија. Од безбедносни причини, шифрираните податоци како SSH клучеви и лозинки не се вклучени во резервните копии.
+
+Ве молиме конфигурирајте ги повторно.</string>
+    <string name="export_to_file">Извези во датотека</string>
+    <string name="export_to_file_subtitle">Извези поставки и хостови во датотека.</string>
+    <string name="import_from_file">Увези од датотека</string>
+    <string name="import_from_file_subtitle">Увези поставки и хостови од датотека.</string>
+    <string name="select_file">Избери датотека</string>
+    <string name="export_to_qr_code">Извези во QR-код</string>
+    <string name="export_to_qr_code_subtitle">Извези поставки и хостови во QR-код.</string>
+    <string name="export_host_title">Извези хост</string>
+    <string name="choose_what_to_include">Изберете што да вклучите во QR-кодот.</string>
+    <string name="full_configuration">Целосна конфигурација</string>
+    <string name="export_settings_too_large_for_qr">Податоците се преголеми за QR-код. Наместо тоа користете извоз во датотека.</string>
+    <string name="import_from_qr_code">Увези од QR-код</string>
+    <string name="import_from_qr_code_subtitle">Увези поставки и хостови од QR-код.</string>
+    <string name="scan_qr_code">Скенирај QR-код</string>
+    <string name="scan_qr_code_prompt">Скенирај QR-код за увоз на хост</string>
+    <string name="scan_qr_code_to_import">Скенирај го QR-кодот за увоз на хост</string>
+    <string name="scan_qr_code_settings_prompt">Скенирај QR-код за увоз на поставки</string>
+    <string name="scan_qr_code_to_import_settings">Скенирај го QR-кодот за увоз на поставки</string>
+    <string name="scan_qr_code_key_prompt">Скенирај QR-код за увоз на SSH клуч</string>
+    <string name="scan_qr_code_public_key_prompt">Овој QR-код го содржи вашиот јавен SSH клуч</string>
+    <string name="scan_qr_code_certificate_prompt">Скенирај QR-код за увоз на SSH сертификат</string>
+    <string name="qr_code_content_description">QR-код</string>
+    <string name="import_settings_title">Увези поставки</string>
+    <string name="import_settings_text">Во случај на судир со постојните хостови, дали сакате да ажурирате или да дуплирате?
+
+Може да изберете и Замени, што ќе ги избрише сите постојни хостови.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="one">Успешно е увезен %d хост.</item>
+        <item quantity="other">Успешно се увезени %d хостови.</item>
+    </plurals>
+
+    <!-- About -->
+    <string name="about_app">За SSH Remote</string>
+    <string name="app_version">Верзија на апликацијата</string>
+    <string name="author">Автор</string>
+    <string name="author_name">Развиено од Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="donate">Донирај</string>
+    <string name="support_developer">Поддржете го развивачот</string>
+    <string name="license">Лиценца</string>
+    <string name="license_name">GNU General Public License v3.0</string>
+    <string name="source_code">Изворен код</string>
+    <string name="view_on_github">Погледни на GitHub</string>
+    <string name="ssh_library">SSH библиотека</string>
+    <string name="ssh_library_subtitle">Користи %1$s %2$s</string>
+
+    <!-- Help & Volume -->
+    <string name="help">Помош</string>
+    <string name="tap_the_help_button_for_help">Допрете го копчето ? за помош.</string>
+    <string name="getting_started_title">Започнување</string>
+    <string name="getting_started_text">Копчињата на далечинскиот управувач се мапирани на одредени команди што се извршуваат на хостот.
+
+Мора да ја инсталирате соодветната алатка на хостот; која ќе биде тоа зависи од тоа кој window manager го користи хостот (X11 или Wayland).
+
+За да започнете, ве молиме изберете пресет. Секогаш можете подоцна повторно да ресетирате на пресет со уредување на далечинскиот управувач.
+
+Ве молиме прочитајте ја страницата Помош ако првпат ја користите оваа апликација.</string>
+    <string name="error_reading_volume">Грешка при читање на јачината на звукот. Ве молиме инсталирајте pactl.</string>
+    <string name="volume_format">Јачина на звук: %s</string>
+    <string name="volume_muted_format">Јачина на звук: %s (исклучен)</string>
+    <string name="smart_volume_settings">Паметни поставки за јачина на звук</string>
+    <string name="read_current_volume">Прочитај ја тековната јачина на звук</string>
+    <string name="show_volume_slider">Прикажи лизгач за јачина на звук</string>
+    <string name="control_volume_with_hardware_buttons">Контролирај јачина на звук со хардверските копчиња</string>
+    <string name="test_pactl">Тестирај pactl</string>
+    <string name="pactl_installation_requirement">Бара да е инсталиран pactl.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Далечински управувач</string>
+    <string name="notification_connected_to">Поврзан со %s</string>
+    <string name="notification_connecting_to">Се поврзува со %s</string>
+    <string name="notification_disconnected_from">Врската со %s е прекината</string>
+    <string name="notification_active">Далечинскиот управувач е активен</string>
+    <string name="notification_inactive">Далечинскиот управувач е неактивен</string>
+    <string name="notification_open">Отвори</string>
+    <string name="notification_close">Затвори</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Додај на почетен екран</string>
+    <string name="run_command_on_host_short">%1$s на %2$s</string>
+    <string name="run_command_on_host_long">Изврши %1$s на %2$s</string>
+    <string name="shortcut_host_not_found">Хостот не е пронајден.</string>
+    <string name="shortcut_command_not_found">Командата не е пронајдена.</string>
+    <string name="shortcut_remote_control_key_not_found">Дејството на кратенката повеќе не е поддржано.</string>
+    <string name="shortcut_save_changes_before_using">Ве молиме зачувајте ги промените на далечинскиот управувач пред да користите кратенки.</string>
+
+    <!-- Share -->
+    <string name="sharing">Споделување</string>
+    <string name="share_target_enabled">Овозможи цел за споделување</string>
+    <string name="share_target_enabled_subtitle">Оваа апликација ќе се појави во менито за споделување за содржина од обичен текст. Стандардно, споделениот текст ќе се внесе на поврзаниот хост со командата за внесување текст од тастатура, но ова може да се прилагоди за секој хост посебно.</string>
+    <string name="share_target_disabled_title">Целта за споделување е оневозможена</string>
+    <string name="share_target_disabled_text">Прво овозможете ја поставката за цел за споделување. Може да се најде во поставките на апликацијата.</string>
+    <string name="share_missing_share_command_title">Командата за споделување не е конфигурирана</string>
+    <string name="share_missing_share_command_text">Овој хост нема конфигурирана команда за споделување. Уредете го далечинскиот управувач на хостот и поставете команда за споделување текст.</string>
+    <string name="share_text">Сподели текст</string>
+    <string name="share_target_settings">Поставки за цел за споделување</string>
+    <string name="use_keyboard_type_command">Користи команда за внесување текст од тастатура</string>
+    <string name="custom_share_command">Прилагодена команда за споделување</string>
+    <string name="share_command_placeholder">%s ќе биде заменето со споделениот текст</string>
+
+</resources>

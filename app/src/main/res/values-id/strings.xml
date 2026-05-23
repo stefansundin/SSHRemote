@@ -1,0 +1,413 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Common -->
+    <string name="app_name">SSH Remote</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Batal</string>
+    <string name="save">Simpan</string>
+    <string name="close">Tutup</string>
+    <string name="error">Kesalahan</string>
+    <string name="error_format">Kesalahan: %s</string>
+    <string name="copy">Salin</string>
+    <string name="share">Bagikan</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Hapus</string>
+    <string name="undo">Urungkan</string>
+    <string name="rename">Ganti nama</string>
+    <string name="reorder">Ubah urutan</string>
+    <string name="clear">Bersihkan</string>
+    <string name="more">Lainnya</string>
+    <string name="more_options">Opsi lainnya</string>
+    <string name="back">Kembali</string>
+    <string name="go_back">Kembali</string>
+    <string name="navigate_back">Navigasi kembali</string>
+    <string name="message">Pesan</string>
+    <string name="name">Nama</string>
+    <string name="name_optional">Nama (opsional)</string>
+    <string name="loading">Memuat…</string>
+    <string name="update">Perbarui</string>
+    <string name="duplicate">Duplikat</string>
+    <string name="replace">Ganti</string>
+    <string name="permission_denied">Izin ditolak</string>
+    <string name="reset">Setel ulang</string>
+    <string name="reset_to_default">Setel ulang ke bawaan</string>
+    <string name="discard_and_leave">Buang dan keluar</string>
+    <string name="please_wait">Harap tunggu…</string>
+    <string name="link_destination">Tujuan Tautan</string>
+    <string name="open_in_browser">Buka di browser</string>
+    <string name="toggle_word_wrap">Aktifkan/nonaktifkan pembungkusan kata</string>
+    <string name="custom">Kustom</string>
+    <string name="search">Cari</string>
+    <string name="search_no_matches">Tidak ada hasil ditemukan</string>
+    <string name="search_match_position">Hasil %1$d dari %2$d</string>
+    <string name="search_next_match">Hasil berikutnya</string>
+
+    <!-- Hosts -->
+    <string name="hosts_title">Host</string>
+    <string name="no_ssh_hosts_added_yet">Belum ada host SSH yang ditambahkan.</string>
+    <string name="empty_list_add_prompt">Ketuk tombol + untuk menambahkannya.</string>
+    <string name="connect_to_host">Hubungkan ke %s</string>
+    <string name="add_ssh_host">Tambahkan Host SSH</string>
+    <string name="add_host_title">Tambah Host</string>
+    <string name="edit_host_title">Edit Host</string>
+    <string name="host_deleted">Host dihapus</string>
+    <string name="clone">Klon</string>
+    <string name="hostname_or_ip">Nama host atau IP</string>
+    <string name="port">Port</string>
+    <string name="user">Pengguna</string>
+    <string name="password">Kata sandi</string>
+    <string name="hide_password">Sembunyikan kata sandi</string>
+    <string name="show_password">Tampilkan kata sandi</string>
+    <string name="password_lost">Kata sandi hilang</string>
+    <string name="password_saved">Kata sandi disimpan</string>
+    <string name="passwords_not_backed_up">Kata sandi tidak dicadangkan, silakan masukkan lagi</string>
+    <string name="enter_new_password_or_empty">Masukkan kata sandi baru, atau biarkan kosong untuk menghapusnya</string>
+    <string name="optional_password_prompt">Opsional, akan diminta jika tidak diberikan</string>
+    <string name="optional">Opsional</string>
+    <string name="re_enter">Masukkan lagi</string>
+    <string name="change_or_clear">Ubah atau Hapus</string>
+    <string name="unsaved_changes_title">Perubahan belum disimpan</string>
+    <string name="unsaved_changes_text">Apakah Anda ingin menyimpan host sebelum keluar?</string>
+    <string name="save_and_leave">Simpan dan keluar</string>
+    <string name="stay">Tetap di sini</string>
+    <string name="connection_error">Kesalahan Koneksi</string>
+    <string name="host_key_verification">Verifikasi Kunci Host</string>
+    <string name="accept">Terima</string>
+    <string name="reject">Tolak</string>
+    <string name="saved_host_keys">Kunci host tersimpan: %d</string>
+    <string name="connection_details_only">Hanya detail koneksi</string>
+    <string name="identity_info_format">%1$s - %2$s</string>
+    <string name="select_host">Pilih host</string>
+    <string name="no_hosts_found">Tidak ada host ditemukan</string>
+
+    <!-- Remote Control -->
+    <string name="tab_remote">Remote</string>
+    <string name="tab_mouse">Mouse</string>
+    <string name="tab_keyboard">Keyboard</string>
+    <string name="tab_commands">Perintah</string>
+    <string name="edit_remote_control">Edit kendali jarak jauh</string>
+    <string name="edit_remote_to_add_commands">Edit kendali jarak jauh untuk menambahkan perintah.</string>
+    <string name="remote_control_group">Kendali jarak jauh</string>
+    <string name="select_preset">Pilih preset</string>
+    <string name="no_preset">Tanpa preset</string>
+    <string name="unsaved_changes_remote_control_text">Apakah Anda ingin menyimpan perubahan sebelum keluar?</string>
+    <string name="reset_commands_title">Setel ulang perintah?</string>
+    <string name="reset_commands_text">Ini akan menyetel ulang semua perintah kendali jarak jauh ke nilai bawaan %s.</string>
+    <string name="reset_to_preset_title">Setel ulang ke preset</string>
+    <string name="set_as_default_tab">Tetapkan sebagai tab bawaan</string>
+    <string name="ad_hoc_command">Perintah ad hoc</string>
+    <string name="ad_hoc_command_title">Perintah Ad Hoc</string>
+    <string name="command">Perintah</string>
+    <string name="execute">Jalankan</string>
+    <string name="command_output">Keluaran Perintah</string>
+    <string name="command_output_label">Keluaran perintah</string>
+    <string name="show_output">Tampilkan keluaran</string>
+    <string name="render_output_as_markdown">Render keluaran sebagai Markdown</string>
+    <string name="clear_history">Hapus riwayat</string>
+    <string name="no_commands_added">Belum ada perintah yang ditambahkan.</string>
+    <string name="add_command">Tambah Perintah</string>
+    <string name="edit_command">Edit Perintah</string>
+    <string name="command_deleted">Perintah dihapus</string>
+    <string name="repeat_command_while_pressed">Ulangi perintah saat tombol ditekan</string>
+    <string name="long_press_command">Perintah tekan lama</string>
+    <string name="key_title_format">Tombol: %s</string>
+    <string name="fullscreen">Layar penuh</string>
+    <string name="exit_fullscreen">Keluar dari layar penuh</string>
+    <string name="disconnect">Putuskan koneksi</string>
+    <string name="configure_remote_commands_prompt">Silakan konfigurasi perintah kendali jarak jauh dengan masuk ke mode edit melalui menu.</string>
+    <string name="tap_to_edit_button_command">Ketuk tombol untuk mengedit perintahnya</string>
+    <string name="run_command_in_background">Jalankan perintah di latar belakang</string>
+    <string name="shortcut_label">Label pintasan</string>
+    <string name="connecting">Menghubungkan…</string>
+    <string name="executing_command">Menjalankan perintah…</string>
+    <string name="executing_on">Menjalankan di %s</string>
+    <string name="sharing_to">Membagikan ke %s</string>
+
+    <!-- Buttons / Keys -->
+    <string name="key_back">Kembali</string>
+    <string name="key_home">Beranda</string>
+    <string name="key_menu">Menu</string>
+    <string name="key_previous">Sebelumnya</string>
+    <string name="key_play_pause">Putar/Jeda</string>
+    <string name="key_next">Berikutnya</string>
+    <string name="key_up">Atas</string>
+    <string name="key_right">Kanan</string>
+    <string name="key_down">Bawah</string>
+    <string name="key_left">Kiri</string>
+    <string name="key_select">Pilih</string>
+    <string name="key_volume_down">Turunkan Volume</string>
+    <string name="key_mute">Bisukan</string>
+    <string name="key_volume_up">Naikkan Volume</string>
+
+    <!-- Mouse -->
+    <string name="mouse_pad">Area Mouse</string>
+    <string name="mouse_pad_disabled">Area Mouse Dinonaktifkan</string>
+    <string name="mouse_commands_not_configured">Perintah mouse belum dikonfigurasi</string>
+    <string name="left_click">Klik Kiri</string>
+    <string name="right_click">Klik Kanan</string>
+    <string name="tap_to_edit_mouse_commands">Ketuk untuk mengedit perintah mouse</string>
+    <string name="tap_to_left_click">Ketuk untuk klik kiri</string>
+    <string name="long_press_to_click_and_drag">Tekan lama untuk klik dan seret</string>
+    <string name="long_press_two_fingers_to_right_click">Tekan lama dengan dua jari untuk klik kanan</string>
+    <string name="scroll_using_two_fingers">Gulir dengan dua jari</string>
+    <string name="edit_mouse_commands">Edit Perintah Mouse</string>
+    <string name="key_mouse_move">Gerakkan Mouse</string>
+    <string name="key_mouse_left_down">Tombol Kiri Ditekan</string>
+    <string name="key_mouse_left_up">Tombol Kiri Dilepas</string>
+    <string name="key_mouse_right_down">Tombol Kanan Ditekan</string>
+    <string name="key_mouse_right_up">Tombol Kanan Dilepas</string>
+    <string name="key_mouse_pan_up">Geser Dua Jari ke Atas</string>
+    <string name="key_mouse_pan_down">Geser Dua Jari ke Bawah</string>
+    <string name="key_mouse_pan_left">Geser Dua Jari ke Kiri</string>
+    <string name="key_mouse_pan_right">Geser Dua Jari ke Kanan</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_commands_not_configured">Perintah keyboard belum dikonfigurasi</string>
+    <string name="edit_keyboard_commands">Edit Perintah Keyboard</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_ctrl">Ctrl</string>
+    <string name="key_alt">Alt</string>
+    <string name="key_shift">Shift</string>
+    <string name="key_super">Super</string>
+    <string name="key_caps">Caps</string>
+    <string name="key_del">Del</string>
+    <string name="key_pageup">PgUp</string>
+    <string name="key_pagedown">PgDn</string>
+    <string name="key_end">End</string>
+    <string name="key_keyboard_type_text">Keyboard Ketik Teks</string>
+    <string name="key_keyboard_key_press">Keyboard Tekan Tombol</string>
+    <string name="key_keyboard_key_down">Keyboard Tombol Ditekan</string>
+    <string name="key_keyboard_key_up">Keyboard Tombol Dilepas</string>
+
+    <!-- SSH Configuration -->
+    <string name="advanced_ssh_config">Konfigurasi SSH Lanjutan</string>
+    <string name="advanced_users_only">Hanya untuk Pengguna Lanjutan</string>
+    <string name="advanced_users_warning">Mengubah nilai konfigurasi SSH ditujukan untuk pengguna lanjutan. Pengaturan yang salah dapat mencegah koneksi.</string>
+    <string name="i_know_what_i_am_doing">Saya tahu apa yang saya lakukan</string>
+    <string name="ssh_configuration_title">Konfigurasi SSH</string>
+    <string name="jsch_config_description">Konfigurasi JSch sebagian besar seperti OpenSSH, tetapi tidak persis sama. Harap pelajari dulu (klik tombol Bantuan di bawah).</string>
+    <string name="strict_host_key_checking">Pemeriksaan ketat kunci host</string>
+    <string name="allow_password_prompting">Izinkan permintaan kata sandi</string>
+
+    <!-- SSH Keys -->
+    <string name="ssh_keys">Kunci SSH</string>
+    <string name="ssh_key">Kunci SSH</string>
+    <string name="add_ssh_key">Tambah Kunci SSH</string>
+    <string name="add_ssh_key_title">Tambah Kunci SSH</string>
+    <string name="no_ssh_keys_added_yet">Belum ada kunci SSH yang ditambahkan.</string>
+    <string name="ssh_key_deleted">Kunci SSH dihapus</string>
+    <string name="use_any_key">Gunakan kunci apa pun</string>
+    <string name="do_not_use_keys">Jangan gunakan kunci</string>
+    <string name="select_public_key">Pilih kunci publik</string>
+    <string name="public_key_copied">Kunci publik disalin ke host.</string>
+    <string name="push_public_key">Kirim kunci publik</string>
+    <string name="passphrase">Frasa sandi</string>
+    <string name="hide_passphrase">Sembunyikan frasa sandi</string>
+    <string name="show_passphrase">Tampilkan frasa sandi</string>
+    <string name="passphrase_protected">Dilindungi frasa sandi</string>
+    <string name="view_public_key">Lihat kunci publik</string>
+    <string name="export_public_key">Ekspor kunci publik</string>
+    <string name="public_key_title">Kunci Publik</string>
+    <string name="public_ssh_key_label">Kunci SSH publik</string>
+    <string name="rename_ssh_key_title">Ganti Nama Kunci SSH</string>
+    <string name="new_name">Nama baru</string>
+    <string name="invalid_key">Kunci tidak valid</string>
+    <string name="invalid_key_format">Format kunci tidak valid</string>
+    <string name="invalid_certificate_format">Format sertifikat tidak valid</string>
+    <string name="private_key">Kunci Privat</string>
+    <string name="paste_from_clipboard">Tempel dari papan klip</string>
+    <string name="generated_key_name">Kunci yang Dihasilkan</string>
+    <string name="generating_key_title">Membuat Kunci</string>
+    <string name="please_wait_generating">Harap tunggu saat kunci sedang dibuat…</string>
+    <string name="key_name_optional">Nama kunci (opsional)</string>
+    <string name="key_name_default_hint">Kunci SSH Saya</string>
+    <string name="import_key_file_prompt">Impor file kunci privat SSH</string>
+    <string name="zip_keys_detected_title">Kunci terdeteksi</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="other">Terdeteksi %d kunci SSH dalam file zip.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">Tidak ditemukan kunci privat SSH yang valid dalam file zip.</string>
+    <string name="select_key_type_prompt">Pilih jenis kunci yang akan dibuat</string>
+    <string name="or_scan_qr_code">atau pindai kode QR</string>
+    <string name="tab_import">Impor</string>
+    <string name="tab_generate">Buat</string>
+    <string name="tab_manual">Manual</string>
+    <string name="key_type_format">Jenis kunci: %s</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d bit)</string>
+    <string name="key_list_type_format">%1$s %2$d-bit</string>
+    <string name="unsaved_key_changes_text">Anda memiliki perubahan yang belum disimpan. Apakah Anda ingin menyimpan kunci sebelum keluar?</string>
+    <string name="no_keys_found_prompt">Tidak ada kunci ditemukan. Buat kunci SSH di pengaturan aplikasi.</string>
+    <string name="key_addition_info">Kunci akan ditambahkan ke file ~/.ssh/authorized_keys milik host.</string>
+    <string name="attach_certificate">Lampirkan sertifikat</string>
+    <string name="certificate_attached">Sertifikat dilampirkan</string>
+    <string name="replace_certificate_title">Ganti sertifikat?</string>
+    <string name="replace_certificate_text">Kunci ini sudah memiliki sertifikat yang dilampirkan. Apakah Anda ingin menggantinya?</string>
+    <string name="delete_certificate">Hapus sertifikat</string>
+    <string name="certificate">Sertifikat</string>
+
+    <!-- Settings -->
+    <string name="settings">Pengaturan</string>
+    <string name="appearance">Tampilan</string>
+    <string name="theme">Tema</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_light">Terang</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="dynamic_colors">Warna dinamis</string>
+    <string name="haptic_feedback">Umpan balik haptik</string>
+    <string name="haptic_vibration_duration_label">Durasi getaran dalam milidetik</string>
+    <string name="haptic_off">Nonaktif</string>
+    <string name="haptic_short">Pendek (%d ms)</string>
+    <string name="haptic_medium">Sedang (%d ms)</string>
+    <string name="haptic_long">Panjang (%d ms)</string>
+    <string name="haptic_custom">Kustom (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
+    <string name="show_notification">Tampilkan notifikasi</string>
+    <string name="keep_screen_on">Biarkan layar tetap menyala</string>
+    <string name="security">Keamanan</string>
+    <string name="ssh_keys_subtitle">Kelola kunci SSH untuk autentikasi</string>
+    <string name="known_hosts">Host Dikenal</string>
+    <string name="known_hosts_subtitle">Kelola kunci host dan sertifikat tepercaya</string>
+    <string name="no_known_hosts_added_yet">Belum ada entri host dikenal yang ditambahkan.</string>
+    <string name="known_host_help_title">Format Entri</string>
+    <string name="known_host_help_text">Entri yang ditambahkan di sini otomatis digunakan untuk semua host. Host juga menyimpan daftar kunci host yang diterima sendiri.
+
+Kasus penggunaan utama bagian ini adalah untuk memercayai sertifikat host, contohnya:
+
+@cert-authority host.example.com ssh-ed25519 AAA…
+
+Entri biasa juga didukung:
+
+host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_add_title">Tambah Entri Host Dikenal</string>
+    <string name="known_host_input_label">Tempel satu entri per baris</string>
+    <string name="add_entries">Tambah entri</string>
+    <string name="known_host_import_summary">Entri valid: %d</string>
+    <string name="known_host_deleted">Entri host dikenal dihapus</string>
+    <string name="view_host_key">Lihat kunci host</string>
+    <string name="scan_qr_code_known_host_prompt">Pindai kode QR untuk mengimpor entri host dikenal</string>
+    <string name="colors">Warna</string>
+    <string name="customize_colors">Sesuaikan warna aplikasi</string>
+    <string name="color_options">Opsi warna</string>
+    <string name="color_overrides">Penggantian warna</string>
+    <string name="choose_a_color">Pilih warna</string>
+    <string name="primary_color">Warna primer</string>
+    <string name="choose_primary_color">Pilih warna primer</string>
+    <string name="choose_on_primary_color">Pilih warna teks pada warna primer</string>
+    <string name="text_on_primary_color">Warna teks pada warna primer</string>
+    <string name="background_color">Warna latar belakang</string>
+    <string name="choose_background_color">Pilih warna latar belakang</string>
+    <string name="hsl">HSL</string>
+    <string name="rgb">RGB</string>
+    <string name="hue_format">Hue: %d</string>
+    <string name="saturation_format">Saturasi: %d%%</string>
+    <string name="lightness_format">Kecerahan: %d%%</string>
+    <string name="red_format">Merah: %d</string>
+    <string name="green_format">Hijau: %d</string>
+    <string name="blue_format">Biru: %d</string>
+
+    <!-- Data Management -->
+    <string name="data">Data</string>
+    <string name="restored_from_backup_title">Dipulihkan dari cadangan</string>
+    <string name="restored_from_backup_text">Data aplikasi dipulihkan dari cadangan. Demi alasan keamanan, data terenkripsi seperti kunci SSH dan kata sandi tidak disertakan dalam cadangan.
+
+Silakan konfigurasi ulang data tersebut.</string>
+    <string name="export_to_file">Ekspor ke file</string>
+    <string name="export_to_file_subtitle">Ekspor pengaturan dan host ke file.</string>
+    <string name="import_from_file">Impor dari file</string>
+    <string name="import_from_file_subtitle">Impor pengaturan dan host dari file.</string>
+    <string name="select_file">Pilih file</string>
+    <string name="export_to_qr_code">Ekspor ke kode QR</string>
+    <string name="export_to_qr_code_subtitle">Ekspor pengaturan dan host ke kode QR.</string>
+    <string name="export_host_title">Ekspor Host</string>
+    <string name="choose_what_to_include">Pilih apa yang akan disertakan dalam kode QR.</string>
+    <string name="full_configuration">Konfigurasi lengkap</string>
+    <string name="export_settings_too_large_for_qr">Data terlalu besar untuk kode QR. Gunakan ekspor file sebagai gantinya.</string>
+    <string name="import_from_qr_code">Impor dari kode QR</string>
+    <string name="import_from_qr_code_subtitle">Impor pengaturan dan host dari kode QR.</string>
+    <string name="scan_qr_code">Pindai kode QR</string>
+    <string name="scan_qr_code_prompt">Pindai kode QR untuk mengimpor host</string>
+    <string name="scan_qr_code_to_import">Pindai kode QR untuk mengimpor host</string>
+    <string name="scan_qr_code_settings_prompt">Pindai kode QR untuk mengimpor pengaturan</string>
+    <string name="scan_qr_code_to_import_settings">Pindai kode QR untuk mengimpor pengaturan</string>
+    <string name="scan_qr_code_key_prompt">Pindai kode QR untuk mengimpor kunci SSH</string>
+    <string name="scan_qr_code_public_key_prompt">Kode QR ini berisi kunci SSH publik Anda</string>
+    <string name="scan_qr_code_certificate_prompt">Pindai kode QR untuk mengimpor sertifikat SSH</string>
+    <string name="qr_code_content_description">Kode QR</string>
+    <string name="import_settings_title">Impor pengaturan</string>
+    <string name="import_settings_text">Jika terjadi konflik dengan host yang ada, apakah Anda ingin memperbarui atau menduplikasi?
+
+Anda juga dapat memilih Ganti yang akan menghapus semua host yang ada.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="other">Berhasil mengimpor %d host.</item>
+    </plurals>
+
+    <!-- About -->
+    <string name="about_app">Tentang SSH Remote</string>
+    <string name="app_version">Versi aplikasi</string>
+    <string name="author">Penulis</string>
+    <string name="author_name">Dikembangkan oleh Stefan Sundin</string>
+    <string name="donate">Donasi</string>
+    <string name="support_developer">Dukung pengembang</string>
+    <string name="license">Lisensi</string>
+    <string name="license_name">GNU General Public License v3.0</string>
+    <string name="source_code">Kode sumber</string>
+    <string name="view_on_github">Lihat di GitHub</string>
+    <string name="ssh_library">Pustaka SSH</string>
+    <string name="ssh_library_subtitle">Menggunakan %1$s %2$s</string>
+
+    <!-- Help & Volume -->
+    <string name="help">Bantuan</string>
+    <string name="tap_the_help_button_for_help">Ketuk tombol ? untuk bantuan.</string>
+    <string name="getting_started_title">Memulai</string>
+    <string name="getting_started_text">Tombol pada kendali jarak jauh dipetakan ke perintah tertentu yang dijalankan pada host.
+
+Anda harus memasang utilitas yang sesuai pada host, dan utilitas yang dibutuhkan bergantung pada window manager yang digunakan host (X11 atau Wayland).
+
+Untuk memulai, silakan pilih preset. Anda selalu dapat menyetel ulang ke preset nanti dengan mengedit kendali jarak jauh.
+
+Silakan baca halaman Bantuan jika ini pertama kalinya Anda menggunakan aplikasi ini.</string>
+    <string name="error_reading_volume">Kesalahan saat membaca volume. Silakan instal pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (dibisukan)</string>
+    <string name="smart_volume_settings">Pengaturan volume pintar</string>
+    <string name="read_current_volume">Baca volume saat ini</string>
+    <string name="show_volume_slider">Tampilkan penggeser volume</string>
+    <string name="control_volume_with_hardware_buttons">Kontrol volume dengan tombol perangkat keras</string>
+    <string name="test_pactl">Uji pactl</string>
+    <string name="pactl_installation_requirement">Memerlukan pactl yang sudah terinstal.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Kendali Jarak Jauh</string>
+    <string name="notification_connected_to">Terhubung ke %s</string>
+    <string name="notification_connecting_to">Menghubungkan ke %s</string>
+    <string name="notification_disconnected_from">Terputus dari %s</string>
+    <string name="notification_active">Kendali jarak jauh aktif</string>
+    <string name="notification_inactive">Kendali jarak jauh tidak aktif</string>
+    <string name="notification_open">Buka</string>
+    <string name="notification_close">Tutup</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Tambahkan ke Layar Utama</string>
+    <string name="run_command_on_host_short">%1$s di %2$s</string>
+    <string name="run_command_on_host_long">Jalankan %1$s di %2$s</string>
+    <string name="shortcut_host_not_found">Host tidak ditemukan.</string>
+    <string name="shortcut_command_not_found">Perintah tidak ditemukan.</string>
+    <string name="shortcut_remote_control_key_not_found">Aksi pintasan tidak lagi didukung.</string>
+    <string name="shortcut_save_changes_before_using">Harap simpan perubahan kendali jarak jauh sebelum menggunakan pintasan.</string>
+
+    <!-- Share -->
+    <string name="sharing">Berbagi</string>
+    <string name="share_target_enabled">Aktifkan target berbagi</string>
+    <string name="share_target_enabled_subtitle">Aplikasi ini akan muncul di menu berbagi untuk konten teks biasa. Secara bawaan, teks yang dibagikan akan diketik pada host yang terhubung menggunakan perintah keyboard type, tetapi ini dapat disesuaikan per host.</string>
+    <string name="share_target_disabled_title">Target berbagi dinonaktifkan</string>
+    <string name="share_target_disabled_text">Aktifkan dulu pengaturan target berbagi. Pengaturan ini dapat ditemukan di pengaturan aplikasi.</string>
+    <string name="share_missing_share_command_title">Perintah berbagi belum dikonfigurasi</string>
+    <string name="share_missing_share_command_text">Host ini tidak memiliki perintah berbagi yang dikonfigurasi. Edit kendali jarak jauh host dan tetapkan perintah untuk membagikan teks.</string>
+    <string name="share_text">Bagikan Teks</string>
+    <string name="share_target_settings">Pengaturan target berbagi</string>
+    <string name="use_keyboard_type_command">Gunakan perintah keyboard type</string>
+    <string name="custom_share_command">Perintah berbagi kustom</string>
+    <string name="share_command_placeholder">%s akan diganti dengan teks yang dibagikan</string>
+
+</resources>

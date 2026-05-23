@@ -1,0 +1,415 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Common -->
+    <string name="app_name">SSH Remote</string>
+    <string name="ok">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save">Gardar</string>
+    <string name="close">Pechar</string>
+    <string name="error">Erro</string>
+    <string name="error_format">Erro: %s</string>
+    <string name="copy">Copiar</string>
+    <string name="share">Compartir</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="undo">Desfacer</string>
+    <string name="rename">Renomear</string>
+    <string name="reorder">Reordenar</string>
+    <string name="clear">Limpar</string>
+    <string name="more">Máis</string>
+    <string name="more_options">Máis opcións</string>
+    <string name="back">Atrás</string>
+    <string name="go_back">Volver atrás</string>
+    <string name="navigate_back">Navegar cara atrás</string>
+    <string name="message">Mensaxe</string>
+    <string name="name">Nome</string>
+    <string name="name_optional">Nome (opcional)</string>
+    <string name="loading">Cargando…</string>
+    <string name="update">Actualizar</string>
+    <string name="duplicate">Duplicar</string>
+    <string name="replace">Substituír</string>
+    <string name="permission_denied">Permiso denegado</string>
+    <string name="reset">Restablecer</string>
+    <string name="reset_to_default">Restablecer ao valor predeterminado</string>
+    <string name="discard_and_leave">Descartar e saír</string>
+    <string name="please_wait">Agarde…</string>
+    <string name="link_destination">Destino da ligazón</string>
+    <string name="open_in_browser">Abrir no navegador</string>
+    <string name="toggle_word_wrap">Activar/desactivar o axuste de liña</string>
+    <string name="custom">Personalizado</string>
+    <string name="search">Buscar</string>
+    <string name="search_no_matches">Non se atoparon coincidencias</string>
+    <string name="search_match_position">Coincidencia %1$d de %2$d</string>
+    <string name="search_next_match">Seguinte coincidencia</string>
+
+    <!-- Hosts -->
+    <string name="hosts_title">Hosts</string>
+    <string name="no_ssh_hosts_added_yet">Aínda non se engadiron hosts SSH.</string>
+    <string name="empty_list_add_prompt">Toque o botón + para engadir un.</string>
+    <string name="connect_to_host">Conectar con %s</string>
+    <string name="add_ssh_host">Engadir host SSH</string>
+    <string name="add_host_title">Engadir host</string>
+    <string name="edit_host_title">Editar host</string>
+    <string name="host_deleted">Host eliminado</string>
+    <string name="clone">Clonar</string>
+    <string name="hostname_or_ip">Nome do host ou IP</string>
+    <string name="port">Porto</string>
+    <string name="user">Usuario</string>
+    <string name="password">Contrasinal</string>
+    <string name="hide_password">Ocultar contrasinal</string>
+    <string name="show_password">Mostrar contrasinal</string>
+    <string name="password_lost">Contrasinal perdido</string>
+    <string name="password_saved">Contrasinal gardado</string>
+    <string name="passwords_not_backed_up">Os contrasinais non se gardan nas copias de seguridade, volva introducilos</string>
+    <string name="enter_new_password_or_empty">Introduza un novo contrasinal, ou déixeo baleiro para borralo</string>
+    <string name="optional_password_prompt">Opcional, pedirase se non se proporciona</string>
+    <string name="optional">Opcional</string>
+    <string name="re_enter">Volver introducir</string> <!-- context: "Re-enter" a lost password -->
+    <string name="change_or_clear">Cambiar ou borrar</string>
+    <string name="unsaved_changes_title">Cambios sen gardar</string>
+    <string name="unsaved_changes_text">Quere gardar o host antes de saír?</string>
+    <string name="save_and_leave">Gardar e saír</string>
+    <string name="stay">Quedar</string>
+    <string name="connection_error">Erro de conexión</string>
+    <string name="host_key_verification">Verificación da clave do host</string>
+    <string name="accept">Aceptar</string>
+    <string name="reject">Rexeitar</string>
+    <string name="saved_host_keys">Claves de host gardadas: %d</string>
+    <string name="connection_details_only">Só detalles da conexión</string>
+    <string name="identity_info_format">%1$s - %2$s</string>
+    <string name="select_host">Seleccione un host</string>
+    <string name="no_hosts_found">Non se atoparon hosts</string>
+
+    <!-- Remote Control -->
+    <string name="tab_remote">Control remoto</string>
+    <string name="tab_mouse">Rato</string>
+    <string name="tab_keyboard">Teclado</string>
+    <string name="tab_commands">Comandos</string>
+    <string name="edit_remote_control">Editar control remoto</string>
+    <string name="edit_remote_to_add_commands">Edite o control remoto para engadir comandos.</string>
+    <string name="remote_control_group">Control remoto</string>
+    <string name="select_preset">Seleccionar predefinición</string>
+    <string name="no_preset">Sen predefinición</string>
+    <string name="unsaved_changes_remote_control_text">Quere gardar os cambios antes de saír?</string>
+    <string name="reset_commands_title">Restablecer os comandos?</string>
+    <string name="reset_commands_text">Isto restablecerá todos os comandos do control remoto aos seus valores predeterminados de %s.</string>
+    <string name="reset_to_preset_title">Restablecer á predefinición</string>
+    <string name="set_as_default_tab">Definir como lapela predeterminada</string>
+    <string name="ad_hoc_command">Comando ad hoc</string>
+    <string name="ad_hoc_command_title">Comando ad hoc</string>
+    <string name="command">Comando</string>
+    <string name="execute">Executar</string>
+    <string name="command_output">Saída do comando</string>
+    <string name="command_output_label">Saída do comando</string>
+    <string name="show_output">Mostrar saída</string>
+    <string name="render_output_as_markdown">Renderizar a saída como Markdown</string>
+    <string name="clear_history">Limpar historial</string>
+    <string name="no_commands_added">Non se engadiu ningún comando.</string>
+    <string name="add_command">Engadir comando</string>
+    <string name="edit_command">Editar comando</string>
+    <string name="command_deleted">Comando eliminado</string>
+    <string name="repeat_command_while_pressed">Repetir o comando mentres se manteña premido o botón</string>
+    <string name="long_press_command">Comando de pulsación longa</string>
+    <string name="key_title_format">Tecla: %s</string>
+    <string name="fullscreen">Pantalla completa</string>
+    <string name="exit_fullscreen">Saír da pantalla completa</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="configure_remote_commands_prompt">Configure os comandos do control remoto entrando no modo de edición a través do menú.</string>
+    <string name="tap_to_edit_button_command">Toque un botón para editar o seu comando</string>
+    <string name="run_command_in_background">Executar o comando en segundo plano</string>
+    <string name="shortcut_label">Etiqueta do atallo</string>
+    <string name="connecting">Conectando…</string>
+    <string name="executing_command">Executando comando…</string>
+    <string name="executing_on">Executando en %s</string>
+    <string name="sharing_to">Compartindo con %s</string>
+
+    <!-- Buttons / Keys -->
+    <string name="key_back">Atrás</string>
+    <string name="key_home">Inicio</string>
+    <string name="key_menu">Menú</string>
+    <string name="key_previous">Anterior</string>
+    <string name="key_play_pause">Reproducir/Pausar</string>
+    <string name="key_next">Seguinte</string>
+    <string name="key_up">Arriba</string>
+    <string name="key_right">Dereita</string>
+    <string name="key_down">Abaixo</string>
+    <string name="key_left">Esquerda</string>
+    <string name="key_select">Seleccionar</string>
+    <string name="key_volume_down">Baixar volume</string>
+    <string name="key_mute">Silenciar</string>
+    <string name="key_volume_up">Subir volume</string>
+
+    <!-- Mouse -->
+    <string name="mouse_pad">Panel do rato</string>
+    <string name="mouse_pad_disabled">Panel do rato desactivado</string>
+    <string name="mouse_commands_not_configured">Os comandos do rato non están configurados</string>
+    <string name="left_click">Clic esquerdo</string>
+    <string name="right_click">Clic dereito</string>
+    <string name="tap_to_edit_mouse_commands">Toque para editar os comandos do rato</string>
+    <string name="tap_to_left_click">Toque para facer clic esquerdo</string>
+    <string name="long_press_to_click_and_drag">Pulsación longa para facer clic e arrastrar</string>
+    <string name="long_press_two_fingers_to_right_click">Pulsación longa con dous dedos para facer clic dereito</string>
+    <string name="scroll_using_two_fingers">Desprazar con dous dedos</string>
+    <string name="edit_mouse_commands">Editar comandos do rato</string>
+    <string name="key_mouse_move">Mover rato</string>
+    <string name="key_mouse_left_down">Botón esquerdo abaixo</string>
+    <string name="key_mouse_left_up">Botón esquerdo arriba</string>
+    <string name="key_mouse_right_down">Botón dereito abaixo</string>
+    <string name="key_mouse_right_up">Botón dereito arriba</string>
+    <string name="key_mouse_pan_up">Desprazamento con dous dedos cara arriba</string>
+    <string name="key_mouse_pan_down">Desprazamento con dous dedos cara abaixo</string>
+    <string name="key_mouse_pan_left">Desprazamento con dous dedos cara á esquerda</string>
+    <string name="key_mouse_pan_right">Desprazamento con dous dedos cara á dereita</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_commands_not_configured">Os comandos do teclado non están configurados</string>
+    <string name="edit_keyboard_commands">Editar comandos do teclado</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_ctrl">Ctrl</string>
+    <string name="key_alt">Alt</string>
+    <string name="key_shift">Maiús</string>
+    <string name="key_super">Super</string>
+    <string name="key_caps">Bloq Maiús</string>
+    <string name="key_del">Supr</string>
+    <string name="key_pageup">PáxAv</string>
+    <string name="key_pagedown">PáxRe</string>
+    <string name="key_end">Fin</string>
+    <string name="key_keyboard_type_text">Escribir texto co teclado</string>
+    <string name="key_keyboard_key_press">Pulsación de tecla do teclado</string>
+    <string name="key_keyboard_key_down">Tecla do teclado abaixo</string>
+    <string name="key_keyboard_key_up">Tecla do teclado arriba</string>
+
+    <!-- SSH Configuration -->
+    <string name="advanced_ssh_config">Configuración SSH avanzada</string>
+    <string name="advanced_users_only">Só para usuarios avanzados</string>
+    <string name="advanced_users_warning">Cambiar os valores da configuración SSH está pensado para usuarios avanzados. Unha configuración incorrecta pode impedir a conexión.</string>
+    <string name="i_know_what_i_am_doing">Sei o que estou facendo</string>
+    <string name="ssh_configuration_title">Configuración SSH</string>
+    <string name="jsch_config_description">A configuración de JSch é maiormente parecida a OpenSSH, pero non exactamente igual. Faga a súa investigación (prema o botón Axuda de abaixo).</string>
+    <string name="strict_host_key_checking">Comprobación estrita da clave do host</string>
+    <string name="allow_password_prompting">Permitir solicitar contrasinais</string>
+
+    <!-- SSH Keys -->
+    <string name="ssh_keys">Claves SSH</string>
+    <string name="ssh_key">Clave SSH</string>
+    <string name="add_ssh_key">Engadir clave SSH</string>
+    <string name="add_ssh_key_title">Engadir clave SSH</string>
+    <string name="no_ssh_keys_added_yet">Aínda non se engadiron claves SSH.</string>
+    <string name="ssh_key_deleted">Clave SSH eliminada</string>
+    <string name="use_any_key">Usar calquera clave</string>
+    <string name="do_not_use_keys">Non usar claves</string>
+    <string name="select_public_key">Seleccionar clave pública</string>
+    <string name="public_key_copied">Clave pública copiada ao host.</string>
+    <string name="push_public_key">Enviar clave pública</string>
+    <string name="passphrase">Frase de paso</string>
+    <string name="hide_passphrase">Ocultar frase de paso</string>
+    <string name="show_passphrase">Mostrar frase de paso</string>
+    <string name="passphrase_protected">Protexida con frase de paso</string>
+    <string name="view_public_key">Ver clave pública</string>
+    <string name="export_public_key">Exportar clave pública</string>
+    <string name="public_key_title">Clave pública</string>
+    <string name="public_ssh_key_label">Clave SSH pública</string>
+    <string name="rename_ssh_key_title">Renomear clave SSH</string>
+    <string name="new_name">Nome novo</string>
+    <string name="invalid_key">Clave non válida</string>
+    <string name="invalid_key_format">Formato de clave non válido</string>
+    <string name="invalid_certificate_format">Formato de certificado non válido</string>
+    <string name="private_key">Clave privada</string>
+    <string name="paste_from_clipboard">Pegar desde a área de transferencia</string>
+    <string name="generated_key_name">Clave xerada</string>
+    <string name="generating_key_title">Xerando clave</string>
+    <string name="please_wait_generating">Agarde mentres se xera a clave…</string>
+    <string name="key_name_optional">Nome da clave (opcional)</string>
+    <string name="key_name_default_hint">A miña clave SSH</string>
+    <string name="import_key_file_prompt">Importar un ficheiro de clave privada SSH</string>
+    <string name="zip_keys_detected_title">Claves detectadas</string>
+    <plurals name="zip_keys_detected_in_zip">
+        <item quantity="one">Detectouse %d clave SSH nun ficheiro zip.</item>
+        <item quantity="other">Detectáronse %d claves SSH nun ficheiro zip.</item>
+    </plurals>
+    <string name="zip_no_valid_keys">Non se atoparon claves privadas SSH válidas no ficheiro zip.</string>
+    <string name="select_key_type_prompt">Seleccione o tipo de clave que quere xerar</string>
+    <string name="or_scan_qr_code">ou escanee un código QR</string>
+    <string name="tab_import">Importar</string>
+    <string name="tab_generate">Xerar</string>
+    <string name="tab_manual">Manual</string>
+    <string name="key_type_format">Tipo de clave: %s</string>
+    <string name="key_create_type_format" tools:ignore="PluralsCandidate">%1$s (%2$d bits)</string>
+    <string name="key_list_type_format">%1$s de %2$d bits</string>
+    <string name="unsaved_key_changes_text">Ten cambios sen gardar. Quere gardar a clave antes de saír?</string>
+    <string name="no_keys_found_prompt">Non se atoparon claves. Cree unha clave SSH nos axustes da aplicación.</string>
+    <string name="key_addition_info">A clave engadirase ao ficheiro ~/.ssh/authorized_keys do host.</string>
+    <string name="attach_certificate">Anexar certificado</string>
+    <string name="certificate_attached">Certificado anexado</string>
+    <string name="replace_certificate_title">Substituír certificado?</string>
+    <string name="replace_certificate_text">Esta clave xa ten un certificado anexado. Quere substituílo?</string>
+    <string name="delete_certificate">Eliminar certificado</string>
+    <string name="certificate">Certificado</string>
+
+    <!-- Settings -->
+    <string name="settings">Axustes</string>
+    <string name="appearance">Aparencia</string>
+    <string name="theme">Tema</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="dynamic_colors">Cores dinámicas</string>
+    <string name="haptic_feedback">Resposta háptica</string>
+    <string name="haptic_vibration_duration_label">Duración da vibración en milisegundos</string>
+    <string name="haptic_off">Desactivado</string>
+    <string name="haptic_short">Curta (%d ms)</string>
+    <string name="haptic_medium">Media (%d ms)</string>
+    <string name="haptic_long">Longa (%d ms)</string>
+    <string name="haptic_custom">Personalizada (%d ms)</string>
+    <string name="milliseconds_abbreviation">ms</string>
+    <string name="show_notification">Mostrar notificación</string>
+    <string name="keep_screen_on">Manter a pantalla acesa</string>
+    <string name="security">Seguridade</string>
+    <string name="ssh_keys_subtitle">Xestionar as claves SSH para a autenticación</string>
+    <string name="known_hosts">Hosts coñecidos</string>
+    <string name="known_hosts_subtitle">Xestionar claves e certificados de host de confianza</string>
+    <string name="no_known_hosts_added_yet">Aínda non se engadiron entradas de hosts coñecidos.</string>
+    <string name="known_host_help_title">Formato da entrada</string>
+    <string name="known_host_help_text">As entradas engadidas aquí úsanse automaticamente para todos os hosts. Os hosts tamén almacenan as súas propias listas de claves de host aceptadas.
+
+O caso de uso principal desta sección é confiar en certificados de host, por exemplo:
+
+@cert-authority host.example.com ssh-ed25519 AAA…
+
+Tamén se admiten entradas normais:
+
+host.example.com ssh-ed25519 AAA…</string>
+    <string name="known_host_add_title">Engadir entradas de hosts coñecidos</string>
+    <string name="known_host_input_label">Pegue unha entrada por liña</string>
+    <string name="add_entries">Engadir entradas</string>
+    <string name="known_host_import_summary">Entradas válidas: %d</string>
+    <string name="known_host_deleted">Entrada de host coñecido eliminada</string>
+    <string name="view_host_key">Ver clave do host</string>
+    <string name="scan_qr_code_known_host_prompt">Escanee un código QR para importar entradas de hosts coñecidos</string>
+    <string name="colors">Cores</string>
+    <string name="customize_colors">Personalizar as cores da aplicación</string>
+    <string name="color_options">Opcións de cor</string>
+    <string name="color_overrides">Substitucións de cor</string>
+    <string name="choose_a_color">Escolla unha cor</string>
+    <string name="primary_color">Cor primaria</string>
+    <string name="choose_primary_color">Escolla a cor primaria</string>
+    <string name="choose_on_primary_color">Escolla a cor do texto sobre a primaria</string>
+    <string name="text_on_primary_color">Cor do texto sobre a primaria</string>
+    <string name="background_color">Cor de fondo</string>
+    <string name="choose_background_color">Escolla a cor de fondo</string>
+    <string name="hsl">HSL</string>
+    <string name="rgb">RGB</string>
+    <string name="hue_format">Matiz: %d</string>
+    <string name="saturation_format">Saturación: %d%%</string>
+    <string name="lightness_format">Luminosidade: %d%%</string>
+    <string name="red_format">Vermello: %d</string>
+    <string name="green_format">Verde: %d</string>
+    <string name="blue_format">Azul: %d</string>
+
+    <!-- Data Management -->
+    <string name="data">Datos</string>
+    <string name="restored_from_backup_title">Restaurado desde unha copia de seguridade</string>
+    <string name="restored_from_backup_text">Os datos da aplicación restauráronse desde unha copia de seguridade. Por razóns de seguridade, os datos cifrados como as claves SSH e os contrasinais non se inclúen nas copias de seguridade.
+
+Volva configuralos.</string>
+    <string name="export_to_file">Exportar a ficheiro</string>
+    <string name="export_to_file_subtitle">Exportar os axustes e os hosts a un ficheiro.</string>
+    <string name="import_from_file">Importar desde ficheiro</string>
+    <string name="import_from_file_subtitle">Importar os axustes e os hosts desde un ficheiro.</string>
+    <string name="select_file">Seleccionar ficheiro</string>
+    <string name="export_to_qr_code">Exportar a código QR</string>
+    <string name="export_to_qr_code_subtitle">Exportar os axustes e os hosts a un código QR.</string>
+    <string name="export_host_title">Exportar host</string>
+    <string name="choose_what_to_include">Escolla que incluír no código QR.</string>
+    <string name="full_configuration">Configuración completa</string>
+    <string name="export_settings_too_large_for_qr">Os datos son demasiado grandes para un código QR. Use a exportación a ficheiro no seu lugar.</string>
+    <string name="import_from_qr_code">Importar desde código QR</string>
+    <string name="import_from_qr_code_subtitle">Importar os axustes e os hosts desde un código QR.</string>
+    <string name="scan_qr_code">Escanear código QR</string>
+    <string name="scan_qr_code_prompt">Escanee un código QR para importar un host</string>
+    <string name="scan_qr_code_to_import">Escanee o código QR para importar o host</string>
+    <string name="scan_qr_code_settings_prompt">Escanee un código QR para importar os axustes</string>
+    <string name="scan_qr_code_to_import_settings">Escanee o código QR para importar os axustes</string>
+    <string name="scan_qr_code_key_prompt">Escanee un código QR para importar unha clave SSH</string>
+    <string name="scan_qr_code_public_key_prompt">Este código QR contén a súa clave SSH pública</string>
+    <string name="scan_qr_code_certificate_prompt">Escanee un código QR para importar un certificado SSH</string>
+    <string name="qr_code_content_description">Código QR</string>
+    <string name="import_settings_title">Importar axustes</string>
+    <string name="import_settings_text">En caso de conflitos cos hosts existentes, quere actualizar ou duplicar?
+
+Tamén pode escoller Substituír, o que eliminará todos os hosts existentes.</string>
+    <plurals name="successfully_imported_hosts">
+        <item quantity="one">Importouse correctamente %d host.</item>
+        <item quantity="other">Importáronse correctamente %d hosts.</item>
+    </plurals>
+
+    <!-- About -->
+    <string name="about_app">Acerca de SSH Remote</string>
+    <string name="app_version">Versión da aplicación</string>
+    <string name="author">Autor</string>
+    <string name="author_name">Desenvolvido por Stefan Sundin</string> <!-- only translate my name if it makes sense -->
+    <string name="donate">Doar</string>
+    <string name="support_developer">Apoiar o desenvolvedor</string>
+    <string name="license">Licenza</string>
+    <string name="license_name">GNU General Public License v3.0</string>
+    <string name="source_code">Código fonte</string>
+    <string name="view_on_github">Ver en GitHub</string>
+    <string name="ssh_library">Biblioteca SSH</string>
+    <string name="ssh_library_subtitle">Usando %1$s %2$s</string>
+
+    <!-- Help & Volume -->
+    <string name="help">Axuda</string>
+    <string name="tap_the_help_button_for_help">Toque o botón ? para obter axuda.</string>
+    <string name="getting_started_title">Primeiros pasos</string>
+    <string name="getting_started_text">Os botóns do control remoto están asignados a comandos específicos que se executan no host.
+
+Ten que instalar a utilidade axeitada no host; cal depende do xestor de xanelas que use o host (X11 ou Wayland).
+
+Para comezar, seleccione unha predefinición. Sempre poderá volver a unha predefinición máis tarde editando o control remoto.
+
+Lea a páxina de Axuda se é a primeira vez que usa esta aplicación.</string>
+    <string name="error_reading_volume">Erro ao ler o volume. Instale pactl.</string>
+    <string name="volume_format">Volume: %s</string>
+    <string name="volume_muted_format">Volume: %s (silenciado)</string>
+    <string name="smart_volume_settings">Axustes intelixentes de volume</string>
+    <string name="read_current_volume">Ler o volume actual</string>
+    <string name="show_volume_slider">Mostrar o control deslizante do volume</string>
+    <string name="control_volume_with_hardware_buttons">Controlar o volume cos botóns físicos</string>
+    <string name="test_pactl">Probar pactl</string>
+    <string name="pactl_installation_requirement">Require que pactl estea instalado.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Control remoto</string>
+    <string name="notification_connected_to">Conectado a %s</string>
+    <string name="notification_connecting_to">Conectando con %s</string>
+    <string name="notification_disconnected_from">Desconectado de %s</string>
+    <string name="notification_active">Control remoto activo</string>
+    <string name="notification_inactive">Control remoto inactivo</string>
+    <string name="notification_open">Abrir</string>
+    <string name="notification_close">Pechar</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Engadir á pantalla de inicio</string>
+    <string name="run_command_on_host_short">%1$s en %2$s</string>
+    <string name="run_command_on_host_long">Executar %1$s en %2$s</string>
+    <string name="shortcut_host_not_found">Host non atopado.</string>
+    <string name="shortcut_command_not_found">Comando non atopado.</string>
+    <string name="shortcut_remote_control_key_not_found">A acción do atallo xa non é compatible.</string>
+    <string name="shortcut_save_changes_before_using">Garde os cambios do control remoto antes de usar atallos.</string>
+
+    <!-- Share -->
+    <string name="sharing">Compartición</string>
+    <string name="share_target_enabled">Activar destino de compartición</string>
+    <string name="share_target_enabled_subtitle">Esta aplicación aparecerá no menú de compartir para contido de texto simple. Por defecto, o texto compartido escribirase no host conectado usando o comando de escritura do teclado, pero isto pódese personalizar para cada host.</string>
+    <string name="share_target_disabled_title">O destino de compartición está desactivado</string>
+    <string name="share_target_disabled_text">Active primeiro o axuste de destino de compartición. Pode atopalo nos axustes da aplicación.</string>
+    <string name="share_missing_share_command_title">O comando de compartición non está configurado</string>
+    <string name="share_missing_share_command_text">Este host non ten configurado un comando de compartición. Edite o control remoto do host e estableza un comando para compartir texto.</string>
+    <string name="share_text">Compartir texto</string>
+    <string name="share_target_settings">Axustes do destino de compartición</string>
+    <string name="use_keyboard_type_command">Usar o comando de escritura do teclado</string>
+    <string name="custom_share_command">Comando de compartición personalizado</string>
+    <string name="share_command_placeholder">%s substituirase polo texto compartido</string>
+
+</resources>
