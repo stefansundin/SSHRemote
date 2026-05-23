@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.parcelize)
     id("com.google.devtools.ksp")
+    id("androidx.room")
 }
 
 android {
@@ -17,7 +18,7 @@ android {
         minSdk = 23
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
         base.archivesName = "ssh-remote-$versionName"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -59,6 +60,10 @@ kotlin {
         // Fixes @StringRes warning:
         freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {

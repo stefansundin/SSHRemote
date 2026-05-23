@@ -32,8 +32,7 @@ import com.stefansundin.sshremote.data.knownhost.KnownHostDao
 
 @Database(
     entities = [Host::class, KnownHost::class, AdHocCommand::class],
-    version = 14,
-    exportSchema = false,
+    version = 1,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -52,9 +51,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "database",
-                )
-                    .fallbackToDestructiveMigration(true)
-                    .build()
+                ).build()
                 INSTANCE = instance
                 instance
             }

@@ -30,8 +30,7 @@ import com.stefansundin.sshremote.data.password.PasswordDao
 
 @Database(
     entities = [Identity::class, Password::class],
-    version = 2,
-    exportSchema = false,
+    version = 1,
 )
 @TypeConverters(Converters::class)
 abstract class EncryptedAppDatabase : RoomDatabase() {
@@ -49,9 +48,7 @@ abstract class EncryptedAppDatabase : RoomDatabase() {
                     context.applicationContext,
                     EncryptedAppDatabase::class.java,
                     "encrypted_database",
-                )
-                    .fallbackToDestructiveMigration(true)
-                    .build()
+                ).build()
                 INSTANCE = instance
                 instance
             }

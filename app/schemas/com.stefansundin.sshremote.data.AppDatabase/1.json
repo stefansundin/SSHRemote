@@ -1,0 +1,152 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "cfc2e9e813584d68f340d92daa478251",
+    "entities": [
+      {
+        "tableName": "hosts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `hostname` TEXT NOT NULL, `port` INTEGER NOT NULL, `user` TEXT NOT NULL, `passwordId` TEXT, `identityIds` TEXT, `knownHosts` TEXT NOT NULL, `commands` TEXT NOT NULL, `remoteCommands` TEXT, `shareInBackground` INTEGER NOT NULL, `startScreen` TEXT NOT NULL, `smartVolume` TEXT, `sshConfig` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hostname",
+            "columnName": "hostname",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "port",
+            "columnName": "port",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "user",
+            "columnName": "user",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "passwordId",
+            "columnName": "passwordId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "identityIds",
+            "columnName": "identityIds",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "knownHosts",
+            "columnName": "knownHosts",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commands",
+            "columnName": "commands",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteCommands",
+            "columnName": "remoteCommands",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "shareInBackground",
+            "columnName": "shareInBackground",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startScreen",
+            "columnName": "startScreen",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "smartVolume",
+            "columnName": "smartVolume",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sshConfig",
+            "columnName": "sshConfig",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "known_hosts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`line` TEXT NOT NULL, `createdAt` TEXT NOT NULL, PRIMARY KEY(`line`))",
+        "fields": [
+          {
+            "fieldPath": "line",
+            "columnName": "line",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "line"
+          ]
+        }
+      },
+      {
+        "tableName": "ad_hoc_commands",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`command` TEXT NOT NULL, `lastUsed` TEXT NOT NULL, PRIMARY KEY(`command`))",
+        "fields": [
+          {
+            "fieldPath": "command",
+            "columnName": "command",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUsed",
+            "columnName": "lastUsed",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "command"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cfc2e9e813584d68f340d92daa478251')"
+    ]
+  }
+}
