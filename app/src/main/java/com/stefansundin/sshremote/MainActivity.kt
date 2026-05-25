@@ -356,22 +356,17 @@ class MainActivity : ComponentActivity() {
                                 pendingShortcut.value = null
                                 val command = host.commands.find { it.id == shortcut.commandId }
                                 if (command != null) {
-                                    NotificationController.commandStarted(this@MainActivity, host.id)
                                     scope.launch {
-                                        try {
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                R.string.executing_command,
-                                                Toast.LENGTH_SHORT,
-                                            ).show()
-                                            hostViewModel.runCommand(
-                                                command = command.command,
-                                                showOutput = command.showOutput,
-                                                renderOutputAsMarkdown = command.renderOutputAsMarkdown,
-                                            )
-                                        } finally {
-                                            NotificationController.commandFinished(this@MainActivity, host.id)
-                                        }
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            R.string.executing_command,
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                        hostViewModel.runCommand(
+                                            command = command.command,
+                                            showOutput = command.showOutput,
+                                            renderOutputAsMarkdown = command.renderOutputAsMarkdown,
+                                        )
                                     }
                                 } else {
                                     Toast.makeText(
@@ -387,10 +382,7 @@ class MainActivity : ComponentActivity() {
                                 try {
                                     val remoteKey = RemoteControlKey.valueOf(shortcut.remoteControlKey)
                                     if (host.remoteCommands?.get(remoteKey) != null) {
-                                        NotificationController.commandStarted(this@MainActivity, host.id)
-                                        hostViewModel.runRemoteControlCommandWithResult(remoteKey) {
-                                            NotificationController.commandFinished(this@MainActivity, host.id)
-                                        }
+                                        hostViewModel.runRemoteControlCommandWithResult(remoteKey)
                                     } else {
                                         Toast.makeText(
                                             this@MainActivity,

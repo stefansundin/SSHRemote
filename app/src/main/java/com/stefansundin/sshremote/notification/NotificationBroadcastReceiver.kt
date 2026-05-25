@@ -58,7 +58,6 @@ class NotificationBroadcastReceiver : BroadcastReceiver() {
                 }
 
                 val pendingResult = goAsync()
-                NotificationController.commandStarted(context, hostId)
                 app.applicationScope.launch {
                     try {
                         val host = app.hostRepository.getOnce(hostId)
@@ -84,7 +83,6 @@ class NotificationBroadcastReceiver : BroadcastReceiver() {
                             }
                         }
                     } finally {
-                        NotificationController.commandFinished(context, hostId)
                         pendingResult.finish()
                     }
                 }

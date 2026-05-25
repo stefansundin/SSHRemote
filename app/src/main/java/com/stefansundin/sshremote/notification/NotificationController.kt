@@ -42,12 +42,8 @@ object NotificationController {
     private const val NOTIFICATION_ID = 1
 
     private var currentHost: NotificationHost? = null
-    private var isCommandLoading = false
 
     fun show(context: Context, host: NotificationHost) {
-        if (currentHost?.id != host.id || host.status != ConnectionStatus.CONNECTED) {
-            isCommandLoading = false
-        }
         currentHost = host
         NotificationCleanupService.start(context)
         updateNotification(context)
@@ -55,29 +51,14 @@ object NotificationController {
 
     fun stop(context: Context) {
         currentHost = null
-        isCommandLoading = false
         NotificationCleanupService.stop(context)
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.cancel(NOTIFICATION_ID)
     }
 
-    fun commandStarted(context: Context, hostId: String) {
-        if (currentHost?.id == hostId) {
-            isCommandLoading = true
-            updateNotification(context)
-        }
-    }
-
-    fun commandFinished(context: Context, hostId: String) {
-        if (currentHost?.id == hostId) {
-            isCommandLoading = false
-            updateNotification(context)
-        }
-    }
-
     private fun updateNotification(context: Context) {
         val host = currentHost ?: return
-        val notification = createNotification(context, host, isCommandLoading)
+        val notification = createNotification(context, host)
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.notify(NOTIFICATION_ID, notification)
     }
@@ -85,7 +66,6 @@ object NotificationController {
     private fun createNotification(
         context: Context,
         host: NotificationHost,
-        isCommandLoading: Boolean,
     ): Notification {
         val openPendingIntent = createOpenPendingIntent(context, host)
         val closePendingIntent = PendingIntent.getBroadcast(
@@ -141,10 +121,6 @@ object NotificationController {
 
         if (host.status == ConnectionStatus.CONNECTED) {
             val remoteViews = RemoteViews(context.packageName, R.layout.notification_remote_control).apply {
-                setViewVisibility(
-                    R.id.command_loading_indicator,
-                    if (isCommandLoading) android.view.View.VISIBLE else android.view.View.GONE,
-                )
                 setOnClickPendingIntent(R.id.button_up, createCommandPendingIntent(context, host, RemoteControlKey.UP))
                 setOnClickPendingIntent(
                     R.id.button_down,
