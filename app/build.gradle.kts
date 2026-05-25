@@ -17,7 +17,7 @@ android {
         applicationId = "com.stefansundin.sshremote"
         minSdk = 23
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0.0"
         base.archivesName = "ssh-remote-$versionName"
 
