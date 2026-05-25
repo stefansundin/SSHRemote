@@ -21,43 +21,77 @@ package com.stefansundin.sshremote.notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
+import android.util.Log
+import com.stefansundin.sshremote.EXTRA_HOST_ID
+import com.stefansundin.sshremote.EXTRA_REMOTE_CONTROL_KEY
+import com.stefansundin.sshremote.Result
+import com.stefansundin.sshremote.SshRemoteApplication
+import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.RemoteControlKey
-
-// TODO: Check if MainActivity is still running.
+import kotlinx.coroutines.launch
 
 class NotificationBroadcastReceiver : BroadcastReceiver() {
-
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            NotificationService.ACTION_EXECUTE_COMMAND -> {
-                val hostId = intent.getStringExtra(NotificationService.EXTRA_HOST_ID)
-
-                val remoteControlKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getSerializableExtra(
-                        NotificationService.EXTRA_REMOTE_CONTROL_KEY,
-                        RemoteControlKey::class.java,
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    intent.getSerializableExtra(NotificationService.EXTRA_REMOTE_CONTROL_KEY) as? RemoteControlKey
+            NotificationController.ACTION_EXECUTE_COMMAND -> {
+                val hostId = intent.getStringExtra(EXTRA_HOST_ID)
+                val remoteControlKeyString = intent.getStringExtra(EXTRA_REMOTE_CONTROL_KEY)
+                if (hostId.isNullOrEmpty() || remoteControlKeyString.isNullOrEmpty()) {
+                    return
                 }
 
-                if (hostId != null && remoteControlKey != null) {
-                    NotificationService.commandStarted(context, hostId)
+                val remoteControlKey = try {
+                    RemoteControlKey.valueOf(remoteControlKeyString)
+                } catch (e: IllegalArgumentException) {
+                    Log.e("NotificationReceiver", "Invalid RemoteControlKey received: $remoteControlKeyString", e)
+                    return
+                }
 
-                    // Send the intent to MainActivity
-                    val executeIntent = Intent(NotificationService.ACTION_EXECUTE_COMMAND).apply {
-                        putExtra(NotificationService.EXTRA_HOST_ID, hostId)
-                        putExtra(NotificationService.EXTRA_REMOTE_CONTROL_KEY, remoteControlKey.name)
-                        setPackage(context.packageName)
+                val app = context.applicationContext as SshRemoteApplication
+                val connectionState = app.activeConnectionTracker.state.value
+                if (connectionState.connectionStatus != ConnectionStatus.CONNECTED || connectionState.hostId != hostId) {
+                    Log.d(
+                        "NotificationReceiver",
+                        "Ignoring notification command because no matching active connection exists.",
+                    )
+                    return
+                }
+
+                val pendingResult = goAsync()
+                NotificationController.commandStarted(context, hostId)
+                app.applicationScope.launch {
+                    try {
+                        val host = app.hostRepository.getOnce(hostId)
+                        val command = host?.remoteCommands?.get(remoteControlKey)
+                        if (command == null) {
+                            Log.w("NotificationReceiver", "No command found for key $remoteControlKey on host $hostId.")
+                            return@launch
+                        }
+
+                        when (val result = app.sshRepository.executeCommand(command.command)) {
+                            is Result.Success -> {
+                                Log.d(
+                                    "NotificationReceiver",
+                                    "Executed notification command $remoteControlKey for host $hostId.",
+                                )
+                            }
+
+                            is Result.Error -> {
+                                Log.w(
+                                    "NotificationReceiver",
+                                    "Notification command failed for host $hostId: ${result.message}",
+                                )
+                            }
+                        }
+                    } finally {
+                        NotificationController.commandFinished(context, hostId)
+                        pendingResult.finish()
                     }
-                    context.sendBroadcast(executeIntent)
                 }
             }
 
-            NotificationService.ACTION_STOP -> {
-                NotificationService.stop(context)
+            NotificationController.ACTION_STOP -> {
+                NotificationController.stop(context)
             }
         }
     }

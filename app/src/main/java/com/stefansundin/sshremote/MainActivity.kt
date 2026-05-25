@@ -18,14 +18,11 @@
 
 package com.stefansundin.sshremote
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.SoundEffectConstants
@@ -71,7 +68,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -98,7 +94,7 @@ import com.stefansundin.sshremote.data.knownhost.KnownHostViewModel
 import com.stefansundin.sshremote.data.knownhost.KnownHostViewModelFactory
 import com.stefansundin.sshremote.data.settings.SettingsViewModel
 import com.stefansundin.sshremote.data.settings.SettingsViewModelFactory
-import com.stefansundin.sshremote.notification.NotificationService
+import com.stefansundin.sshremote.notification.NotificationController
 import com.stefansundin.sshremote.ui.screens.AdHocCommandScreen
 import com.stefansundin.sshremote.ui.screens.AddIdentityScreen
 import com.stefansundin.sshremote.ui.screens.EditHostScreen
@@ -270,8 +266,6 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
 
-            CommandBroadcastReceiver(hostViewModel)
-
             SSHRemoteTheme(
                 theme,
                 useDynamicColors,
@@ -362,17 +356,22 @@ class MainActivity : ComponentActivity() {
                                 pendingShortcut.value = null
                                 val command = host.commands.find { it.id == shortcut.commandId }
                                 if (command != null) {
+                                    NotificationController.commandStarted(this@MainActivity, host.id)
                                     scope.launch {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            R.string.executing_command,
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
-                                        hostViewModel.runCommand(
-                                            command = command.command,
-                                            showOutput = command.showOutput,
-                                            renderOutputAsMarkdown = command.renderOutputAsMarkdown,
-                                        )
+                                        try {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                R.string.executing_command,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                            hostViewModel.runCommand(
+                                                command = command.command,
+                                                showOutput = command.showOutput,
+                                                renderOutputAsMarkdown = command.renderOutputAsMarkdown,
+                                            )
+                                        } finally {
+                                            NotificationController.commandFinished(this@MainActivity, host.id)
+                                        }
                                     }
                                 } else {
                                     Toast.makeText(
@@ -388,8 +387,9 @@ class MainActivity : ComponentActivity() {
                                 try {
                                     val remoteKey = RemoteControlKey.valueOf(shortcut.remoteControlKey)
                                     if (host.remoteCommands?.get(remoteKey) != null) {
-                                        scope.launch {
-                                            hostViewModel.runRemoteControlCommand(remoteKey)
+                                        NotificationController.commandStarted(this@MainActivity, host.id)
+                                        hostViewModel.runRemoteControlCommandWithResult(remoteKey) {
+                                            NotificationController.commandFinished(this@MainActivity, host.id)
                                         }
                                     } else {
                                         Toast.makeText(
@@ -917,7 +917,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        NotificationService.stop(this)
+        NotificationController.stop(this)
         val app = (application as SshRemoteApplication)
         app.activeConnectionTracker.reset()
     }
@@ -1050,62 +1050,6 @@ private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<Rem
     )
 }
 
-@Composable
-fun CommandBroadcastReceiver(hostViewModel: HostViewModel) {
-    val context = LocalContext.current
-
-    DisposableEffect(context, hostViewModel) {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (intent.action == NotificationService.ACTION_EXECUTE_COMMAND) {
-                    val hostId = intent.getStringExtra(NotificationService.EXTRA_HOST_ID)
-                    val remoteControlKeyString = intent.getStringExtra(NotificationService.EXTRA_REMOTE_CONTROL_KEY)
-
-                    if (remoteControlKeyString != null && hostId != null) {
-                        val remoteControlKey: RemoteControlKey
-                        try {
-                            remoteControlKey = RemoteControlKey.valueOf(remoteControlKeyString)
-                        } catch (e: IllegalArgumentException) {
-                            NotificationService.commandFinished(context, hostId)
-                            Log.e(
-                                "CommandBroadcastReceiver",
-                                "Invalid RemoteControlKey received: $remoteControlKeyString",
-                                e,
-                            )
-                            return
-                        }
-
-                        val allHosts = hostViewModel.allHosts.value
-                        val targetHost = allHosts?.find { it.id == hostId }
-
-                        if (targetHost != null) {
-                            hostViewModel.runRemoteControlCommandWithResult(remoteControlKey) {
-                                NotificationService.commandFinished(context, hostId)
-                            }
-                            Log.d("CommandBroadcastReceiver", "Executing command on host: ${targetHost.name}")
-                        } else {
-                            NotificationService.commandFinished(context, hostId)
-                            Log.w("CommandBroadcastReceiver", "Host with ID $hostId not found.")
-                        }
-                    }
-                }
-            }
-        }
-
-        val intentFilter = IntentFilter(NotificationService.ACTION_EXECUTE_COMMAND)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.registerReceiver(context, receiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            context.registerReceiver(receiver, intentFilter)
-        }
-
-        onDispose {
-            context.unregisterReceiver(receiver)
-        }
-    }
-}
 
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)

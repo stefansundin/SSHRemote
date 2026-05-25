@@ -26,7 +26,7 @@ import com.stefansundin.sshremote.data.host.HostRepository
 import com.stefansundin.sshremote.data.identity.IdentityRepository
 import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import com.stefansundin.sshremote.data.settings.SettingsRepository
-import com.stefansundin.sshremote.notification.NotificationService
+import com.stefansundin.sshremote.notification.NotificationController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -73,6 +73,6 @@ class SshRemoteApplication : Application() {
         Security.removeProvider(EdDSASecurityProvider.PROVIDER_NAME)
         Security.addProvider(EdDSASecurityProvider())
 
-        NotificationService.createNotificationChannel(this)
+        NotificationController.createNotificationChannel(this)
     }
 }

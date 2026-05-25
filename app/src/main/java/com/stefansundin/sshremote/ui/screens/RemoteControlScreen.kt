@@ -114,7 +114,7 @@ import com.stefansundin.sshremote.data.host.RemoteUiState
 import com.stefansundin.sshremote.data.identity.IRemoteControlIdentityViewModel
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ISettingsViewModel
-import com.stefansundin.sshremote.notification.NotificationService
+import com.stefansundin.sshremote.notification.NotificationController
 import com.stefansundin.sshremote.notification.toNotificationHost
 import com.stefansundin.sshremote.performHapticFeedback
 import com.stefansundin.sshremote.ui.KeyEvent
@@ -219,15 +219,11 @@ fun RemoteControlScreen(
 
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
 
-    LaunchedEffect(uiState.connectionStatus) {
-        if (notificationsEnabled) {
-            host.let { NotificationService.start(context, it.toNotificationHost(uiState.connectionStatus)) }
-        }
-    }
-
-    LaunchedEffect(uiState.connectionStatus) {
-        if (uiState.connectionStatus == ConnectionStatus.DISCONNECTED) {
-            NotificationService.stop(context)
+    LaunchedEffect(notificationsEnabled, host, uiState.connectionStatus) {
+        if (notificationsEnabled && uiState.connectionStatus != ConnectionStatus.DISCONNECTED) {
+            NotificationController.show(context, host.toNotificationHost(uiState.connectionStatus))
+        } else {
+            NotificationController.stop(context)
         }
     }
 
