@@ -216,4 +216,17 @@ object NotificationController {
             manager.createNotificationChannel(serviceChannel)
         }
     }
+
+    fun dismissExistingNotification(context: Context) {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        val hasManagedNotification = runCatching {
+            manager.activeNotifications.any { notification ->
+                notification.id == NOTIFICATION_ID &&
+                        (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || notification.notification.channelId == CHANNEL_ID)
+            }
+        }.getOrDefault(true)
+        if (hasManagedNotification) {
+            stop(context)
+        }
+    }
 }

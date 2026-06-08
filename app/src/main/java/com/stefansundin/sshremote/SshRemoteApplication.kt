@@ -73,6 +73,9 @@ class SshRemoteApplication : Application() {
         Security.removeProvider(EdDSASecurityProvider.PROVIDER_NAME)
         Security.addProvider(EdDSASecurityProvider())
 
+        // Set up notification channel
         NotificationController.createNotificationChannel(this)
+        // Dismiss any leftover notification from a previous instance of the app
+        NotificationController.dismissExistingNotification(this)
     }
 }
