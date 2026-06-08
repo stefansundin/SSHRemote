@@ -38,7 +38,7 @@ object NotificationController {
     const val ACTION_STOP = "com.stefansundin.sshremote.notification.ACTION_STOP"
     const val ACTION_EXECUTE_COMMAND = "com.stefansundin.sshremote.notification.ACTION_EXECUTE_COMMAND"
 
-    private const val CHANNEL_ID = "NotificationServiceChannel"
+    private const val REMOTE_CONTROL_CHANNEL_ID = "RemoteControlChannel"
     private const val NOTIFICATION_ID = 1
 
     private var currentHost: NotificationHost? = null
@@ -96,7 +96,7 @@ object NotificationController {
             }
         }
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, REMOTE_CONTROL_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
@@ -205,7 +205,7 @@ object NotificationController {
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
-                CHANNEL_ID,
+                REMOTE_CONTROL_CHANNEL_ID,
                 context.getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
@@ -222,7 +222,7 @@ object NotificationController {
         val hasManagedNotification = runCatching {
             manager.activeNotifications.any { notification ->
                 notification.id == NOTIFICATION_ID &&
-                        (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || notification.notification.channelId == CHANNEL_ID)
+                        (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || notification.notification.channelId == REMOTE_CONTROL_CHANNEL_ID)
             }
         }.getOrDefault(true)
         if (hasManagedNotification) {
