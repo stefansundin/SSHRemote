@@ -10,13 +10,13 @@ android {
     namespace = "com.stefansundin.sshremote"
 
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.stefansundin.sshremote"
         minSdk = 23
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 2
         versionName = "1.0.0"
         base.archivesName = "ssh-remote-$versionName"
