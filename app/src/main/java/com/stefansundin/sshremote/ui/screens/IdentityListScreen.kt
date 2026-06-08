@@ -121,6 +121,7 @@ import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -164,7 +165,7 @@ fun IdentityListScreen(
             when (interaction) {
                 is PressInteraction.Press -> {
                     isLongClick = false
-                    delay(viewConfiguration.longPressTimeoutMillis)
+                    delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                     isLongClick = true
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     undoableDeletedIdentityId = null
@@ -758,7 +759,6 @@ private val fakeCryptoManager = object : ICryptoManager {
         encryptedDataWithIv.toString(Charsets.UTF_8)
 }
 
-@Suppress("SpellCheckingInspection")
 private val dummyEncryptedKey = """
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABDSThtB3E
@@ -770,7 +770,6 @@ bTweZs5vUHXl3DwGDMbnWc5GZN+figL3dxWVg=
 -----END OPENSSH PRIVATE KEY-----
 """.trimIndent().toByteArray()
 
-@Suppress("SpellCheckingInspection")
 private val dummyUnencryptedKey = """
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
@@ -781,7 +780,6 @@ AAAED3XbOirI60/hldspI2oaMWBL9k50YX8z5uzaCqo0nSlWEdoighwUgo+p3E/NMYVkIs
 -----END OPENSSH PRIVATE KEY-----
 """.trimIndent().toByteArray()
 
-@Suppress("SpellCheckingInspection")
 private val dummyUnencryptedRsaKey = """
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn
@@ -801,12 +799,11 @@ Gd80I0/AcKP4TOHfGbAAAAGEluc2VjdXJlIFVuZW5jcnlwdGVkIEtleQEC
 -----END OPENSSH PRIVATE KEY-----
 """.trimIndent().toByteArray()
 
-@Suppress("SpellCheckingInspection")
 private val dummyUnencryptedRsaKeyCertificate = """
 ssh-rsa-cert-v01@openssh.com AAAAHHNzaC1yc2EtY2VydC12MDFAb3BlbnNzaC5jb20AAAAgONiQ4M6WM6nMKOenKOz08kWm6dp0IFEwmkheo2maKQ4AAAADAQABAAAAgQDGzm9sCg1D465xSl2c4/svwZO2bs/Ar4s+d8aJaxWiOLXo1qkkZkxd571yBRmsPgEUC2tpU8lFjCbU2JtrtEfeJzbJ3unqL3aFXY4G9XlqDRYFdf/4hZgm71R7zUtQXixyr7NT3HWIBluJnr7LEUbTONZUQYpVImP/fMl6ykkxoQAAAAAAAAAAAAAAAQAAAAJwaQAAAAYAAAACcGkAAAAAAAAAAP//////////AAAAAAAAAIIAAAAVcGVybWl0LVgxMS1mb3J3YXJkaW5nAAAAAAAAABdwZXJtaXQtYWdlbnQtZm9yd2FyZGluZwAAAAAAAAAWcGVybWl0LXBvcnQtZm9yd2FyZGluZwAAAAAAAAAKcGVybWl0LXB0eQAAAAAAAAAOcGVybWl0LXVzZXItcmMAAAAAAAAAAAAAADMAAAALc3NoLWVkMjU1MTkAAAAgVBqK4PcN893KbFi8DTqEhu0Xf2XkOXLJKjJ2a8K0p3AAAABTAAAAC3NzaC1lZDI1NTE5AAAAQLG80AToroiVcRQTkLhvrMIN0HKMDGoxyBvwNARL1FclkEJ6VD5VHIe+8ua/OaS3aMX4WKa/oujFy2G+p0u1RQI= (null)
 """.trimIndent().toByteArray()
 
-@Suppress("SpellCheckingInspection")
+@Suppress("SpellCheckingInspection", "GrazieInspectionRunner")
 private val dummyUnencryptedEcdsaKey = """
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS

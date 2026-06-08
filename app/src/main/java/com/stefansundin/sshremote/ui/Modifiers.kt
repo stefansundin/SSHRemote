@@ -81,9 +81,7 @@ private class DpadFocusableNode : Modifier.Node(), KeyInputModifierNode, Composi
         return false
     }
 
-    override fun onKeyEvent(event: KeyEvent): Boolean {
-        return false
-    }
+    override fun onKeyEvent(event: KeyEvent): Boolean = false
 }
 
 /**

@@ -350,7 +350,6 @@ class HostViewModel(
     fun runRemoteControlCommandWithResult(key: RemoteControlKey, onComplete: ((Result) -> Unit)? = null) {
         val command = activeHost.value?.remoteCommands?.get(key)
         if (command != null) {
-            val oldVolume = uiState.value.volume
             viewModelScope.launch {
                 val result = runCommand(
                     command = command.command,

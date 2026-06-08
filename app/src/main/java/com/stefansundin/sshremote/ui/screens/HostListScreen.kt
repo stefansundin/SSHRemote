@@ -82,6 +82,7 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +116,7 @@ fun HostListScreen(
             when (interaction) {
                 is PressInteraction.Press -> {
                     isLongClick = false
-                    delay(viewConfiguration.longPressTimeoutMillis)
+                    delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                     isLongClick = true
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     undoableDeletedHostId = null

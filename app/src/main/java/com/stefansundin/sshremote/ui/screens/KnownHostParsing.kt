@@ -20,7 +20,7 @@ package com.stefansundin.sshremote.ui.screens
 
 import java.util.Base64
 
-@Suppress("SpellCheckingInspection")
+@Suppress("SpellCheckingInspection", "GrazieInspectionRunner")
 private val knownHostKeyTypePrefixes = listOf("ssh-", "ecdsa-", "sk-")
 private val knownHostKeyDataPattern = Regex("^[A-Za-z0-9+/=_-]+$")
 

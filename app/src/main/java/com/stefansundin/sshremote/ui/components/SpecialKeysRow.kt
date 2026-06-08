@@ -59,6 +59,7 @@ import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private data class KeyData(
     val label: String,
@@ -190,10 +191,10 @@ private fun KeyButton(
     if (repeatable && enabled && isHeld) {
         LaunchedEffect(keyData.keyCode) {
             onClick()
-            delay(500)
+            delay(500.milliseconds)
             while (true) {
                 onClick()
-                delay(100)
+                delay(100.milliseconds)
             }
         }
     }

@@ -57,6 +57,7 @@ import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun RepeatingButton(
@@ -90,11 +91,11 @@ fun RepeatingButton(
                             interactionSource.emit(downPress)
                             view.playSoundEffect(SoundEffectConstants.CLICK)
                             currentOnClick()
-                            delay(500)
+                            delay(500.milliseconds)
                             while (enabled && down.pressed) {
                                 view.playSoundEffect(SoundEffectConstants.CLICK)
                                 currentOnClick()
-                                delay(100)
+                                delay(100.milliseconds)
                             }
                         }
                         val up = waitForUpOrCancellation()

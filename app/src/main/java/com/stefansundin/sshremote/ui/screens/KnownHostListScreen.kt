@@ -103,6 +103,7 @@ import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,7 +136,7 @@ fun KnownHostListScreen(
             when (interaction) {
                 is PressInteraction.Press -> {
                     isLongClick = false
-                    delay(viewConfiguration.longPressTimeoutMillis)
+                    delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                     isLongClick = true
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     undoableDeletedKnownHostLine = null
@@ -544,7 +545,6 @@ private class FakeKnownHostViewModel(initialEntries: List<KnownHost>) : IKnownHo
     override fun clearKnownHosts() {}
 }
 
-@Suppress("SpellCheckingInspection")
 private val sampleKnownHosts = listOf(
     KnownHost(
         line = "@cert-authority *.example.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfA61oe0k19ti1BWcNcOeehAO28ih1hILIGRQx/1q5p",

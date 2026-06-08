@@ -758,7 +758,7 @@ private fun RouterContentPreview_Loading() {
     }
 }
 
-@Suppress("SpellCheckingInspection")
+@Suppress("SpellCheckingInspection", "GrazieInspectionRunner")
 @Preview(showBackground = true, widthDp = 400, heightDp = 600, name = "Router output")
 @Preview(
     showBackground = true,
@@ -829,7 +829,6 @@ private fun RouterContentPreview_Message() {
     }
 }
 
-@Suppress("SpellCheckingInspection")
 @Preview(showBackground = true, widthDp = 400, heightDp = 600, name = "Host key verification")
 @Preview(
     showBackground = true,

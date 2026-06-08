@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 internal fun parseVolumePercent(volume: String?): Float? {
     if (volume == null) return null
@@ -109,7 +110,7 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
     LaunchedEffect(isDragging) {
         if (!isDragging && hasInteracted && !suppressUpdates) {
             suppressUpdates = true
-            delay(1000)
+            delay(1000.milliseconds)
             suppressUpdates = false
         }
     }
@@ -172,7 +173,7 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
     LaunchedEffect(isDragging) {
         if (!isDragging && hasInteracted && !suppressUpdates) {
             suppressUpdates = true
-            delay(1000)
+            delay(1000.milliseconds)
             suppressUpdates = false
         }
     }

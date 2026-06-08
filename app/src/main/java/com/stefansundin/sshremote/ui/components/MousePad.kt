@@ -60,6 +60,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun MousePad(
@@ -197,7 +198,7 @@ private fun TouchPad(
 
                         val longPressJob = if (leftDownUpConfigured) {
                             launch {
-                                delay(viewConfiguration.longPressTimeoutMillis)
+                                delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                                 state = GestureState.LongPressDrag
                                 onLeftDown()
                             }
@@ -222,7 +223,7 @@ private fun TouchPad(
                                             .fold(Offset.Zero) { acc, offset -> acc + offset } / pressedChanges.size.toFloat()
                                         if (rightClickConfigured) {
                                             twoFingerLongPressJob = launch {
-                                                delay(viewConfiguration.longPressTimeoutMillis)
+                                                delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                                                 onRightClick()
                                             }
                                         }

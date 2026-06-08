@@ -244,7 +244,7 @@ private fun expandTabsForDisplay(text: String, tabWidth: Int = 8): String {
     return expanded.toString()
 }
 
-@Suppress("SpellCheckingInspection")
+@Suppress("SpellCheckingInspection", "GrazieInspectionRunner")
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
 @Preview(
     showBackground = true,
