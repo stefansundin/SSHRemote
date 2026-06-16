@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.os.SystemClock
 import android.view.MotionEvent
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -30,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,6 +45,8 @@ import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+
+private const val UPDATE_SUPPRESSION_WINDOW_MS = 750L
 
 internal fun parseVolumePercent(volume: String?): Float? {
     if (volume == null) return null
@@ -66,33 +70,32 @@ internal class VolumeSetThrottle(private val onVolumeSet: (Int) -> Unit) {
     }
 
     fun onDrag(value: Float) {
-        val now = System.currentTimeMillis()
+        val now = SystemClock.uptimeMillis()
         val intValue = value.roundToInt()
         val previousValue = lastSentValue
 
         if (previousValue == null) {
             send(intValue, now)
-            return
-        }
-
-        val changeSinceLastSent = abs(intValue - previousValue)
-        val minInterval = minIntervalMs(changeSinceLastSent)
-        if (now - lastSentAt >= minInterval) {
-            send(intValue, now)
+        } else if (intValue != lastSentValue) {
+            val changeSinceLastSent = abs(intValue - previousValue)
+            val minInterval = minIntervalMs(changeSinceLastSent)
+            if (now - lastSentAt >= minInterval) {
+                send(intValue, now)
+            }
         }
     }
 
     fun onPress(value: Float) {
         val intValue = value.roundToInt()
         if (intValue != lastSentValue) {
-            send(intValue, System.currentTimeMillis())
+            send(intValue, SystemClock.uptimeMillis())
         }
     }
 
     fun onFinished(value: Float) {
         val intValue = value.roundToInt()
         if (intValue != lastSentValue) {
-            send(intValue, System.currentTimeMillis())
+            send(intValue, SystemClock.uptimeMillis())
         }
     }
 }
@@ -103,20 +106,25 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
     var sliderValue by remember { mutableFloatStateOf(committedValue ?: 0f) }
     var sliderWidthPx by remember { mutableIntStateOf(0) }
     var isDragging by remember { mutableStateOf(false) }
-    var suppressUpdates by remember { mutableStateOf(false) }
     var hasInteracted by remember { mutableStateOf(false) }
+    var lastSliderSetAtMs by remember { mutableLongStateOf(0L) }
+    var suppressionWindowEndedSignal by remember { mutableIntStateOf(0) }
 
-    // When drag finishes, suppress external updates for 1 second to allow network round-trip
-    LaunchedEffect(isDragging) {
-        if (!isDragging && hasInteracted && !suppressUpdates) {
-            suppressUpdates = true
-            delay(1000.milliseconds)
-            suppressUpdates = false
+    // Force a re-check when the suppression window ends so the latest committed value can be applied.
+    LaunchedEffect(lastSliderSetAtMs, hasInteracted) {
+        if (!hasInteracted) return@LaunchedEffect
+        val elapsedSinceLocalSetMs = SystemClock.uptimeMillis() - lastSliderSetAtMs
+        val remainingMs = UPDATE_SUPPRESSION_WINDOW_MS - elapsedSinceLocalSetMs
+        if (remainingMs > 0L) {
+            delay(remainingMs.milliseconds)
+            suppressionWindowEndedSignal++
         }
     }
 
     // Update slider value from committed value only when not dragging and update suppression window is closed
-    LaunchedEffect(committedValue, isDragging, suppressUpdates) {
+    LaunchedEffect(committedValue, isDragging, lastSliderSetAtMs, suppressionWindowEndedSignal) {
+        val elapsedSinceLocalSetMs = SystemClock.uptimeMillis() - lastSliderSetAtMs
+        val suppressUpdates = hasInteracted && elapsedSinceLocalSetMs < UPDATE_SUPPRESSION_WINDOW_MS
         if (!isDragging && !suppressUpdates && committedValue != null) {
             sliderValue = committedValue
         }
@@ -126,9 +134,9 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
         enabled = volume != null,
         value = sliderValue,
         onValueChange = {
+            lastSliderSetAtMs = SystemClock.uptimeMillis()
             hasInteracted = true
             isDragging = true
-            suppressUpdates = false
             sliderValue = it
             throttle.onDrag(it)
         },
@@ -147,9 +155,9 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
                     // We intercept ACTION_DOWN, calculate the position the user tapped, and send it immediately
                     // for better UX - the volume responds right away without requiring any movement.
                     val pressedValue = ((event.x.coerceIn(0f, sliderWidthPx.toFloat())) / sliderWidthPx) * 100f
+                    lastSliderSetAtMs = SystemClock.uptimeMillis()
                     hasInteracted = true
                     isDragging = true
-                    suppressUpdates = false
                     sliderValue = pressedValue
                     throttle.onPress(pressedValue)
                 }
@@ -166,20 +174,25 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
     var sliderValue by remember { mutableFloatStateOf(committedValue ?: 0f) }
     var sliderHeightPx by remember { mutableIntStateOf(0) }
     var isDragging by remember { mutableStateOf(false) }
-    var suppressUpdates by remember { mutableStateOf(false) }
     var hasInteracted by remember { mutableStateOf(false) }
+    var lastSliderSetAtMs by remember { mutableLongStateOf(0L) }
+    var suppressionWindowEndedSignal by remember { mutableIntStateOf(0) }
 
-    // When drag finishes, suppress external updates for 1 second to allow network round-trip
-    LaunchedEffect(isDragging) {
-        if (!isDragging && hasInteracted && !suppressUpdates) {
-            suppressUpdates = true
-            delay(1000.milliseconds)
-            suppressUpdates = false
+    // Force a re-check when the suppression window ends so the latest committed value can be applied.
+    LaunchedEffect(lastSliderSetAtMs, hasInteracted) {
+        if (!hasInteracted) return@LaunchedEffect
+        val elapsedSinceLocalSetMs = SystemClock.uptimeMillis() - lastSliderSetAtMs
+        val remainingMs = UPDATE_SUPPRESSION_WINDOW_MS - elapsedSinceLocalSetMs
+        if (remainingMs > 0L) {
+            delay(remainingMs.milliseconds)
+            suppressionWindowEndedSignal++
         }
     }
 
     // Update slider value from committed value only when not dragging and update suppression window is closed
-    LaunchedEffect(committedValue, isDragging, suppressUpdates) {
+    LaunchedEffect(committedValue, isDragging, lastSliderSetAtMs, suppressionWindowEndedSignal) {
+        val elapsedSinceLocalSetMs = SystemClock.uptimeMillis() - lastSliderSetAtMs
+        val suppressUpdates = hasInteracted && elapsedSinceLocalSetMs < UPDATE_SUPPRESSION_WINDOW_MS
         if (!isDragging && !suppressUpdates && committedValue != null) {
             sliderValue = committedValue
         }
@@ -199,9 +212,9 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
                     // The slider is rotated -90 degrees, so we invert Y (top = 100%, bottom = 0%).
                     val clampedY = event.y.coerceIn(0f, sliderHeightPx.toFloat())
                     val pressedValue = (1f - (clampedY / sliderHeightPx)) * 100f
+                    lastSliderSetAtMs = SystemClock.uptimeMillis()
                     hasInteracted = true
                     isDragging = true
-                    suppressUpdates = false
                     sliderValue = pressedValue
                     throttle.onPress(pressedValue)
                 }
@@ -214,9 +227,9 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
             enabled = volume != null,
             value = sliderValue,
             onValueChange = {
+                lastSliderSetAtMs = SystemClock.uptimeMillis()
                 hasInteracted = true
                 isDragging = true
-                suppressUpdates = false
                 sliderValue = it
                 throttle.onDrag(it)
             },
