@@ -1,0 +1,32 @@
+body {
+  padding: 0 15px;
+  margin-bottom: 100px;
+}
+
+[data-bs-theme="dark"] header img {
+  filter: invert(100%);
+}
+
+.container {
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+h1 {
+  font-size: 4em;
+}
+
+h2 {
+  border-bottom: 1px solid #ccc;
+  margin-top: 2em;
+  padding-bottom: 0.125em;
+}
+
+input:invalid {
+  border-color: red;
+}

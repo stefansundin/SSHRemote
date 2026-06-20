@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+    #outline, circle {
+      stroke: light-dark(black, white);
+    }
+    rect {
+      fill: light-dark(black, white);
+    }
+  </style>
+  <g transform="translate(64, 64)">
+    <rect id="outline" x="-33" y="-56" width="66" height="112" rx="12" stroke-width="8" style="fill:none" />
+    <circle cx="0" cy="-15" r="15" stroke-width="7" fill="none" />
+    <rect x="-21" y="12" width="11" height="6.5" rx="3" />
+    <rect x="-5.5" y="12" width="11" height="6.5" rx="3" />
+    <rect x="10" y="12" width="11" height="6.5" rx="3" />
+    <rect x="-21" y="24" width="11" height="6.5" rx="3" />
+    <rect x="-5.5" y="24" width="11" height="6.5" rx="3" />
+    <rect x="10" y="24" width="11" height="6.5" rx="3" />
+    <rect x="-21" y="36" width="11" height="6.5" rx="3" />
+    <rect x="-5.5" y="36" width="11" height="6.5" rx="3" />
+    <rect x="10" y="36" width="11" height="6.5" rx="3" />
+  </g>
+</svg>

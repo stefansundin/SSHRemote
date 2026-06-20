@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+  <title>SSH Remote</title>
+
+  <meta charset="utf-8">
+  <meta name="author" content="Stefan Sundin">
+  <meta name="description" content="Android app to control your SSH-enabled devices.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:site_name" content="SSH Remote">
+  <meta property="og:title" content="Android app to control your SSH-enabled devices.">
+  <meta property="og:description" content="Android app to control your SSH-enabled devices.">
+  <meta property="og:url" content="https://stefansundin.github.io/sshremote/">
+  <meta property="og:image" content="https://stefansundin.github.io/sshremote/img/icon.png">
+
+  <link rel="icon" href="img/favicon.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="alternate" type="application/atom+xml" href="https://github.com/stefansundin/SSHRemote/releases.atom" title="SSH Remote release feed">
+</head>
+<body>
+  <header class="text-center">
+    <img src="img/icon.svg" width="196" height="196" alt="SSH Remote Icon" itemprop="image">
+    <h1 itemprop="name">SSH Remote</h1>
+  </header>
+
+  <div class="text-center m-4">
+    <a type="button" class="btn btn-lg btn-primary m-1" href="https://github.com/stefansundin/SSHRemote">GitHub</a>
+    <a type="button" class="btn btn-lg btn-success m-1" href="#donate">Donate</a>
+  </div>
+
+  <div class="container">
+    <p>Control your SSH-enabled devices, such as your computer or HTPC, using your Android smartphone.</p>
+
+    <p>Requirements:</p>
+    <ul>
+      <li>The device you want to control must be running an SSH server.</li>
+      <li>A program that allows control, such as <code>ydotool</code>, <code>xdotool</code>, <code>wtype</code>, etc., must be installed.</li>
+    </ul>
+
+    <p>Features:</p>
+    <ul>
+      <li>Fully configurable. You can modify the commands that each button run when pressed.</li>
+      <li>Excellent mouse and keyboard support.</li>
+      <li>Supports SSH keys, certificates, and host key verification for a secure connection.</li>
+      <li>Sensitive data like passwords and SSH keys are securely encrypted.</li>
+      <li>No ads. No tracking or telemetry. No network requests except for the SSH connection.</li>
+    </ul>
+
+    <p>Read <a target="_blank" rel="noopener" href="https://github.com/stefansundin/SSHRemote/blob/main/app/src/main/res/raw/help.md">the help text</a> that is included in the app.</p>
+
+    <p>Made by Stefan Sundin.</p>
+
+    <p>The source code is licensed under the <a target="_blank" rel="noopener" href="https://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License version 3</a> or later.</p>
+
+
+    <h2 id="donate">Support My Open Source Work</h2>
+
+    <p>If SSH Remote has saved you time, solved a problem, or become part of your workflow, please consider supporting my work. Every contribution helps me spend more time maintaining and improving the tools you use.</p>
+
+    <div class="alert alert-primary mb-4" role="alert">
+      <h3 class="h5 mb-2">Donor Perk: Private Discord Access</h3>
+      <p class="mb-0">Donate a total of <strong>$25 or more</strong> and you can join my private Discord server to chat with me and other users. It does <strong>not</strong> have to be $25 per month: a one-time donation or smaller donations that add up to $25 both qualify.</p>
+    </div>
+
+    <section class="mb-5" aria-labelledby="github-sponsors">
+      <h3 id="github-sponsors">1. GitHub Sponsors (Recommended)</h3>
+      <p>GitHub Sponsors is the best way to support my work because GitHub does not charge fees, so your entire contribution reaches me.</p>
+      <p><a class="btn btn-primary" target="_blank" rel="noopener" href="https://github.com/sponsors/stefansundin">Support on GitHub Sponsors</a></p>
+    </section>
+
+    <section class="mb-5" aria-labelledby="paypal">
+      <h3 id="paypal">2. PayPal</h3>
+      <p>Prefer to make a one-time donation? PayPal is a quick and easy option.</p>
+
+      <form method="post" action="https://www.paypal.com/cgi-bin/webscr" target="_blank" class="row g-3 mb-2">
+        <input type="hidden" name="cmd" value="_xclick">
+        <input type="hidden" name="business" value="KYMVEK692RF5Q">
+        <input type="hidden" name="item_name" value="SSH Remote">
+        <input type="hidden" name="item_number" value="SSH Remote">
+        <input type="hidden" name="no_shipping" value="1">
+        <input type="hidden" name="return" value="https://stefansundin.github.io/thx">
+        <input type="hidden" name="cbt" value="Learn why you just became awesome">
+        <div class="col-sm-3">
+          <div class="input-group">
+            <span class="input-group-text"><label for="donation_amount">$</label></span>
+            <input type="hidden" name="currency_code" value="USD">
+            <input class="form-control" type="number" id="donation_amount" name="amount" value="25.00" min="1" step="0.01" inputmode="decimal" placeholder="Amount">
+          </div>
+        </div>
+        <div class="col">
+          <input class="btn btn-success" type="submit" value="Donate with PayPal">
+        </div>
+      </form>
+    </section>
+
+    <section class="mb-5" aria-labelledby="patreon">
+      <h3 id="patreon">3. Patreon</h3>
+      <p>If you already use Patreon or prefer recurring support there, you can become a patron.</p>
+      <p><a class="btn btn-danger" target="_blank" rel="noopener" href="https://www.patreon.com/stefansundin">Support on Patreon</a></p>
+    </section>
+
+    <p>Have questions? <a href="../donate/">View the full FAQ and donation information</a>.</p>
+
+    <p class="mb-5">Thank you for supporting independent open source software.</p>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
