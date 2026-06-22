@@ -1,0 +1,10 @@
+Requirements:
+- The device you want to control must be running an SSH server.
+- A program that allows control, such as ydotool, xdotool, wtype, etc., must be installed.
+
+Features:
+- Fully configurable. You can modify the commands that each button run when pressed.
+- Excellent mouse and keyboard support.
+- Supports SSH keys, certificates, and host key verification for a secure connection.
+- Sensitive data like passwords and SSH keys are securely encrypted.
+- No ads. No tracking or telemetry. No network requests except for the SSH connection.
