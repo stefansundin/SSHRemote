@@ -53,6 +53,12 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+
+    // Options to make F-Droid happy
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 }
 
 kotlin {
