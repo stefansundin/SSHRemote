@@ -142,6 +142,9 @@ class SettingsImporter(
             if (settings.allowPasswordPrompting != null) {
                 settingsRepository.setAllowPasswordPrompting(settings.allowPasswordPrompting)
             }
+            if (settings.showWhenLocked != null) {
+                settingsRepository.setShowWhenLocked(settings.showWhenLocked)
+            }
             if (settings.shareTargetEnabled != null) {
                 settingsRepository.setShareTargetEnabled(settings.shareTargetEnabled)
             }

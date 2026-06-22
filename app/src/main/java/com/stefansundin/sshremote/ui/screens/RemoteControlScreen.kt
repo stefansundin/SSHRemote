@@ -155,6 +155,7 @@ fun RemoteControlScreen(
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
+    val activity = context as? Activity
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var wasConnected by rememberSaveable { mutableStateOf(false) }
@@ -180,8 +181,14 @@ fun RemoteControlScreen(
     }
     val canToggleFullscreen = !isInMultiWindowMode && (hasSystemBars || isFullscreen)
 
-    BackHandler {
+    val showWhenLocked by settingsViewModel.showWhenLocked.collectAsState()
+    val disconnectFromRemote = {
+        activity?.setShowWhenLockedEnabled(false)
         onDisconnect()
+    }
+
+    BackHandler {
+        disconnectFromRemote()
     }
 
     LaunchedEffect(isInMultiWindowMode, configuration) {
@@ -197,8 +204,8 @@ fun RemoteControlScreen(
     val view = LocalView.current
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
 
-    DisposableEffect(keepScreenOn) {
-        val window = (view.context as? Activity)?.window
+    DisposableEffect(activity, view, keepScreenOn, showWhenLocked) {
+        val window = activity?.window
         if (window != null) {
             if (keepScreenOn) {
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -206,7 +213,9 @@ fun RemoteControlScreen(
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         }
+        activity?.setShowWhenLockedEnabled(showWhenLocked)
         onDispose {
+            activity?.setShowWhenLockedEnabled(false)
             if (window != null) {
                 val insetsController = WindowCompat.getInsetsController(window, view)
                 insetsController.show(WindowInsetsCompat.Type.systemBars())
@@ -601,7 +610,7 @@ fun RemoteControlScreen(
                             IconButton(
                                 onClick = {
                                     view.playSoundEffect(SoundEffectConstants.CLICK)
-                                    onDisconnect()
+                                    disconnectFromRemote()
                                 },
                             ) {
                                 Icon(
@@ -864,6 +873,19 @@ fun RemoteControlScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Suppress("DEPRECATION")
+private fun Activity.setShowWhenLockedEnabled(enabled: Boolean) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+        setShowWhenLocked(enabled)
+    } else {
+        if (enabled) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
         }
     }
 }

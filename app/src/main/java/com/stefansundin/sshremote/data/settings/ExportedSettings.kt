@@ -70,6 +70,7 @@ data class ExportedSettings(
     val notificationsEnabled: Boolean?,
     val strictHostKeyChecking: Boolean?,
     val allowPasswordPrompting: Boolean?,
+    val showWhenLocked: Boolean?,
     val shareTargetEnabled: Boolean?,
     val hosts: List<ExportedHost>?,
     val knownHosts: List<ExportedKnownHost>?,

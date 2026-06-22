@@ -50,6 +50,7 @@ class SettingsRepository(context: Context) {
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val STRICT_HOST_KEY_CHECKING = booleanPreferencesKey("strict_host_key_checking")
         val ALLOW_PASSWORD_PROMPTING = booleanPreferencesKey("allow_password_prompting")
+        val SHOW_WHEN_LOCKED = booleanPreferencesKey("show_when_locked")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val SHARE_TARGET_ENABLED = booleanPreferencesKey("share_target_enabled")
     }
@@ -180,6 +181,17 @@ class SettingsRepository(context: Context) {
     suspend fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ALLOW_PASSWORD_PROMPTING] = allowPasswordPrompting
+        }
+    }
+
+    val showWhenLocked: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.SHOW_WHEN_LOCKED] ?: false
+        }
+
+    suspend fun setShowWhenLocked(showWhenLocked: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_WHEN_LOCKED] = showWhenLocked
         }
     }
 

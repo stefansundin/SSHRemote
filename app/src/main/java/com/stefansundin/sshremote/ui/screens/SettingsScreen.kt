@@ -311,6 +311,7 @@ fun SettingsScreen(
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
     val allowPasswordPrompting by settingsViewModel.allowPasswordPrompting.collectAsState()
+    val showWhenLocked by settingsViewModel.showWhenLocked.collectAsState()
     val shareTargetEnabled by settingsViewModel.shareTargetEnabled.collectAsState()
     val hasHosts by settingsViewModel.hasHosts.collectAsState()
 
@@ -627,6 +628,11 @@ fun SettingsScreen(
                         checked = allowPasswordPrompting,
                         onCheckedChange = { settingsViewModel.setAllowPasswordPrompting(it) },
                     )
+                    SettingsSwitchItem(
+                        title = stringResource(R.string.show_when_locked),
+                        checked = showWhenLocked,
+                        onCheckedChange = { settingsViewModel.setShowWhenLocked(it) },
+                    )
                 }
 
                 HorizontalDivider()
@@ -758,6 +764,7 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
     override val notificationsEnabled = MutableStateFlow(false)
     override val strictHostKeyChecking = MutableStateFlow(true)
     override val allowPasswordPrompting = MutableStateFlow(true)
+    override val showWhenLocked = MutableStateFlow(false)
     override val shareTargetEnabled = MutableStateFlow(false)
     override val hasHosts: StateFlow<Boolean> = MutableStateFlow(true)
     override val eventFlow: SharedFlow<SettingsEvent> = MutableSharedFlow()
@@ -800,6 +807,10 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
 
     override fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
         this.allowPasswordPrompting.value = allowPasswordPrompting
+    }
+
+    override fun setShowWhenLocked(showWhenLocked: Boolean) {
+        this.showWhenLocked.value = showWhenLocked
     }
 
     override fun setShareTargetEnabled(shareTargetEnabled: Boolean) {
