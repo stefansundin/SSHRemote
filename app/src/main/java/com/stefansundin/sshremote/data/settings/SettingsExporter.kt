@@ -102,10 +102,10 @@ class SettingsExporter(
         val backgroundColor = settingsRepository.backgroundColor.first()
         val hapticFeedback = settingsRepository.hapticFeedback.first()
         val keepScreenOn = settingsRepository.keepScreenOn.first()
+        val showWhenLocked = settingsRepository.showWhenLocked.first()
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
         val allowPasswordPrompting = settingsRepository.allowPasswordPrompting.first()
-        val showWhenLocked = settingsRepository.showWhenLocked.first()
         val shareTargetEnabled = settingsRepository.shareTargetEnabled.first()
         val hosts = hostRepository.getAll().first().map { it.toExportedHost() }
         val knownHosts = knownHostRepository.getAll().first().map { knownHost ->
@@ -128,10 +128,10 @@ class SettingsExporter(
             backgroundColor?.toHex(),
             hapticFeedback.duration,
             keepScreenOn,
+            showWhenLocked,
             notificationsEnabled,
             strictHostKeyChecking,
             allowPasswordPrompting,
-            showWhenLocked,
             shareTargetEnabled,
             hosts,
             knownHosts,

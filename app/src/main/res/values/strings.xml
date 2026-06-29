@@ -274,8 +274,8 @@
     <string name="milliseconds_abbreviation">ms</string>
     <string name="show_notification">Show notification</string>
     <string name="keep_screen_on">Keep screen on</string>
+    <string name="show_when_locked">Show on top of lock screen</string>
     <string name="security">Security</string>
-    <string name="show_when_locked">Show remote on top of lock screen</string>
     <string name="ssh_keys_subtitle">Manage SSH keys for authentication</string>
     <string name="known_hosts">Known Hosts</string>
     <string name="known_hosts_subtitle">Manage trusted host keys and certificates</string>
