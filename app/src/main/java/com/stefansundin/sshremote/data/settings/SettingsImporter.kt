@@ -130,6 +130,9 @@ class SettingsImporter(
             if (settings.keepScreenOn != null) {
                 settingsRepository.setKeepScreenOn(settings.keepScreenOn)
             }
+            if (settings.showWhenLocked != null) {
+                settingsRepository.setShowWhenLocked(settings.showWhenLocked)
+            }
             if (settings.notificationsEnabled != null) {
                 settingsRepository.setNotificationsEnabled(settings.notificationsEnabled)
                 if (settings.notificationsEnabled) {

@@ -102,6 +102,7 @@ class SettingsExporter(
         val backgroundColor = settingsRepository.backgroundColor.first()
         val hapticFeedback = settingsRepository.hapticFeedback.first()
         val keepScreenOn = settingsRepository.keepScreenOn.first()
+        val showWhenLocked = settingsRepository.showWhenLocked.first()
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
         val allowPasswordPrompting = settingsRepository.allowPasswordPrompting.first()
@@ -127,6 +128,7 @@ class SettingsExporter(
             backgroundColor?.toHex(),
             hapticFeedback.duration,
             keepScreenOn,
+            showWhenLocked,
             notificationsEnabled,
             strictHostKeyChecking,
             allowPasswordPrompting,

@@ -307,8 +307,9 @@ fun SettingsScreen(
     var importUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var importJson by rememberSaveable { mutableStateOf<String?>(null) }
     var exportJson by rememberSaveable { mutableStateOf<String?>(null) }
-    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
+    val showWhenLocked by settingsViewModel.showWhenLocked.collectAsState()
+    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
     val allowPasswordPrompting by settingsViewModel.allowPasswordPrompting.collectAsState()
     val shareTargetEnabled by settingsViewModel.shareTargetEnabled.collectAsState()
@@ -585,6 +586,11 @@ fun SettingsScreen(
                         onCheckedChange = { settingsViewModel.setKeepScreenOn(it) },
                     )
                     SettingsSwitchItem(
+                        title = stringResource(R.string.show_when_locked),
+                        checked = showWhenLocked,
+                        onCheckedChange = { settingsViewModel.setShowWhenLocked(it) },
+                    )
+                    SettingsSwitchItem(
                         title = stringResource(R.string.show_notification),
                         checked = notificationsEnabled,
                         onCheckedChange = {
@@ -755,6 +761,7 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
     override val onPrimaryColor = MutableStateFlow<Color?>(null)
     override val hapticFeedback = MutableStateFlow<HapticFeedback>(HapticFeedback.Medium)
     override val keepScreenOn = MutableStateFlow(true)
+    override val showWhenLocked = MutableStateFlow(false)
     override val notificationsEnabled = MutableStateFlow(false)
     override val strictHostKeyChecking = MutableStateFlow(true)
     override val allowPasswordPrompting = MutableStateFlow(true)
@@ -788,6 +795,10 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
 
     override fun setKeepScreenOn(keepScreenOn: Boolean) {
         this.keepScreenOn.value = keepScreenOn
+    }
+
+    override fun setShowWhenLocked(showWhenLocked: Boolean) {
+        this.showWhenLocked.value = showWhenLocked
     }
 
     override fun setNotificationsEnabled(notificationsEnabled: Boolean) {

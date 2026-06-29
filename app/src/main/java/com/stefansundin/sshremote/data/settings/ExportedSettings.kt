@@ -67,6 +67,7 @@ data class ExportedSettings(
     val backgroundColor: String?,
     val hapticFeedbackDuration: Long?,
     val keepScreenOn: Boolean?,
+    val showWhenLocked: Boolean?,
     val notificationsEnabled: Boolean?,
     val strictHostKeyChecking: Boolean?,
     val allowPasswordPrompting: Boolean?,

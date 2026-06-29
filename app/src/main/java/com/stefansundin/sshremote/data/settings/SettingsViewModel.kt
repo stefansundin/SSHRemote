@@ -46,6 +46,7 @@ interface ISettingsViewModel {
     val onPrimaryColor: StateFlow<Color?>
     val hapticFeedback: StateFlow<HapticFeedback>
     val keepScreenOn: StateFlow<Boolean>
+    val showWhenLocked: StateFlow<Boolean>
     val notificationsEnabled: StateFlow<Boolean>
     val strictHostKeyChecking: StateFlow<Boolean>
     val allowPasswordPrompting: StateFlow<Boolean>
@@ -60,6 +61,7 @@ interface ISettingsViewModel {
     fun setOnPrimaryColor(color: Color?)
     fun setHapticFeedback(hapticFeedback: HapticFeedback)
     fun setKeepScreenOn(keepScreenOn: Boolean)
+    fun setShowWhenLocked(showWhenLocked: Boolean)
     fun setNotificationsEnabled(notificationsEnabled: Boolean)
     fun setStrictHostKeyChecking(strictHostKeyChecking: Boolean)
     fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean)
@@ -168,6 +170,19 @@ class SettingsViewModel(
     override fun setKeepScreenOn(keepScreenOn: Boolean) {
         viewModelScope.launch {
             settingsRepository.setKeepScreenOn(keepScreenOn)
+        }
+    }
+
+    override val showWhenLocked: StateFlow<Boolean> = settingsRepository.showWhenLocked
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = false,
+        )
+
+    override fun setShowWhenLocked(showWhenLocked: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setShowWhenLocked(showWhenLocked)
         }
     }
 
