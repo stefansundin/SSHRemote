@@ -82,6 +82,7 @@ import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.settings.ISettingsViewModel
+import com.stefansundin.sshremote.data.settings.AppearanceSettings
 import com.stefansundin.sshremote.data.settings.ImportStrategy
 import com.stefansundin.sshremote.data.settings.SettingsEvent
 import com.stefansundin.sshremote.ui.components.ColorSettingDialog
@@ -754,6 +755,15 @@ fun SettingsScreen(
 
 
 val fakeSettingsViewModel = object : ISettingsViewModel {
+    override val appearance = MutableStateFlow(
+        AppearanceSettings(
+            theme = Theme.SYSTEM,
+            useDynamicColors = true,
+            backgroundColor = null,
+            primaryColor = null,
+            onPrimaryColor = null,
+        ),
+    )
     override val theme = MutableStateFlow(Theme.SYSTEM)
     override val useDynamicColors = MutableStateFlow(true)
     override val backgroundColor = MutableStateFlow<Color?>(null)
@@ -769,24 +779,45 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
     override val hasHosts: StateFlow<Boolean> = MutableStateFlow(true)
     override val eventFlow: SharedFlow<SettingsEvent> = MutableSharedFlow()
 
+    private fun updateAppearance(
+        theme: Theme = this.theme.value,
+        useDynamicColors: Boolean = this.useDynamicColors.value,
+        backgroundColor: Color? = this.backgroundColor.value,
+        primaryColor: Color? = this.primaryColor.value,
+        onPrimaryColor: Color? = this.onPrimaryColor.value,
+    ) {
+        appearance.value = AppearanceSettings(
+            theme = theme,
+            useDynamicColors = useDynamicColors,
+            backgroundColor = backgroundColor,
+            primaryColor = primaryColor,
+            onPrimaryColor = onPrimaryColor,
+        )
+    }
+
     override fun setTheme(theme: Theme) {
         this.theme.value = theme
+        updateAppearance(theme = theme)
     }
 
     override fun setUseDynamicColors(useDynamicColors: Boolean) {
         this.useDynamicColors.value = useDynamicColors
+        updateAppearance(useDynamicColors = useDynamicColors)
     }
 
     override fun setBackgroundColor(color: Color?) {
         this.backgroundColor.value = color
+        updateAppearance(backgroundColor = color)
     }
 
     override fun setPrimaryColor(color: Color?) {
         this.primaryColor.value = color
+        updateAppearance(primaryColor = color)
     }
 
     override fun setOnPrimaryColor(color: Color?) {
         this.onPrimaryColor.value = color
+        updateAppearance(onPrimaryColor = color)
     }
 
     override fun setHapticFeedback(hapticFeedback: HapticFeedback) {

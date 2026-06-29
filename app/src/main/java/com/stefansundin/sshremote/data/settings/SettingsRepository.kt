@@ -55,15 +55,32 @@ class SettingsRepository(context: Context) {
         val SHARE_TARGET_ENABLED = booleanPreferencesKey("share_target_enabled")
     }
 
-    val theme: Flow<Theme> = dataStore.data
-        .map { preferences ->
-            val themeName = preferences[PreferencesKeys.THEME] ?: Theme.SYSTEM.name
-            try {
-                Theme.valueOf(themeName)
-            } catch (e: IllegalArgumentException) {
-                Theme.SYSTEM
-            }
+    private fun Preferences.readTheme(): Theme {
+        val themeName = this[PreferencesKeys.THEME] ?: Theme.SYSTEM.name
+        return try {
+            Theme.valueOf(themeName)
+        } catch (_: IllegalArgumentException) {
+            Theme.SYSTEM
         }
+    }
+
+    private fun Preferences.toAppearanceSettings(): AppearanceSettings {
+        return AppearanceSettings(
+            theme = readTheme(),
+            useDynamicColors = this[PreferencesKeys.USE_DYNAMIC_COLORS] ?: true,
+            backgroundColor = this[PreferencesKeys.BACKGROUND_COLOR]?.let { Color(it) },
+            primaryColor = this[PreferencesKeys.PRIMARY_COLOR]?.let { Color(it) },
+            onPrimaryColor = this[PreferencesKeys.ON_PRIMARY_COLOR]?.let { Color(it) },
+        )
+    }
+
+    val appearance: Flow<AppearanceSettings> = dataStore.data
+        .map { preferences ->
+            preferences.toAppearanceSettings()
+        }
+
+    val theme: Flow<Theme> = appearance
+        .map { it.theme }
 
     suspend fun setTheme(theme: Theme) {
         dataStore.edit { preferences ->
@@ -71,10 +88,8 @@ class SettingsRepository(context: Context) {
         }
     }
 
-    val useDynamicColors: Flow<Boolean> = dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.USE_DYNAMIC_COLORS] ?: true
-        }
+    val useDynamicColors: Flow<Boolean> = appearance
+        .map { it.useDynamicColors }
 
     suspend fun setUseDynamicColors(useDynamicColors: Boolean) {
         dataStore.edit { preferences ->
@@ -82,10 +97,8 @@ class SettingsRepository(context: Context) {
         }
     }
 
-    val backgroundColor: Flow<Color?> = dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.BACKGROUND_COLOR]?.let { Color(it) }
-        }
+    val backgroundColor: Flow<Color?> = appearance
+        .map { it.backgroundColor }
 
     suspend fun setBackgroundColor(color: Color?) {
         dataStore.edit { preferences ->
@@ -97,10 +110,8 @@ class SettingsRepository(context: Context) {
         }
     }
 
-    val primaryColor: Flow<Color?> = dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.PRIMARY_COLOR]?.let { Color(it) }
-        }
+    val primaryColor: Flow<Color?> = appearance
+        .map { it.primaryColor }
 
     suspend fun setPrimaryColor(color: Color?) {
         dataStore.edit { preferences ->
@@ -112,10 +123,8 @@ class SettingsRepository(context: Context) {
         }
     }
 
-    val onPrimaryColor: Flow<Color?> = dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.ON_PRIMARY_COLOR]?.let { Color(it) }
-        }
+    val onPrimaryColor: Flow<Color?> = appearance
+        .map { it.onPrimaryColor }
 
     suspend fun setOnPrimaryColor(color: Color?) {
         dataStore.edit { preferences ->

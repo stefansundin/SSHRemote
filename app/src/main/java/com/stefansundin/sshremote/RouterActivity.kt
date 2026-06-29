@@ -85,37 +85,18 @@ class RouterActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         applyNoAnimationTransition(isOpen = true)
         setContent {
-            val theme by app.settingsRepository.theme.collectAsState(initial = Theme.SYSTEM)
-            val useDynamicColors by app.settingsRepository.useDynamicColors.collectAsState(initial = true)
-            val backgroundColor by app.settingsRepository.backgroundColor.collectAsState(initial = null)
-            val primaryColor by app.settingsRepository.primaryColor.collectAsState(initial = null)
-            val onPrimaryColor by app.settingsRepository.onPrimaryColor.collectAsState(initial = null)
+            val appearance by app.settingsRepository.appearance.collectAsState(initial = null)
 
             val message by app.sshRepository.message.collectAsState()
             val hostKeyVerification by app.sshRepository.hostKeyVerification.collectAsState()
             val passwordPrompt by app.sshRepository.passwordPrompt.collectAsState()
             val passphrasePrompt by app.sshRepository.passphrasePrompt.collectAsState()
 
-            SSHRemoteTheme(
-                theme = theme,
-                dynamicColor = useDynamicColors,
-                colorOverrides = {
-                    var scheme = this
-                    if (backgroundColor != null) {
-                        scheme = scheme.copy(
-                            background = backgroundColor!!,
-                            surface = backgroundColor!!,
-                        )
-                    }
-                    if (primaryColor != null) {
-                        scheme = scheme.copy(primary = primaryColor!!)
-                    }
-                    if (onPrimaryColor != null) {
-                        scheme = scheme.copy(onPrimary = onPrimaryColor!!)
-                    }
-                    scheme
-                },
-            ) {
+            val resolvedAppearance = appearance ?: run {
+                return@setContent
+            }
+
+            SSHRemoteTheme(appearance = resolvedAppearance) {
                 RouterContent(
                     uiState = uiState,
                     message = message,

@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.stefansundin.sshremote.Theme
+import com.stefansundin.sshremote.data.settings.AppearanceSettings
 import com.stefansundin.sshremote.ui.screens.RemoteControlScreenPreview
 
 private val DarkColorScheme = darkColorScheme(
@@ -54,6 +55,34 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+
+@Composable
+fun SSHRemoteTheme(
+    appearance: AppearanceSettings,
+    content: @Composable () -> Unit,
+) {
+    SSHRemoteTheme(
+        theme = appearance.theme,
+        dynamicColor = appearance.useDynamicColors,
+        colorOverrides = {
+            var scheme = this
+            if (appearance.backgroundColor != null) {
+                scheme = scheme.copy(
+                    background = appearance.backgroundColor,
+                    surface = appearance.backgroundColor,
+                )
+            }
+            if (appearance.primaryColor != null) {
+                scheme = scheme.copy(primary = appearance.primaryColor)
+            }
+            if (appearance.onPrimaryColor != null) {
+                scheme = scheme.copy(onPrimary = appearance.onPrimaryColor)
+            }
+            scheme
+        },
+        content = content,
+    )
+}
 
 @Composable
 fun SSHRemoteTheme(

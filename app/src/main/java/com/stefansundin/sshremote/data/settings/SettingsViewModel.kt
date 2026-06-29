@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 interface ISettingsViewModel {
+    val appearance: StateFlow<AppearanceSettings?>
     val theme: StateFlow<Theme>
     val useDynamicColors: StateFlow<Boolean>
     val backgroundColor: StateFlow<Color?>
@@ -82,7 +83,15 @@ class SettingsViewModel(
     private val _eventFlow = MutableSharedFlow<SettingsEvent>()
     override val eventFlow = _eventFlow.asSharedFlow()
 
-    override val theme: StateFlow<Theme> = settingsRepository.theme
+    override val appearance: StateFlow<AppearanceSettings?> = settingsRepository.appearance
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
+
+    override val theme: StateFlow<Theme> = appearance
+        .map { it?.theme ?: Theme.SYSTEM }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
@@ -95,7 +104,8 @@ class SettingsViewModel(
         }
     }
 
-    override val useDynamicColors: StateFlow<Boolean> = settingsRepository.useDynamicColors
+    override val useDynamicColors: StateFlow<Boolean> = appearance
+        .map { it?.useDynamicColors ?: true }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
@@ -108,7 +118,8 @@ class SettingsViewModel(
         }
     }
 
-    override val backgroundColor: StateFlow<Color?> = settingsRepository.backgroundColor
+    override val backgroundColor: StateFlow<Color?> = appearance
+        .map { it?.backgroundColor }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
@@ -121,7 +132,8 @@ class SettingsViewModel(
         }
     }
 
-    override val primaryColor: StateFlow<Color?> = settingsRepository.primaryColor
+    override val primaryColor: StateFlow<Color?> = appearance
+        .map { it?.primaryColor }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
@@ -134,7 +146,8 @@ class SettingsViewModel(
         }
     }
 
-    override val onPrimaryColor: StateFlow<Color?> = settingsRepository.onPrimaryColor
+    override val onPrimaryColor: StateFlow<Color?> = appearance
+        .map { it?.onPrimaryColor }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,

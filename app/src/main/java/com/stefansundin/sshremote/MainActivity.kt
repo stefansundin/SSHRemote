@@ -71,6 +71,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -238,7 +239,12 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        splashScreen.setKeepOnScreenCondition {
+            // Extend the splash screen until the theme and other settings have loaded, to avoid rendering the app using the wrong colors
+            settingsViewModel.appearance.value == null
+        }
         if (BuildConfig.DEBUG && savedInstanceState != null) {
             // Try to avoid activity recreation by adding to android:configChanges
             Log.w("MainActivity", "Activity recreated!")
@@ -247,45 +253,26 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
 
         setContent {
-            val theme by settingsViewModel.theme.collectAsState()
-            val useDynamicColors by settingsViewModel.useDynamicColors.collectAsState()
-            val backgroundColor by settingsViewModel.backgroundColor.collectAsState()
-            val primaryColor by settingsViewModel.primaryColor.collectAsState()
-            val onPrimaryColor by settingsViewModel.onPrimaryColor.collectAsState()
-            val useDarkTheme = when (theme) {
-                Theme.SYSTEM -> isSystemInDarkTheme()
-                Theme.LIGHT -> false
-                Theme.DARK -> true
-            }
+            val appearance by settingsViewModel.appearance.collectAsState()
+            val useDarkTheme = appearance?.isDarkTheme(systemIsDarkTheme = isSystemInDarkTheme())
 
             DisposableEffect(useDarkTheme) {
                 enableEdgeToEdge(
-                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { useDarkTheme },
-                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { useDarkTheme },
+                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) {
+                        useDarkTheme ?: false
+                    },
+                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) {
+                        useDarkTheme ?: false
+                    },
                 )
                 onDispose {}
             }
 
-            SSHRemoteTheme(
-                theme,
-                useDynamicColors,
-                {
-                    var scheme = this
-                    if (backgroundColor != null) {
-                        scheme = scheme.copy(
-                            background = backgroundColor!!,
-                            surface = backgroundColor!!,
-                        )
-                    }
-                    if (primaryColor != null) {
-                        scheme = scheme.copy(primary = primaryColor!!)
-                    }
-                    if (onPrimaryColor != null) {
-                        scheme = scheme.copy(onPrimary = onPrimaryColor!!)
-                    }
-                    scheme
-                },
-            ) {
+            val resolvedAppearance = appearance ?: run {
+                return@setContent
+            }
+
+            SSHRemoteTheme(appearance = resolvedAppearance) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -1041,7 +1028,6 @@ private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<Rem
         confirmButton = {},
     )
 }
-
 
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
