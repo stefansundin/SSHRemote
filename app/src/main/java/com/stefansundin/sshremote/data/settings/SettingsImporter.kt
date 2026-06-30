@@ -32,17 +32,17 @@ import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandRepository
 import com.stefansundin.sshremote.data.gson
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostRepository
-import com.stefansundin.sshremote.data.knownhost.KnownHost
-import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
+import com.stefansundin.sshremote.data.knownhost.KnownHost
+import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
 import java.util.UUID
 import java.util.zip.GZIPInputStream
-import java.util.zip.ZipException
 
 enum class ImportStrategy {
     Upsert,
@@ -51,6 +51,48 @@ enum class ImportStrategy {
 }
 
 class ImportException(message: String) : Exception(message)
+
+private const val UTF8_BOM = '\uFEFF'
+private const val GZIP_MAGIC_BYTE_1: Byte = 0x1f.toByte()
+private const val GZIP_MAGIC_BYTE_2: Byte = 0x8b.toByte()
+
+internal fun decodeImportedSettingsPayload(
+    data: String,
+    base64Decoder: (String) -> ByteArray = { Base64.decode(it, Base64.DEFAULT) },
+): String {
+    if (data.firstMeaningfulChar() == '{') {
+        return data
+    }
+
+    val compressed = try {
+        base64Decoder(data)
+    } catch (_: IllegalArgumentException) {
+        return data
+    }
+
+    if (!compressed.hasGzipHeader()) {
+        return data
+    }
+
+    return try {
+        GZIPInputStream(ByteArrayInputStream(compressed)).use { gis ->
+            val buffer = ByteArray(1024)
+            val out = ByteArrayOutputStream()
+            var len: Int
+            while (gis.read(buffer).also { len = it } != -1) {
+                out.write(buffer, 0, len)
+            }
+            out.toString(Charsets.UTF_8.name())
+        }
+    } catch (_: IOException) {
+        throw ImportException("Invalid file format")
+    }
+}
+
+private fun String.firstMeaningfulChar(): Char? = firstOrNull { !it.isWhitespace() && it != UTF8_BOM }
+
+private fun ByteArray.hasGzipHeader(): Boolean =
+    size >= 2 && this[0] == GZIP_MAGIC_BYTE_1 && this[1] == GZIP_MAGIC_BYTE_2
 
 class SettingsImporter(
     private val context: Context,
@@ -67,30 +109,6 @@ class SettingsImporter(
         return import(json, importStrategy)
     }
 
-    private fun decompress(data: String): String {
-        return try {
-            val compressed = Base64.decode(data, Base64.DEFAULT)
-            val bis = ByteArrayInputStream(compressed)
-            val gis = GZIPInputStream(bis)
-            val buffer = ByteArray(1024)
-            val out = ByteArrayOutputStream()
-            var len: Int
-            while (gis.read(buffer).also { len = it } != -1) {
-                out.write(buffer, 0, len)
-            }
-            out.toString("UTF-8")
-        } catch (e: Exception) {
-            when (e) {
-                is ZipException, is IllegalArgumentException -> {
-                    // Not compressed or not Base64, assume it's the raw JSON
-                    data
-                }
-
-                else -> throw e
-            }
-        }
-    }
-
     private fun parseColor(hex: String?): Color? {
         if (hex == null) return null
         return try {
@@ -105,7 +123,7 @@ class SettingsImporter(
         var importedTheme: Theme? = null
 
         try {
-            val decompressedJson = decompress(json)
+            val decompressedJson = decodeImportedSettingsPayload(json)
             val settings: ExportedSettings = gson.fromJson(decompressedJson, ExportedSettings::class.java)
                 ?: throw ImportException("Not a valid JSON file")
 
