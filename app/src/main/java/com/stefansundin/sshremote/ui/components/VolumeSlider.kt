@@ -19,6 +19,8 @@
 package com.stefansundin.sshremote.ui.components
 
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -51,6 +53,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private const val UPDATE_SUPPRESSION_WINDOW_MS = 750L
 
+private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
+
 private fun dragStartHapticConstant(): Int {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         HapticFeedbackConstants.DRAG_START
@@ -80,9 +84,34 @@ internal fun parseVolumePercent(volume: String?): Float? {
     return volume.trimEnd('%').trim().toFloatOrNull()
 }
 
-internal class VolumeSetThrottle(private val onVolumeSet: (Int) -> Unit) {
+internal fun horizontalSliderValueForX(x: Float, sliderWidthPx: Int): Float {
+    if (sliderWidthPx <= 0) return 0f
+    return (x.coerceIn(0f, sliderWidthPx.toFloat()) / sliderWidthPx) * 100f
+}
+
+internal fun verticalSliderValueForY(y: Float, sliderHeightPx: Int): Float {
+    if (sliderHeightPx <= 0) return 0f
+    return (1f - (y.coerceIn(0f, sliderHeightPx.toFloat()) / sliderHeightPx)) * 100f
+}
+
+internal fun interface CancelScheduledSend {
+    fun cancel()
+}
+
+internal class VolumeSetThrottle(
+    private val onVolumeSet: (Int) -> Unit,
+    private val nowMs: () -> Long = SystemClock::uptimeMillis,
+    private val scheduleDelayedSend: (delayMs: Long, callback: () -> Unit) -> CancelScheduledSend = { delayMs, callback ->
+        val runnable = Runnable(callback)
+        mainHandler.postDelayed(runnable, delayMs)
+        CancelScheduledSend { mainHandler.removeCallbacks(runnable) }
+    },
+) {
     private var lastSentValue: Int? = null
     private var lastSentAt: Long = 0L
+    private var pendingValue: Int? = null
+    private var pendingSendAt: Long? = null
+    private var pendingSendCancellation: CancelScheduledSend? = null
 
     private fun minIntervalMs(changeSinceLastSent: Int): Long = when {
         changeSinceLastSent >= 10 -> 0L
@@ -90,36 +119,100 @@ internal class VolumeSetThrottle(private val onVolumeSet: (Int) -> Unit) {
         else -> 500L
     }
 
+    private fun shouldSendImmediately(value: Int): Boolean = value == 0 || value == 100
+
+    private fun cancelPendingSend() {
+        pendingSendCancellation?.cancel()
+        pendingSendCancellation = null
+        pendingSendAt = null
+    }
+
+    private fun clearPendingValue() {
+        cancelPendingSend()
+        pendingValue = null
+    }
+
     private fun send(value: Int, now: Long): Boolean {
+        clearPendingValue()
         lastSentValue = value
         lastSentAt = now
         onVolumeSet(value)
         return true
     }
 
-    fun onDrag(value: Float): Boolean {
-        val now = SystemClock.uptimeMillis()
-        val intValue = value.roundToInt()
-        val previousValue = lastSentValue
+    private fun schedulePendingSend(value: Int, now: Long): Boolean {
+        val previousValue = lastSentValue ?: return send(value, now)
+        if (value == previousValue) {
+            clearPendingValue()
+            return false
+        }
+        if (shouldSendImmediately(value)) {
+            return send(value, now)
+        }
 
-        if (previousValue == null) {
-            return send(intValue, now)
-        } else if (intValue != lastSentValue) {
-            val changeSinceLastSent = abs(intValue - previousValue)
-            val minInterval = minIntervalMs(changeSinceLastSent)
-            if (now - lastSentAt >= minInterval) {
-                return send(intValue, now)
+        pendingValue = value
+        val minInterval = minIntervalMs(abs(value - previousValue))
+        val sendAt = lastSentAt + minInterval
+        val delayMs = (sendAt - now).coerceAtLeast(0L)
+
+        if (delayMs == 0L) {
+            return send(value, now)
+        }
+
+        if (pendingSendAt != sendAt) {
+            cancelPendingSend()
+            pendingSendAt = sendAt
+            pendingSendCancellation = scheduleDelayedSend(delayMs) {
+                flushPending()
             }
         }
 
         return false
     }
 
+    private fun flushPending(): Boolean {
+        cancelPendingSend()
+        val value = pendingValue ?: return false
+        val now = nowMs()
+        val previousValue = lastSentValue ?: return send(value, now)
+        if (value == previousValue) {
+            pendingValue = null
+            return false
+        }
+        if (shouldSendImmediately(value)) {
+            return send(value, now)
+        }
+
+        val minInterval = minIntervalMs(abs(value - previousValue))
+        return if (now - lastSentAt >= minInterval) {
+            send(value, now)
+        } else {
+            schedulePendingSend(value, now)
+        }
+    }
+
+    fun dispose() {
+        clearPendingValue()
+    }
+
+    fun onDrag(value: Float): Boolean {
+        val now = nowMs()
+        val intValue = value.roundToInt()
+        val previousValue = lastSentValue
+
+        if (previousValue == null) {
+            return send(intValue, now)
+        }
+
+        return schedulePendingSend(intValue, now)
+    }
+
     fun onPress(value: Float): Boolean {
         val intValue = value.roundToInt()
         return if (intValue != lastSentValue) {
-            send(intValue, SystemClock.uptimeMillis())
+            send(intValue, nowMs())
         } else {
+            clearPendingValue()
             false
         }
     }
@@ -127,8 +220,9 @@ internal class VolumeSetThrottle(private val onVolumeSet: (Int) -> Unit) {
     fun onFinished(value: Float): Boolean {
         val intValue = value.roundToInt()
         return if (intValue != lastSentValue) {
-            send(intValue, SystemClock.uptimeMillis())
+            send(intValue, nowMs())
         } else {
+            clearPendingValue()
             false
         }
     }
@@ -193,7 +287,7 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
                     // The Material Slider doesn't respond immediately on press; it waits for drag motion.
                     // We intercept ACTION_DOWN, calculate the position the user tapped, and send it immediately
                     // for better UX - the volume responds right away without requiring any movement.
-                    val pressedValue = ((event.x.coerceIn(0f, sliderWidthPx.toFloat())) / sliderWidthPx) * 100f
+                    val pressedValue = horizontalSliderValueForX(event.x, sliderWidthPx)
                     lastSliderSetAtMs = SystemClock.uptimeMillis()
                     hasInteracted = true
                     isDragging = true
@@ -252,8 +346,7 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
                     // We intercept ACTION_DOWN, calculate the position the user tapped, and send it immediately
                     // for better UX - the volume responds right away without requiring any movement.
                     // The slider is rotated -90 degrees, so we invert Y (top = 100%, bottom = 0%).
-                    val clampedY = event.y.coerceIn(0f, sliderHeightPx.toFloat())
-                    val pressedValue = (1f - (clampedY / sliderHeightPx)) * 100f
+                    val pressedValue = verticalSliderValueForY(event.y, sliderHeightPx)
                     lastSliderSetAtMs = SystemClock.uptimeMillis()
                     hasInteracted = true
                     isDragging = true

@@ -57,6 +57,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -147,6 +148,12 @@ private fun RemoteControlLayout(
 
     val showSlider = !editing && host?.smartVolume?.showSlider == true && connectionStatus == ConnectionStatus.CONNECTED
     val volumeThrottle = remember(onVolumeSet) { VolumeSetThrottle(onVolumeSet) }
+
+    DisposableEffect(volumeThrottle) {
+        onDispose {
+            volumeThrottle.dispose()
+        }
+    }
 
     when (layoutMode) {
         RemoteLayoutMode.Compact -> {
