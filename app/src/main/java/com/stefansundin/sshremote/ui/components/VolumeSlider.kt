@@ -18,7 +18,9 @@
 
 package com.stefansundin.sshremote.ui.components
 
+import android.os.Build
 import android.os.SystemClock
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -40,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -47,6 +50,30 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val UPDATE_SUPPRESSION_WINDOW_MS = 750L
+
+private fun dragStartHapticConstant(): Int {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        HapticFeedbackConstants.DRAG_START
+    } else {
+        HapticFeedbackConstants.LONG_PRESS
+    }
+}
+
+private fun dragTickHapticConstant(): Int {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        HapticFeedbackConstants.SEGMENT_FREQUENT_TICK
+    } else {
+        HapticFeedbackConstants.CLOCK_TICK
+    }
+}
+
+private fun dragEndHapticConstant(): Int {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        HapticFeedbackConstants.GESTURE_END
+    } else {
+        HapticFeedbackConstants.CLOCK_TICK
+    }
+}
 
 internal fun parseVolumePercent(volume: String?): Float? {
     if (volume == null) return null
@@ -63,39 +90,46 @@ internal class VolumeSetThrottle(private val onVolumeSet: (Int) -> Unit) {
         else -> 500L
     }
 
-    private fun send(value: Int, now: Long) {
+    private fun send(value: Int, now: Long): Boolean {
         lastSentValue = value
         lastSentAt = now
         onVolumeSet(value)
+        return true
     }
 
-    fun onDrag(value: Float) {
+    fun onDrag(value: Float): Boolean {
         val now = SystemClock.uptimeMillis()
         val intValue = value.roundToInt()
         val previousValue = lastSentValue
 
         if (previousValue == null) {
-            send(intValue, now)
+            return send(intValue, now)
         } else if (intValue != lastSentValue) {
             val changeSinceLastSent = abs(intValue - previousValue)
             val minInterval = minIntervalMs(changeSinceLastSent)
             if (now - lastSentAt >= minInterval) {
-                send(intValue, now)
+                return send(intValue, now)
             }
         }
+
+        return false
     }
 
-    fun onPress(value: Float) {
+    fun onPress(value: Float): Boolean {
         val intValue = value.roundToInt()
-        if (intValue != lastSentValue) {
+        return if (intValue != lastSentValue) {
             send(intValue, SystemClock.uptimeMillis())
+        } else {
+            false
         }
     }
 
-    fun onFinished(value: Float) {
+    fun onFinished(value: Float): Boolean {
         val intValue = value.roundToInt()
-        if (intValue != lastSentValue) {
+        return if (intValue != lastSentValue) {
             send(intValue, SystemClock.uptimeMillis())
+        } else {
+            false
         }
     }
 }
@@ -103,6 +137,7 @@ internal class VolumeSetThrottle(private val onVolumeSet: (Int) -> Unit) {
 @Composable
 internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) {
     val committedValue = parseVolumePercent(volume)
+    val view = LocalView.current
     var sliderValue by remember { mutableFloatStateOf(committedValue ?: 0f) }
     var sliderWidthPx by remember { mutableIntStateOf(0) }
     var isDragging by remember { mutableStateOf(false) }
@@ -138,10 +173,14 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
             hasInteracted = true
             isDragging = true
             sliderValue = it
-            throttle.onDrag(it)
+            if (throttle.onDrag(it)) {
+                view.performHapticFeedback(dragTickHapticConstant())
+            }
         },
         onValueChangeFinished = {
-            throttle.onFinished(sliderValue)
+            if (throttle.onFinished(sliderValue)) {
+                view.performHapticFeedback(dragEndHapticConstant())
+            }
             isDragging = false
         },
         valueRange = 0f..100f,
@@ -159,7 +198,9 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
                     hasInteracted = true
                     isDragging = true
                     sliderValue = pressedValue
-                    throttle.onPress(pressedValue)
+                    if (throttle.onPress(pressedValue)) {
+                        view.performHapticFeedback(dragStartHapticConstant())
+                    }
                 }
                 false
             },
@@ -171,6 +212,7 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
     // I tried using VerticalSlider in material3 1.5.0-alpha20 but could not get it working completely
     // For now it is better to just rotate a regular slider
     val committedValue = parseVolumePercent(volume)
+    val view = LocalView.current
     var sliderValue by remember { mutableFloatStateOf(committedValue ?: 0f) }
     var sliderHeightPx by remember { mutableIntStateOf(0) }
     var isDragging by remember { mutableStateOf(false) }
@@ -216,7 +258,9 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
                     hasInteracted = true
                     isDragging = true
                     sliderValue = pressedValue
-                    throttle.onPress(pressedValue)
+                    if (throttle.onPress(pressedValue)) {
+                        view.performHapticFeedback(dragStartHapticConstant())
+                    }
                 }
                 false
             },
@@ -231,10 +275,14 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
                 hasInteracted = true
                 isDragging = true
                 sliderValue = it
-                throttle.onDrag(it)
+                if (throttle.onDrag(it)) {
+                    view.performHapticFeedback(dragTickHapticConstant())
+                }
             },
             onValueChangeFinished = {
-                throttle.onFinished(sliderValue)
+                if (throttle.onFinished(sliderValue)) {
+                    view.performHapticFeedback(dragEndHapticConstant())
+                }
                 isDragging = false
             },
             valueRange = 0f..100f,
