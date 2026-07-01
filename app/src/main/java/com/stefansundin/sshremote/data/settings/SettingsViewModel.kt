@@ -69,6 +69,8 @@ interface ISettingsViewModel {
     fun setShareTargetEnabled(shareTargetEnabled: Boolean)
     fun exportSettings(context: Context, uri: Uri)
     suspend fun exportSettingsToString(context: Context): String
+    suspend fun previewImport(context: Context, uri: Uri): ImportPreview
+    suspend fun previewImport(context: Context, json: String): ImportPreview
     fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy)
     fun importSettings(context: Context, json: String, importStrategy: ImportStrategy)
 }
@@ -278,6 +280,26 @@ class SettingsViewModel(
             knownHostRepository,
             adHocCommandRepository,
         ).exportToString()
+    }
+
+    override suspend fun previewImport(context: Context, uri: Uri): ImportPreview {
+        return SettingsImporter(
+            context,
+            settingsRepository,
+            hostRepository,
+            knownHostRepository,
+            adHocCommandRepository,
+        ).preview(uri)
+    }
+
+    override suspend fun previewImport(context: Context, json: String): ImportPreview {
+        return SettingsImporter(
+            context,
+            settingsRepository,
+            hostRepository,
+            knownHostRepository,
+            adHocCommandRepository,
+        ).preview(json)
     }
 
     override fun importSettings(context: Context, uri: Uri, importStrategy: ImportStrategy) {

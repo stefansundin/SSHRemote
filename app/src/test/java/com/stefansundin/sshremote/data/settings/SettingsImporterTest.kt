@@ -74,6 +74,34 @@ class SettingsImporterTest {
         assertTrue(exception.message?.contains("Invalid file format") == true)
     }
 
+    @Test
+    fun parseImportedSettingsPreview_returnsHostCountFromImportedSettings() {
+        val preview = parseImportedSettingsPreview("{\"hosts\":[{},{}]}")
+
+        assertEquals(2, preview.hostCount)
+        assertEquals(0, preview.conflictingHostCount)
+    }
+
+    @Test
+    fun parseImportedSettingsPreview_countsHostsThatConflictByInternalId() {
+        val preview = parseImportedSettingsPreview(
+            data = "{\"hosts\":[{\"id\":\"host-1\"},{\"id\":\"host-2\"},{\"id\":\"host-3\"}]}",
+            existingHostIds = setOf("host-2", "host-3", "host-4"),
+        )
+
+        assertEquals(3, preview.hostCount)
+        assertEquals(2, preview.conflictingHostCount)
+    }
+
+    @Test
+    fun parseImportedSettings_throwsImportExceptionWhenHostsFieldIsMissing() {
+        val exception = assertThrows(ImportException::class.java) {
+            parseImportedSettings("{\"theme\":\"SYSTEM\"}")
+        }
+
+        assertEquals("Invalid file format", exception.message)
+    }
+
     @Suppress("SameParameterValue")
     private fun gzip(data: String): ByteArray {
         val out = ByteArrayOutputStream()

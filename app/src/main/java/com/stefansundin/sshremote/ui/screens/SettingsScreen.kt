@@ -81,8 +81,10 @@ import com.stefansundin.sshremote.BuildConfig
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Theme
-import com.stefansundin.sshremote.data.settings.ISettingsViewModel
 import com.stefansundin.sshremote.data.settings.AppearanceSettings
+import com.stefansundin.sshremote.data.settings.ISettingsViewModel
+import com.stefansundin.sshremote.data.settings.ImportException
+import com.stefansundin.sshremote.data.settings.ImportPreview
 import com.stefansundin.sshremote.data.settings.ImportStrategy
 import com.stefansundin.sshremote.data.settings.SettingsEvent
 import com.stefansundin.sshremote.ui.components.ColorSettingDialog
@@ -213,16 +215,56 @@ private fun SettingsSwitchItem(
 
 @Composable
 private fun ImportSettingsDialog(
+    hostCount: Int,
+    conflictingHostCount: Int,
+    canReplaceExistingHosts: Boolean,
     onDismissRequest: () -> Unit,
     onImport: (ImportStrategy) -> Unit,
 ) {
+    val resources = LocalResources.current
     val view = LocalView.current
+    val showConflictOptions = conflictingHostCount > 0
 
     AlertDialog(
         title = { Text(stringResource(R.string.import_settings_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.import_settings_text))
+                if (hostCount > 0) {
+                    Text(
+                        resources.getQuantityString(
+                            R.plurals.import_settings_hosts_to_import,
+                            hostCount,
+                            hostCount,
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                when {
+                    hostCount == 0 -> {
+                        Text(stringResource(R.string.import_settings_no_hosts_text))
+                    }
+
+                    showConflictOptions -> {
+                        Text(
+                            resources.getQuantityString(
+                                R.plurals.import_settings_conflicting_hosts,
+                                conflictingHostCount,
+                                conflictingHostCount,
+                            ),
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(stringResource(R.string.import_settings_merge_explanation))
+                    }
+
+                    canReplaceExistingHosts -> {
+                        Text(stringResource(R.string.import_settings_no_conflicts_text))
+                    }
+                }
+
+                if (canReplaceExistingHosts) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(stringResource(R.string.import_settings_replace_text))
+                }
             }
         },
         properties = DialogProperties(dismissOnClickOutside = false),
@@ -232,29 +274,50 @@ private fun ImportSettingsDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TextButton(
-                    onClick = {
-                        view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onImport(ImportStrategy.Upsert)
-                    },
-                ) {
-                    Text(stringResource(R.string.update))
-                }
-                TextButton(
-                    onClick = {
-                        view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onImport(ImportStrategy.Duplicate)
-                    },
-                ) {
-                    Text(stringResource(R.string.duplicate))
-                }
-                TextButton(
-                    onClick = {
-                        view.playSoundEffect(SoundEffectConstants.CLICK)
-                        onImport(ImportStrategy.Replace)
-                    },
-                ) {
-                    Text(stringResource(R.string.replace))
+                if (showConflictOptions) {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onImport(ImportStrategy.Upsert)
+                        },
+                    ) {
+                        Text(stringResource(R.string.merge))
+                    }
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onImport(ImportStrategy.Duplicate)
+                        },
+                    ) {
+                        Text(stringResource(R.string.duplicate))
+                    }
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onImport(ImportStrategy.Replace)
+                        },
+                    ) {
+                        Text(stringResource(R.string.replace))
+                    }
+                } else {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            onImport(ImportStrategy.Upsert)
+                        },
+                    ) {
+                        Text(stringResource(R.string.tab_import))
+                    }
+                    if (canReplaceExistingHosts) {
+                        TextButton(
+                            onClick = {
+                                view.playSoundEffect(SoundEffectConstants.CLICK)
+                                onImport(ImportStrategy.Replace)
+                            },
+                        ) {
+                            Text(stringResource(R.string.replace))
+                        }
+                    }
                 }
             }
         },
@@ -307,6 +370,8 @@ fun SettingsScreen(
     var showHapticFeedbackDialog by rememberSaveable { mutableStateOf(false) }
     var importUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var importJson by rememberSaveable { mutableStateOf<String?>(null) }
+    var importHostCount by rememberSaveable { mutableStateOf<Int?>(null) }
+    var importConflictingHostCount by rememberSaveable { mutableStateOf<Int?>(null) }
     var exportJson by rememberSaveable { mutableStateOf<String?>(null) }
     val keepScreenOn by settingsViewModel.keepScreenOn.collectAsState()
     val showWhenLocked by settingsViewModel.showWhenLocked.collectAsState()
@@ -339,13 +404,35 @@ fun SettingsScreen(
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri ->
-            uri?.let { importUri = it }
+            uri?.let {
+                coroutineScope.launch {
+                    try {
+                        val preview = settingsViewModel.previewImport(context, it)
+                        importUri = it
+                        importJson = null
+                        importHostCount = preview.hostCount
+                        importConflictingHostCount = preview.conflictingHostCount
+                    } catch (e: ImportException) {
+                        Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         },
     )
 
     val qrScanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            importJson = result.contents
+            coroutineScope.launch {
+                try {
+                    val preview = settingsViewModel.previewImport(context, result.contents)
+                    importUri = null
+                    importJson = result.contents
+                    importHostCount = preview.hostCount
+                    importConflictingHostCount = preview.conflictingHostCount
+                } catch (e: ImportException) {
+                    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -385,37 +472,40 @@ fun SettingsScreen(
         }
     }
 
-    importUri?.let { uri ->
-        if (hasHosts) {
+    val pendingImportHostCount = importHostCount
+    val pendingImportConflictingHostCount = importConflictingHostCount
+    if (pendingImportHostCount != null && pendingImportConflictingHostCount != null) {
+        val dismissPendingImport = {
+            importUri = null
+            importJson = null
+            importHostCount = null
+            importConflictingHostCount = null
+        }
+
+        importUri?.let { uri ->
             ImportSettingsDialog(
-                onDismissRequest = { importUri = null },
+                hostCount = pendingImportHostCount,
+                conflictingHostCount = pendingImportConflictingHostCount,
+                canReplaceExistingHosts = hasHosts,
+                onDismissRequest = dismissPendingImport,
                 onImport = { strategy ->
                     settingsViewModel.importSettings(context, uri, strategy)
-                    importUri = null
+                    dismissPendingImport()
                 },
             )
-        } else {
-            LaunchedEffect(Unit) {
-                settingsViewModel.importSettings(context, uri, ImportStrategy.Upsert)
-                importUri = null
-            }
         }
-    }
 
-    importJson?.let { json ->
-        if (hasHosts) {
+        importJson?.let { json ->
             ImportSettingsDialog(
-                onDismissRequest = { importJson = null },
+                hostCount = pendingImportHostCount,
+                conflictingHostCount = pendingImportConflictingHostCount,
+                canReplaceExistingHosts = hasHosts,
+                onDismissRequest = dismissPendingImport,
                 onImport = { strategy ->
                     settingsViewModel.importSettings(context, json, strategy)
-                    importJson = null
+                    dismissPendingImport()
                 },
             )
-        } else {
-            LaunchedEffect(Unit) {
-                settingsViewModel.importSettings(context, json, ImportStrategy.Upsert)
-                importJson = null
-            }
         }
     }
 
@@ -850,6 +940,12 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
 
     override fun exportSettings(context: Context, uri: Uri) {}
     override suspend fun exportSettingsToString(context: Context): String = ""
+    override suspend fun previewImport(context: Context, uri: Uri): ImportPreview =
+        ImportPreview(hostCount = 2, conflictingHostCount = 1)
+
+    override suspend fun previewImport(context: Context, json: String): ImportPreview =
+        ImportPreview(hostCount = 2, conflictingHostCount = 1)
+
     override fun importSettings(
         context: Context,
         uri: Uri,
@@ -881,8 +977,28 @@ fun SettingsScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, heightDp = 600)
+@Composable
+private fun ImportSettingsDialogPreviewContent(
+    hostCount: Int,
+    conflictingHostCount: Int,
+    canReplaceExistingHosts: Boolean,
+) {
+    SSHRemoteTheme {
+        Surface {
+            ImportSettingsDialog(
+                hostCount = hostCount,
+                conflictingHostCount = conflictingHostCount,
+                canReplaceExistingHosts = canReplaceExistingHosts,
+                onDismissRequest = {},
+                onImport = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "Import dialog - conflicts", showBackground = true, widthDp = 400, heightDp = 600)
 @Preview(
+    name = "Import dialog - conflicts dark large text",
     showBackground = true,
     widthDp = 400,
     heightDp = 600,
@@ -890,13 +1006,50 @@ fun SettingsScreenPreview() {
     fontScale = 2.0f,
 )
 @Composable
-fun ImportSettingsDialogPreview() {
-    SSHRemoteTheme {
-        Surface {
-            ImportSettingsDialog(
-                onDismissRequest = {},
-                onImport = {},
-            )
-        }
-    }
+fun ImportSettingsDialogConflictsPreview() {
+    ImportSettingsDialogPreviewContent(
+        hostCount = 2,
+        conflictingHostCount = 1,
+        canReplaceExistingHosts = true,
+    )
+}
+
+@Preview(name = "Import dialog - no conflicts", showBackground = true, widthDp = 400, heightDp = 600)
+@Composable
+fun ImportSettingsDialogNoConflictsPreview() {
+    ImportSettingsDialogPreviewContent(
+        hostCount = 2,
+        conflictingHostCount = 0,
+        canReplaceExistingHosts = true,
+    )
+}
+
+@Preview(name = "Import dialog - new hosts only", showBackground = true, widthDp = 400, heightDp = 600)
+@Composable
+fun ImportSettingsDialogNoExistingHostsPreview() {
+    ImportSettingsDialogPreviewContent(
+        hostCount = 2,
+        conflictingHostCount = 0,
+        canReplaceExistingHosts = false,
+    )
+}
+
+@Preview(name = "Import dialog - settings only", showBackground = true, widthDp = 400, heightDp = 600)
+@Composable
+fun ImportSettingsDialogNoImportedHostsPreview() {
+    ImportSettingsDialogPreviewContent(
+        hostCount = 0,
+        conflictingHostCount = 0,
+        canReplaceExistingHosts = true,
+    )
+}
+
+@Preview(name = "Import dialog - settings only no existing hosts", showBackground = true, widthDp = 400, heightDp = 600)
+@Composable
+fun ImportSettingsDialogNoImportedHostsNoExistingHostsPreview() {
+    ImportSettingsDialogPreviewContent(
+        hostCount = 0,
+        conflictingHostCount = 0,
+        canReplaceExistingHosts = false,
+    )
 }

@@ -36,6 +36,7 @@ import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.knownhost.KnownHost
 import com.stefansundin.sshremote.data.knownhost.KnownHostRepository
+import kotlinx.coroutines.flow.first
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -49,6 +50,11 @@ enum class ImportStrategy {
     Duplicate,
     Replace,
 }
+
+data class ImportPreview(
+    val hostCount: Int,
+    val conflictingHostCount: Int,
+)
 
 class ImportException(message: String) : Exception(message)
 
@@ -89,6 +95,43 @@ internal fun decodeImportedSettingsPayload(
     }
 }
 
+internal fun parseImportedSettings(
+    data: String,
+    base64Decoder: (String) -> ByteArray = { Base64.decode(it, Base64.DEFAULT) },
+): ExportedSettings {
+    try {
+        val decompressedJson = decodeImportedSettingsPayload(data, base64Decoder)
+        val settings: ExportedSettings = gson.fromJson(decompressedJson, ExportedSettings::class.java)
+            ?: throw ImportException("Not a valid JSON file")
+
+        if (settings.hosts == null) {
+            throw ImportException("Invalid file format")
+        }
+
+        return settings
+    } catch (e: ImportException) {
+        throw e
+    } catch (_: JsonSyntaxException) {
+        throw ImportException("Invalid file format")
+    }
+}
+
+internal fun parseImportedSettingsPreview(
+    data: String,
+    existingHostIds: Set<String> = emptySet(),
+    base64Decoder: (String) -> ByteArray = { Base64.decode(it, Base64.DEFAULT) },
+): ImportPreview {
+    val settings = parseImportedSettings(data, base64Decoder)
+    val hosts = settings.hosts ?: throw ImportException("Invalid file format")
+    val conflictingHostCount = hosts.count { exportedHost ->
+        exportedHost.id != null && exportedHost.id in existingHostIds
+    }
+    return ImportPreview(
+        hostCount = hosts.size,
+        conflictingHostCount = conflictingHostCount,
+    )
+}
+
 private fun String.firstMeaningfulChar(): Char? = firstOrNull { !it.isWhitespace() && it != UTF8_BOM }
 
 private fun ByteArray.hasGzipHeader(): Boolean =
@@ -101,6 +144,21 @@ class SettingsImporter(
     private val knownHostRepository: KnownHostRepository,
     private val adHocCommandRepository: AdHocCommandRepository,
 ) {
+
+    suspend fun preview(uri: Uri): ImportPreview {
+        val json = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            inputStream.bufferedReader().use { it.readText() }
+        } ?: throw ImportException("Could not read file")
+        return preview(json)
+    }
+
+    suspend fun preview(json: String): ImportPreview {
+        val existingHostIds = hostRepository.getAll().first().map { it.id }.toSet()
+        return parseImportedSettingsPreview(
+            data = json,
+            existingHostIds = existingHostIds,
+        )
+    }
 
     suspend fun import(uri: Uri, importStrategy: ImportStrategy): Triple<Int, Boolean, Theme?> {
         val json = context.contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -123,13 +181,8 @@ class SettingsImporter(
         var importedTheme: Theme? = null
 
         try {
-            val decompressedJson = decodeImportedSettingsPayload(json)
-            val settings: ExportedSettings = gson.fromJson(decompressedJson, ExportedSettings::class.java)
-                ?: throw ImportException("Not a valid JSON file")
-
-            if (settings.hosts == null) {
-                throw ImportException("Invalid file format")
-            }
+            val settings = parseImportedSettings(json)
+            val hosts = settings.hosts ?: throw ImportException("Invalid file format")
 
             if (settings.theme != null) {
                 settingsRepository.setTheme(settings.theme)
@@ -173,7 +226,7 @@ class SettingsImporter(
                 adHocCommandRepository.deleteAll()
             }
 
-            settings.hosts.forEach { exportedHost ->
+            hosts.forEach { exportedHost ->
                 val id =
                     if (importStrategy == ImportStrategy.Duplicate || exportedHost.id == null) UUID.randomUUID()
                         .toString()
@@ -224,11 +277,9 @@ class SettingsImporter(
                 }
             }
 
-            return Triple(settings.hosts.size, requestNotificationPermission, importedTheme)
+            return Triple(hosts.size, requestNotificationPermission, importedTheme)
         } catch (e: ImportException) {
             throw e
-        } catch (_: JsonSyntaxException) {
-            throw ImportException("Invalid file format")
         } catch (e: Exception) {
             Log.e("SettingsImporter", "Error importing settings", e)
             throw ImportException("Something went wrong")
