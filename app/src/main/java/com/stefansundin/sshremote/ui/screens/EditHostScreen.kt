@@ -92,10 +92,12 @@ import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.IEditHostViewModel
+import com.stefansundin.sshremote.data.host.ImportedSshHost
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.data.host.parseSshUri
+import com.stefansundin.sshremote.data.host.toSshUri
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ExportedCommand
@@ -109,7 +111,6 @@ import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStreamReader
-import java.net.URLEncoder
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
@@ -511,18 +512,13 @@ fun EditHostScreen(
                     onClick = {
                         view.playSoundEffect(SoundEffectConstants.CLICK)
                         showExportDialog = false
-                        val encodedName = URLEncoder.encode(name, "UTF-8")
-                        var url = "ssh://$user@$hostname:$port?name=$encodedName"
-                        if (knownHosts.isNotEmpty()) {
-                            val key = URLEncoder.encode("hostKey[]", "UTF-8")
-                            val hostKeysQuery =
-                                knownHosts.joinToString("&") {
-                                    val value = URLEncoder.encode(it, "UTF-8")
-                                    "$key=$value"
-                                }
-                            url += "&$hostKeysQuery"
-                        }
-                        qrCodeString = url
+                        qrCodeString = ImportedSshHost(
+                            name = name,
+                            hostname = hostname,
+                            port = port.toIntOrNull(),
+                            user = user,
+                            knownHosts = knownHosts,
+                        ).toSshUri()
                     },
                 ) {
                     Text(stringResource(R.string.connection_details_only))

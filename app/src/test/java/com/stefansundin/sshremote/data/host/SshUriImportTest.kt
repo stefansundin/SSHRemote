@@ -24,6 +24,24 @@ import org.junit.Test
 
 class SshUriImportTest {
     @Test
+    fun `toSshUri round-trips through parseSshUri`() {
+        val host = ImportedSshHost(
+            name = "Office Server",
+            hostname = "example.com",
+            port = 2222,
+            user = "alice",
+            knownHosts = listOf(
+                "example.com ssh-ed25519 AAAAB3NzaC1lZDI1NTE5AAAA",
+                "example.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ",
+            ),
+        )
+
+        val result = parseSshUri(host.toSshUri())
+
+        assertEquals(host, result)
+    }
+
+    @Test
     fun `parseSshUri parses standard ssh URI fields`() {
         val result = parseSshUri(
             "ssh://alice@example.com:2222?name=Office+Server&hostKey%5B%5D=example.com+ssh-ed25519+AAAAB3NzaC1lZDI1NTE5AAAA",

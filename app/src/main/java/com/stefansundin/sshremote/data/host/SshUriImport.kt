@@ -20,6 +20,7 @@ package com.stefansundin.sshremote.data.host
 
 import java.net.URI
 import java.net.URLDecoder
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 data class ImportedSshHost(
@@ -29,6 +30,23 @@ data class ImportedSshHost(
     val user: String? = null,
     val knownHosts: List<String> = emptyList(),
 )
+
+fun ImportedSshHost.toSshUri(): String {
+    val encodedUser = user?.takeIf { it.isNotBlank() }?.let { "${encodeQueryComponent(it)}@" }.orEmpty()
+    val encodedHostname = hostname?.takeIf { it.isNotBlank() } ?: ""
+    val encodedPort = port?.let { ":$it" }.orEmpty()
+
+    val queryParameters = buildList {
+        name?.takeIf { it.isNotBlank() }?.let { add("name=${encodeQueryComponent(it)}") }
+        knownHosts
+            .filter { it.isNotBlank() }
+            .forEach { add("${encodeQueryComponent("hostKey[]")}=${encodeQueryComponent(it)}") }
+    }
+
+    val query = queryParameters.takeIf { it.isNotEmpty() }?.joinToString("&")?.let { "?$it" }.orEmpty()
+
+    return "ssh://$encodedUser$encodedHostname$encodedPort$query"
+}
 
 fun parseSshUri(sshUri: String): ImportedSshHost? {
     val uri = runCatching { URI(sshUri) }.getOrNull() ?: return null
@@ -76,4 +94,8 @@ private fun parseQueryParameters(rawQuery: String?): Map<String, List<String>> {
 
 private fun decodeQueryComponent(value: String): String {
     return URLDecoder.decode(value, StandardCharsets.UTF_8.name())
+}
+
+private fun encodeQueryComponent(value: String): String {
+    return URLEncoder.encode(value, StandardCharsets.UTF_8.name())
 }
