@@ -31,7 +31,9 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -131,6 +133,7 @@ internal class VolumeSetThrottle(
     private var pendingValue: Int? = null
     private var pendingSendAt: Long? = null
     private var pendingSendCancellation: CancelScheduledSend? = null
+    var onPendingSend: (() -> Unit)? = null
 
     private fun minIntervalMs(changeSinceLastSent: Int): Long = when {
         changeSinceLastSent >= 10 -> 0L
@@ -151,11 +154,14 @@ internal class VolumeSetThrottle(
         pendingValue = null
     }
 
-    private fun send(value: Int, now: Long): Boolean {
+    private fun send(value: Int, now: Long, fromPendingSend: Boolean = false): Boolean {
         clearPendingValue()
         lastSentValue = value
         lastSentAt = now
         onVolumeSet(value)
+        if (fromPendingSend) {
+            onPendingSend?.invoke()
+        }
         return true
     }
 
@@ -204,7 +210,7 @@ internal class VolumeSetThrottle(
 
         val minInterval = minIntervalMs(abs(value - previousValue))
         return if (now - lastSentAt >= minInterval) {
-            send(value, now)
+            send(value, now, fromPendingSend = true)
         } else {
             schedulePendingSend(value, now)
         }
@@ -247,7 +253,26 @@ internal class VolumeSetThrottle(
 }
 
 @Composable
+private fun BindPendingVolumeTickHapticFeedback(throttle: VolumeSetThrottle) {
+    val view = LocalView.current
+
+    SideEffect {
+        throttle.onPendingSend = {
+            view.performHapticFeedback(dragTickHapticConstant())
+        }
+    }
+
+    DisposableEffect(throttle) {
+        onDispose {
+            throttle.onPendingSend = null
+        }
+    }
+}
+
+@Composable
 internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) {
+    BindPendingVolumeTickHapticFeedback(throttle)
+
     val committedValue = parseVolumePercent(volume)
     val density = LocalDensity.current
     val view = LocalView.current
@@ -329,6 +354,8 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
 
 @Composable
 internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) {
+    BindPendingVolumeTickHapticFeedback(throttle)
+
     // I tried using VerticalSlider in material3 1.5.0-alpha20 but could not get it working completely
     // For now it is better to just rotate a regular slider
     val committedValue = parseVolumePercent(volume)
