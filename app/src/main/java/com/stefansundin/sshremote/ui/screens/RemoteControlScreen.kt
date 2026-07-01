@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -75,6 +76,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -85,6 +87,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -532,7 +535,17 @@ fun RemoteControlScreen(
     val pagerState = rememberPagerState(initialPage = initialPage) { 4 }
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val imeInsets = WindowInsets.ime
     var pressedSpecialKeys by rememberSaveable { mutableStateOf(emptySet<Int>()) }
+
+    val hideKeyboard = {
+        focusManager.clearFocus(force = true)
+        keyboardController?.hide()
+        activity?.window?.let { window ->
+            WindowCompat.getInsetsController(window, view).hide(WindowInsetsCompat.Type.ime())
+        }
+    }
 
     val runKeyboardCommand = { keyCode: Int, remoteControlKey: RemoteControlKey ->
         host.remoteCommands?.get(remoteControlKey)
@@ -569,10 +582,19 @@ fun RemoteControlScreen(
             pressedSpecialKeys = emptySet()
 
             // Hide the virtual keyboard when the Keyboard tab is no longer focused:
-            focusManager.clearFocus()
+            hideKeyboard()
             // Focus the remote control so volume hardware buttons can be intercepted:
             focusRequester.requestFocus()
         }
+    }
+
+    LaunchedEffect(pagerState, imeInsets, density) {
+        snapshotFlow { pagerState.currentPage to (imeInsets.getBottom(density) > 0) }
+            .collect { (currentPage, isImeVisible) ->
+                if (currentPage != 2 && isImeVisible) {
+                    hideKeyboard()
+                }
+            }
     }
 
     BoxWithConstraints(
