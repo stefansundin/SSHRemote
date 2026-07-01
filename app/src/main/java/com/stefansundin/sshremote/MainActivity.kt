@@ -23,6 +23,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.SoundEffectConstants
@@ -111,8 +112,11 @@ import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
     data object HostList : Screen("host_list")
-    data object HostEdit : Screen("host_edit/{hostId}?scan={scan}") {
-        fun createRoute(hostId: String?, scan: Boolean = false) = "host_edit/$hostId?scan=$scan"
+    data object HostEdit : Screen("host_edit/{hostId}?scan={scan}&sshUri={sshUri}") {
+        fun createRoute(hostId: String?, scan: Boolean = false, sshUri: String? = null): String {
+            val encodedSshUri = Uri.encode(sshUri ?: "")
+            return "host_edit/$hostId?scan=$scan&sshUri=$encodedSshUri"
+        }
     }
 
     data object RemoteControl : Screen("remote_control/{hostId}/{initialPage}") {
@@ -219,9 +223,14 @@ class MainActivity : ComponentActivity() {
 
     private var pendingShortcut = mutableStateOf<PendingShortcut?>(null)
     private var pendingShare = mutableStateOf<PendingShare?>(null)
+    private var pendingSshUri = mutableStateOf<String?>(null)
 
     private fun handleIntent(intent: Intent?) {
         if (intent == null) return
+        if (intent.action == Intent.ACTION_VIEW && intent.data?.scheme.equals("ssh", ignoreCase = true)) {
+            pendingSshUri.value = intent.dataString
+            return
+        }
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
             val hostId = intent.getStringExtra(EXTRA_HOST_ID) ?: return
@@ -555,6 +564,12 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    LaunchedEffect(pendingSshUri.value) {
+                        val sshUri = pendingSshUri.value ?: return@LaunchedEffect
+                        pendingSshUri.value = null
+                        navController.navigate(Screen.HostEdit.createRoute(hostId = null, sshUri = sshUri))
+                    }
+
                     if (showBackupRestoredDialog) {
                         AlertDialog(
                             title = { Text(stringResource(R.string.restored_from_backup_title)) },
@@ -616,14 +631,19 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(
                                 navArgument("hostId") { type = NavType.StringType; nullable = true },
                                 navArgument("scan") { type = NavType.BoolType; defaultValue = false },
+                                navArgument("sshUri") {
+                                    type = NavType.StringType; nullable = true; defaultValue = null
+                                },
                             ),
                         ) { backStackEntry ->
                             val hostId = backStackEntry.arguments?.getString("hostId")
                             val scan = backStackEntry.arguments?.getBoolean("scan") ?: false
+                            val sshUri = backStackEntry.arguments?.getString("sshUri")
                             val host = hosts?.find { it.id == hostId }
                             val identities by identityViewModel.identities.collectAsState()
                             EditHostScreen(
                                 host = host,
+                                sshUri = sshUri,
                                 identities = identities,
                                 allUsers = hosts?.map { it.user } ?: emptyList(),
                                 onSave = { newHost, password ->
@@ -879,6 +899,10 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        if (intent.action == Intent.ACTION_VIEW && intent.data?.scheme.equals("ssh", ignoreCase = true)) {
+            handleIntent(intent)
+            return
+        }
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             handleIntent(intent)
             return

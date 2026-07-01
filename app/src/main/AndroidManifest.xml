@@ -48,6 +48,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="ssh" />
+            </intent-filter>
         </activity>
 
         <service

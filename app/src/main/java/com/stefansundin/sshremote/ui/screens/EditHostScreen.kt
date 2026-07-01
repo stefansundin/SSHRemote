@@ -85,7 +85,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
@@ -96,6 +95,7 @@ import com.stefansundin.sshremote.data.host.IEditHostViewModel
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
+import com.stefansundin.sshremote.data.host.parseSshUri
 import com.stefansundin.sshremote.data.host.wtypePreset
 import com.stefansundin.sshremote.data.identity.Identity
 import com.stefansundin.sshremote.data.settings.ExportedCommand
@@ -122,6 +122,7 @@ private enum class PasswordState {
 @Composable
 fun EditHostScreen(
     host: Host?,
+    sshUri: String? = null,
     identities: List<Identity>?,
     allUsers: List<String>,
     onSave: (Host, String?) -> Unit,
@@ -130,10 +131,23 @@ fun EditHostScreen(
     settingsViewModel: ISettingsViewModel,
     scanQrCodeOnStart: Boolean = false,
 ) {
-    var name by rememberSaveable(host) { mutableStateOf(host?.name ?: "") }
-    var hostname by rememberSaveable(host) { mutableStateOf(host?.hostname ?: "") }
-    var port by rememberSaveable(host) { mutableStateOf(host?.port?.toString() ?: "22") }
-    var user by rememberSaveable(host) { mutableStateOf(host?.user ?: "") }
+    val importedHost = remember(host, sshUri) {
+        if (host == null && !sshUri.isNullOrBlank()) {
+            parseSshUri(sshUri)
+        } else {
+            null
+        }
+    }
+    val initialName = host?.name ?: importedHost?.name.orEmpty()
+    val initialHostname = host?.hostname ?: importedHost?.hostname.orEmpty()
+    val initialPort = host?.port?.toString() ?: importedHost?.port?.toString() ?: "22"
+    val initialUser = host?.user ?: importedHost?.user.orEmpty()
+    val initialKnownHosts = host?.knownHosts ?: importedHost?.knownHosts ?: emptyList()
+
+    var name by rememberSaveable(host, sshUri) { mutableStateOf(initialName) }
+    var hostname by rememberSaveable(host, sshUri) { mutableStateOf(initialHostname) }
+    var port by rememberSaveable(host, sshUri) { mutableStateOf(initialPort) }
+    var user by rememberSaveable(host, sshUri) { mutableStateOf(initialUser) }
     var sshConfig by rememberSaveable(host) { mutableStateOf(host?.sshConfig) }
 
     val coroutineScope = rememberCoroutineScope()
@@ -179,7 +193,7 @@ fun EditHostScreen(
         mutableStateOf(resultIds)
     }
     var identityDropdownExpanded by rememberSaveable { mutableStateOf(false) }
-    var knownHosts by rememberSaveable(host) { mutableStateOf(host?.knownHosts ?: emptyList()) }
+    var knownHosts by rememberSaveable(host, sshUri) { mutableStateOf(initialKnownHosts) }
 
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var hasBeenSubmitted by rememberSaveable { mutableStateOf(false) }
@@ -199,13 +213,13 @@ fun EditHostScreen(
     } else {
         password.isNotEmpty()
     }
-    val hasUnsavedChanges = (name != (host?.name ?: "")) ||
-            (hostname != (host?.hostname ?: "")) ||
-            (port != (host?.port?.toString() ?: "22")) ||
-            (user != (host?.user ?: "")) ||
+    val hasUnsavedChanges = (name != initialName) ||
+            (hostname != initialHostname) ||
+            (port != initialPort) ||
+            (user != initialUser) ||
             passwordChanged ||
             (selectedIdentityIds != host?.identityIds) ||
-            (knownHosts != (host?.knownHosts ?: emptyList<String>())) ||
+            (knownHosts != initialKnownHosts) ||
             (shareInBackground != (host?.shareInBackground ?: false)) ||
             (sshConfig != host?.sshConfig)
 
@@ -412,18 +426,14 @@ fun EditHostScreen(
             val contents = result.contents
             try {
                 if (contents.startsWith("ssh://")) {
-                    val uri = contents.toUri()
-                    uri.userInfo?.let { user = it }
-                    uri.host?.let { hostname = it }
-                    if (uri.port != -1) {
-                        port = uri.port.toString()
-                    }
-                    uri.getQueryParameter("name")?.let {
-                        name = it
-                    }
-                    val hostKeys = uri.getQueryParameters("hostKey[]")
-                    if (hostKeys.isNotEmpty()) {
-                        knownHosts = hostKeys
+                    parseSshUri(contents)?.let { importedHost ->
+                        importedHost.name?.let { name = it }
+                        importedHost.hostname?.let { hostname = it }
+                        importedHost.port?.let { port = it.toString() }
+                        importedHost.user?.let { user = it }
+                        if (importedHost.knownHosts.isNotEmpty()) {
+                            knownHosts = importedHost.knownHosts
+                        }
                     }
                 } else {
                     val reader = if (contents.startsWith("{")) {
@@ -908,7 +918,7 @@ val sampleHost = Host(
     emptyList(),
     listOf(""),
     remoteCommands = wtypePreset,
-    smartVolume = SmartVolumeSettings(readCurrentVolume = true, showSlider = true)
+    smartVolume = SmartVolumeSettings(readCurrentVolume = true, showSlider = true),
 )
 
 private val fakeEditHostViewModel = object : IEditHostViewModel {
