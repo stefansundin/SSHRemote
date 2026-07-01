@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -52,6 +53,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val UPDATE_SUPPRESSION_WINDOW_MS = 750L
+private val SliderVisualEdgeInset = 16.dp
 
 private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
@@ -84,14 +86,31 @@ internal fun parseVolumePercent(volume: String?): Float? {
     return volume.trimEnd('%').trim().toFloatOrNull()
 }
 
-internal fun horizontalSliderValueForX(x: Float, sliderWidthPx: Int): Float {
-    if (sliderWidthPx <= 0) return 0f
-    return (x.coerceIn(0f, sliderWidthPx.toFloat()) / sliderWidthPx) * 100f
+internal fun horizontalSliderValueForX(x: Float, sliderWidthPx: Int, edgePaddingPx: Float): Float {
+    return sliderFractionForPosition(x, sliderWidthPx, edgePaddingPx) * 100f
 }
 
-internal fun verticalSliderValueForY(y: Float, sliderHeightPx: Int): Float {
-    if (sliderHeightPx <= 0) return 0f
-    return (1f - (y.coerceIn(0f, sliderHeightPx.toFloat()) / sliderHeightPx)) * 100f
+internal fun verticalSliderValueForY(y: Float, sliderHeightPx: Int, edgePaddingPx: Float): Float {
+    return (1f - sliderFractionForPosition(y, sliderHeightPx, edgePaddingPx)) * 100f
+}
+
+private fun sliderFractionForPosition(position: Float, sizePx: Int, edgePaddingPx: Float): Float {
+    if (sizePx <= 0) return 0f
+
+    val size = sizePx.toFloat()
+    val clampedPosition = position.coerceIn(0f, size)
+    val clampedPadding = edgePaddingPx.coerceIn(0f, size / 2f)
+    val activeEnd = size - clampedPadding
+
+    if (activeEnd <= clampedPadding) {
+        return if (clampedPosition >= size / 2f) 1f else 0f
+    }
+
+    return when {
+        clampedPosition <= clampedPadding -> 0f
+        clampedPosition >= activeEnd -> 1f
+        else -> (clampedPosition - clampedPadding) / (activeEnd - clampedPadding)
+    }
 }
 
 internal fun interface CancelScheduledSend {
@@ -198,9 +217,8 @@ internal class VolumeSetThrottle(
     fun onDrag(value: Float): Boolean {
         val now = nowMs()
         val intValue = value.roundToInt()
-        val previousValue = lastSentValue
 
-        if (previousValue == null) {
+        if (lastSentValue == null) {
             return send(intValue, now)
         }
 
@@ -231,7 +249,9 @@ internal class VolumeSetThrottle(
 @Composable
 internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) {
     val committedValue = parseVolumePercent(volume)
+    val density = LocalDensity.current
     val view = LocalView.current
+    val edgePaddingPx = with(density) { SliderVisualEdgeInset.toPx() }
     var sliderValue by remember { mutableFloatStateOf(committedValue ?: 0f) }
     var sliderWidthPx by remember { mutableIntStateOf(0) }
     var isDragging by remember { mutableStateOf(false) }
@@ -259,25 +279,7 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
         }
     }
 
-    Slider(
-        enabled = volume != null,
-        value = sliderValue,
-        onValueChange = {
-            lastSliderSetAtMs = SystemClock.uptimeMillis()
-            hasInteracted = true
-            isDragging = true
-            sliderValue = it
-            if (throttle.onDrag(it)) {
-                view.performHapticFeedback(dragTickHapticConstant())
-            }
-        },
-        onValueChangeFinished = {
-            if (throttle.onFinished(sliderValue)) {
-                view.performHapticFeedback(dragEndHapticConstant())
-            }
-            isDragging = false
-        },
-        valueRange = 0f..100f,
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .onSizeChanged { sliderWidthPx = it.width }
@@ -287,7 +289,7 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
                     // The Material Slider doesn't respond immediately on press; it waits for drag motion.
                     // We intercept ACTION_DOWN, calculate the position the user tapped, and send it immediately
                     // for better UX - the volume responds right away without requiring any movement.
-                    val pressedValue = horizontalSliderValueForX(event.x, sliderWidthPx)
+                    val pressedValue = horizontalSliderValueForX(event.x, sliderWidthPx, edgePaddingPx)
                     lastSliderSetAtMs = SystemClock.uptimeMillis()
                     hasInteracted = true
                     isDragging = true
@@ -298,7 +300,31 @@ internal fun HorizontalVolumeSlider(volume: String?, throttle: VolumeSetThrottle
                 }
                 false
             },
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        val sliderWidth = (maxWidth - SliderVisualEdgeInset * 2).coerceAtLeast(120.dp)
+        Slider(
+            enabled = volume != null,
+            value = sliderValue,
+            onValueChange = {
+                lastSliderSetAtMs = SystemClock.uptimeMillis()
+                hasInteracted = true
+                isDragging = true
+                sliderValue = it
+                if (throttle.onDrag(it)) {
+                    view.performHapticFeedback(dragTickHapticConstant())
+                }
+            },
+            onValueChangeFinished = {
+                if (throttle.onFinished(sliderValue)) {
+                    view.performHapticFeedback(dragEndHapticConstant())
+                }
+                isDragging = false
+            },
+            valueRange = 0f..100f,
+            modifier = Modifier.requiredWidth(sliderWidth),
+        )
+    }
 }
 
 @Composable
@@ -306,7 +332,9 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
     // I tried using VerticalSlider in material3 1.5.0-alpha20 but could not get it working completely
     // For now it is better to just rotate a regular slider
     val committedValue = parseVolumePercent(volume)
+    val density = LocalDensity.current
     val view = LocalView.current
+    val edgePaddingPx = with(density) { SliderVisualEdgeInset.toPx() }
     var sliderValue by remember { mutableFloatStateOf(committedValue ?: 0f) }
     var sliderHeightPx by remember { mutableIntStateOf(0) }
     var isDragging by remember { mutableStateOf(false) }
@@ -346,7 +374,7 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
                     // We intercept ACTION_DOWN, calculate the position the user tapped, and send it immediately
                     // for better UX - the volume responds right away without requiring any movement.
                     // The slider is rotated -90 degrees, so we invert Y (top = 100%, bottom = 0%).
-                    val pressedValue = verticalSliderValueForY(event.y, sliderHeightPx)
+                    val pressedValue = verticalSliderValueForY(event.y, sliderHeightPx, edgePaddingPx)
                     lastSliderSetAtMs = SystemClock.uptimeMillis()
                     hasInteracted = true
                     isDragging = true
@@ -359,7 +387,7 @@ internal fun VerticalVolumeSlider(volume: String?, throttle: VolumeSetThrottle) 
             },
         contentAlignment = Alignment.Center,
     ) {
-        val sliderLength = (maxHeight - 32.dp).coerceAtLeast(120.dp)
+        val sliderLength = (maxHeight - SliderVisualEdgeInset * 2).coerceAtLeast(120.dp)
         Slider(
             enabled = volume != null,
             value = sliderValue,

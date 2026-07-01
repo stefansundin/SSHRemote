@@ -167,22 +167,30 @@ private fun RemoteControlLayout(
 
         RemoteLayoutMode.Landscape -> {
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Dpad(onKeyEvent, host, editing, isConnected)
+                Box(
+                    modifier = Modifier.padding(start = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Dpad(onKeyEvent, host, editing, isConnected)
+                }
                 if (showSlider) {
                     VerticalVolumeSlider(volume, volumeThrottle)
                 }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                Box(
+                    modifier = Modifier.padding(end = 16.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    StatusText(host, editing, volume, muted)
-                    ActionButtons(onKeyEvent, host, editing, isConnected, muted)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                    ) {
+                        StatusText(host, editing, volume, muted)
+                        ActionButtons(onKeyEvent, host, editing, isConnected, muted)
+                    }
                 }
             }
         }
@@ -190,17 +198,28 @@ private fun RemoteControlLayout(
         RemoteLayoutMode.Portrait -> {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
             ) {
-                StatusText(host, editing, volume, muted)
+                Box(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    StatusText(host, editing, volume, muted)
+                }
                 Dpad(onKeyEvent, host, editing, isConnected)
                 if (showSlider) {
                     HorizontalVolumeSlider(volume, volumeThrottle)
                 }
-                ActionButtons(onKeyEvent, host, editing, isConnected, muted)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    ActionButtons(onKeyEvent, host, editing, isConnected, muted)
+                }
             }
         }
     }
