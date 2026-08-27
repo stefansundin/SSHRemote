@@ -581,6 +581,11 @@ private sealed interface RenderedBlock {
     object RenderedThematicBreak : RenderedBlock
 }
 
+private data class MarkdownSelectableSnippet(
+    val markdown: String,
+    val isListMarker: Boolean = false,
+)
+
 private data class RenderedTableRow(
     val isHeader: Boolean,
     val cells: List<AnnotatedString>,
@@ -739,7 +744,7 @@ fun MarkdownText(
     onSearchPositionChanged: ((current: Int, total: Int) -> Unit)? = null,
 ) {
     val clipboard = LocalClipboard.current
-    val context = LocalContext.current
+    val appContext = LocalContext.current
     val density = LocalDensity.current
     val resources = LocalResources.current
     val view = LocalView.current
@@ -762,6 +767,7 @@ fun MarkdownText(
     var selectedLink by rememberSaveable { mutableStateOf<String?>(null) }
     val onLinkClick = remember<(String) -> Unit> { { url -> selectedLink = url } }
 
+    var parsedBlocks by remember(markdown) { mutableStateOf<List<MdBlock>?>(null) }
     var renderedBlocks by remember(markdown) { mutableStateOf<List<RenderedBlock>?>(null) }
 
     LaunchedEffect(
@@ -775,7 +781,7 @@ fun MarkdownText(
         onLinkClick,
     ) {
         val startNs = System.nanoTime()
-        val parsedBlocks = withContext(Dispatchers.Default) { parseMarkdown(markdown) }
+        val parsed = withContext(Dispatchers.Default) { parseMarkdown(markdown) }
         val parseElapsedMs = (System.nanoTime() - startNs) / 1_000_000L
 
         val renderStartNs = System.nanoTime()
@@ -789,7 +795,7 @@ fun MarkdownText(
                 )
             }
             renderBlocks(
-                parsedBlocks,
+                parsed,
                 onLinkClick,
                 linkColor,
                 codeBackground,
@@ -803,13 +809,14 @@ fun MarkdownText(
             parseMs = parseElapsedMs,
             renderMs = renderElapsedMs,
             totalMs = totalElapsedMs,
-            totalBlocks = parsedBlocks.size,
+            totalBlocks = parsed.size,
         )
+        parsedBlocks = parsed
         renderedBlocks = rendered
     }
 
     val blocks = renderedBlocks
-    if (blocks == null) {
+    if (blocks == null || parsedBlocks == null) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = modifier.padding(16.dp),
@@ -821,6 +828,9 @@ fun MarkdownText(
             calculateTotalSearchMatches(blocks, searchRegex)
         }
         val verticalScrollState = rememberScrollState()
+        val markdownSelectableSnippets = remember(parsedBlocks) {
+            collectMarkdownSelectablesForBlocks(parsedBlocks ?: emptyList())
+        }
         val blockPositions = remember(blocks) { MutableList(blocks.size) { 0f } }
         val blockHeights = remember(blocks) { IntArray(blocks.size) }
         var layoutVersion by remember(blocks) { mutableIntStateOf(0) }
@@ -903,20 +913,20 @@ fun MarkdownText(
         SelectionContainer(
             state = markdownSelectionState,
             modifier = Modifier.appendTextContextMenuComponents {
-                when (val context = selectionContext) {
+                when (val selectionCtx = selectionContext) {
                     is MarkdownSelectionContext.Block -> {
-                        if (!context.selectableRange.isEmpty) {
+                        if (!selectionCtx.selectableRange.isEmpty) {
                             item(
-                                key = context.actionKey,
-                                label = resources.getString(context.actionLabelRes),
+                                key = selectionCtx.actionKey,
+                                label = resources.getString(selectionCtx.actionLabelRes),
                             ) {
                                 selectSelectableRange(
                                     selectionState = markdownSelectionState,
-                                    selectableRange = context.selectableRange,
+                                    selectableRange = selectionCtx.selectableRange,
                                 )
                                 close()
                             }
-                            context.additionalActions.forEach { additionalAction ->
+                            selectionCtx.additionalActions.forEach { additionalAction ->
                                 if (!additionalAction.selectableRange.isEmpty) {
                                     item(
                                         key = additionalAction.actionKey,
@@ -930,6 +940,24 @@ fun MarkdownText(
                                     }
                                 }
                             }
+                            item(
+                                key = CopyAsMarkdownMenuKey,
+                                label = resources.getString(R.string.copy_as_markdown),
+                            ) {
+                                val markdownText = markdownForSelectableRange(
+                                    snippets = markdownSelectableSnippets,
+                                    selectableRange = selectionCtx.selectableRange,
+                                )
+                                if (markdownText.isNotBlank()) {
+                                    val clipData = ClipData.newPlainText(
+                                        resources.getString(R.string.copy_as_markdown),
+                                        markdownText,
+                                    )
+                                    scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
+                                    Toast.makeText(appContext, R.string.copied, Toast.LENGTH_SHORT).show()
+                                }
+                                close()
+                            }
                         }
                     }
 
@@ -940,9 +968,9 @@ fun MarkdownText(
                             label = resources.getString(R.string.select_table_cell),
                         ) {
                             val selectableRange = selectableRangeForCell(
-                                activeCell = context.activeCell,
-                                tableSelectableRange = context.selectableRange,
-                                columnsPerRow = context.columnsPerRow,
+                                activeCell = selectionCtx.activeCell,
+                                tableSelectableRange = selectionCtx.selectableRange,
+                                columnsPerRow = selectionCtx.columnsPerRow,
                             )
                             if (selectableRange != null) {
                                 selectSelectableRange(
@@ -957,9 +985,9 @@ fun MarkdownText(
                             label = resources.getString(R.string.select_table_row),
                         ) {
                             val selectableRange = selectableRangeForRow(
-                                activeCell = context.activeCell,
-                                tableSelectableRange = context.selectableRange,
-                                columnsPerRow = context.columnsPerRow,
+                                activeCell = selectionCtx.activeCell,
+                                tableSelectableRange = selectionCtx.selectableRange,
+                                columnsPerRow = selectionCtx.columnsPerRow,
                             )
                             if (selectableRange != null) {
                                 selectSelectableRange(
@@ -975,7 +1003,7 @@ fun MarkdownText(
                         ) {
                             selectSelectableRange(
                                 selectionState = markdownSelectionState,
-                                selectableRange = context.selectableRange,
+                                selectableRange = selectionCtx.selectableRange,
                             )
                             close()
                         }
@@ -1031,7 +1059,7 @@ fun MarkdownText(
                 view.playSoundEffect(SoundEffectConstants.CLICK)
                 val clipData = ClipData.newPlainText(resources.getString(R.string.link_destination), url)
                 scope.launch { clipboard.setClipEntry(clipData.toClipEntry()) }
-                Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
+                Toast.makeText(appContext, R.string.copied, Toast.LENGTH_SHORT).show()
             },
             onOpenInBrowser = {
                 view.playSoundEffect(SoundEffectConstants.CLICK)
@@ -1622,6 +1650,192 @@ private data object SelectListItemMenuKey
 private data object SelectTableCellMenuKey
 private data object SelectTableRowMenuKey
 private data object SelectFullTableMenuKey
+private data object CopyAsMarkdownMenuKey
+
+private fun collectMarkdownSelectablesForBlocks(blocks: List<MdBlock>): List<MarkdownSelectableSnippet> {
+    val result = mutableListOf<MarkdownSelectableSnippet>()
+
+    fun collect(block: MdBlock) {
+        when (block) {
+            is MdBlock.MdHeading,
+            is MdBlock.MdParagraph,
+            is MdBlock.MdCode,
+                -> result.add(MarkdownSelectableSnippet(serializeMarkdownBlock(block)))
+
+            is MdBlock.MdThematicBreak -> Unit
+            is MdBlock.MdTable -> {
+                block.rows.forEach { row ->
+                    row.cells.forEach { cell ->
+                        result.add(MarkdownSelectableSnippet(serializeMarkdownInlines(cell)))
+                    }
+                }
+            }
+
+            is MdBlock.MdBlockQuote -> {
+                block.children.forEach(::collect)
+            }
+
+            is MdBlock.MdBulletList -> {
+                block.items.forEach { item ->
+                    if (item.taskChecked == null) {
+                        result.add(MarkdownSelectableSnippet(markdown = "- ", isListMarker = true))
+                    }
+                    item.blocks.forEach(::collect)
+                }
+            }
+
+            is MdBlock.MdOrderedList -> {
+                block.items.forEachIndexed { index, item ->
+                    if (item.taskChecked == null) {
+                        result.add(
+                            MarkdownSelectableSnippet(
+                                markdown = "${block.startNumber + index}. ",
+                                isListMarker = true,
+                            ),
+                        )
+                    }
+                    item.blocks.forEach(::collect)
+                }
+            }
+        }
+    }
+
+    blocks.forEach(::collect)
+    return result
+}
+
+private fun markdownForSelectableRange(
+    snippets: List<MarkdownSelectableSnippet>,
+    selectableRange: SelectableRange,
+): String {
+    if (snippets.isEmpty()) return ""
+
+    val start = selectableRange.startIndex.coerceAtLeast(0)
+    val endExclusive = selectableRange.endIndexExclusive.coerceAtMost(snippets.size)
+    if (endExclusive <= start) return ""
+
+    val builder = StringBuilder()
+    var index = start
+    while (index < endExclusive) {
+        val current = snippets[index]
+        if (current.markdown.isNotBlank()) {
+            if (current.isListMarker) {
+                if (builder.isNotEmpty()) builder.append("\n")
+                builder.append(current.markdown)
+                if (index + 1 < endExclusive) {
+                    val next = snippets[index + 1]
+                    if (next.markdown.isNotBlank()) builder.append(next.markdown)
+                    index += 2
+                    continue
+                }
+            } else {
+                if (builder.isNotEmpty()) builder.append("\n\n")
+                builder.append(current.markdown)
+            }
+        }
+        index++
+    }
+    return builder.toString()
+}
+
+private fun serializeMarkdownBlock(block: MdBlock): String {
+    return when (block) {
+        is MdBlock.MdHeading -> "${"#".repeat(block.level.coerceAtLeast(1))} ${serializeMarkdownInlines(block.inline)}"
+        is MdBlock.MdParagraph -> serializeMarkdownInlines(block.inline)
+        is MdBlock.MdCode -> {
+            val info = block.language?.takeIf { it.isNotBlank() } ?: ""
+            val fence = "```"
+            buildString {
+                append(fence)
+                append(info)
+                append('\n')
+                append(block.code)
+                append('\n')
+                append(fence)
+            }
+        }
+
+        is MdBlock.MdThematicBreak -> "---"
+        is MdBlock.MdBlockQuote -> block.children.joinToString("\n") { child ->
+            serializeMarkdownBlock(child)
+                .lines()
+                .joinToString("\n") { line -> "> $line" }
+        }
+
+        is MdBlock.MdTable -> {
+            val columnCount = block.rows.maxOfOrNull { it.cells.size } ?: 0
+            if (columnCount == 0) return ""
+
+            val headerRow = block.rows.firstOrNull { it.isHeader }
+            val bodyRows = block.rows.filter { !it.isHeader }
+            val effectiveHeader = headerRow ?: bodyRows.firstOrNull()
+            val remainingBody = if (headerRow == null && bodyRows.isNotEmpty()) bodyRows.drop(1) else bodyRows
+
+            buildString {
+                if (effectiveHeader != null) {
+                    append("| ")
+                    append(
+                        (0 until columnCount).joinToString(" | ") { columnIndex ->
+                            serializeMarkdownInlines(effectiveHeader.cells.getOrNull(columnIndex) ?: emptyList())
+                        },
+                    )
+                    append(" |\n")
+                }
+                append("| ")
+                append((0 until columnCount).joinToString(" | ") { "---" })
+                append(" |")
+                remainingBody.forEach { row ->
+                    append("\n| ")
+                    append(
+                        (0 until columnCount).joinToString(" | ") { columnIndex ->
+                            serializeMarkdownInlines(row.cells.getOrNull(columnIndex) ?: emptyList())
+                        },
+                    )
+                    append(" |")
+                }
+            }
+        }
+
+        is MdBlock.MdBulletList -> block.items.joinToString("\n") { item ->
+            val marker = when (item.taskChecked) {
+                true -> "- [x] "
+                false -> "- [ ] "
+                null -> "- "
+            }
+            val itemText = item.blocks.joinToString("\n") { serializeMarkdownBlock(it) }
+            marker + itemText
+        }
+
+        is MdBlock.MdOrderedList -> block.items.mapIndexed { index, item ->
+            val marker = when (item.taskChecked) {
+                true -> "- [x] "
+                false -> "- [ ] "
+                null -> "${block.startNumber + index}. "
+            }
+            val itemText = item.blocks.joinToString("\n") { serializeMarkdownBlock(it) }
+            marker + itemText
+        }.joinToString("\n")
+    }
+}
+
+private fun serializeMarkdownInlines(inlines: List<MdInline>): String {
+    return buildString {
+        inlines.forEach { inline ->
+            when (inline) {
+                is MdInline.MdText -> append(inline.text)
+                is MdInline.MdBold -> append("**${serializeMarkdownInlines(inline.children)}**")
+                is MdInline.MdItalic -> append("_${serializeMarkdownInlines(inline.children)}_")
+                is MdInline.MdStrikethrough -> append("~~${serializeMarkdownInlines(inline.children)}~~")
+                is MdInline.MdInlineCode -> append("`${inline.code}`")
+                is MdInline.MdLink -> append("[${serializeMarkdownInlines(inline.children)}](${inline.url})")
+                is MdInline.MdImage -> append("![${serializeMarkdownInlines(inline.alt)}]")
+                is MdInline.MdHtmlTag -> append(inline.literal)
+                MdInline.MdSoftBreak -> append('\n')
+                MdInline.MdHardBreak -> append("  \n")
+            }
+        }
+    }
+}
 
 private fun countSelectablesInBlock(block: RenderedBlock): Int {
     return when (block) {

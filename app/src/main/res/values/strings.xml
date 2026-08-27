@@ -434,5 +434,6 @@
     <string name="select_table_cell">Select table cell</string>
     <string name="select_table_row">Select table row</string>
     <string name="select_full_table">Select full table</string>
+    <string name="copy_as_markdown">Copy as markdown</string>
 
 </resources>
