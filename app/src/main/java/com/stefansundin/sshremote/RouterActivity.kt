@@ -91,15 +91,16 @@ class RouterActivity : ComponentActivity() {
     private var uiState by mutableStateOf<RouterUiState>(RouterUiState.Idle)
     private var activeOperationJob: Job? = null
     private var localNetworkPermissionContinuation: CompletableDeferred<Boolean>? = null
-
-    private val localNetworkPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        localNetworkPermissionContinuation?.complete(granted)
-    }
+    private val localNetworkPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            localNetworkPermissionContinuation?.complete(granted)
+        }
 
     private suspend fun ensureLocalNetworkPermission(hostname: String): Boolean {
-        if (LocalNetworkPermissions.isGranted(this) || !LocalNetworkPermissions.isLocalHost(hostname)) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN
+            || LocalNetworkPermissions.isGranted(this)
+            || !LocalNetworkPermissions.isLocalHost(hostname)
+        ) {
             return true
         }
         val deferred = CompletableDeferred<Boolean>()

@@ -24,6 +24,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,15 +42,38 @@ import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.UnknownHostException
 
+private fun ipv4ToInt(octets: ByteArray): Int {
+    return (octets[0].toInt() and 0xFF shl 24) or
+            (octets[1].toInt() and 0xFF shl 16) or
+            (octets[2].toInt() and 0xFF shl 8) or
+            (octets[3].toInt() and 0xFF)
+}
+
+private class Ipv4Range(baseAddress: String, prefixBits: Int) {
+    private val mask = if (prefixBits == 0) 0 else -1 shl (32 - prefixBits)
+    private val base = ipv4ToInt(InetAddress.getByName(baseAddress).address) and mask
+
+    fun contains(addr: Int): Boolean = (addr and mask) == base
+}
+
 object LocalNetworkPermissions {
+    @RequiresApi(Build.VERSION_CODES.CINNAMON_BUN)
     val PERMISSION = Manifest.permission.ACCESS_LOCAL_NETWORK
 
+    @RequiresApi(Build.VERSION_CODES.CINNAMON_BUN)
     fun isGranted(context: Context): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) {
-            return true
-        }
         return ContextCompat.checkSelfPermission(context, PERMISSION) == PackageManager.PERMISSION_GRANTED
     }
+
+    private val IPV4_LOCAL_RANGES = listOf(
+        Ipv4Range("169.254.0.0", 16),       // 169.254.0.0/16     - Link-local (APIPA)
+        Ipv4Range("100.64.0.0", 10),        // 100.64.0.0/10      - Carrier-grade NAT / shared address space (RFC 6598)
+        Ipv4Range("10.0.0.0", 8),           // 10.0.0.0/8         - Private network (RFC 1918)
+        Ipv4Range("172.16.0.0", 12),        // 172.16.0.0/12      - Private network (RFC 1918)
+        Ipv4Range("192.168.0.0", 16),       // 192.168.0.0./16    - Private network (RFC 1918)
+        Ipv4Range("224.0.0.0", 4),          // 224.0.0.0/4        - Multicast
+        Ipv4Range("255.255.255.255", 32),   // 255.255.255.255/32 - Limited broadcast
+    )
 
     // Matches the definition of a local network from https://developer.android.com/privacy-and-security/local-network-definition:
     // RFC1918 private ranges, CGNAT, link-local, loopback, IPv6 unique local addresses, plus multicast and broadcast addresses.
@@ -59,40 +83,15 @@ object LocalNetworkPermissions {
         }
 
         val octets = address.address
-
         if (address is Inet4Address) {
-            val b0 = octets[0].toInt() and 0xFF
-            val b1 = octets[1].toInt() and 0xFF
-
-            // 1. Link Local: 169.254.0.0/16
-            if (b0 == 169 && b1 == 254) return true
-
-            // 2. CGNAT: 100.64.0.0/10 (range 100.64.0.0 – 100.127.255.255)
-            if (b0 == 100 && b1 in 64..127) return true
-
-            // 3. RFC 1918 Private Networks:
-            // - 10.0.0.0/8
-            if (b0 == 10) return true
-            // - 172.16.0.0/12 (range 172.16.0.0 – 172.31.255.255)
-            if (b0 == 172 && b1 in 16..31) return true
-            // - 192.168.0.0/16
-            if (b0 == 192 && b1 == 168) return true
-
-            // 4. IPv4 Broadcast: 255.255.255.255
-            if (octets.all { (it.toInt() and 0xFF) == 0xFF }) return true
-
-            // 5. IPv4 Multicast: 224.0.0.0/4 (range 224.0.0.0 – 239.255.255.255)
-            if (b0 in 224..239) return true
-
+            val addr = ipv4ToInt(octets)
+            return IPV4_LOCAL_RANGES.any { it.contains(addr) }
         } else if (address is Inet6Address) {
-            // 1. Unique local addresses (ULA): fc00::/7
-            if ((octets[0].toInt() and 0xFE) == 0xFC) return true
-
-            // 2. Link-local IPv6 addresses: fe80::/10
-            if ((octets[0].toInt() and 0xFF) == 0xFE && (octets[1].toInt() and 0xC0) == 0x80) return true
-
-            // 3. IPv6 Multicast: ff00::/8
-            if ((octets[0].toInt() and 0xFF) == 0xFF) return true
+            val byte0 = octets[0].toInt() and 0xFF
+            val byte1 = octets[1].toInt() and 0xFF
+            return (byte0 and 0xFE) == 0xFC                        // fc00::/7  - Unique Local Address (ULA)
+                    || (byte0 == 0xFE && (byte1 and 0xC0) == 0x80) // fe80::/10 - Link-local
+                    || (byte0 == 0xFF)                             // ff00::/8  - Multicast
         }
 
         return false
@@ -114,22 +113,24 @@ object LocalNetworkPermissions {
 fun rememberLocalNetworkPermissionRequest(): suspend (String) -> Boolean {
     val context = LocalContext.current
     var result by remember { mutableStateOf<Boolean?>(null) }
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted ->
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         result = granted
     }
+
     return remember {
         suspend { hostname: String ->
-            if (!LocalNetworkPermissions.isGranted(context) && LocalNetworkPermissions.isLocalHost(hostname)) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN
+                || LocalNetworkPermissions.isGranted(context)
+                || !LocalNetworkPermissions.isLocalHost(hostname)
+            ) {
+                true
+            } else {
                 result = null
                 launcher.launch(LocalNetworkPermissions.PERMISSION)
                 snapshotFlow { result }
                     .filterNotNull()
                     .first()
                     .also { result = null }
-            } else {
-                true
             }
         }
     }
