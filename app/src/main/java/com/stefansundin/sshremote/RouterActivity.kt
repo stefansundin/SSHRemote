@@ -26,6 +26,7 @@ import android.view.SoundEffectConstants
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -89,6 +90,29 @@ class RouterActivity : ComponentActivity() {
     private val cryptoManager = CryptoManager()
     private var uiState by mutableStateOf<RouterUiState>(RouterUiState.Idle)
     private var activeOperationJob: Job? = null
+    private var localNetworkPermissionContinuation: CompletableDeferred<Boolean>? = null
+
+    private val localNetworkPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        localNetworkPermissionContinuation?.complete(granted)
+    }
+
+    private suspend fun ensureLocalNetworkPermission(hostname: String): Boolean {
+        if (LocalNetworkPermissions.isGranted(this) || !LocalNetworkPermissions.isLocalHost(hostname)) {
+            return true
+        }
+        val deferred = CompletableDeferred<Boolean>()
+        localNetworkPermissionContinuation = deferred
+        try {
+            localNetworkPermissionLauncher.launch(LocalNetworkPermissions.PERMISSION)
+            return deferred.await()
+        } finally {
+            if (localNetworkPermissionContinuation === deferred) {
+                localNetworkPermissionContinuation = null
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -336,6 +360,17 @@ class RouterActivity : ComponentActivity() {
             uiState = RouterUiState.Loading(title = loadingTitle, statusRes = R.string.connecting)
         }
         app.activeConnectionTracker.update(host.id, ConnectionStatus.CONNECTING)
+
+        if (!ensureLocalNetworkPermission(host.hostname)) {
+            app.activeConnectionTracker.update(host.id, ConnectionStatus.DISCONNECTED)
+            val errorMessage = getString(R.string.permission_denied)
+            if (showUi) {
+                uiState = RouterUiState.Output(output = errorMessage, renderMarkdown = false)
+            } else {
+                Toast.makeText(applicationContext, errorMessage, Toast.LENGTH_LONG).show()
+            }
+            return false
+        }
 
         return try {
             val hostKeyUsed = app.sshRepository.connect(

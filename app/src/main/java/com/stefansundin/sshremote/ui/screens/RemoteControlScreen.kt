@@ -24,6 +24,7 @@ import android.os.Build
 import android.view.SoundEffectConstants
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -110,11 +111,13 @@ import com.jcraft.jsch.HostKey
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.HostKeyVerification
 import com.stefansundin.sshremote.ISshRepository
+import com.stefansundin.sshremote.LocalNetworkPermissions
 import com.stefansundin.sshremote.Message
 import com.stefansundin.sshremote.PassphrasePrompt
 import com.stefansundin.sshremote.PasswordPrompt
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Result
+import com.stefansundin.sshremote.rememberLocalNetworkPermissionRequest
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostConnectionDetails
@@ -176,6 +179,8 @@ fun RemoteControlScreen(
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var wasConnected by rememberSaveable { mutableStateOf(false) }
+    val ensureLocalNetworkPermission = rememberLocalNetworkPermissionRequest()
+    val permissionDeniedMsg = stringResource(R.string.permission_denied)
 
     val isInMultiWindowMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         (context as? Activity)?.isInMultiWindowMode == true
@@ -277,13 +282,21 @@ fun RemoteControlScreen(
     LaunchedEffect(host) {
         if (uiState.hostId != host.id) {
             wasConnected = false
-            hostViewModel.connect(host)
+            if (ensureLocalNetworkPermission(host.hostname)) {
+                hostViewModel.connect(host)
+            } else {
+                Toast.makeText(context, permissionDeniedMsg, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     // Reconnect in case of disconnection
     LaunchedEffect(host, uiState.connectionStatus, uiState.error, uiState.hostId) {
         if (uiState.hostId == host.id && uiState.connectionStatus == ConnectionStatus.DISCONNECTED && uiState.error == null && wasConnected) {
+            if (!ensureLocalNetworkPermission(host.hostname)) {
+                Toast.makeText(context, permissionDeniedMsg, Toast.LENGTH_SHORT).show()
+                return@LaunchedEffect
+            }
             hostViewModel.connect(host)
         }
     }
