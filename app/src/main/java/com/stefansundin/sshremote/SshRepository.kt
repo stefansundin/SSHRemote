@@ -29,6 +29,7 @@ import com.jcraft.jsch.UserInfo
 import com.stefansundin.sshremote.data.host.HostConnectionDetails
 import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,11 +38,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
@@ -93,6 +96,11 @@ interface ISshRepository {
  * A repository for handling SSH connection and command execution.
  */
 class SshRepository(private val settingsRepository: SettingsRepository) : ISshRepository {
+
+    private companion object {
+        /** Commands sent over the reusable shell channel are expected to finish quickly. */
+        const val ShellCommandTimeoutMillis = 5_000L
+    }
 
     private val commandMutex = Mutex()
 
@@ -320,9 +328,17 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
      * Executes a command on the currently connected SSH session.
      * This function reuses the existing channel if available, otherwise creates a new one.
      *
+     * The channel requests a PTY with TERM=dumb. Some servers refuse to run a plain shell without
+     * a PTY, and interactive shells like fish stall on terminal capability queries unless the
+     * terminal looks dumb. The command and the end marker are sent as separate lines using only
+     * shell syntax that is supported everywhere (no `$?`, no `2>&1`), so this works in POSIX
+     * shells, fish, etc. The exit status of the command is therefore not reported, but the
+     * command's stderr is captured via the channel's extended data stream. The marker echo uses
+     * split quoting (`echo END_OF_COMMAND"$id"`), so a terminal echoing back the sent lines
+     * cannot be mistaken for the marker; only the actual output matches.
+     *
      * @param command The command string to execute.
-     * @return The result (output and exit code, or error information) from the command.
-     * @throws Exception if not connected or command fails.
+     * @return The output from the command, or error information if the command could not be completed.
      */
     override suspend fun executeCommandReuseShell(command: String): Result {
         return commandMutex.withLock {
@@ -340,11 +356,16 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
                     if (channel == null || channel?.isConnected != true) {
                         disconnectChannel()
                         val newChannel = session.openChannel("shell") as ChannelShell
-                        newChannel.setPty(false)
+                        newChannel.setPty(true)
+                        // TERM=dumb prevents interactive shells (like fish) from stalling while
+                        // waiting for answers to their terminal capability queries.
+                        newChannel.setPtyType("dumb")
+                        val newInputStream = newChannel.inputStream
+                        val newOutputStream = newChannel.outputStream
                         newChannel.connect(30000)
                         channel = newChannel
-                        channelInputStream = newChannel.inputStream
-                        channelOutputStream = newChannel.outputStream
+                        channelInputStream = newInputStream
+                        channelOutputStream = newOutputStream
                     }
 
                     val outputStream = channelOutputStream ?: return@withContext Result.Error(
@@ -355,62 +376,93 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
                         "Channel input stream is null",
                         isConnectionError = true,
                     )
+                    val errorStream = channel?.extInputStream
 
-                    // A unique separator is used to mark the end of the command output and carry the exit code
-                    val endMarker = "END_OF_COMMAND_${UUID.randomUUID()}"
-                    val fullCommand = "$command 2>&1; echo \"${endMarker}$?\"\n"
-                    outputStream.write(fullCommand.toByteArray())
+                    // The end marker is printed as its own line using nothing but `echo`, which
+                    // every shell understands. The quotes around the id ensure that a terminal
+                    // echoing back this line does not itself contain the marker that is being
+                    // waited for; only the actual command output does.
+                    val markerId = UUID.randomUUID().toString()
+                    val endMarker = "END_OF_COMMAND$markerId"
+                    outputStream.write("$command\necho END_OF_COMMAND\"$markerId\"\n".toByteArray())
                     outputStream.flush()
 
-                    val buffer = ByteArray(1024)
-                    val output = StringBuilder()
+                    val outputString = readUntilEndMarker(inputStream, errorStream, endMarker)
 
-                    // Read until the marker appears in the output
-                    while (true) {
-                        val bytesRead = inputStream.read(buffer)
-                        if (bytesRead < 0) break
-                        val chunk = String(buffer, 0, bytesRead)
-                        output.append(chunk)
-
-                        val outputSoFar = output.toString()
-                        if (outputSoFar.contains(endMarker)) {
-                            val endMarkerIndex = outputSoFar.lastIndexOf(endMarker)
-                            if (endMarkerIndex != -1) {
-                                val rest = outputSoFar.substring(endMarkerIndex)
-                                if (rest.contains("\n")) {
-                                    break
-                                }
-                            }
-                        }
-                    }
-
-                    val outputString = output.toString()
-                    val endMarkerIndex = outputString.lastIndexOf(endMarker)
-
-                    if (endMarkerIndex == -1) {
-                        return@withContext Result.Error("Failed to determine command exit status. Output:\n$outputString")
+                    if (outputString == null) {
+                        // The marker never arrived, so the channel is in an unknown state. Discard
+                        // it to guarantee the next call starts with a fresh shell.
+                        disconnectChannel()
+                        Log.e("SshRepository", "Command did not complete: '$command'")
+                        return@withContext Result.Error("Command did not complete.")
                     }
 
                     // Extract the command output
+                    val endMarkerIndex = outputString.lastIndexOf(endMarker)
                     val commandOutput = outputString.take(endMarkerIndex).trim()
-
-                    // Extract the exit code
-                    val markerLine = outputString.substring(endMarkerIndex)
-                    val exitCodeString = markerLine.substring(endMarker.length).trim().lines().first()
-                    val exitStatus = exitCodeString.toIntOrNull() ?: -1
-
-                    if (exitStatus == 0) {
-                        Result.Success(commandOutput)
-                    } else {
-                        Result.Error("Command failed (Status $exitStatus).\nOutput:\n$commandOutput")
-                    }
-
+                    Result.Success(commandOutput)
+                } catch (e: CancellationException) {
+                    // Unblock this thread in case a read is still waiting on the channel:
+                    disconnectChannel()
+                    throw e
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("SshRepository", "Execution failed for '$command'.", e)
                     disconnectChannel()
                     Result.Error("Execution failed: ${e.message}", isConnectionError = true)
                 }
             }
+        }
+    }
+
+    /**
+     * Reads from [inputStream] until [endMarker] followed by a newline appears in the output,
+     * and returns everything that was read, or null if the stream ends or the command times out
+     * before that happens. Anything received on [errorStream] is appended to the output as well.
+     * A watchdog disconnects the shell channel on timeout so that the blocking read cannot stall
+     * forever and hold up other commands.
+     */
+    private fun CoroutineScope.readUntilEndMarker(
+        inputStream: InputStream,
+        errorStream: InputStream?,
+        endMarker: String,
+    ): String? {
+        val buffer = ByteArray(1024)
+        val output = StringBuilder()
+
+        val watchdog = launch {
+            delay(ShellCommandTimeoutMillis)
+            disconnectChannel()
+        }
+
+        try {
+            while (true) {
+                coroutineContext.ensureActive()
+
+                val bytesRead = inputStream.read(buffer)
+                if (bytesRead < 0) break
+                output.append(String(buffer, 0, bytesRead))
+
+                // Drain any stderr that arrived alongside the stdout.
+                if (errorStream != null) {
+                    while (errorStream.available() > 0) {
+                        val bytesAvailable = errorStream.read(buffer)
+                        if (bytesAvailable < 0) break
+                        output.append(String(buffer, 0, bytesAvailable))
+                    }
+                }
+
+                val outputSoFar = output.toString()
+                val endMarkerIndex = outputSoFar.lastIndexOf(endMarker)
+                if (endMarkerIndex != -1 && outputSoFar.indexOf('\n', endMarkerIndex) != -1) {
+                    return outputSoFar
+                }
+            }
+            return null
+        } catch (e: IOException) {
+            // The watchdog (or a cancellation) disconnected the channel to unblock this read.
+            return null
+        } finally {
+            watchdog.cancel()
         }
     }
 

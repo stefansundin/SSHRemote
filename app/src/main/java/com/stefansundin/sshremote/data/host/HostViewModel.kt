@@ -527,6 +527,17 @@ class HostViewModel(
                         sshRepository.executeCommandReuseShell(cmdStr)
                     }
                     Log.d("HostViewModel", "executeCommand for '${cmdStr}' took $duration")
+
+                    if (result is Result.Error) {
+                        Log.e("HostViewModel", "Mouse move command failed: ${result.message}")
+                        _uiState.update {
+                            it.copy(
+                                commandOutput = result.message,
+                                commandOutputIsMarkdown = false,
+                                isLoading = false,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -559,6 +570,17 @@ class HostViewModel(
                             sshRepository.executeCommandReuseShell(commandText)
                         }
                         Log.d("HostViewModel", "executeCommand for '$commandText' took $duration")
+
+                        if (result is Result.Error) {
+                            Log.e("HostViewModel", "Mouse pan command failed: ${result.message}")
+                            _uiState.update {
+                                it.copy(
+                                    commandOutput = result.message,
+                                    commandOutputIsMarkdown = false,
+                                    isLoading = false,
+                                )
+                            }
+                        }
                     }
                 }
             }
