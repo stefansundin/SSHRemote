@@ -68,7 +68,7 @@ interface IRemoteControlHostViewModel {
         showOutput: Boolean,
         renderOutputAsMarkdown: Boolean = false,
         isRetry: Boolean = false,
-//        reuseShell: Boolean = true,
+        reuseShell: Boolean = true,
     ): Result
 
     fun setVolume(percent: Int)
@@ -130,8 +130,8 @@ class HostViewModel(
                 .distinctUntilChanged()
                 .collectLatest { readCurrentVolume ->
                     if (readCurrentVolume == true) {
-                        updateVolume()
-                        updateMuted()
+//                        updateVolume()
+//                        updateMuted()
                     } else {
                         _uiState.update {
                             it.copy(volume = null, muted = null)
@@ -277,7 +277,7 @@ class HostViewModel(
         showOutput: Boolean,
         renderOutputAsMarkdown: Boolean,
         isRetry: Boolean,
-//        reuseShell: Boolean,
+        reuseShell: Boolean,
     ): Result {
         if (_uiState.value.connectionStatus != ConnectionStatus.CONNECTED) {
             _uiState.update {
@@ -296,11 +296,11 @@ class HostViewModel(
 
         val (result, duration) = try {
             measureTimedValue {
-//            if (reuseShell) {
-//                sshRepository.executeCommandReuseShell(command)
-//            } else {
-                sshRepository.executeCommand(command)
-//            }
+                if (reuseShell) {
+                    sshRepository.executeCommandReuseShell(command)
+                } else {
+                    sshRepository.executeCommand(command)
+                }
             }
         } catch (e: CancellationException) {
             _uiState.update { it.copy(isLoading = false) }
@@ -461,7 +461,7 @@ class HostViewModel(
     }
 
     suspend fun readVolume(): String? {
-        val result = sshRepository.executeCommandReuseShell("pactl get-sink-volume @DEFAULT_SINK@")
+        val result = runCommand("pactl get-sink-volume @DEFAULT_SINK@", showOutput = false)
         Log.d("HostViewModel", "readVolume result: $result")
         if (result is Result.Success) {
             // Extracts the first percent value from this output:
@@ -473,7 +473,7 @@ class HostViewModel(
     }
 
     suspend fun readMuted(): Boolean? {
-        val result = sshRepository.executeCommandReuseShell("pactl get-sink-mute @DEFAULT_SINK@")
+        val result = runCommand("pactl get-sink-mute @DEFAULT_SINK@", showOutput = false)
         Log.d("HostViewModel", "readMuted result: $result")
         if (result is Result.Success) {
             // TODO: Is this output localized?
@@ -523,21 +523,7 @@ class HostViewModel(
                         .replace("%dx", cx.toString())
                         .replace("%dy", cy.toString())
 
-                    val (result, duration) = measureTimedValue {
-                        sshRepository.executeCommandReuseShell(cmdStr)
-                    }
-                    Log.d("HostViewModel", "executeCommand for '${cmdStr}' took $duration")
-
-                    if (result is Result.Error) {
-                        Log.e("HostViewModel", "Mouse move command failed: ${result.message}")
-                        _uiState.update {
-                            it.copy(
-                                commandOutput = result.message,
-                                commandOutputIsMarkdown = false,
-                                isLoading = false,
-                            )
-                        }
-                    }
+                    runCommand(cmdStr, showOutput = false)
                 }
             }
         }
@@ -566,21 +552,7 @@ class HostViewModel(
 
                     activeHost.value?.remoteCommands?.get(key)?.let { command ->
                         val commandText = command.command ?: return@let
-                        val (result, duration) = measureTimedValue {
-                            sshRepository.executeCommandReuseShell(commandText)
-                        }
-                        Log.d("HostViewModel", "executeCommand for '$commandText' took $duration")
-
-                        if (result is Result.Error) {
-                            Log.e("HostViewModel", "Mouse pan command failed: ${result.message}")
-                            _uiState.update {
-                                it.copy(
-                                    commandOutput = result.message,
-                                    commandOutputIsMarkdown = false,
-                                    isLoading = false,
-                                )
-                            }
-                        }
+                        runCommand(commandText, showOutput = false)
                     }
                 }
             }

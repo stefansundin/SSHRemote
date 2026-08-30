@@ -387,6 +387,7 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
                                                 command = commandText,
                                                 showOutput = command.showOutput,
                                                 renderOutputAsMarkdown = command.renderOutputAsMarkdown,
+                                                reuseShell = false,
                                             )
                                         }
                                     } else {
@@ -584,7 +585,7 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
                         if (commandTemplate?.hasTapCommand() == true) {
                             val command = commandTemplate.formatCommand(share.text)
                             scope.launch {
-                                hostViewModel.runCommand(command, commandTemplate.showOutput)
+                                hostViewModel.runCommand(command, commandTemplate.showOutput, reuseShell = false)
                             }
                         }
                     }
@@ -848,7 +849,7 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
                                 onExecuteCommand = { command, popUpToPrevious ->
                                     scope.launch {
                                         adHocCommandViewModel.addAdHocCommand(command)
-                                        hostViewModel.runCommand(command, showOutput = true)
+                                        hostViewModel.runCommand(command, showOutput = true, reuseShell = false)
                                         if (popUpToPrevious) {
                                             navController.safePopBackStack()
                                         }

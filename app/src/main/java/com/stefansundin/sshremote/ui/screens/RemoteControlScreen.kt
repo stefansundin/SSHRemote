@@ -574,7 +574,7 @@ fun RemoteControlScreen(
                             command = command,
                             showOutput = false,
                             isRetry = false,
-//                            reuseShell = false,
+                            reuseShell = false,
                         )
                         if (result is Result.Success) {
                             snackbarHostState.showSnackbar(publicKeyCopiedMsg)
@@ -1200,7 +1200,7 @@ private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewMode
         showOutput: Boolean,
         renderOutputAsMarkdown: Boolean,
         isRetry: Boolean,
-//        reuseShell: Boolean,
+        reuseShell: Boolean,
     ): Result {
         return Result.Success("")
     }

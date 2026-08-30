@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote
 
+import android.os.SystemClock
 import android.util.Log
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.ChannelShell
@@ -29,18 +30,17 @@ import com.jcraft.jsch.UserInfo
 import com.stefansundin.sshremote.data.host.HostConnectionDetails
 import com.stefansundin.sshremote.data.settings.SettingsRepository
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -99,7 +99,13 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
 
     private companion object {
         /** Commands sent over the reusable shell channel are expected to finish quickly. */
-        const val ShellCommandTimeoutMillis = 5_000L
+        const val SHELL_COMMAND_TIMEOUT_MS = 5_000L
+
+        /** Max time to discard startup output after opening/reinitializing the shell channel. */
+        const val SHELL_STARTUP_DRAIN_TIMEOUT_MS = 750L
+
+        /** Stop draining once no bytes have arrived for this long. */
+        const val SHELL_STARTUP_QUIET_PERIOD_MS = 120L
     }
 
     private val commandMutex = Mutex()
@@ -264,6 +270,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
 
             var channel: ChannelExec? = null
             try {
+                Log.d("SshRepository", "Opening new exec channel")
                 channel = session.openChannel("exec") as ChannelExec
                 channel.setCommand(command)
 
@@ -330,12 +337,7 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
      *
      * The channel requests a PTY with TERM=dumb. Some servers refuse to run a plain shell without
      * a PTY, and interactive shells like fish stall on terminal capability queries unless the
-     * terminal looks dumb. The command and the end marker are sent as separate lines using only
-     * shell syntax that is supported everywhere (no `$?`, no `2>&1`), so this works in POSIX
-     * shells, fish, etc. The exit status of the command is therefore not reported, but the
-     * command's stderr is captured via the channel's extended data stream. The marker echo uses
-     * split quoting (`echo END_OF_COMMAND"$id"`), so a terminal echoing back the sent lines
-     * cannot be mistaken for the marker; only the actual output matches.
+     * terminal looks dumb.
      *
      * @param command The command string to execute.
      * @return The output from the command, or error information if the command could not be completed.
@@ -355,14 +357,32 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
 
                     if (channel == null || channel?.isConnected != true) {
                         disconnectChannel()
+                        Log.d("SshRepository", "Opening new shell channel")
                         val newChannel = session.openChannel("shell") as ChannelShell
                         newChannel.setPty(true)
                         // TERM=dumb prevents interactive shells (like fish) from stalling while
                         // waiting for answers to their terminal capability queries.
                         newChannel.setPtyType("dumb")
+                        // https://www.rfc-editor.org/info/rfc4254/#section-8
+                        newChannel.setTerminalMode(
+                            byteArrayOf(
+                                53, 0, 0, 0, 0, // ECHO OFF
+                                0, // TTY_OP_END
+                            ),
+                        )
                         val newInputStream = newChannel.inputStream
                         val newOutputStream = newChannel.outputStream
                         newChannel.connect(30000)
+                        // Force a predictable POSIX shell for command execution regardless of
+                        // the account's login shell (for example fish).
+                        // In my testing this improves performance by a lot!
+                        newOutputStream.write("exec /bin/sh\n".toByteArray())
+                        // Disable the prompt and turn off echo again (required on macOS for some reason)
+                        newOutputStream.write("PS1=\nexport PS1\nPS2=\nexport PS2\nstty -echo\n".toByteArray())
+                        newOutputStream.flush()
+                        // Drop any banner/prompt text emitted while the shell is starting so
+                        // the next command reads only its own output.
+                        drainPendingShellOutput(newInputStream, newChannel.extInputStream)
                         channel = newChannel
                         channelInputStream = newInputStream
                         channelOutputStream = newOutputStream
@@ -376,32 +396,76 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
                         "Channel input stream is null",
                         isConnectionError = true,
                     )
-                    val errorStream = channel?.extInputStream
 
-                    // The end marker is printed as its own line using nothing but `echo`, which
-                    // every shell understands. The quotes around the id ensure that a terminal
-                    // echoing back this line does not itself contain the marker that is being
-                    // waited for; only the actual command output does.
-                    val markerId = UUID.randomUUID().toString()
-                    val endMarker = "END_OF_COMMAND$markerId"
-                    outputStream.write("$command\necho END_OF_COMMAND\"$markerId\"\n".toByteArray())
+                    // A unique separator is used to mark the end of the command output and carry the exit code
+                    val endMarker = "END_OF_COMMAND_${UUID.randomUUID()}"
+                    val fullCommand = "$command 2>&1; echo \"${endMarker}$?\"\n"
+                    outputStream.write(fullCommand.toByteArray())
                     outputStream.flush()
+                    Log.d("SshRepository", "Sent command: $fullCommand")
 
-                    val outputString = readUntilEndMarker(inputStream, errorStream, endMarker)
-
-                    if (outputString == null) {
-                        // The marker never arrived, so the channel is in an unknown state. Discard
-                        // it to guarantee the next call starts with a fresh shell.
+                    val watchdog = launch {
+                        delay(SHELL_COMMAND_TIMEOUT_MS.milliseconds)
                         disconnectChannel()
-                        Log.e("SshRepository", "Command did not complete: '$command'")
-                        return@withContext Result.Error("Command did not complete.")
+                    }
+
+                    val buffer = ByteArray(1024)
+                    val output = StringBuilder()
+
+                    try {
+                        while (true) {
+                            coroutineContext.ensureActive()
+                            watchdog.ensureActive()
+
+                            val bytesRead = inputStream.read(buffer)
+                            if (bytesRead < 0) break
+                            val chunk = String(buffer, 0, bytesRead)
+                            output.append(chunk)
+
+                            val outputSoFar = output.toString()
+                            if (outputSoFar.contains(endMarker)) {
+                                val endMarkerIndex = outputSoFar.lastIndexOf(endMarker)
+                                if (endMarkerIndex != -1) {
+                                    val rest = outputSoFar.substring(endMarkerIndex)
+                                    if (rest.contains("\n")) {
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e: IOException) {
+                        // The watchdog (or a cancellation) disconnected the channel to unblock this read.
+                        Log.e("SshRepository", "Error when running command", e)
+                    } finally {
+                        watchdog.cancel()
+                    }
+
+                    if (channel == null) {
+                        return@withContext Result.Error("Command did not complete in ${SHELL_COMMAND_TIMEOUT_MS.milliseconds}.")
+                    }
+
+                    val outputString = output.toString()
+                    Log.d("SshRepository", "Received output: $outputString")
+                    val endMarkerIndex = outputString.lastIndexOf(endMarker)
+                    if (endMarkerIndex == -1) {
+                        return@withContext Result.Error("Failed to determine command exit status. Output:\n$outputString")
                     }
 
                     // Extract the command output
-                    val endMarkerIndex = outputString.lastIndexOf(endMarker)
                     val commandOutput = outputString.take(endMarkerIndex).trim()
-                    Result.Success(commandOutput)
+
+                    // Extract the exit code
+                    val markerLine = outputString.substring(endMarkerIndex)
+                    val exitCodeString = markerLine.substring(endMarker.length).trim().lines().first()
+                    val exitStatus = exitCodeString.toIntOrNull() ?: -1
+
+                    if (exitStatus == 0) {
+                        Result.Success(commandOutput)
+                    } else {
+                        Result.Error("Command failed (Status $exitStatus).\nOutput:\n$commandOutput")
+                    }
                 } catch (e: CancellationException) {
+                    Log.e("SshRepository", "Error when running command", e)
                     // Unblock this thread in case a read is still waiting on the channel:
                     disconnectChannel()
                     throw e
@@ -414,55 +478,41 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
         }
     }
 
-    /**
-     * Reads from [inputStream] until [endMarker] followed by a newline appears in the output,
-     * and returns everything that was read, or null if the stream ends or the command times out
-     * before that happens. Anything received on [errorStream] is appended to the output as well.
-     * A watchdog disconnects the shell channel on timeout so that the blocking read cannot stall
-     * forever and hold up other commands.
-     */
-    private fun CoroutineScope.readUntilEndMarker(
+    /** Best-effort startup drain to avoid mixing login banners/prompts into command output. */
+    private suspend fun drainPendingShellOutput(
         inputStream: InputStream,
         errorStream: InputStream?,
-        endMarker: String,
-    ): String? {
+    ) {
         val buffer = ByteArray(1024)
-        val output = StringBuilder()
+        val deadline = SystemClock.uptimeMillis() + SHELL_STARTUP_DRAIN_TIMEOUT_MS
+        var lastDataAt = SystemClock.uptimeMillis()
 
-        val watchdog = launch {
-            delay(ShellCommandTimeoutMillis)
-            disconnectChannel()
+        suspend fun drainAvailableBytes(stream: InputStream): Boolean {
+            var drainedAny = false
+            while (runInterruptible(Dispatchers.IO) { stream.available() } > 0) {
+                val bytesRead = runInterruptible(Dispatchers.IO) { stream.read(buffer) }
+                if (bytesRead <= 0) break
+                drainedAny = true
+            }
+            return drainedAny
         }
 
         try {
-            while (true) {
-                coroutineContext.ensureActive()
+            while (SystemClock.uptimeMillis() < deadline) {
+                val drainedStdout = drainAvailableBytes(inputStream)
+                val drainedStderr = errorStream?.let { drainAvailableBytes(it) } ?: false
+                val drainedAny = drainedStdout || drainedStderr
 
-                val bytesRead = inputStream.read(buffer)
-                if (bytesRead < 0) break
-                output.append(String(buffer, 0, bytesRead))
-
-                // Drain any stderr that arrived alongside the stdout.
-                if (errorStream != null) {
-                    while (errorStream.available() > 0) {
-                        val bytesAvailable = errorStream.read(buffer)
-                        if (bytesAvailable < 0) break
-                        output.append(String(buffer, 0, bytesAvailable))
-                    }
+                if (drainedAny) {
+                    lastDataAt = SystemClock.uptimeMillis()
+                } else if (SystemClock.uptimeMillis() - lastDataAt >= SHELL_STARTUP_QUIET_PERIOD_MS) {
+                    return
                 }
 
-                val outputSoFar = output.toString()
-                val endMarkerIndex = outputSoFar.lastIndexOf(endMarker)
-                if (endMarkerIndex != -1 && outputSoFar.indexOf('\n', endMarkerIndex) != -1) {
-                    return outputSoFar
-                }
+                delay(20.milliseconds)
             }
-            return null
-        } catch (e: IOException) {
-            // The watchdog (or a cancellation) disconnected the channel to unblock this read.
-            return null
-        } finally {
-            watchdog.cancel()
+        } catch (_: IOException) {
+            // If the channel closes while draining startup output, continue with normal handling.
         }
     }
 

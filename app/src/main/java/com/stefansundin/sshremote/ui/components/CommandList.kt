@@ -121,6 +121,7 @@ fun CommandList(
                                         command = commandText,
                                         showOutput = command.showOutput,
                                         renderOutputAsMarkdown = command.renderOutputAsMarkdown,
+                                        reuseShell = false,
                                     )
                                 }
                             },
@@ -145,7 +146,7 @@ private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewMode
         showOutput: Boolean,
         renderOutputAsMarkdown: Boolean,
         isRetry: Boolean,
-//        reuseShell: Boolean,
+        reuseShell: Boolean,
     ): Result {
         return Result.Success("")
     }
