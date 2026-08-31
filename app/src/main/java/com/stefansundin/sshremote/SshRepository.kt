@@ -343,6 +343,10 @@ class SshRepository(private val settingsRepository: SettingsRepository) : ISshRe
      * @return The output from the command, or error information if the command could not be completed.
      */
     override suspend fun executeCommandReuseShell(command: String): Result {
+        if (!settingsRepository.reuseShell.first()) {
+            return executeCommand(command)
+        }
+
         return commandMutex.withLock {
             withContext(Dispatchers.IO) {
                 try {

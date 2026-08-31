@@ -217,7 +217,8 @@
     <string name="strict_host_key_checking">Strict host key checking</string>
     <string name="allow_password_prompting">Allow password prompting</string>
 
-    <!-- SSH Keys -->
+    <!-- SSH -->
+    <string name="ssh">SSH</string>
     <string name="ssh_keys">SSH Keys</string>
     <string name="ssh_key">SSH Key</string>
     <string name="add_ssh_key">Add SSH Key</string>
@@ -291,6 +292,8 @@
     <string name="haptic_custom">Custom (%d ms)</string>
     <string name="milliseconds_abbreviation">ms</string>
     <string name="show_notification">Show notification</string>
+    <string name="reuse_shell_channel">Reuse shell channel</string>
+    <string name="reuse_shell_channel_subtitle">Improves performance</string>
     <string name="keep_screen_on">Keep screen on</string>
     <string name="show_when_locked">Show on top of lock screen</string>
     <string name="security">Security</string>

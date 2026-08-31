@@ -112,6 +112,7 @@ class SettingsExporter(
         val notificationsEnabled = settingsRepository.notificationsEnabled.first()
         val strictHostKeyChecking = settingsRepository.strictHostKeyChecking.first()
         val allowPasswordPrompting = settingsRepository.allowPasswordPrompting.first()
+        val reuseShell = settingsRepository.reuseShell.first()
         val shareTargetEnabled = settingsRepository.shareTargetEnabled.first()
         val hosts = hostRepository.getAll().first().map { it.toExportedHost() }
         val knownHosts = knownHostRepository.getAll().first().map { knownHost ->
@@ -138,6 +139,7 @@ class SettingsExporter(
             notificationsEnabled,
             strictHostKeyChecking,
             allowPasswordPrompting,
+            reuseShell,
             shareTargetEnabled,
             hosts,
             knownHosts,

@@ -216,6 +216,9 @@ class SettingsImporter(
             if (settings.allowPasswordPrompting != null) {
                 settingsRepository.setAllowPasswordPrompting(settings.allowPasswordPrompting)
             }
+            if (settings.reuseShell != null) {
+                settingsRepository.setReuseShell(settings.reuseShell)
+            }
             if (settings.shareTargetEnabled != null) {
                 settingsRepository.setShareTargetEnabled(settings.shareTargetEnabled)
             }

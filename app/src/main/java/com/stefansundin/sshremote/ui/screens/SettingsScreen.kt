@@ -191,6 +191,7 @@ private fun SettingsItem(
 @Composable
 private fun SettingsSwitchItem(
     title: String,
+    subtitle: String? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -208,13 +209,23 @@ private fun SettingsSwitchItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            title,
-            style = MaterialTheme.typography.bodyLarge,
+        Column(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 16.dp),
-        )
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -388,6 +399,7 @@ fun SettingsScreen(
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
     val strictHostKeyChecking by settingsViewModel.strictHostKeyChecking.collectAsState()
     val allowPasswordPrompting by settingsViewModel.allowPasswordPrompting.collectAsState()
+    val reuseShell by settingsViewModel.reuseShell.collectAsState()
     val shareTargetEnabled by settingsViewModel.shareTargetEnabled.collectAsState()
     val hasHosts by settingsViewModel.hasHosts.collectAsState()
 
@@ -728,7 +740,7 @@ fun SettingsScreen(
 
                         HorizontalDivider()
 
-                        SettingsGroup(stringResource(R.string.security)) {
+                        SettingsGroup(stringResource(R.string.ssh)) {
                             SettingsItem(
                                 title = stringResource(R.string.ssh_keys),
                                 subtitle = stringResource(R.string.ssh_keys_subtitle),
@@ -751,6 +763,12 @@ fun SettingsScreen(
                                 title = stringResource(R.string.allow_password_prompting),
                                 checked = allowPasswordPrompting,
                                 onCheckedChange = { settingsViewModel.setAllowPasswordPrompting(it) },
+                            )
+                            SettingsSwitchItem(
+                                title = stringResource(R.string.reuse_shell_channel),
+                                subtitle = stringResource(R.string.reuse_shell_channel_subtitle),
+                                checked = reuseShell,
+                                onCheckedChange = { settingsViewModel.setReuseShell(it) },
                             )
                         }
 
@@ -895,6 +913,7 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
     override val notificationsEnabled = MutableStateFlow(false)
     override val strictHostKeyChecking = MutableStateFlow(true)
     override val allowPasswordPrompting = MutableStateFlow(true)
+    override val reuseShell = MutableStateFlow(true)
     override val shareTargetEnabled = MutableStateFlow(false)
     override val hasHosts: StateFlow<Boolean> = MutableStateFlow(true)
     override val eventFlow: SharedFlow<SettingsEvent> = MutableSharedFlow()
@@ -962,6 +981,10 @@ val fakeSettingsViewModel = object : ISettingsViewModel {
 
     override fun setAllowPasswordPrompting(allowPasswordPrompting: Boolean) {
         this.allowPasswordPrompting.value = allowPasswordPrompting
+    }
+
+    override fun setReuseShell(reuseShell: Boolean) {
+        this.reuseShell.value = reuseShell
     }
 
     override fun setShareTargetEnabled(shareTargetEnabled: Boolean) {
