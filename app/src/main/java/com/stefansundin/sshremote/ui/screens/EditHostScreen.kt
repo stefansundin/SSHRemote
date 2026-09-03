@@ -730,6 +730,7 @@ fun EditHostScreen(
                 )
 
                 // USER FIELD
+                val suggestedUsers = allUsers.distinct().sorted()
                 var userDropdownExpanded by rememberSaveable { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
                     expanded = userDropdownExpanded,
@@ -753,17 +754,18 @@ fun EditHostScreen(
                             imeAction = ImeAction.Next,
                         ),
                         trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    // Intentionally left empty.
-                                },
-                            ) {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = userDropdownExpanded)
+                            if (suggestedUsers.isNotEmpty()) {
+                                IconButton(
+                                    onClick = {
+                                        // Intentionally left empty.
+                                    },
+                                ) {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = userDropdownExpanded)
+                                }
                             }
                         },
                     )
 
-                    val suggestedUsers = allUsers.distinct().sorted()
                     if (suggestedUsers.isNotEmpty()) {
                         ExposedDropdownMenu(
                             expanded = userDropdownExpanded,
