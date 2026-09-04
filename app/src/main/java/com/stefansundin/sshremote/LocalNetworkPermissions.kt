@@ -25,6 +25,9 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +35,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -117,6 +123,32 @@ fun rememberLocalNetworkPermissionRequest(): suspend (String) -> Boolean {
         result = granted
     }
 
+    var primerRequest by remember { mutableStateOf<CompletableDeferred<Boolean>?>(null) }
+
+    primerRequest?.let { deferred ->
+        AlertDialog(
+            title = { Text(stringResource(R.string.allow_local_network_access)) },
+            text = {
+                Text(stringResource(R.string.local_network_access_permission_explanation))
+            },
+            properties = DialogProperties(dismissOnClickOutside = false),
+            onDismissRequest = {
+                deferred.complete(false)
+                primerRequest = null
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        deferred.complete(true)
+                        primerRequest = null
+                    },
+                ) {
+                    Text(stringResource(R.string.cont))
+                }
+            },
+        )
+    }
+
     return remember {
         suspend { hostname: String ->
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN
@@ -125,12 +157,19 @@ fun rememberLocalNetworkPermissionRequest(): suspend (String) -> Boolean {
             ) {
                 true
             } else {
-                result = null
-                launcher.launch(LocalNetworkPermissions.PERMISSION)
-                snapshotFlow { result }
-                    .filterNotNull()
-                    .first()
-                    .also { result = null }
+                val deferred = CompletableDeferred<Boolean>()
+                primerRequest = deferred
+
+                if (!deferred.await()) {
+                    false // user declined the primer
+                } else {
+                    result = null
+                    launcher.launch(LocalNetworkPermissions.PERMISSION)
+                    snapshotFlow { result }
+                        .filterNotNull()
+                        .first()
+                        .also { result = null }
+                }
             }
         }
     }

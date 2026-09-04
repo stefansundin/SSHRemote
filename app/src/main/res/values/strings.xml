@@ -30,6 +30,7 @@
     <string name="merge">Merge</string>
     <string name="duplicate">Duplicate</string>
     <string name="replace">Replace</string>
+    <string name="cont">Continue</string>
     <string name="permission_denied">Permission denied</string>
     <string name="reset">Reset</string>
     <string name="reset_to_default">Reset to default</string>
@@ -149,6 +150,8 @@
     <string name="error_reading_volume">Error reading volume. Please install pactl.</string>
     <string name="volume_format">Volume: %s</string>
     <string name="volume_muted_format">Volume: %s (muted)</string>
+    <string name="allow_local_network_access">Allow local network access</string>
+    <string name="local_network_access_permission_explanation">This host is on your local network. Android will now show a permission prompt asking if this app should be allowed to make connections to local devices.\n\nTap \"Allow\" to continue.</string>
 
     <!-- Buttons / Keys -->
     <string name="key_back">Back</string>
