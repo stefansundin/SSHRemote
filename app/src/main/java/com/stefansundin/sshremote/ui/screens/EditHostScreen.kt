@@ -209,12 +209,12 @@ fun EditHostScreen(
     val onSubmit = { hasBeenSubmitted = true }
 
     val isNameValid by remember(name) { derivedStateOf { Validations.validateName(name) } }
-    val isHostValid by remember(hostname) { derivedStateOf { Validations.validateHost(hostname) } }
+    val isHostnameValid by remember(hostname) { derivedStateOf { Validations.validateHostname(hostname) } }
     val isUserValid by remember(user) { derivedStateOf { Validations.validateUser(user) } }
     val isPortValid by remember(port) { derivedStateOf { Validations.validatePort(port) } }
 
-    val isFormValid by remember(isNameValid, isHostValid, isUserValid, isPortValid) {
-        derivedStateOf { isNameValid && isHostValid && isUserValid && isPortValid }
+    val isFormValid by remember(isNameValid, isHostnameValid, isUserValid, isPortValid) {
+        derivedStateOf { isNameValid && isHostnameValid && isUserValid && isPortValid }
     }
 
     val passwordChanged = if (isPasswordSet) {
@@ -271,7 +271,7 @@ fun EditHostScreen(
         } else {
             coroutineScope.launch {
                 if (!isNameValid) nameRequester.bringIntoView()
-                else if (!isHostValid) hostnameRequester.bringIntoView()
+                else if (!isHostnameValid) hostnameRequester.bringIntoView()
                 else if (!isPortValid) portRequester.bringIntoView()
                 else if (!isUserValid) userRequester.bringIntoView()
             }
@@ -700,7 +700,7 @@ fun EditHostScreen(
                         .bringIntoViewRequester(hostnameRequester)
                         .fillMaxWidth()
                         .dpadFocusable(),
-                    isError = hasBeenSubmitted && !isHostValid,
+                    isError = hasBeenSubmitted && !isHostnameValid,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Next,
