@@ -36,6 +36,18 @@ enum class RemoteControlScreen(val tabIndex: Int) {
 }
 
 /**
+ * Captures network service discovery metadata.
+ */
+data class ServiceInfo(
+    val serviceName: String,
+    val serviceType: String,
+    val hostAddresses: List<String> = emptyList(),
+    val port: Int? = null,
+    val attributes: Map<String, String>? = null,
+    val networkHandle: Long? = null,
+)
+
+/**
  * A host is a network device that can be accessed via SSH.
  *
  * A host is also known as an SSH server, but in this app the term host is used consistently, including in the UI.
@@ -57,6 +69,7 @@ data class Host(
     val startScreen: RemoteControlScreen = RemoteControlScreen.Default,
     val smartVolume: SmartVolumeSettings? = null,
     val sshConfig: String? = null,
+    val serviceInfo: ServiceInfo? = null,
 ) {
     companion object {
         val DEFAULT_COMMANDS = listOf(Command("uptime", name = "Uptime", showOutput = true))
@@ -103,6 +116,7 @@ data class Host(
             startScreen = startScreen,
             smartVolume = smartVolume,
             sshConfig = sshConfig,
+            serviceInfo = serviceInfo,
         )
     }
 }

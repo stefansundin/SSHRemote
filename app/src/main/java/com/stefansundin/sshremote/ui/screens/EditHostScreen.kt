@@ -19,9 +19,15 @@
 package com.stefansundin.sshremote.ui.screens
 
 import android.content.res.Configuration
+import android.net.nsd.NsdServiceInfo
+import android.os.Build
+import android.os.Parcelable
+import android.os.PatternMatcher
+import android.os.ext.SdkExtensions
 import android.util.Base64
 import android.util.Log
 import android.view.SoundEffectConstants
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +39,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -42,6 +49,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -74,10 +82,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -93,6 +103,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.google.gson.Gson
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.stefansundin.sshremote.NetworkServiceDiscovery
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Validations
 import com.stefansundin.sshremote.data.host.Host
@@ -100,6 +111,7 @@ import com.stefansundin.sshremote.data.host.IEditHostViewModel
 import com.stefansundin.sshremote.data.host.ImportedSshHost
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
+import com.stefansundin.sshremote.data.host.ServiceInfo
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 import com.stefansundin.sshremote.data.host.parseSshUri
 import com.stefansundin.sshremote.data.host.toSshUri
@@ -109,6 +121,7 @@ import com.stefansundin.sshremote.data.settings.ExportedCommand
 import com.stefansundin.sshremote.data.settings.ExportedHost
 import com.stefansundin.sshremote.data.settings.ISettingsViewModel
 import com.stefansundin.sshremote.ui.HardwareMenuKeyHandler
+import com.stefansundin.sshremote.ui.components.NetworkServiceDiscoveryModal
 import com.stefansundin.sshremote.ui.components.QrCodeDialog
 import com.stefansundin.sshremote.ui.components.ScrollbarContainer
 import com.stefansundin.sshremote.ui.dpadFocusable
@@ -116,16 +129,81 @@ import com.stefansundin.sshremote.ui.portraitImePadding
 import com.stefansundin.sshremote.ui.theme.AppDimens
 import com.stefansundin.sshremote.ui.theme.SSHRemoteTheme
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStreamReader
+import java.nio.ByteBuffer
+import java.nio.charset.CodingErrorAction
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+
+const val TAG = "EditHostScreen"
 
 private enum class PasswordState {
     SET,
     LOST,
 }
+
+val ServiceInfoSaver: Saver<ServiceInfo?, Any> = Saver(
+    save = { info ->
+        info?.let {
+            listOf(
+                it.serviceName,
+                it.serviceType,
+                it.hostAddresses,
+                it.port,
+                it.attributes,
+                it.networkHandle,
+            )
+        }
+    },
+    restore = { saved ->
+        val list = saved as List<Any?>
+        @Suppress("UNCHECKED_CAST")
+        ServiceInfo(
+            serviceName = list[0] as String,
+            serviceType = list[1] as String,
+            hostAddresses = list[2] as List<String>,
+            port = list[3] as Int?,
+            attributes = list[4] as Map<String, String>,
+            networkHandle = list[5] as Long?,
+        )
+    },
+)
+
+fun Map<String, ByteArray>.decodeUtf8OrDrop(): Map<String, String> =
+    mapNotNull { (key, bytes) ->
+        val decoder = Charsets.UTF_8.newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT)
+        try {
+            key to decoder.decode(ByteBuffer.wrap(bytes)).toString()
+        } catch (_: CharacterCodingException) {
+            null
+        }
+    }.toMap()
+
+fun toServiceInfo(nsdServiceInfo: NsdServiceInfo): ServiceInfo {
+    val hostAddresses = NetworkServiceDiscovery.getHostAddresses(nsdServiceInfo)
+    val networkHandle =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 3) {
+            nsdServiceInfo.network?.networkHandle
+        } else null
+    val serviceInfo = ServiceInfo(
+        nsdServiceInfo.serviceName,
+        nsdServiceInfo.serviceType,
+        hostAddresses,
+        nsdServiceInfo.port,
+        nsdServiceInfo.attributes.decodeUtf8OrDrop(),
+        networkHandle,
+    )
+    Log.d(TAG, "Created: $serviceInfo")
+    return serviceInfo
+}
+
+@Parcelize
+data class DiscoveryRequest(val nameFilter: PatternMatcher? = null) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,12 +230,14 @@ fun EditHostScreen(
     val initialPort = host?.port?.toString() ?: importedHost?.port?.toString() ?: "22"
     val initialUser = host?.user ?: importedHost?.user.orEmpty()
     val initialKnownHosts = host?.knownHosts ?: importedHost?.knownHosts ?: emptyList()
+    val initialServiceInfo = host?.serviceInfo
 
     var name by rememberSaveable(host, sshUri) { mutableStateOf(initialName) }
     var hostname by rememberSaveable(host, sshUri) { mutableStateOf(initialHostname) }
     var port by rememberSaveable(host, sshUri) { mutableStateOf(initialPort) }
     var user by rememberSaveable(host, sshUri) { mutableStateOf(initialUser) }
     var sshConfig by rememberSaveable(host) { mutableStateOf(host?.sshConfig) }
+    var serviceInfo by rememberSaveable(host, stateSaver = ServiceInfoSaver) { mutableStateOf(initialServiceInfo) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -181,6 +261,7 @@ fun EditHostScreen(
     var userWantsToChangePassword by rememberSaveable { mutableStateOf(false) }
     val showPasswordField = !isPasswordSet || userWantsToChangePassword
 
+    var serviceHostnameDropdownExpanded by rememberSaveable { mutableStateOf(false) }
     var password by rememberSaveable { mutableStateOf("") }
     var selectedIdentityIds by rememberSaveable(host, identities) {
         val originalIds = host?.identityIds
@@ -230,16 +311,39 @@ fun EditHostScreen(
             (selectedIdentityIds != host?.identityIds) ||
             (knownHosts != initialKnownHosts) ||
             (shareInBackground != (host?.shareInBackground ?: false)) ||
-            (sshConfig != host?.sshConfig)
+            (sshConfig != host?.sshConfig) ||
+            (serviceInfo != host?.serviceInfo)
 
     var showSaveDialog by rememberSaveable { mutableStateOf(false) }
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
     val view = LocalView.current
+    val uriHandler = LocalUriHandler.current
+    var isDiscoveringService by rememberSaveable { mutableStateOf<DiscoveryRequest?>(null) }
+    var showServiceDiscoveryPrimer by rememberSaveable { mutableStateOf(false) }
+    var showServiceOptions by rememberSaveable { mutableStateOf(false) }
 
     val nameRequester = remember { BringIntoViewRequester() }
     val hostnameRequester = remember { BringIntoViewRequester() }
     val portRequester = remember { BringIntoViewRequester() }
     val userRequester = remember { BringIntoViewRequester() }
+
+    val serviceUpdatedMsg = stringResource(R.string.service_updated)
+    val serviceNotUpdatedMsg = stringResource(R.string.no_change_detected)
+
+    fun handleServicePicked(newServiceInfo: ServiceInfo) {
+        if (name.isEmpty()) {
+            name = newServiceInfo.serviceName
+        }
+        hostname = newServiceInfo.hostAddresses.first()
+        port = newServiceInfo.port.toString()
+        serviceInfo = newServiceInfo
+        if (user.isEmpty()) {
+            newServiceInfo.attributes?.get("user")?.let {
+                user = it
+            }
+        }
+    }
 
     fun handleSave() {
         onSubmit()
@@ -253,6 +357,7 @@ fun EditHostScreen(
                 knownHosts = knownHosts,
                 shareInBackground = shareInBackground,
                 sshConfig = sshConfig,
+                serviceInfo = serviceInfo,
             )
                 ?: Host(
                     name = name,
@@ -266,6 +371,7 @@ fun EditHostScreen(
                     commands = commands ?: Host.DEFAULT_COMMANDS,
                     remoteCommands = remoteCommands,
                     startScreen = startScreen,
+                    serviceInfo = serviceInfo,
                 )
             onSave(hostToSave, if (showPasswordField) password else null)
         } else {
@@ -348,7 +454,6 @@ fun EditHostScreen(
     }
 
     if (showSshConfigDialog) {
-        val uriHandler = LocalUriHandler.current
         var currentConfig by rememberSaveable { mutableStateOf(sshConfig ?: Host.DEFAULT_SSH_CONFIG) }
 
         AlertDialog(
@@ -420,6 +525,170 @@ fun EditHostScreen(
         )
     }
 
+    if (showServiceDiscoveryPrimer) {
+        AlertDialog(
+            title = { Text(stringResource(R.string.discover_ssh_server)) },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(stringResource(R.string.ssh_discovery_requirements_text))
+                }
+            },
+            onDismissRequest = {
+                showServiceDiscoveryPrimer = false
+            },
+            confirmButton = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Button(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            showServiceDiscoveryPrimer = false
+                            coroutineScope.launch {
+                                isDiscoveringService = DiscoveryRequest()
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                                    && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 22
+                                ) {
+                                    try {
+                                        val nsdServiceInfo = NetworkServiceDiscovery.findService(context)
+                                        if (nsdServiceInfo != null) {
+                                            val newServiceInfo = toServiceInfo(nsdServiceInfo)
+                                            handleServicePicked(newServiceInfo)
+                                        }
+                                    } finally {
+                                        isDiscoveringService = null
+                                    }
+                                }
+                            }
+                        },
+                    ) {
+                        Text(stringResource(R.string.cont))
+                    }
+                }
+            },
+            dismissButton = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            uriHandler.openUri("https://github.com/stefansundin/SSHRemote/discussions/25")
+                        },
+                    ) {
+                        Text(stringResource(R.string.help))
+                    }
+                    TextButton(
+                        onClick = {
+                            view.playSoundEffect(SoundEffectConstants.CLICK)
+                            showServiceDiscoveryPrimer = false
+                        },
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            },
+            properties = DialogProperties(dismissOnClickOutside = false),
+        )
+    }
+
+    if (showServiceOptions) {
+        AlertDialog(
+            title = { Text(stringResource(R.string.service_options)) },
+            text = {
+                Text(stringResource(R.string.service_options_text))
+            },
+            onDismissRequest = { showServiceOptions = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        coroutineScope.launch {
+                            try {
+                                serviceInfo?.let { serviceInfo ->
+                                    val nameFilter =
+                                        PatternMatcher(serviceInfo.serviceName, PatternMatcher.PATTERN_LITERAL)
+                                    isDiscoveringService = DiscoveryRequest(nameFilter)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                                        && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 22
+                                    ) {
+                                        try {
+                                            val nsdServiceInfo = NetworkServiceDiscovery.findService(
+                                                context,
+                                                serviceInfo.serviceType,
+                                                nameFilter,
+                                            )
+                                            if (nsdServiceInfo != null) {
+                                                val newServiceInfo = toServiceInfo(nsdServiceInfo)
+                                                if (newServiceInfo != serviceInfo) {
+                                                    handleServicePicked(newServiceInfo)
+                                                    Toast.makeText(context, serviceUpdatedMsg, Toast.LENGTH_SHORT)
+                                                        .show()
+                                                } else {
+                                                    Toast.makeText(context, serviceNotUpdatedMsg, Toast.LENGTH_SHORT)
+                                                        .show()
+                                                }
+                                            }
+                                        } finally {
+                                            isDiscoveringService = null
+                                        }
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, e.toString())
+                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                            } finally {
+                                showServiceOptions = false
+                            }
+                        }
+                    },
+                ) {
+                    Text(stringResource(R.string.check_for_updates))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        serviceInfo = null
+                        showServiceOptions = false
+                    },
+                ) {
+                    Text(stringResource(R.string.unbind))
+                }
+            },
+        )
+    }
+
+    if (isDiscoveringService != null
+        && (Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+                || SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) < 22)
+    ) {
+        NetworkServiceDiscoveryModal(
+            nameFilter = isDiscoveringService?.nameFilter,
+            onServiceSelected = {
+                val newServiceInfo = toServiceInfo(it)
+                if (serviceInfo == null) {
+                    handleServicePicked(newServiceInfo)
+                } else if (newServiceInfo != serviceInfo) {
+                    handleServicePicked(newServiceInfo)
+                    Toast.makeText(context, serviceUpdatedMsg, Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    Toast.makeText(context, serviceNotUpdatedMsg, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                isDiscoveringService = null
+            },
+            onDismiss = {
+                isDiscoveringService = null
+            },
+        )
+    }
+
     var qrCodeString by remember { mutableStateOf<String?>(null) }
 
     qrCodeString?.let {
@@ -470,6 +739,7 @@ fun EditHostScreen(
                             (it.filterKeys { it != null } as Map<RemoteControlKey, ExportedCommand>).mapValues { it.value.toCommand() }
                     }
                     hostData.startScreen?.let { startScreen = it }
+                    hostData.serviceInfo?.let { serviceInfo = it }
                 }
             } catch (e: Exception) {
                 Log.e("SSHRemote", "Error parsing QR code", e)
@@ -666,6 +936,31 @@ fun EditHostScreen(
                     .verticalScroll(verticalScrollState),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                // DISCOVER LOCAL SSH SERVER
+                Button(
+                    onClick = {
+                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                        if (serviceInfo == null) {
+                            showServiceDiscoveryPrimer = true
+                        } else {
+                            showServiceOptions = true
+                        }
+                    },
+                    enabled = isDiscoveringService == null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dpadFocusable(),
+                ) {
+                    Icon(Icons.Default.Search, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = serviceInfo?.serviceName?.let {
+                            stringResource(R.string.bound_format, it)
+                        } ?: stringResource(R.string.discover_local_ssh_server),
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+
                 // NAME FIELD
                 OutlinedTextField(
                     value = name,
@@ -688,24 +983,61 @@ fun EditHostScreen(
                     ),
                 )
 
-                // HOSTNAME FIELD
-                OutlinedTextField(
-                    value = hostname,
-                    onValueChange = { newHostname ->
-                        // Disallow spaces and newlines
-                        hostname = newHostname.replace(" ", "").replace("\n", "").take(255)
-                    },
-                    label = { Text(stringResource(R.string.hostname_or_ip)) },
-                    modifier = Modifier
-                        .bringIntoViewRequester(hostnameRequester)
-                        .fillMaxWidth()
-                        .dpadFocusable(),
-                    isError = hasBeenSubmitted && !isHostnameValid,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                    ),
-                )
+                if (serviceInfo == null) {
+                    // HOSTNAME FIELD
+                    OutlinedTextField(
+                        value = hostname,
+                        onValueChange = { newHostname ->
+                            // Disallow spaces and newlines
+                            hostname = newHostname.replace(" ", "").replace("\n", "").take(255)
+                        },
+                        label = { Text(stringResource(R.string.hostname_or_ip)) },
+                        modifier = Modifier
+                            .bringIntoViewRequester(hostnameRequester)
+                            .fillMaxWidth()
+                            .dpadFocusable(),
+                        isError = hasBeenSubmitted && !isHostnameValid,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                        ),
+                    )
+                } else {
+                    // SERVICE HOSTNAME DROPDOWN
+                    ExposedDropdownMenuBox(
+                        expanded = serviceHostnameDropdownExpanded,
+                        onExpandedChange = { serviceHostnameDropdownExpanded = it },
+                    ) {
+                        OutlinedTextField(
+                            readOnly = true,
+                            value = hostname,
+                            onValueChange = { },
+                            label = { Text(stringResource(R.string.hostname_or_ip)) },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = serviceHostnameDropdownExpanded)
+                            },
+                            modifier = Modifier
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                                .fillMaxWidth()
+                                .dpadFocusable(),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = serviceHostnameDropdownExpanded,
+                            onDismissRequest = { serviceHostnameDropdownExpanded = false },
+                        ) {
+                            serviceInfo?.hostAddresses?.forEach { address ->
+                                DropdownMenuItem(
+                                    text = { Text(address) },
+                                    onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                                        hostname = address
+                                        serviceHostnameDropdownExpanded = false
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
 
                 // PORT FIELD
                 OutlinedTextField(
@@ -727,10 +1059,17 @@ fun EditHostScreen(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Next,
                     ),
+                    readOnly = serviceInfo != null,
                 )
 
                 // USER FIELD
-                val suggestedUsers = allUsers.distinct().sorted()
+                val suggestedUsers = allUsers.distinct().sorted().toMutableList()
+                serviceInfo?.attributes?.get("user")?.let {
+                    if (suggestedUsers.contains(it)) {
+                        suggestedUsers.remove(it)
+                    }
+                    suggestedUsers.add(0, it)
+                }
                 var userDropdownExpanded by rememberSaveable { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
                     expanded = userDropdownExpanded,
@@ -870,7 +1209,11 @@ fun EditHostScreen(
                 // SSH KEY SELECTION DROPDOWN
                 ExposedDropdownMenuBox(
                     expanded = identityDropdownExpanded,
-                    onExpandedChange = { if (identities != null) identityDropdownExpanded = !identityDropdownExpanded },
+                    onExpandedChange = {
+                        if (identities != null) {
+                            identityDropdownExpanded = it
+                        }
+                    },
                 ) {
                     OutlinedTextField(
                         readOnly = true,

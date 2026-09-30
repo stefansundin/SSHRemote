@@ -252,6 +252,7 @@ class SettingsImporter(
                     startScreen = exportedHost.startScreen ?: RemoteControlScreen.Default,
                     smartVolume = exportedHost.smartVolume,
                     sshConfig = exportedHost.sshConfig,
+                    serviceInfo = exportedHost.serviceInfo,
                 )
                 hostRepository.upsert(host)
             }

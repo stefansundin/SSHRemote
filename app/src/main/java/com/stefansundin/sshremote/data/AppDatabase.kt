@@ -19,6 +19,7 @@
 package com.stefansundin.sshremote.data
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -32,7 +33,10 @@ import com.stefansundin.sshremote.data.knownhost.KnownHostDao
 
 @Database(
     entities = [Host::class, KnownHost::class, AdHocCommand::class],
-    version = 1,
+    version = 2,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ],
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
