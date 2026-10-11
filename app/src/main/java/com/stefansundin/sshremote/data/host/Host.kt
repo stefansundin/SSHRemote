@@ -18,6 +18,7 @@
 
 package com.stefansundin.sshremote.data.host
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.stefansundin.sshremote.data.settings.ExportedCommand
@@ -38,6 +39,7 @@ enum class RemoteControlScreen(val tabIndex: Int) {
 /**
  * Captures network service discovery metadata.
  */
+@Keep
 data class ServiceInfo(
     val serviceName: String,
     val serviceType: String,
