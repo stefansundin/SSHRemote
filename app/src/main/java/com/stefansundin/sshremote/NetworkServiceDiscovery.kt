@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.Inet6Address
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -71,11 +72,27 @@ object NetworkServiceDiscovery {
                 .setFlags(DiscoveryRequest.FLAG_SHOW_PICKER)
                 .build()
 
-            val listener = object : NsdManager.ServiceInfoCallback {
+            val nsdManager = context.getSystemService(NsdManager::class.java)
+            val unregistered = AtomicBoolean(false)
+            var listener: NsdManager.ServiceInfoCallback? = null
+
+            fun unregisterCallback() {
+                if (unregistered.compareAndSet(false, true)) {
+                    try {
+                        listener?.let {
+                            nsdManager.unregisterServiceInfoCallback(it)
+                        }
+                    } catch (_: IllegalArgumentException) {
+                    }
+                }
+            }
+
+            listener = object : NsdManager.ServiceInfoCallback {
                 override fun onServiceUpdated(serviceInfo: NsdServiceInfo) {
                     Log.d(TAG, "Service updated: $serviceInfo")
                     if (cont.isActive) {
                         cont.resume(serviceInfo)
+                        unregisterCallback()
                     }
                 }
 
@@ -88,15 +105,15 @@ object NetworkServiceDiscovery {
                     if (cont.isActive) {
                         cont.resume(null)
                     }
+                    unregisterCallback()
                 }
 
                 override fun onServiceLost() {}
             }
 
-            val nsdManager = context.getSystemService(NsdManager::class.java)
             nsdManager.registerServiceInfoCallback(request, Runnable::run, listener)
             cont.invokeOnCancellation {
-                nsdManager.unregisterServiceInfoCallback(listener)
+                unregisterCallback()
             }
         }
     }
