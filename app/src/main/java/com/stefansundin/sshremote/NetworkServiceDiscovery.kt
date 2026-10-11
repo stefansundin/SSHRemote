@@ -35,6 +35,17 @@ object NetworkServiceDiscovery {
     private const val TAG = "NetworkServiceDiscovery"
     const val SSH_SERVICE_TYPE = "_ssh._tcp"
 
+    private data class ServiceKey(val name: String, val type: String)
+
+    private data class PendingResolve(
+        val info: NsdServiceInfo,
+        val key: ServiceKey,
+        val version: Int,
+    )
+
+    private fun serviceKey(info: NsdServiceInfo): ServiceKey =
+        ServiceKey(info.serviceName, info.serviceType)
+
     fun getHostAddresses(nsdServiceInfo: NsdServiceInfo): List<String> {
         val addresses =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 7) {
@@ -133,21 +144,31 @@ object NetworkServiceDiscovery {
                 null
             }
         val nsdManager = context.getSystemService(NsdManager::class.java)
-        val pendingResolves = Channel<NsdServiceInfo>(Channel.UNLIMITED)
+        val pendingResolves = Channel<PendingResolve>(Channel.UNLIMITED)
+        val serviceVersions = mutableMapOf<ServiceKey, Int>()
+        val serviceVersionsLock = Any()
 
         val discoveryListener = object : NsdManager.DiscoveryListener {
             override fun onServiceFound(info: NsdServiceInfo) {
                 Log.d(TAG, "Service found: $info")
-                // Apps implement their own logic for which services count —
-                // here that's the same name filter as before.
                 if (nameFilter?.match(info.serviceName) == false) {
                     return
                 }
-                pendingResolves.trySend(info)
+                val key = serviceKey(info)
+                val version = synchronized(serviceVersionsLock) {
+                    val nextVersion = (serviceVersions[key] ?: 0) + 1
+                    serviceVersions[key] = nextVersion
+                    nextVersion
+                }
+                pendingResolves.trySend(PendingResolve(info, key, version))
             }
 
             override fun onServiceLost(info: NsdServiceInfo) {
                 Log.d(TAG, "Service lost: $info")
+                val key = serviceKey(info)
+                synchronized(serviceVersionsLock) {
+                    serviceVersions[key] = (serviceVersions[key] ?: 0) + 1
+                }
                 trySend(NetworkServiceDiscoveryEvent.ServiceLost(info))
             }
 
@@ -165,12 +186,19 @@ object NetworkServiceDiscovery {
         // Resolve found services one at a time, in the order they arrived,
         // instead of calling resolveService() concurrently.
         val resolverJob = launch {
-            for (found in pendingResolves) {
+            for ((info, key, version) in pendingResolves) {
                 try {
-                    val resolved = resolveLegacy(nsdManager, found)
-                    send(NetworkServiceDiscoveryEvent.ServiceAvailable(resolved))
+                    val resolved = resolveLegacy(nsdManager, info)
+                    val isCurrent = synchronized(serviceVersionsLock) {
+                        serviceVersions[key] == version
+                    }
+                    if (isCurrent) {
+                        send(NetworkServiceDiscoveryEvent.ServiceAvailable(resolved))
+                    } else {
+                        Log.d(TAG, "Ignoring stale resolved service: ${info.serviceName}")
+                    }
                 } catch (e: DiscoveryException) {
-                    Log.d(TAG, "Resolve failed for ${found.serviceName}: ${e.errorCode}")
+                    Log.d(TAG, "Resolve failed for ${info.serviceName}: ${e.errorCode}")
                 }
             }
         }
