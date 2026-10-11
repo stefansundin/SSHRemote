@@ -57,6 +57,7 @@ data class Host(
     val startScreen: RemoteControlScreen = RemoteControlScreen.Default,
     val smartVolume: SmartVolumeSettings? = null,
     val sshConfig: String? = null,
+    val serviceInfo: ServiceInfo? = null,
 ) {
     companion object {
         val DEFAULT_COMMANDS = listOf(Command("uptime", name = "Uptime", showOutput = true))
@@ -103,6 +104,7 @@ data class Host(
             startScreen = startScreen,
             smartVolume = smartVolume,
             sshConfig = sshConfig,
+            serviceInfo = serviceInfo,
         )
     }
 }

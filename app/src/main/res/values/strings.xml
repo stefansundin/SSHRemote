@@ -44,6 +44,8 @@
     <string name="search_no_matches">No matches found</string>
     <string name="search_match_position">Match %1$d of %2$d</string>
     <string name="search_next_match">Next match</string>
+    <string name="retry">Retry</string>
+    <string name="check_for_updates">Check for updates</string>
 
     <!-- Hosts -->
     <string name="hosts_title">Hosts</string>
@@ -82,6 +84,18 @@
     <string name="identity_info_format">%1$s - %2$s</string>
     <string name="select_host">Select a host</string>
     <string name="no_hosts_found">No hosts found</string>
+    <string name="discover_local_ssh_server">Discover local SSH server</string>
+    <string name="discover_ssh_server">Discover SSH server</string>
+    <string name="ssh_discovery_requirements_text">The server must advertise an SSH service via mDNS/DNS-SD to appear in the picker.\n\nOn Linux, install and configure Avahi so _ssh._tcp is announced. On other systems, use equivalent Bonjour-compatible service discovery software.</string>
+    <string name="choose_a_device">Choose a device</string>
+    <string name="looking_for_devices">Looking for devices…</string>
+    <string name="no_devices_found">No devices found.</string>
+    <string name="bound_format">Bound to %1$s</string>
+    <string name="service_options">Service options</string>
+    <string name="service_options_text">You can refresh service information or unbind from the service.</string>
+    <string name="unbind">Unbind</string>
+    <string name="service_updated">Service updated</string>
+    <string name="no_change_detected">No change detected</string>
 
     <!-- Remote Control -->
     <string name="tab_remote">Remote</string>

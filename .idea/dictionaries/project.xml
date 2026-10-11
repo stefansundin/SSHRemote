@@ -12,6 +12,8 @@
       <w>mousemove</w>
       <w>mouseup</w>
       <w>nextsong</w>
+      <w>nsdmanager</w>
+      <w>nsdserviceinfo</w>
       <w>pactl</w>
       <w>playpause</w>
       <w>previoussong</w>

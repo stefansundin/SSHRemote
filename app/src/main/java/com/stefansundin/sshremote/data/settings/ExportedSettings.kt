@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder
 import com.stefansundin.sshremote.Theme
 import com.stefansundin.sshremote.data.host.RemoteControlKey
 import com.stefansundin.sshremote.data.host.RemoteControlScreen
+import com.stefansundin.sshremote.data.host.ServiceInfo
 import com.stefansundin.sshremote.data.host.SmartVolumeSettings
 
 @Keep
@@ -40,6 +41,7 @@ data class ExportedHost(
     val startScreen: RemoteControlScreen?,
     val smartVolume: SmartVolumeSettings?,
     val sshConfig: String?,
+    val serviceInfo: ServiceInfo?,
 ) {
     fun exportToString(): String {
         return GsonBuilder().create().toJson(this)
