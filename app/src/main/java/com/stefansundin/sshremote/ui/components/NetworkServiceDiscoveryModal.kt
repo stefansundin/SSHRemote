@@ -174,6 +174,11 @@ fun NetworkServiceDiscoveryModal(
                             val addresses =
                                 NetworkServiceDiscovery.getHostAddresses(service).map { "${it}:${service.port}" }
 
+                            // Probably never happens in practice, but ensure there's at least one address
+                            if (addresses.isEmpty()) {
+                                return@items
+                            }
+
                             ListItem(
                                 headlineContent = { Text(service.serviceName) },
                                 supportingContent = { Text(addresses.joinToString("\n")) },
