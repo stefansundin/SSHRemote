@@ -558,6 +558,9 @@ fun EditHostScreen(
                                             val newServiceInfo = toServiceInfo(nsdServiceInfo)
                                             handleServicePicked(newServiceInfo)
                                         }
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, e.toString())
+                                        Toast.makeText(context, e.message ?: e.toString(), Toast.LENGTH_LONG).show()
                                     } finally {
                                         isDiscoveringService = null
                                     }

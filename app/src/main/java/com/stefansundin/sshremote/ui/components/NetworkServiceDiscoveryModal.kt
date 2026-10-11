@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.TreeMap
 
-// This code is used only used before Android 17 where there is no DiscoveryRequest.FLAG_SHOW_PICKER.
+// This code is only used before Android 17 where there is no DiscoveryRequest.FLAG_SHOW_PICKER.
 
 data class NetworkServiceDiscoveryUiState(
     val isSearching: Boolean = false,
