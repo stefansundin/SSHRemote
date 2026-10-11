@@ -61,6 +61,7 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
@@ -1067,11 +1068,9 @@ fun EditHostScreen(
 
                 // USER FIELD
                 val suggestedUsers = allUsers.distinct().sorted().toMutableList()
-                serviceInfo?.attributes?.get("user")?.let {
-                    if (suggestedUsers.contains(it)) {
-                        suggestedUsers.remove(it)
-                    }
-                    suggestedUsers.add(0, it)
+                val serviceInfoUser = serviceInfo?.attributes?.get("user")
+                if (serviceInfoUser != null) {
+                    suggestedUsers.remove(serviceInfoUser)
                 }
                 var userDropdownExpanded by rememberSaveable { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
@@ -1096,7 +1095,7 @@ fun EditHostScreen(
                             imeAction = ImeAction.Next,
                         ),
                         trailingIcon = {
-                            if (suggestedUsers.isNotEmpty()) {
+                            if (serviceInfoUser != null || suggestedUsers.isNotEmpty()) {
                                 IconButton(
                                     onClick = {
                                         // Intentionally left empty.
@@ -1108,11 +1107,24 @@ fun EditHostScreen(
                         },
                     )
 
-                    if (suggestedUsers.isNotEmpty()) {
+                    if (serviceInfoUser != null || suggestedUsers.isNotEmpty()) {
                         ExposedDropdownMenu(
                             expanded = userDropdownExpanded,
                             onDismissRequest = { userDropdownExpanded = false },
                         ) {
+                            if (serviceInfoUser != null) {
+                                DropdownMenuItem(
+                                    text = { Text(serviceInfoUser) },
+                                    onClick = {
+                                        view.playSoundEffect(SoundEffectConstants.CLICK)
+                                        user = serviceInfoUser
+                                        userDropdownExpanded = false
+                                    },
+                                )
+                                if (suggestedUsers.isNotEmpty()) {
+                                    HorizontalDivider()
+                                }
+                            }
                             suggestedUsers.forEach { suggestedUser ->
                                 DropdownMenuItem(
                                     text = { Text(suggestedUser) },
