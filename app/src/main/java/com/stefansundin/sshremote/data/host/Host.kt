@@ -18,7 +18,6 @@
 
 package com.stefansundin.sshremote.data.host
 
-import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.stefansundin.sshremote.data.settings.ExportedCommand
@@ -35,19 +34,6 @@ enum class RemoteControlScreen(val tabIndex: Int) {
         val Default = REMOTE
     }
 }
-
-/**
- * Captures network service discovery metadata.
- */
-@Keep
-data class ServiceInfo(
-    val serviceName: String,
-    val serviceType: String,
-    val hostAddresses: List<String> = emptyList(),
-    val port: Int? = null,
-    val attributes: Map<String, String> = emptyMap(),
-    val networkHandle: Long? = null,
-)
 
 /**
  * A host is a network device that can be accessed via SSH.
