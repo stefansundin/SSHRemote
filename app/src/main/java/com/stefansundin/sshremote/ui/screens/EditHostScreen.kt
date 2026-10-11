@@ -339,7 +339,7 @@ fun EditHostScreen(
         port = newServiceInfo.port.toString()
         serviceInfo = newServiceInfo
         if (user.isEmpty()) {
-            newServiceInfo.attributes?.get("user")?.let {
+            newServiceInfo.attributes["user"]?.let {
                 user = it
             }
         }

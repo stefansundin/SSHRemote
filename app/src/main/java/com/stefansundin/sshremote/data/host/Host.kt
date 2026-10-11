@@ -43,7 +43,7 @@ data class ServiceInfo(
     val serviceType: String,
     val hostAddresses: List<String> = emptyList(),
     val port: Int? = null,
-    val attributes: Map<String, String>? = null,
+    val attributes: Map<String, String> = emptyMap(),
     val networkHandle: Long? = null,
 )
 
