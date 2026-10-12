@@ -44,7 +44,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -99,6 +101,12 @@ fun SpecialKeysRow(
         KeyEvent.KEYCODE_TAB,
     )
 
+    // Holdable keys send the down/up events when the key is pressed/released, which lets you hold a key down for several seconds.
+    // It could be argued that the keys in repeatableKeys should really be in this list instead. Perhaps this will change in the future.
+    val holdableKeys = setOf(
+        KeyEvent.KEYCODE_ESCAPE,
+    )
+
     val view = LocalView.current
 
     val runKey = { keyData: KeyData ->
@@ -140,6 +148,9 @@ fun SpecialKeysRow(
                     isPressed = pressedKeys.contains(keyData.keyCode),
                     enabled = isEnabled,
                     onClick = { runKey(keyData) },
+                    holdable = holdableKeys.contains(keyData.keyCode),
+                    onHoldStart = { onKeyDown(keyData.keyCode) },
+                    onHoldEnd = { onKeyUp(keyData.keyCode) },
                     repeatable = repeatableKeys.contains(keyData.keyCode),
                     modifier = Modifier.weight(1f),
                 )
@@ -168,6 +179,9 @@ fun SpecialKeysRow(
                     isPressed = pressedKeys.contains(keyData.keyCode),
                     enabled = isEnabled,
                     onClick = { runKey(keyData) },
+                    holdable = holdableKeys.contains(keyData.keyCode),
+                    onHoldStart = { onKeyDown(keyData.keyCode) },
+                    onHoldEnd = { onKeyUp(keyData.keyCode) },
                     repeatable = repeatableKeys.contains(keyData.keyCode),
                     modifier = Modifier.weight(1f),
                 )
@@ -183,10 +197,32 @@ private fun KeyButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    holdable: Boolean = false,
+    onHoldStart: () -> Unit = {},
+    onHoldEnd: () -> Unit = {},
     repeatable: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHeld by interactionSource.collectIsPressedAsState()
+    var holdActive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(holdable, enabled, isHeld) {
+        if (!holdable || !enabled) {
+            if (holdActive) {
+                onHoldEnd()
+                holdActive = false
+            }
+            return@LaunchedEffect
+        }
+
+        if (isHeld && !holdActive) {
+            onHoldStart()
+            holdActive = true
+        } else if (!isHeld && holdActive) {
+            onHoldEnd()
+            holdActive = false
+        }
+    }
 
     if (repeatable && enabled && isHeld) {
         LaunchedEffect(keyData.keyCode) {
@@ -212,7 +248,7 @@ private fun KeyButton(
     }
 
     Surface(
-        onClick = { if (!repeatable) onClick() },
+        onClick = { if (!repeatable && !holdable) onClick() },
         enabled = enabled,
         shape = RoundedCornerShape(4.dp),
         color = containerColor,
