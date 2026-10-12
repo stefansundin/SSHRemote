@@ -196,8 +196,28 @@ private fun LazyListScrollbar(
     if (totalItems <= 0) return
 
     val visibleItems = layoutInfo.visibleItemsInfo
-    val firstVisibleItem = visibleItems.firstOrNull() ?: return
-    val lastVisibleItem = visibleItems.lastOrNull() ?: return
+    if (visibleItems.isEmpty()) return
+    val firstVisibleItem = visibleItems.first()
+
+    // Use a stable pixel-based estimate to avoid thumb jitter when visible item set changes.
+    val estimatedItemSizePx =
+        visibleItems.map { it.size }.average().toFloat().coerceAtLeast(1f)
+    val viewportLengthPx =
+        (layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset).toFloat().coerceAtLeast(1f)
+    val beforeContentPaddingPx = layoutInfo.beforeContentPadding.toFloat().coerceAtLeast(0f)
+    val afterContentPaddingPx = layoutInfo.afterContentPadding.toFloat().coerceAtLeast(0f)
+    val estimatedContentLengthPx =
+        (beforeContentPaddingPx + (estimatedItemSizePx * totalItems) + afterContentPaddingPx)
+            .coerceAtLeast(viewportLengthPx)
+
+    val scrolledWithinFirstVisibleItemPx =
+        beforeContentPaddingPx - firstVisibleItem.offset.toFloat()
+    val rawScrolledPx =
+        (firstVisibleItem.index * estimatedItemSizePx) + scrolledWithinFirstVisibleItemPx
+    val maxScrollPx = (estimatedContentLengthPx - viewportLengthPx).coerceAtLeast(1f)
+
+    val targetScrollProgress = (rawScrolledPx / maxScrollPx).coerceIn(0f, 1f)
+    val targetVisibleFraction = (viewportLengthPx / estimatedContentLengthPx).coerceIn(0f, 1f)
 
     Canvas(modifier = modifier.width(ScrollbarGutterSize)) {
         val thicknessPx = ScrollbarThickness.toPx()
@@ -206,18 +226,8 @@ private fun LazyListScrollbar(
         val trackLength = (size.height - (paddingPx * 2)).coerceAtLeast(0f)
         if (trackLength <= 0f) return@Canvas
 
-        val visibleSpan = (lastVisibleItem.index - firstVisibleItem.index + 1).coerceAtLeast(1)
-        val estimatedItemSize = ((lastVisibleItem.offset + lastVisibleItem.size) - firstVisibleItem.offset)
-            .toFloat()
-            .coerceAtLeast(1f) / visibleSpan
-        val estimatedContentLength = estimatedItemSize * totalItems
-        val thumbLength = (trackLength * trackLength / estimatedContentLength)
-            .coerceIn(minThumbLengthPx, trackLength)
-
-        val maxScrollItems = (totalItems - visibleSpan).coerceAtLeast(1)
-        val scrollProgress =
-            (firstVisibleItem.index + (firstVisibleItem.offset / estimatedItemSize)) / maxScrollItems.toFloat()
-        val thumbOffset = ((trackLength - thumbLength).coerceAtLeast(0f) * scrollProgress.coerceIn(0f, 1f))
+        val thumbLength = (trackLength * targetVisibleFraction).coerceIn(minThumbLengthPx, trackLength)
+        val thumbOffset = ((trackLength - thumbLength).coerceAtLeast(0f) * targetScrollProgress)
 
         drawRoundRect(
             color = color,
