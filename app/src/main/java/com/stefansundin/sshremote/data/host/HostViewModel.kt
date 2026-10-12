@@ -62,6 +62,7 @@ interface IRemoteControlHostViewModel {
     fun runRemoteControlCommand(key: RemoteControlKey)
     fun runRemoteControlPressCommand(key: RemoteControlKey) {}
     fun runRemoteControlReleaseCommand(key: RemoteControlKey) {}
+    fun updateRemoteCommands(hostId: String, remoteCommands: Map<RemoteControlKey, Command>)
     fun clearCommandOutput()
     suspend fun runCommand(
         command: String,
@@ -587,7 +588,7 @@ class HostViewModel(
         _uiState.update { it.copy(error = null) }
     }
 
-    fun updateRemoteCommands(hostId: String, remoteCommands: Map<RemoteControlKey, Command>) {
+    override fun updateRemoteCommands(hostId: String, remoteCommands: Map<RemoteControlKey, Command>) {
         viewModelScope.launch {
             repository.updateRemoteCommands(hostId, remoteCommands)
         }

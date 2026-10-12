@@ -140,6 +140,7 @@ fun CommandList(
 private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewModel {
     override fun connect(host: Host) {}
     override fun runRemoteControlCommand(key: RemoteControlKey) {}
+    override fun updateRemoteCommands(hostId: String, remoteCommands: Map<RemoteControlKey, Command>) {}
     override fun clearCommandOutput() {}
     override suspend fun runCommand(
         command: String,

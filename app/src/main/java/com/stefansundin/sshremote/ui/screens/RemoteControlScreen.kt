@@ -111,13 +111,12 @@ import com.jcraft.jsch.HostKey
 import com.stefansundin.sshremote.HapticFeedback
 import com.stefansundin.sshremote.HostKeyVerification
 import com.stefansundin.sshremote.ISshRepository
-import com.stefansundin.sshremote.LocalNetworkPermissions
 import com.stefansundin.sshremote.Message
 import com.stefansundin.sshremote.PassphrasePrompt
 import com.stefansundin.sshremote.PasswordPrompt
 import com.stefansundin.sshremote.R
 import com.stefansundin.sshremote.Result
-import com.stefansundin.sshremote.rememberLocalNetworkPermissionRequest
+import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostConnectionDetails
@@ -131,17 +130,20 @@ import com.stefansundin.sshremote.data.settings.ISettingsViewModel
 import com.stefansundin.sshremote.notification.NotificationController
 import com.stefansundin.sshremote.notification.toNotificationHost
 import com.stefansundin.sshremote.performHapticFeedback
+import com.stefansundin.sshremote.rememberLocalNetworkPermissionRequest
 import com.stefansundin.sshremote.ui.HardwareMenuKeyHandler
 import com.stefansundin.sshremote.ui.KeyEvent
 import com.stefansundin.sshremote.ui.MouseEvent
 import com.stefansundin.sshremote.ui.components.CommandList
 import com.stefansundin.sshremote.ui.components.CommandOutputDialog
 import com.stefansundin.sshremote.ui.components.ConnectionStatusIndicator
+import com.stefansundin.sshremote.ui.components.GettingStartedDialog
 import com.stefansundin.sshremote.ui.components.KeyboardInput
 import com.stefansundin.sshremote.ui.components.MousePad
 import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
+import com.stefansundin.sshremote.ui.components.SelectPresetDialog
 import com.stefansundin.sshremote.ui.components.SpecialKeysRow
 import com.stefansundin.sshremote.ui.dpadFocusable
 import com.stefansundin.sshremote.ui.theme.AppDimens
@@ -169,6 +171,7 @@ fun RemoteControlScreen(
     onDisconnect: () -> Unit,
     onAdHocCommandClicked: () -> Unit,
     onEditRemoteControlClicked: (Int) -> Unit,
+    onHelpClicked: () -> Unit,
     onClearError: () -> Unit,
     modifier: Modifier = Modifier,
     initialPage: Int = 0,
@@ -179,6 +182,8 @@ fun RemoteControlScreen(
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var wasConnected by rememberSaveable { mutableStateOf(false) }
+    var showGettingStartedDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showSelectPresetDialog by rememberSaveable(host.id) { mutableStateOf(false) }
     val ensureLocalNetworkPermission = rememberLocalNetworkPermissionRequest()
     val permissionDeniedMsg = stringResource(R.string.permission_denied)
 
@@ -277,6 +282,15 @@ fun RemoteControlScreen(
         if (uiState.connectionStatus == ConnectionStatus.CONNECTED) {
             wasConnected = true
         }
+    }
+
+    LaunchedEffect(uiState.connectionStatus, uiState.hostId, host.id, host.remoteCommands) {
+        val isConnectedToCurrentHost =
+            uiState.connectionStatus == ConnectionStatus.CONNECTED && uiState.hostId == host.id
+        if (!isConnectedToCurrentHost || host.remoteCommands != null) {
+            return@LaunchedEffect
+        }
+        showGettingStartedDialog = true
     }
 
     LaunchedEffect(host) {
@@ -535,6 +549,35 @@ fun RemoteControlScreen(
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
+            },
+        )
+    }
+
+    if (showGettingStartedDialog) {
+        GettingStartedDialog(
+            onConfirm = {
+                showGettingStartedDialog = false
+                showSelectPresetDialog = true
+            },
+            onHelp = {
+                onHelpClicked()
+            },
+            onDismiss = {
+                disconnectFromRemote()
+            },
+        )
+    }
+
+    if (showSelectPresetDialog) {
+        SelectPresetDialog(
+            onPresetSelected = { presetMap ->
+                if (presetMap != null) {
+                    hostViewModel.updateRemoteCommands(host.id, presetMap)
+                }
+                showSelectPresetDialog = false
+            },
+            onDismiss = {
+                disconnectFromRemote()
             },
         )
     }
@@ -1194,6 +1237,7 @@ private val fakeRemoteControlIdentityViewModel = object : IRemoteControlIdentity
 private val fakeRemoteControlHostViewModel = object : IRemoteControlHostViewModel {
     override fun connect(host: Host) {}
     override fun runRemoteControlCommand(key: RemoteControlKey) {}
+    override fun updateRemoteCommands(hostId: String, remoteCommands: Map<RemoteControlKey, Command>) {}
     override fun clearCommandOutput() {}
     override suspend fun runCommand(
         command: String,
@@ -1246,6 +1290,7 @@ fun RemoteControlScreenPreview(
     onDisconnect: () -> Unit = {},
     onAdHocCommandClicked: () -> Unit = {},
     onEditRemoteControlClicked: (Int) -> Unit = {},
+    onHelpClicked: () -> Unit = {},
     onClearError: () -> Unit = {},
     initialPage: Int = 0,
 ) {
@@ -1261,6 +1306,7 @@ fun RemoteControlScreenPreview(
         onDisconnect = onDisconnect,
         onAdHocCommandClicked = onAdHocCommandClicked,
         onEditRemoteControlClicked = onEditRemoteControlClicked,
+        onHelpClicked = onHelpClicked,
         onClearError = onClearError,
         modifier = modifier,
         initialPage = initialPage,

@@ -21,7 +21,6 @@ package com.stefansundin.sshremote
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -37,29 +36,20 @@ import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -68,7 +58,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -84,13 +73,11 @@ import androidx.navigation.navArgument
 import com.stefansundin.sshremote.data.CryptoManager
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModel
 import com.stefansundin.sshremote.data.adhoccommand.AdHocCommandViewModelFactory
-import com.stefansundin.sshremote.data.host.Command
 import com.stefansundin.sshremote.data.host.ConnectionStatus
 import com.stefansundin.sshremote.data.host.Host
 import com.stefansundin.sshremote.data.host.HostViewModel
 import com.stefansundin.sshremote.data.host.HostViewModelFactory
 import com.stefansundin.sshremote.data.host.RemoteControlKey
-import com.stefansundin.sshremote.data.host.presets
 import com.stefansundin.sshremote.data.identity.IdentityViewModel
 import com.stefansundin.sshremote.data.identity.IdentityViewModelFactory
 import com.stefansundin.sshremote.data.knownhost.KnownHostViewModel
@@ -328,10 +315,6 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
                         )
                     }
 
-                    var hostForPresetSelection by remember { mutableStateOf<Host?>(null) }
-                    var showGettingStartedDialog by rememberSaveable { mutableStateOf(false) }
-                    var showSelectPresetDialog by rememberSaveable { mutableStateOf(false) }
-
                     // Auto-run a command after connecting via a home-screen shortcut.
                     LaunchedEffect(
                         uiState.connectionStatus,
@@ -461,46 +444,11 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
 
 
                     val onConnect = { host: Host ->
-                        if (host.remoteCommands == null) {
-                            hostForPresetSelection = host
-                            showGettingStartedDialog = true
-                        } else {
-                            hostViewModel.disconnect()
-                            val initialPage = host.startScreen.tabIndex
-                            navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage)) {
-                                popUpTo(Screen.HostList.route)
-                            }
+                        hostViewModel.disconnect()
+                        val initialPage = host.startScreen.tabIndex
+                        navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage)) {
+                            popUpTo(Screen.HostList.route)
                         }
-                    }
-
-                    if (showGettingStartedDialog) {
-                        GettingStartedDialog(
-                            onDismiss = { showGettingStartedDialog = false },
-                            onConfirm = {
-                                showGettingStartedDialog = false
-                                showSelectPresetDialog = true
-                            },
-                            onHelp = {
-                                showGettingStartedDialog = false
-                                navController.navigate(Screen.Help.route)
-                            },
-                        )
-                    }
-
-                    if (showSelectPresetDialog) {
-                        SelectPresetDialog(
-                            onDismiss = { showSelectPresetDialog = false },
-                            onPresetSelected = { presetMap ->
-                                hostForPresetSelection?.let { host ->
-                                    if (presetMap != null) {
-                                        hostViewModel.updateRemoteCommands(host.id, presetMap)
-                                    }
-                                    val initialPage = host.startScreen.tabIndex
-                                    navController.navigate(Screen.RemoteControl.createRoute(host.id, initialPage))
-                                }
-                                showSelectPresetDialog = false
-                            },
-                        )
                     }
 
                     LaunchedEffect(hosts, pendingShortcut.value, uiState.connectionStatus, uiState.hostId) {
@@ -738,6 +686,7 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
                                             ),
                                         )
                                     },
+                                    onHelpClicked = { navController.navigate(Screen.Help.route) },
                                     onClearError = { hostViewModel.clearError() },
                                     initialPage = initialPage,
                                     settingsViewModel = settingsViewModel,
@@ -1042,105 +991,5 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
             .build()
 
         ShortcutManagerCompat.requestPinShortcut(context, shortcutInfo, null)
-    }
-}
-
-@Composable
-private fun GettingStartedDialog(onDismiss: () -> Unit, onConfirm: () -> Unit, onHelp: () -> Unit) {
-    val view = LocalView.current
-
-    AlertDialog(
-        title = { Text(stringResource(R.string.getting_started_title)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.getting_started_text))
-            }
-        },
-        properties = DialogProperties(dismissOnClickOutside = false),
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onConfirm()
-                },
-            ) {
-                Text(stringResource(R.string.select_preset))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    view.playSoundEffect(SoundEffectConstants.CLICK)
-                    onHelp()
-                },
-            ) {
-                Text(stringResource(R.string.help))
-            }
-        },
-    )
-}
-
-@Composable
-private fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteControlKey, Command>?) -> Unit) {
-    val view = LocalView.current
-    val noPreset = stringResource(R.string.no_preset)
-
-    AlertDialog(
-        title = { Text(stringResource(R.string.select_preset)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                (presets.keys + noPreset).forEach { presetKey ->
-                    ListItem(
-                        headlineContent = { Text(presetKey) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                view.playSoundEffect(SoundEffectConstants.CLICK)
-                                onPresetSelected(presets[presetKey])
-                            },
-                    )
-                    HorizontalDivider()
-                }
-            }
-        },
-        properties = DialogProperties(dismissOnClickOutside = false),
-        onDismissRequest = onDismiss,
-        confirmButton = {},
-    )
-}
-
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 600)
-@Preview(
-    showBackground = true,
-    widthDp = 400,
-    heightDp = 600,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    fontScale = 2.0f,
-)
-@Composable
-private fun GettingStartedDialogPreview() {
-    SSHRemoteTheme {
-        Surface {
-            GettingStartedDialog(onDismiss = {}, onConfirm = {}, onHelp = {})
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 600)
-@Preview(
-    showBackground = true,
-    widthDp = 400,
-    heightDp = 600,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    fontScale = 2.0f,
-)
-@Composable
-private fun SelectPresetDialogPreview() {
-    SSHRemoteTheme {
-        Surface {
-            SelectPresetDialog(onDismiss = {}, onPresetSelected = {})
-        }
     }
 }
