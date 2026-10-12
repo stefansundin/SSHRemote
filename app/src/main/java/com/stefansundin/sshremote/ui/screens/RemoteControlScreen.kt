@@ -140,6 +140,7 @@ import com.stefansundin.sshremote.ui.components.ConnectionStatusIndicator
 import com.stefansundin.sshremote.ui.components.GettingStartedDialog
 import com.stefansundin.sshremote.ui.components.KeyboardInput
 import com.stefansundin.sshremote.ui.components.MousePad
+import com.stefansundin.sshremote.ui.components.NoPresetSelectedDialog
 import com.stefansundin.sshremote.ui.components.RemoteControl
 import com.stefansundin.sshremote.ui.components.ResponsiveTabRow
 import com.stefansundin.sshremote.ui.components.SelectIdentityDialog
@@ -184,6 +185,7 @@ fun RemoteControlScreen(
     var wasConnected by rememberSaveable { mutableStateOf(false) }
     var showGettingStartedDialog by rememberSaveable(host.id) { mutableStateOf(false) }
     var showSelectPresetDialog by rememberSaveable(host.id) { mutableStateOf(false) }
+    var showNoPresetSelectedDialog by rememberSaveable(host.id) { mutableStateOf(false) }
     val ensureLocalNetworkPermission = rememberLocalNetworkPermissionRequest()
     val permissionDeniedMsg = stringResource(R.string.permission_denied)
 
@@ -573,12 +575,21 @@ fun RemoteControlScreen(
             onPresetSelected = { presetMap ->
                 if (presetMap != null) {
                     hostViewModel.updateRemoteCommands(host.id, presetMap)
+                } else {
+                    hostViewModel.updateRemoteCommands(host.id, emptyMap())
+                    showNoPresetSelectedDialog = true
                 }
                 showSelectPresetDialog = false
             },
             onDismiss = {
                 disconnectFromRemote()
             },
+        )
+    }
+
+    if (showNoPresetSelectedDialog) {
+        NoPresetSelectedDialog(
+            onDismiss = { showNoPresetSelectedDialog = false },
         )
     }
 

@@ -108,6 +108,32 @@ fun SelectPresetDialog(onDismiss: () -> Unit, onPresetSelected: (Map<RemoteContr
     )
 }
 
+@Composable
+fun NoPresetSelectedDialog(onDismiss: () -> Unit) {
+    val view = LocalView.current
+
+    AlertDialog(
+        title = { Text(stringResource(R.string.no_preset)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(stringResource(R.string.configure_remote_commands_prompt))
+            }
+        },
+        properties = DialogProperties(dismissOnClickOutside = false),
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    view.playSoundEffect(SoundEffectConstants.CLICK)
+                    onDismiss()
+                },
+            ) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+    )
+}
+
 @Preview(showBackground = true, widthDp = 400, heightDp = 600)
 @Preview(
     showBackground = true,
@@ -138,6 +164,23 @@ private fun SelectPresetDialogPreview() {
     SSHRemoteTheme {
         Surface {
             SelectPresetDialog(onDismiss = {}, onPresetSelected = {})
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, heightDp = 600)
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 600,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2.0f,
+)
+@Composable
+private fun NoPresetSelectedDialogPreview() {
+    SSHRemoteTheme {
+        Surface {
+            NoPresetSelectedDialog(onDismiss = {})
         }
     }
 }

@@ -70,7 +70,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
@@ -244,16 +243,8 @@ private fun StatusText(
     volume: String?,
     muted: Boolean?,
 ) {
-    if (!editing && host != null) {
-        if (host.smartVolume != null) {
-            VolumeStatus(host.smartVolume, volume, muted)
-        } else if (host.remoteCommands == null) {
-            // This text is only displayed when the user picks "No preset" upon first connection
-            Text(
-                stringResource(R.string.configure_remote_commands_prompt),
-                textAlign = TextAlign.Center,
-            )
-        }
+    if (!editing && host?.smartVolume != null) {
+        VolumeStatus(host.smartVolume, volume, muted)
     }
 }
 
