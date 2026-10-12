@@ -113,6 +113,7 @@ fun HostListScreen(
     var undoableDeletedHostId by rememberSaveable { mutableStateOf<String?>(null) }
     var focusedHostId by rememberSaveable { mutableStateOf<String?>(null) }
     var contextMenuHostId by rememberSaveable { mutableStateOf<String?>(null) }
+    var previousHostIds by rememberSaveable { mutableStateOf<List<String>?>(null) }
     val view = LocalView.current
 
     // Long pressing the FAB will launch directly into the QR code scanner
@@ -175,6 +176,21 @@ fun HostListScreen(
             }
             undoableDeletedHostId = null
         }
+    }
+
+    // Automatically scroll to new hosts that are added
+    LaunchedEffect(hosts, undoableDeletedHostId) {
+        val currentHosts = hosts ?: return@LaunchedEffect
+        val prevIds = previousHostIds?.toSet()
+
+        if (prevIds != null && undoableDeletedHostId == null) {
+            val indexOfNewHost = currentHosts.indexOfFirst { it.id !in prevIds }
+            if (indexOfNewHost != -1) {
+                listState.animateScrollToItem(indexOfNewHost)
+            }
+        }
+
+        previousHostIds = currentHosts.map { it.id }
     }
 
     HardwareMenuKeyHandler {
