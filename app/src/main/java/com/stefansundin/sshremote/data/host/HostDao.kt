@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HostDao {
-    @Query("SELECT * FROM hosts ORDER BY name ASC")
+    @Query("SELECT * FROM hosts ORDER BY name ASC, hostname ASC, port ASC, user ASC, id ASC")
     fun getAll(): Flow<List<Host>>
 
     @Query("SELECT * FROM hosts WHERE id = :id")
