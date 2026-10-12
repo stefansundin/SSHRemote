@@ -53,13 +53,18 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -639,6 +644,14 @@ private fun RouterPasswordPrompt(
 ) {
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(prompt) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
     AlertDialog(
         title = { Text(prompt.message) },
         text = {
@@ -648,6 +661,7 @@ private fun RouterPasswordPrompt(
                 label = { Text(stringResource(R.string.password)) },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .focusRequester(focusRequester)
                     .dpadFocusable(),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 singleLine = true,
@@ -699,6 +713,14 @@ private fun RouterPassphrasePrompt(
 ) {
     var passphrase by rememberSaveable { mutableStateOf("") }
     var passphraseVisible by rememberSaveable { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(prompt) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
     AlertDialog(
         title = { Text(prompt.message) },
         text = {
@@ -708,6 +730,7 @@ private fun RouterPassphrasePrompt(
                 label = { Text(stringResource(R.string.passphrase)) },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .focusRequester(focusRequester)
                     .dpadFocusable(),
                 visualTransformation = if (passphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 singleLine = true,

@@ -321,6 +321,7 @@ fun RemoteControlScreen(
     val message by sshRepository.message.collectAsState()
     val passwordPrompt by sshRepository.passwordPrompt.collectAsState()
     val passphrasePrompt by sshRepository.passphrasePrompt.collectAsState()
+    val promptKeyboardController = LocalSoftwareKeyboardController.current
 
     uiState.commandOutput?.let { output ->
         CommandOutputDialog(
@@ -416,6 +417,13 @@ fun RemoteControlScreen(
     passwordPrompt?.let { prompt ->
         var password by rememberSaveable { mutableStateOf("") }
         var passwordVisible by rememberSaveable { mutableStateOf(false) }
+        val passwordFocusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(prompt) {
+            passwordFocusRequester.requestFocus()
+            promptKeyboardController?.show()
+        }
+
         AlertDialog(
             title = { Text(prompt.message) },
             text = {
@@ -425,6 +433,7 @@ fun RemoteControlScreen(
                     label = { Text(stringResource(R.string.password)) },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .focusRequester(passwordFocusRequester)
                         .dpadFocusable(),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
@@ -487,6 +496,13 @@ fun RemoteControlScreen(
     passphrasePrompt?.let { prompt ->
         var passphrase by rememberSaveable { mutableStateOf("") }
         var passphraseVisible by rememberSaveable { mutableStateOf(false) }
+        val passphraseFocusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(prompt) {
+            passphraseFocusRequester.requestFocus()
+            promptKeyboardController?.show()
+        }
+
         AlertDialog(
             title = { Text(prompt.message) },
             text = {
@@ -496,6 +512,7 @@ fun RemoteControlScreen(
                     label = { Text(stringResource(R.string.passphrase)) },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .focusRequester(passphraseFocusRequester)
                         .dpadFocusable(),
                     visualTransformation = if (passphraseVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
