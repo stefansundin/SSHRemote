@@ -26,12 +26,12 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class NotificationHost(
     val id: String,
-    val name: String,
+    val displayName: String,
     val status: ConnectionStatus,
 ) : Parcelable
 
 fun Host.toNotificationHost(status: ConnectionStatus) = NotificationHost(
     id = id,
-    name = name,
+    displayName = displayName,
     status = status,
 )

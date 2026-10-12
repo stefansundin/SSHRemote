@@ -939,8 +939,8 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
         }
 
         val shortcutInfo = ShortcutInfoCompat.Builder(context, "host_${host.id}")
-            .setShortLabel(host.name)
-            .setLongLabel(getString(R.string.connect_to_host, host.name))
+            .setShortLabel(host.displayName)
+            .setLongLabel(getString(R.string.connect_to_host, host.displayName))
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(intent)
             .build()
@@ -984,8 +984,8 @@ class MainActivity : ComponentActivity(), HardwareMenuKeyHandlerHost {
         }
 
         val shortcutInfo = ShortcutInfoCompat.Builder(context, "remote_command_${host.id}_${key.name}")
-            .setShortLabel(getString(R.string.run_command_on_host_short, commandLabel, host.name))
-            .setLongLabel(getString(R.string.run_command_on_host_long, commandLabel, host.name))
+            .setShortLabel(getString(R.string.run_command_on_host_short, commandLabel, host.displayName))
+            .setLongLabel(getString(R.string.run_command_on_host_long, commandLabel, host.displayName))
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_launcher))
             .setIntent(intent)
             .build()

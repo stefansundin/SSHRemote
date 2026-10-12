@@ -410,14 +410,16 @@ fun HostItem(
                     .padding(vertical = 12.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = host.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
+                if (host.name.isNotBlank()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = host.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
 
                 val portString = if (host.port != 22) ":${host.port}" else ""
                 Text(

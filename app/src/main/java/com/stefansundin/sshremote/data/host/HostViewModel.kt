@@ -197,7 +197,7 @@ class HostViewModel(
             }
             val clonedHost = host.copy(
                 id = UUID.randomUUID().toString(),
-                name = "Copy of ${host.name}",
+                name = "Copy of ${host.displayName}",
                 passwordId = newPasswordId,
             )
             repository.insert(clonedHost)

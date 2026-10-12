@@ -57,7 +57,7 @@ fun SelectHostDialog(
                 LazyColumn {
                     items(hosts, key = { it.id }) { host ->
                         ListItem(
-                            headlineContent = { Text(host.name) },
+                            headlineContent = { Text(host.displayName) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {

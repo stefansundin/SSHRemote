@@ -81,17 +81,17 @@ object NotificationController {
         val text: String
         when (host.status) {
             ConnectionStatus.CONNECTED -> {
-                title = context.getString(R.string.notification_connected_to, host.name)
+                title = context.getString(R.string.notification_connected_to, host.displayName)
                 text = context.getString(R.string.notification_active)
             }
 
             ConnectionStatus.CONNECTING -> {
-                title = context.getString(R.string.notification_connecting_to, host.name)
+                title = context.getString(R.string.notification_connecting_to, host.displayName)
                 text = context.getString(R.string.please_wait)
             }
 
             ConnectionStatus.DISCONNECTED -> {
-                title = context.getString(R.string.notification_disconnected_from, host.name)
+                title = context.getString(R.string.notification_disconnected_from, host.displayName)
                 text = context.getString(R.string.notification_inactive)
             }
         }

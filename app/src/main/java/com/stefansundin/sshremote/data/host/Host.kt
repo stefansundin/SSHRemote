@@ -64,6 +64,9 @@ data class Host(
         const val DEFAULT_SSH_CONFIG = "ServerAliveInterval 60\n"
     }
 
+    val displayName: String
+        get() = name.ifBlank { hostname }
+
     fun resolveShareCommandTemplate(): Command? {
         return remoteCommands?.get(RemoteControlKey.SHARE_TEXT)
             ?: remoteCommands?.get(RemoteControlKey.KEYBOARD_TYPE_INPUT)

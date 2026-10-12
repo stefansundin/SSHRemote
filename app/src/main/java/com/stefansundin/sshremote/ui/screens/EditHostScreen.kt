@@ -142,7 +142,7 @@ import java.nio.charset.CodingErrorAction
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
-const val TAG = "EditHostScreen"
+private const val TAG = "EditHostScreen"
 
 private enum class PasswordState {
     SET,
@@ -293,13 +293,12 @@ fun EditHostScreen(
     var hasBeenSubmitted by rememberSaveable { mutableStateOf(false) }
     val onSubmit = { hasBeenSubmitted = true }
 
-    val isNameValid by remember(name) { derivedStateOf { Validations.validateName(name) } }
     val isHostnameValid by remember(hostname) { derivedStateOf { Validations.validateHostname(hostname) } }
     val isUserValid by remember(user) { derivedStateOf { Validations.validateUser(user) } }
     val isPortValid by remember(port) { derivedStateOf { Validations.validatePort(port) } }
 
-    val isFormValid by remember(isNameValid, isHostnameValid, isUserValid, isPortValid) {
-        derivedStateOf { isNameValid && isHostnameValid && isUserValid && isPortValid }
+    val isFormValid by remember(isHostnameValid, isUserValid, isPortValid) {
+        derivedStateOf { isHostnameValid && isUserValid && isPortValid }
     }
 
     val passwordChanged = if (isPasswordSet) {
@@ -380,8 +379,7 @@ fun EditHostScreen(
             onSave(hostToSave, if (showPasswordField) password else null)
         } else {
             coroutineScope.launch {
-                if (!isNameValid) nameRequester.bringIntoView()
-                else if (!isHostnameValid) hostnameRequester.bringIntoView()
+                if (!isHostnameValid) hostnameRequester.bringIntoView()
                 else if (!isPortValid) portRequester.bringIntoView()
                 else if (!isUserValid) userRequester.bringIntoView()
             }
@@ -978,12 +976,11 @@ fun EditHostScreen(
                             name = newName.take(100)
                         }
                     },
-                    label = { Text(stringResource(R.string.name)) },
+                    label = { Text(stringResource(R.string.name_optional)) },
                     modifier = Modifier
                         .bringIntoViewRequester(nameRequester)
                         .fillMaxWidth()
                         .dpadFocusable(),
-                    isError = hasBeenSubmitted && !isNameValid,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Next,

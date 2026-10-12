@@ -21,6 +21,8 @@ package com.stefansundin.sshremote.data.host
 import android.util.Log
 import com.jcraft.jsch.HostKey
 
+private const val TAG = "HostKeyPersistence"
+
 private fun HostKey.toKnownHostsLine(): String {
     return "${marker.orEmpty()} $host $type $key ${comment.orEmpty()}".trim()
 }
@@ -35,7 +37,7 @@ suspend fun persistAcceptedHostKey(
     val knownHostsLine = hostKey.toKnownHostsLine()
     if (host.knownHosts.contains(knownHostsLine)) return host
 
-    Log.d("HostKeyPersistence", "New host key for ${host.name}: $knownHostsLine")
+    Log.d(TAG, "New host key for ${host.hostname}: $knownHostsLine")
     val updatedKnownHosts = host.knownHosts + knownHostsLine
     repository.updateKnownHosts(host.id, updatedKnownHosts)
     return host.copy(knownHosts = updatedKnownHosts)

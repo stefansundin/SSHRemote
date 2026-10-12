@@ -515,7 +515,7 @@ fun EditRemoteControlScreen(
             ?: stringResource(R.string.command)
 
         AddCommandShortcutDialog(
-            initialShortcutLabel = stringResource(R.string.run_command_on_host_short, commandLabel, host.name),
+            initialShortcutLabel = stringResource(R.string.run_command_on_host_short, commandLabel, host.displayName),
             onDismiss = {
                 pendingCommandShortcutId = null
             },

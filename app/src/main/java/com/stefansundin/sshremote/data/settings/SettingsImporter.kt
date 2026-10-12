@@ -238,7 +238,7 @@ class SettingsImporter(
                 @Suppress("UNCHECKED_CAST")
                 val host = Host(
                     id = id,
-                    name = exportedHost.name!!,
+                    name = exportedHost.name.orEmpty(),
                     hostname = exportedHost.hostname!!,
                     port = exportedHost.port ?: 22,
                     user = exportedHost.user!!,

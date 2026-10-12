@@ -21,11 +21,6 @@ package com.stefansundin.sshremote
 import android.util.Patterns
 
 object Validations {
-    fun validateName(name: String): Boolean {
-        // Name must not be blank.
-        return name.isNotBlank()
-    }
-
     fun validateHostname(host: String): Boolean {
         if (host.isBlank()) return false
 

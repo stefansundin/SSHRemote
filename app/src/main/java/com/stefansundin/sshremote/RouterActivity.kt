@@ -227,7 +227,7 @@ class RouterActivity : ComponentActivity() {
                     host = host,
                     commandTemplate = commandTemplate,
                     command = commandTemplate.formatCommand(sharedText),
-                    loadingTitle = getString(R.string.sharing_to, host.name),
+                    loadingTitle = getString(R.string.sharing_to, host.displayName),
                 )
             } else {
                 forwardToMainActivity(intent)
@@ -282,7 +282,7 @@ class RouterActivity : ComponentActivity() {
                 host = host,
                 commandTemplate = commandTemplate,
                 command = commandTemplate.command ?: return@routerTask,
-                loadingTitle = getString(R.string.executing_on, host.name),
+                loadingTitle = getString(R.string.executing_on, host.displayName),
             )
         }
     }

@@ -942,7 +942,7 @@ fun RemoteControlScreen(
             topBar = {
                 if (showTopBar) {
                     TopAppBar(
-                        title = { Text(host.name, maxLines = 1) },
+                        title = { Text(host.displayName, maxLines = 1) },
                         navigationIcon = {
                             TooltipBox(
                                 state = rememberTooltipState(),
