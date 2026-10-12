@@ -88,10 +88,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -1087,6 +1090,7 @@ fun EditHostScreen(
                         modifier = Modifier
                             .bringIntoViewRequester(userRequester)
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                            .semantics { contentType = ContentType.Username }
                             .fillMaxWidth()
                             .dpadFocusable(),
                         isError = hasBeenSubmitted && !isUserValid,
@@ -1161,6 +1165,7 @@ fun EditHostScreen(
                             )
                         },
                         modifier = Modifier
+                            .semantics { contentType = ContentType.Password }
                             .fillMaxWidth()
                             .dpadFocusable(),
                         singleLine = true,
