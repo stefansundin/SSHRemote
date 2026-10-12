@@ -200,6 +200,7 @@ fun IdentityListScreen(
         }
     }
 
+    // Important: This uses attachment/plain to make Android not append ".txt" to the end of the filename.
     val fileSaverLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("attachment/plain"),
         onResult = { uri ->
