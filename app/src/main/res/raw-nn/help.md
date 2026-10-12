@@ -112,8 +112,6 @@ Diskuter gjerne macOS i denne diskusjonstråden: <https://github.com/stefansundi
 
 Dersom Android-eininga di kjem med ein SSH-server, kan det hende du kan kople til henne og sende inndatahendingar. Dette er meir sannsynleg dersom eininga køyrer ein tilpassa ROM, til dømes KonstaKANG på Raspberry Pi.
 
-Eg har ikkje funne ut korleis musestøtte kan fungere.
-
 Diskuter gjerne Android i denne diskusjonstråden: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Smart volumkontroll

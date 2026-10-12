@@ -112,8 +112,6 @@ macOS 관련 논의는 이 토론 스레드에서 해 주세요: <https://github
 
 Android 기기에 SSH 서버가 함께 제공된다면 연결해서 입력 이벤트를 전송할 수 있을지도 모릅니다. Raspberry Pi의 KonstaKANG 같은 커스텀 ROM을 사용하는 경우 그럴 가능성이 더 높습니다.
 
-마우스 지원을 동작시키는 방법은 아직 찾지 못했습니다.
-
 Android 관련 논의는 이 토론 스레드에서 해 주세요: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## 스마트 볼륨 제어

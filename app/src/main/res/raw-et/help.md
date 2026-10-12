@@ -112,8 +112,6 @@ Palun arutle macOS-i teemal selles arutelulõimes: <https://github.com/stefansun
 
 Kui sinu Android-seadmega tuleb kaasa SSH-server, võib sul olla võimalik sellega ühenduda ja sisendsündmusi saata. See on tõenäolisem siis, kui sinu seade kasutab kohandatud ROM-i, näiteks Raspberry Pi jaoks mõeldud KonstaKANG-i.
 
-Ma ei ole veel välja selgitanud, kuidas hiiretoe toimima saada.
-
 Palun arutle Androidi teemal selles arutelulõimes: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Nutikas helitugevuse juhtimine

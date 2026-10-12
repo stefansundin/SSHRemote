@@ -112,8 +112,6 @@ Si us plau, parleu de macOS en aquest fil de discussió: <https://github.com/ste
 
 Si el vostre dispositiu Android incorpora un servidor SSH, potser podreu connectar-vos-hi i enviar-hi esdeveniments d'entrada. Això és més probable si el dispositiu executa una ROM personalitzada, com ara KonstaKANG al Raspberry Pi.
 
-No he aconseguit fer funcionar el suport del ratolí.
-
 Si us plau, parleu d'Android en aquest fil de discussió: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Control intel·ligent del volum

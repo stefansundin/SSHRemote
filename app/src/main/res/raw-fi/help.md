@@ -112,8 +112,6 @@ Keskustele macOS:stä tässä keskusteluketjussa: <https://github.com/stefansund
 
 Jos Android-laitteessasi on SSH-palvelin, saatat voida muodostaa siihen yhteyden ja lähettää syötetapahtumia. Tämä on todennäköisempää, jos laitteessasi on mukautettu ROM, kuten KonstaKANG Raspberry Pille.
 
-En ole saanut selville, miten hiirituki saataisiin toimimaan.
-
 Keskustele Androidista tässä keskusteluketjussa: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Älykäs äänenvoimakkuuden säätö

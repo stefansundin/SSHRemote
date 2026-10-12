@@ -112,8 +112,6 @@ macOS bo‘yicha muhokama shu yerda: <https://github.com/stefansundin/SSHRemote/
 
 Agar Android qurilmangizda SSH server boʻlsa, unga ulanib kiritish hodisalarini yuborishingiz mumkin boʻlishi ehtimol. Bu, ayniqsa, qurilmangiz Raspberry Pi dagi KonstaKANG kabi maxsus ROM da ishlayotgan bo‘lsa ko‘proq ehtimolga ega.
 
-Men hozircha sichqoncha qoʻllab-quvvatlovini qanday ishlatishni aniqlay olmadim.
-
 Android bo‘yicha muhokama shu yerda: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Aqlli ovoz balandligi boshqaruvi

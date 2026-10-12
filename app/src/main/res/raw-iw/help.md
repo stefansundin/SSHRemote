@@ -112,8 +112,6 @@ xhost +local:$USER
 
 אם מכשיר ה-Android שלכם מגיע עם שרת SSH, ייתכן שתוכלו להתחבר אליו ולשלוח אירועי קלט. זה סביר יותר אם המכשיר מריץ ROM מותאם אישית, כמו KonstaKANG על Raspberry Pi.
 
-עדיין לא הצלחתי להבין איך לגרום לתמיכה בעכבר לעבוד.
-
 אנא דונו ב-Android בשרשור הדיון הזה: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## בקרת עוצמת קול חכמה

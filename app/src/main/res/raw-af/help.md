@@ -112,8 +112,6 @@ Bespreek asseblief macOS in hierdie besprekingsdraad: <https://github.com/stefan
 
 As jou Android-toestel met ’n SSH-bediener kom, kan jy dalk daaraan koppel en invoergebeurtenisse stuur. Dit is meer waarskynlik as jou toestel ’n pasgemaakte ROM gebruik, soos KonstaKANG op die Raspberry Pi.
 
-Ek het nog nie uitgewerk hoe om muisondersteuning te laat werk nie.
-
 Bespreek asseblief Android in hierdie besprekingsdraad: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Slim volumebeheer

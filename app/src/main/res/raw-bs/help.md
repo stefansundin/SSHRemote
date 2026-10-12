@@ -112,8 +112,6 @@ Molimo razgovarajte o macOS-u u ovoj diskusionoj temi: <https://github.com/stefa
 
 Ako vaš Android uređaj ima SSH server, možda ćete se moći povezati na njega i slati događaje unosa. To je vjerovatnije ako vaš uređaj koristi prilagođeni ROM, kao što je KonstaKANG na Raspberry Pi-u.
 
-Nisam uspio otkriti kako da podrška za miš radi.
-
 Molimo razgovarajte o Androidu u ovoj diskusionoj temi: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Pametna kontrola glasnoće

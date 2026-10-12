@@ -112,8 +112,6 @@ Mesedez, eztabaidatu macOS honako harian: <https://github.com/stefansundin/SSHRe
 
 Zure Android gailuak SSH zerbitzari bat badakar, baliteke bertara konektatu eta sarrerako gertaerak bidali ahal izatea. Hau litekeena da zure gailuak ROM pertsonalizatu bat badarabil, adibidez Raspberry Pi-rako KonstaKANG.
 
-Ez dut oraindik asmatu nola lortu saguarentzako euskarria.
-
 Mesedez, eztabaidatu Android honako harian: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Bolumen adimendunaren kontrola

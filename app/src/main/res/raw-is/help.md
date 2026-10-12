@@ -112,8 +112,6 @@ Vinsamlegast ræddu macOS í þessum umræðuþræði: <https://github.com/stefa
 
 Ef Android-tækið þitt kemur með SSH-þjóni gætirðu getað tengst því og sent inntaksatvik til þess. Þetta er líklegra ef tækið þitt keyrir sérsniðna ROM, eins og KonstaKANG á Raspberry Pi.
 
-Mér hefur ekki tekist að finna leið til að fá músarstuðning til að virka.
-
 Vinsamlegast ræddu Android í þessum umræðuþræði: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Snjöll hljóðstyrksstýring

@@ -112,8 +112,6 @@ macOS barədə müzakirə üçün bu mövzuya yazın: <https://github.com/stefan
 
 Android cihazınızda SSH server varsa, ona qoşulub giriş hadisələri göndərə bilərsiniz. Bu, cihaz custom ROM (məsələn Raspberry Pi üzərində KonstaKANG) ilə işləyirsə daha ehtimallıdır.
 
-Siçan dəstəyini necə işə salmağı hələ tapa bilməmişəm.
-
 Android barədə müzakirə üçün bu mövzuya yazın: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Ağıllı səs idarəsi

@@ -112,8 +112,6 @@ xhost +local:$USER
 
 如果你的 Android 裝置內建 SSH 伺服器，你或許可以連線到它並傳送輸入事件。如果你的裝置使用自訂 ROM，例如 Raspberry Pi 上的 KonstaKANG，這種可能性會更高。
 
-我還沒找到讓滑鼠支援正常運作的方法。
-
 請在這個討論串討論 Android：<https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## 智慧音量控制

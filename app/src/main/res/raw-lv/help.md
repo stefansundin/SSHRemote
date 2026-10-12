@@ -112,8 +112,6 @@ Lūdzu, apspriediet macOS šajā diskusijas pavedienā: <https://github.com/stef
 
 Ja jūsu Android ierīcē ir SSH serveris, iespējams, varēsiet tai pieslēgties un nosūtīt ievades notikumus. Tas ir ticamāk, ja ierīcē darbojas pielāgota ROM versija, piemēram, KonstaKANG uz Raspberry Pi.
 
-Man vēl nav izdevies panākt, lai peles atbalsts darbotos.
-
 Lūdzu, apspriediet Android šajā diskusijas pavedienā: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Viedā skaļuma vadība

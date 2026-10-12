@@ -112,8 +112,6 @@ macOS मा VLC नियन्त्रण गर्न AppleScript आदे�
 
 यदि तपाईंको Android यन्त्रमा SSH server छ भने, तपाईं त्यसमा जडान गरेर input events पठाउन सक्नुहुन्छ। तपाईंको यन्त्र Raspberry Pi का लागि KonstaKANG जस्तो custom ROM मा चलिरहेको छ भने, यसको सम्भावना बढी हुन्छ।
 
-माउस समर्थन काम गराउने तरिका मैले अझै पत्ता लगाउन सकेको छैन।
-
 कृपया Android सम्बन्धी छलफलका लागि यो discussion thread प्रयोग गर्नुहोस्: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## स्मार्ट भोल्युम नियन्त्रण

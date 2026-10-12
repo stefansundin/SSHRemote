@@ -112,8 +112,6 @@ macOS પર VLC ને નિયંત્રિત કરવા માટે �
 
 જો તમારા Android ડિવાઇસમાં SSH server હોય, તો તમે શક્ય છે કે તેમાં જોડાઈ શકો અને input events મોકલી શકો. જો તમારું ડિવાઇસ Raspberry Pi પર KonstaKANG જેવી custom ROM ચલાવે છે, તો તેની શક્યતા વધારે છે.
 
-mouse support કેવી રીતે કાર્યરત કરવું તે હું હજી સમજી શક્યો નથી.
-
 કૃપા કરીને Android અંગે આ ચર્ચા થ્રેડમાં ચર્ચા કરો: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## સ્માર્ટ વોલ્યુમ નિયંત્રણ

@@ -112,8 +112,6 @@ Discutescha macOS en quest fil da discussiun: <https://github.com/stefansundin/S
 
 Sche tes apparat Android vegn cun in server SSH, lura pudessas ti esser abel da ta connectar ad el e trametter novitads d'input. Quai è pli probabel sche tes apparat funcziuna cun ina custom ROM, sco KonstaKANG sin il Raspberry Pi.
 
-Jau n'hai betg anc chattà co far funcziunar il sustegn per la mieur.
-
 Discutescha Android en quest fil da discussiun: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Control da volumen intelligent

@@ -112,8 +112,6 @@ Tafadhali jadili macOS katika mjadala huu: <https://github.com/stefansundin/SSHR
 
 Ikiwa kifaa chako cha Android kinakuja na seva ya SSH, basi huenda ukaweza kuunganisha nacho na kutuma matukio ya ingizo. Hili lina uwezekano mkubwa zaidi ikiwa kifaa chako kinatumia ROM maalum, kama KonstaKANG kwenye Raspberry Pi.
 
-Bado sijagundua jinsi ya kufanya msaada wa kipanya ufanye kazi.
-
 Tafadhali jadili Android katika mjadala huu: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Udhibiti mahiri wa sauti

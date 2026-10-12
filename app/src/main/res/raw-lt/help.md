@@ -112,8 +112,6 @@ Apie macOS prašome diskutuoti šioje diskusijų temoje: <https://github.com/ste
 
 Jei jūsų Android įrenginyje yra SSH serveris, galbūt galėsite prie jo prisijungti ir siųsti įvesties įvykius. Tai labiau tikėtina, jei įrenginyje naudojama pasirinktinė ROM, pavyzdžiui, KonstaKANG Raspberry Pi įrenginiuose.
 
-Kol kas nesu išsiaiškinęs, kaip priversti veikti pelės palaikymą.
-
 Apie Android prašome diskutuoti šioje diskusijų temoje: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Išmanusis garsumo valdymas

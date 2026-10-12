@@ -112,8 +112,6 @@ Dyskutuj o macOS w tym wątku: <https://github.com/stefansundin/SSHRemote/discus
 
 Jeśli Twoje urządzenie z Androidem ma serwer SSH, możesz być w stanie połączyć się z nim i wysyłać zdarzenia wejściowe. Jest to bardziej prawdopodobne, jeśli urządzenie działa na niestandardowym ROM-ie, takim jak KonstaKANG na Raspberry Pi.
 
-Nie udało mi się ustalić, jak uruchomić obsługę myszy.
-
 Dyskutuj o Androidzie w tym wątku: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Inteligentne sterowanie głośnością

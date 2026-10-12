@@ -112,8 +112,6 @@ Vui lòng thảo luận về macOS trong chủ đề này: <https://github.com/s
 
 Nếu thiết bị Android của bạn có sẵn máy chủ SSH, bạn có thể kết nối tới nó và gửi các sự kiện nhập liệu. Điều này có khả năng xảy ra cao hơn nếu thiết bị của bạn chạy ROM tùy chỉnh, chẳng hạn như KonstaKANG trên Raspberry Pi.
 
-Tôi vẫn chưa tìm ra cách để hỗ trợ chuột hoạt động.
-
 Vui lòng thảo luận về Android trong chủ đề này: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Điều khiển âm lượng thông minh

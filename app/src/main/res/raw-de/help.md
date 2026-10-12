@@ -112,8 +112,6 @@ Bitte diskutiere über macOS in diesem Diskussions-Thread: <https://github.com/s
 
 Wenn dein Android-Gerät mit einem SSH-Server ausgeliefert wird, kannst du dich möglicherweise damit verbinden und Eingabeereignisse senden. Das ist wahrscheinlicher, wenn auf deinem Gerät ein Custom-ROM läuft, etwa KonstaKANG auf dem Raspberry Pi.
 
-Ich habe noch nicht herausgefunden, wie sich Mausunterstützung zum Laufen bringen lässt.
-
 Bitte diskutiere über Android in diesem Diskussions-Thread: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Intelligente Lautstärkesteuerung

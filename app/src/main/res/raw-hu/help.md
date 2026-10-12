@@ -112,8 +112,6 @@ A macOS kapcsán ebben a beszélgetésszálban írhat: <https://github.com/stefa
 
 Ha az Android-eszközén van SSH szerver, akkor lehet, hogy csatlakozni tud hozzá, és bemeneti eseményeket küldhet neki. Ez valószínűbb, ha az eszköz egy egyéni ROM-ot futtat, például a Raspberry Pi-hez készült KonstaKANG-ot.
 
-Még nem sikerült rájönnöm, hogyan lehetne működésre bírni az egértámogatást.
-
 Az Android kapcsán ebben a beszélgetésszálban írhat: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Intelligens hangerőszabályzás

@@ -112,8 +112,6 @@ Ju lutemi diskutoni macOS në këtë temë diskutimi: <https://github.com/stefan
 
 Nëse pajisja juaj Android vjen me një server SSH, atëherë mund të jeni në gjendje të lidheni me të dhe të dërgoni ngjarje hyrëse. Kjo është më e mundshme nëse pajisja juaj përdor një ROM të personalizuar, si KonstaKANG për Raspberry Pi.
 
-Nuk kam arritur të kuptoj se si ta bëj të funksionojë mbështetja e mausit.
-
 Ju lutemi diskutoni Android në këtë temë diskutimi: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Kontrolli i zgjuar i volumit

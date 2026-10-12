@@ -112,8 +112,6 @@ xhost +local:$USER
 
 ຖ້າອຸປະກອນ Android ຂອງທ່ານມີ SSH server ມາພ້ອມ, ທ່ານອາດສາມາດເຊື່ອມຕໍ່ໄປຫາມັນແລະສົ່ງ input events ໄດ້. ນີ້ມີໂອກາດເກີດຂຶ້ນຫຼາຍກວ່າຖ້າອຸປະກອນຂອງທ່ານໃຊ້ custom ROM, ເຊັ່ນ KonstaKANG ໃນ Raspberry Pi.
 
-ຂ້ອຍຍັງບໍ່ສາມາດຫາວິທີໃຫ້ mouse support ເຮັດວຽກໄດ້.
-
 ກະລຸນາຮ່ວມສົນທະນາກ່ຽວກັບ Android ໃນ discussion thread ນີ້: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## ການຄວບຄຸມລະດັບສຽງອັດສະລິຍະ

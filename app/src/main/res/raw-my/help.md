@@ -112,8 +112,6 @@ macOS အကြောင်း ဆွေးနွေးရန် discussion thre
 
 သင့် Android device တွင် SSH server ပါလာပါက ၎င်းသို့ ချိတ်ဆက်ပြီး input event များ ပို့နိုင်နိုင်ပါသည်။ Raspberry Pi ပေါ်ရှိ KonstaKANG ကဲ့သို့ custom ROM ကို အသုံးပြုနေပါက ထိုသို့ဖြစ်နိုင်ချေ ပိုများသည်။
 
-Mouse support ကို မည်သို့ အလုပ်လုပ်စေရမည်ဆိုတာကို ကျွန်ုပ် မရှာဖွေနိုင်သေးပါ။
-
 Android အကြောင်း ဆွေးနွေးရန် discussion thread: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Smart volume control

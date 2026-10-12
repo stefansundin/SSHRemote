@@ -112,8 +112,6 @@ Molimo raspravljajte o macOS-u u ovoj temi rasprave: <https://github.com/stefans
 
 Ako vaš Android uređaj dolazi sa SSH poslužiteljem, možda ćete se moći povezati s njim i slati ulazne događaje. To je vjerojatnije ako uređaj koristi prilagođeni ROM, poput KonstaKANG-a na Raspberry Pi-ju.
 
-Nisam uspio pronaći način da mi upravljanje mišem radi.
-
 Molimo raspravljajte o Androidu u ovoj temi rasprave: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Pametno upravljanje glasnoćom

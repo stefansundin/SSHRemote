@@ -112,8 +112,6 @@ Bespreek macOS in deze discussiethread: <https://github.com/stefansundin/SSHRemo
 
 Als je Android-apparaat een SSH-server heeft, kun je er mogelijk verbinding mee maken en invoergebeurtenissen versturen. Dit is waarschijnlijker als je apparaat een aangepaste ROM gebruikt, zoals KonstaKANG op de Raspberry Pi.
 
-Ik heb nog niet uitgezocht hoe ik muisondersteuning werkend krijg.
-
 Bespreek Android in deze discussiethread: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Slimme volumeregeling

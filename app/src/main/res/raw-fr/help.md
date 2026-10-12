@@ -112,8 +112,6 @@ Veuillez discuter de macOS dans ce fil de discussion : <https://github.com/stefa
 
 Si votre appareil Android est livré avec un serveur SSH, vous pourrez peut-être vous y connecter et envoyer des événements d'entrée. C'est plus probable si votre appareil exécute une ROM personnalisée, comme KonstaKANG sur le Raspberry Pi.
 
-Je n'ai pas encore trouvé comment faire fonctionner la prise en charge de la souris.
-
 Veuillez discuter d'Android dans ce fil de discussion : <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Contrôle intelligent du volume

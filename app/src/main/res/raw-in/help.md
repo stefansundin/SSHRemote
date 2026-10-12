@@ -112,8 +112,6 @@ Silakan diskusikan macOS di utas diskusi ini: <https://github.com/stefansundin/S
 
 Jika perangkat Android Anda dilengkapi server SSH, Anda mungkin dapat terhubung ke perangkat tersebut dan mengirim kejadian input. Hal ini lebih mungkin terjadi jika perangkat Anda menjalankan ROM kustom, seperti KonstaKANG pada Raspberry Pi.
 
-Saya belum menemukan cara agar dukungan mouse berfungsi.
-
 Silakan diskusikan Android di utas diskusi ini: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Kontrol volume pintar

@@ -112,8 +112,6 @@ Diskuter gjerne macOS i denne diskusjonstråden: <https://github.com/stefansundi
 
 Hvis Android-enheten din kommer med en SSH-server, kan det hende du kan koble til den og sende inndatahendelser. Dette er mer sannsynlig hvis enheten kjører en tilpasset ROM, for eksempel KonstaKANG på Raspberry Pi.
 
-Jeg har ikke funnet ut hvordan musestøtte kan fungere.
-
 Diskuter gjerne Android i denne diskusjonstråden: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Smart volumkontroll

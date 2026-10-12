@@ -112,8 +112,6 @@ Lütfen macOS hakkında şu tartışma başlığında konuşun: <https://github.
 
 Android cihazınızda bir SSH sunucusu varsa ona bağlanıp giriş olayları gönderebilirsiniz. Bu, cihazınız Raspberry Pi üzerinde KonstaKANG gibi özel bir ROM çalıştırıyorsa daha olasıdır.
 
-Fare desteğini nasıl çalıştıracağımı henüz çözemedim.
-
 Lütfen Android hakkında şu tartışma başlığında konuşun: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Akıllı ses kontrolü

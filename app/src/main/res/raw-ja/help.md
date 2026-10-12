@@ -112,8 +112,6 @@ macOS に関する話題は、このディスカッションスレッドでお�
 
 Android デバイスに SSH サーバーが搭載されている場合、接続して入力イベントを送信できる可能性があります。Raspberry Pi 上の KonstaKANG のようなカスタム ROM を使用している場合は、その可能性がより高いです。
 
-マウス対応をどのように実現するかは、まだわかっていません。
-
 Android に関する話題は、このディスカッションスレッドでお願いします: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## スマート音量制御

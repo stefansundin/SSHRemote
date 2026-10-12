@@ -112,8 +112,6 @@ macOS මත VLC පාලනය කිරීම සඳහා AppleScript වි
 
 ඔබගේ Android උපාංගය SSH server එකක් සමඟ එන්නේ නම්, ඔබට එයට සම්බන්ධ වී input events යැවීමට හැකි විය හැක. KonstaKANG on the Raspberry Pi වැනි custom ROM එකක් ධාවනය කරන්නේ නම් මෙය වැඩි වශයෙන් සම්භාව්‍ය වේ.
 
-මූසික සහය ක්‍රියාකරවන්නේ කෙසේදැයි මම තවම හඳුනාගෙන නැත.
-
 කරුණාකර Android පිළිබඳව මෙම discussion thread එකේ සාකච්ඡා කරන්න: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## ස්මාර්ට් ශබ්ද පාලනය

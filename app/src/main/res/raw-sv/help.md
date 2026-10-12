@@ -110,8 +110,6 @@ Diskutera gärna macOS i denna diskussionstråd: <https://github.com/stefansundi
 
 Om din Android-enhet har en SSH-server kan du kanske ansluta till den och skicka inmatningshändelser. Det är mer sannolikt om din enhet kör ett anpassat ROM, som KonstaKANG på Raspberry Pi.
 
-Jag har inte lyckats få musstöd att fungera.
-
 Diskutera gärna Android i denna diskussionstråd: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Smart volymkontroll

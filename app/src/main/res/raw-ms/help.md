@@ -112,8 +112,6 @@ Sila bincangkan macOS dalam thread perbincangan ini: <https://github.com/stefans
 
 Jika peranti Android anda disertakan dengan pelayan SSH, maka anda mungkin boleh menyambung kepadanya dan menghantar peristiwa input. Ini lebih berkemungkinan jika peranti anda menjalankan ROM tersuai, seperti KonstaKANG pada Raspberry Pi.
 
-Saya belum dapat mengetahui cara untuk menjadikan sokongan tetikus berfungsi.
-
 Sila bincangkan Android dalam thread perbincangan ini: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Kawalan kelantangan pintar

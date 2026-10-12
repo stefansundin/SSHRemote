@@ -112,8 +112,6 @@ macOS ስለ ውይይት እባክዎ ይህን ክር ይጠቀሙ: <https://g
 
 የAndroid መሣሪያዎ SSH server ካለው ከእሱ ጋር መገናኘት እና የግቤት ክስተቶችን መላክ ሊቻል ይችላል። መሣሪያዎ እንደ Raspberry Pi ላይ KonstaKANG ያለ ብጁ ROM ካለበት ይህ እድል የበለጠ ነው።
 
-የmouse ድጋፍ እንዴት እንደሚሰራ ገና አልቻልኩም።
-
 Android ስለ ውይይት እባክዎ ይህን ክር ይጠቀሙ: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## ስማርት የድምጽ መቆጣጠሪያ

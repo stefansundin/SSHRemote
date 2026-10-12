@@ -112,8 +112,6 @@ Molimo da o macOS-u diskutujete u ovoj temi za diskusiju: <https://github.com/st
 
 Ako vaš Android uređaj dolazi sa SSH serverom, možda ćete moći da se povežete sa njim i šaljete događaje unosa. To je verovatnije ako vaš uređaj koristi prilagođeni ROM, kao što je KonstaKANG na Raspberry Pi-ju.
 
-Nisam uspeo da pronađem kako da osposobim podršku za miš.
-
 Molimo da o Android-u diskutujete u ovoj temi za diskusiju: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Pametna kontrola jačine zvuka

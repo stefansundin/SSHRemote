@@ -112,8 +112,6 @@ Prosím, diskutujte o macOS v tomto diskusnom vlákne: <https://github.com/stefa
 
 Ak vaše zariadenie s Androidom obsahuje SSH server, možno sa k nemu budete môcť pripojiť a odosielať udalosti vstupu. Je to pravdepodobnejšie, ak vaše zariadenie používa vlastnú ROM, napríklad KonstaKANG na Raspberry Pi.
 
-Zatiaľ som neprišiel na to, ako rozchodiť podporu myši.
-
 Prosím, diskutujte o Androide v tomto diskusnom vlákne: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Inteligentné ovládanie hlasitosti

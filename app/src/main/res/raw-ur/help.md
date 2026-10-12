@@ -112,8 +112,6 @@ macOS پر VLC کو کنٹرول کرنے کے لیے ایک پری سیٹ مو�
 
 اگر آپ کے Android ڈیوائس میں SSH server موجود ہے، تو ہو سکتا ہے کہ آپ اس سے کنیکٹ ہو کر ان پٹ ایونٹس بھیج سکیں۔ اس کا امکان زیادہ ہے اگر آپ کا ڈیوائس Raspberry Pi پر KonstaKANG جیسے custom ROM پر چل رہا ہو۔
 
-میں ابھی تک یہ معلوم نہیں کر سکا کہ ماؤس سپورٹ کو کیسے کام کروایا جائے۔
-
 براہ کرم Android پر اس discussion thread میں گفتگو کریں: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## سمارٹ والیوم کنٹرول

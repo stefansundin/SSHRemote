@@ -112,8 +112,6 @@ O macOS prosim razpravljajte v tej temi: <https://github.com/stefansundin/SSHRem
 
 Če je na vaši napravi Android nameščen strežnik SSH, se boste morda lahko povezali z njo in pošiljali dogodke vnosa. To je bolj verjetno, če naprava uporablja prilagojen ROM, kot je KonstaKANG na Raspberry Piju.
 
-Nisem še ugotovil, kako usposobiti podporo za miško.
-
 O Androidu prosim razpravljajte v tej temi: <https://github.com/stefansundin/SSHRemote/discussions/9>
 
 ## Pametno upravljanje glasnosti
